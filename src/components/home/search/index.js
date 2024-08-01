@@ -46,7 +46,7 @@ const SearchResult = (props) => {
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
   const [filterValue, setFilterValue] = useState([]);
   //const [rating_count, setRatingCount] = useState(0);
-  const [minMax, setMinMax] = useState([0, 200000]);
+  const [minMax, setMinMax] = useState([0, 20000]);
   const [type, setType] = useState("all");
   const [category_id, setCategoryId] = useState(id);
   const [sortBy, setSortBy] = useState("high2Low");
@@ -64,12 +64,10 @@ const SearchResult = (props) => {
     ///dispatch(setStoreSelectedItems(data_type === "category" ? [id] : []));
   }, []);
   useEffect(() => {}, []);
-  console.log({ selectedCategories });
 
   const page_limit = 12;
 
   const selectedCategoriesHandler = (dataArray) => {
-    console.log({ dataArray });
     if (dataArray?.length > 0) {
       setLinkRouteTo("");
       dispatch(setSelectedCategories([...new Set(dataArray)]));
@@ -111,9 +109,7 @@ const SearchResult = (props) => {
 
   const selectedCategoriesIds = selectedCategories;
 
-  console.log({ filterData });
   const handleSuccess = (res) => {
-    console.log({ res });
     if (res) {
       const hasData =
         currentTab === 0
@@ -193,7 +189,7 @@ const SearchResult = (props) => {
     rating_count,
     selectedBrands,
   ]);
-  console.log({ selectedCategories });
+
   const handleFilterSelection = () => {
     const filterTypesConditionally = filterTypeStores;
     const newData = filterTypesConditionally?.map((item) => {

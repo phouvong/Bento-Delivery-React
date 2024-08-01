@@ -1,20 +1,13 @@
-import us from "./assets/eng.png";
-import lo from "./assets/lao.png";
+import usFlag from "./assets/us.svg";
 import arabicFlag from "./assets/arabic-flag-svg.svg";
 import spain from "./assets/spain.png";
 import bangladesh from "./assets/bangladesh.png";
 export const languageList = [
   {
-    languageName: "ພາສາລາວ",
-    languageCode: "lo",
-    countryCode: "LA",
-    countryFlag: lo.src,
-  },
-  {
     languageName: "English",
     languageCode: "en",
     countryCode: "US",
-    countryFlag: us.src,
+    countryFlag: usFlag.src,
   },
   // {
   //   languageName: "Spanish",
