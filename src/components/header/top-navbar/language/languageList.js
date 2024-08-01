@@ -1,5 +1,5 @@
-import usFlag from "./assets/eng.svg";
-import loFlag from "./assets/lao.svg";
+import usFlag from "./assets/eng.png";
+import loFlag from "./assets/lao.png";
 import arabicFlag from "./assets/arabic-flag-svg.svg";
 import spain from "./assets/spain.png";
 import bangladesh from "./assets/bangladesh.png";
