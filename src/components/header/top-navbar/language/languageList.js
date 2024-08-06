@@ -22,12 +22,12 @@ export const languageList = [
   //   countryCode: "es",
   //   countryFlag: spain.src,
   // },
-  {
-    languageName: "Arabic",
-    languageCode: "ar",
-    countryCode: "SA",
-    countryFlag: arabicFlag.src,
-  },
+  //{
+  //  languageName: "Arabic",
+  //  languageCode: "ar",
+  //  countryCode: "SA",
+  //  countryFlag: arabicFlag.src,
+  //},
   // {
   //   languageName: "Bengali",
   //   languageCode: "bn",
