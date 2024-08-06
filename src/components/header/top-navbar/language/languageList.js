@@ -11,7 +11,7 @@ export const languageList = [
     countryFlag: usFlag.src,
   },
   {
-    languageName: "Lao",
+    languageName: "ພາສາລາວ",
     languageCode: "lo",
     countryCode: "LA",
     countryFlag: loFlag.src,
