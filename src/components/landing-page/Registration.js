@@ -45,16 +45,22 @@ const TopText = ({ data }) => {
     <CustomStackFullWidth
       alignItems="center"
       justifyContent="center"
-    // spacing={1}
+      // spacing={1}
     >
-      <Typography textAlign="center" variant={isSmall ? "h7" : "h4"} lineHeight={{ xs: "31px", sm: "45px", md: "57px" }}>
+      <Typography
+        sx={{ opacity: ".9" }}
+        textAlign="center"
+        variant={isSmall ? "h7" : "h4"}
+        lineHeight={{ xs: "31px", sm: "45px", md: "57px" }}
+      >
         <DollarSignHighlighter theme={theme} text={data?.earning_title} />
       </Typography>
       <Typography
         textAlign="center"
         fontSize={{ xs: "12px", sm: "16px", md: "18px" }}
         lineHeight={{ xs: "15px", sm: "24px", md: "39px" }}
-        sx={{ color: "text.secondary", width: "70%" }}>
+        sx={{ color: "text.secondary", width: "70%" }}
+      >
         {t(data?.earning_sub_title)}
       </Typography>
     </CustomStackFullWidth>
@@ -90,7 +96,12 @@ const Card = ({
         },
       }}
     >
-      <Grid container spacing={{ xs: 0, sm: .5, md: 2 }} alignItems="center" justifyContent="center">
+      <Grid
+        container
+        spacing={{ xs: 0, sm: 0.5, md: 2 }}
+        alignItems="center"
+        justifyContent="center"
+      >
         <Grid item xs={4} sm={4} md={4}>
           <ImageContainer>
             <CustomImageContainer

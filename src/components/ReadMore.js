@@ -1,6 +1,7 @@
 import { Typography } from "@mui/material";
 import { useState } from "react";
 import { useTheme } from "@emotion/react";
+import { t } from "i18next";
 
 export const ReadMore = ({ children, limits, color }) => {
   const fontLimits = limits ? limits : 70;
@@ -18,7 +19,7 @@ export const ReadMore = ({ children, limits, color }) => {
       fontWeight="400"
       color={color ? color : theme.palette.neutral[600]}
       sx={{
-        wordWrap: "break-word"
+        wordWrap: "break-word",
       }}
     >
       {isReadMore ? text?.slice(0, fontLimits) : text}
@@ -27,7 +28,7 @@ export const ReadMore = ({ children, limits, color }) => {
           onClick={toggleReadMore}
           style={{ cursor: "pointer", color: fontColor }}
         >
-          {isReadMore ? "...Read more" : " Show less"}
+          {isReadMore ? t("...Read more") : t(" Show less")}
         </span>
       )}
     </Typography>

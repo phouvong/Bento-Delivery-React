@@ -1,6 +1,7 @@
 import React, { useEffect, useReducer, useState } from "react";
 import {
   Grid,
+  IconButton,
   Stack,
   Typography,
   useMediaQuery,
@@ -30,6 +31,7 @@ import plusIcon from "../assets/plus.png";
 import AddressForm from "./AddressForm";
 import { styled } from "@mui/material/styles";
 import { useSelector } from "react-redux";
+import GpsFixedIcon from "@mui/icons-material/GpsFixed";
 export const AddAddressSearchBox = styled(Box)(({ theme }) => ({
   position: "absolute",
   zIndex: "999",
@@ -53,7 +55,6 @@ const AddAddressComponent = ({
     editAddress ? editAddress?.address_type : ""
   );
   const { configData } = useSelector((state) => state.configData);
-  const [defaultLocation, setDefaultLocation] = useState({});
   const [isDisablePickButton, setDisablePickButton] = useState(false);
   const [locationEnabled, setLocationEnabled] = useState(false);
   const [location, setLocation] = useState(
@@ -63,8 +64,6 @@ const AddAddressComponent = ({
   const [enabled, setEnabled] = useState(false);
   const [placeDetailsEnabled, setPlaceDetailsEnabled] = useState(true);
   const [placeDescription, setPlaceDescription] = useState(undefined);
-  const [zoneId, setZoneId] = useState(undefined);
-  const [mounted, setMounted] = useState(true);
   const [predictions, setPredictions] = useState([]);
   const [placeId, setPlaceId] = useState("");
 
@@ -145,6 +144,9 @@ const AddAddressComponent = ({
     }
     setPlaceDetailsEnabled(true);
   };
+  const getCurrentLocation = () => {
+    setLocation({ lat: coords.latitude, lng: coords.longitude });
+  };
 
   return (
     <>
@@ -188,20 +190,36 @@ const AddAddressComponent = ({
             // isLoading={isFetchingGeoCode}
           />
         </AddAddressSearchBox>
-        {location && (
-          <GoogleMapComponent
-            setLocation={setLocation}
-            location={location}
-            setPlaceDetailsEnabled={setPlaceDetailsEnabled}
-            placeDetailsEnabled={placeDetailsEnabled}
-            locationEnabled={locationEnabled}
-            setPlaceDescription={setPlaceDescription}
-            setLocationEnabled={setLocationEnabled}
-            setDisablePickButton={setDisablePickButton}
-            height="350px"
-          />
-        )}
+        <Stack>
+          {location && (
+            <GoogleMapComponent
+              setLocation={setLocation}
+              location={location}
+              setPlaceDetailsEnabled={setPlaceDetailsEnabled}
+              placeDetailsEnabled={placeDetailsEnabled}
+              locationEnabled={locationEnabled}
+              setPlaceDescription={setPlaceDescription}
+              setLocationEnabled={setLocationEnabled}
+              setDisablePickButton={setDisablePickButton}
+              height="350px"
+            />
+          )}
+          <IconButton
+            onClick={getCurrentLocation}
+            sx={{
+              position: "absolute",
+              bottom: "25%",
+              right: "10px",
+              borderRadius: "50%",
+              color: (theme) => theme.palette.primary.main,
+              backgroundColor: "background.paper",
+            }}
+          >
+            <GpsFixedIcon sx={{ fontSize: { xs: "18px", md: "24px" } }} />
+          </IconButton>
+        </Stack>
       </Grid>
+
       <Grid item xs={12} md={7}>
         <CustomStackFullWidth mb="20px">
           <Typography>{t("Label As")}</Typography>
@@ -250,13 +268,12 @@ const AddAddressComponent = ({
           </Stack>
         </CustomStackFullWidth>
         <AddressForm
-          deliveryAddress={
-           geoCodeResults?.results[0]?.formatted_address
-          }
+          deliveryAddress={geoCodeResults?.results[0]?.formatted_address}
           atModal="false"
           addressType={addressType}
           configData={configData}
-          phone={userData?.phone}
+          phone={editAddress ? editAddress?.phone : userData?.phone}
+          email={editAddress ? editAddress?.email : userData?.email}
           lat={location?.lat || ""}
           lng={location?.lng || ""}
           personName={

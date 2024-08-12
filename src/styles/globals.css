@@ -218,8 +218,9 @@ a>div {
 
 /* for parcel page video container radius */
 video {
-    border-radius: 10px;
-    height: 96% !important;
+    /*border-radius: 10px;*/
+    height: 98% !important;
+
 }
 
 /*!* CSS file *!*/

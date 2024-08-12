@@ -63,7 +63,6 @@ const SearchResult = (props) => {
     dispatch(setSelectedCategories(data_type === "category" ? [id] : []));
     ///dispatch(setStoreSelectedItems(data_type === "category" ? [id] : []));
   }, []);
-  useEffect(() => {}, []);
 
   const page_limit = 12;
 

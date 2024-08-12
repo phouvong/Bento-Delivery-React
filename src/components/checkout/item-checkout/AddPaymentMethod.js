@@ -40,10 +40,13 @@ const AddPaymentMethod = (props) => {
     forprescription,
     offlinePaymentOptions,
     setSwitchToWallet,
+    isZoneDigital,
+    setPaymentMethodImage,
+    paymentMethodImage,
   } = props;
   const [openModal, setOpenModel] = useState(false);
   const { offlineMethod } = useSelector((state) => state.offlinePayment);
-  const [paymentMethodImage, setPaymentMethodImage] = useState("");
+
   const theme = useTheme();
   const dispatch = useDispatch();
   const handleClick = () => {
@@ -96,7 +99,7 @@ const AddPaymentMethod = (props) => {
                 ? `${paymentMethod?.replaceAll("_", " ")} (${
                     offlineMethod?.method_name
                   })`
-                : paymentMethod?.replaceAll("_", " ")}
+                : t(paymentMethod?.replaceAll("_", " "))}
             </Typography>
           </Stack>
         ) : (
@@ -119,10 +122,7 @@ const AddPaymentMethod = (props) => {
                 TransitionComponent={Zoom}
                 title={t("Please select a payment method")}
               >
-                <InfoIcon
-                  color="error"
-                  style={{ width: "16px", height: "16px" }}
-                />
+                <InfoIcon style={{ width: "16px", height: "16px" }} />
               </Tooltip>
             </Stack>
           </Stack>
@@ -176,6 +176,7 @@ const AddPaymentMethod = (props) => {
             paymentMethodImage={paymentMethodImage}
             setPaymentMethodImage={setPaymentMethodImage}
             setSwitchToWallet={setSwitchToWallet}
+            isZoneDigital={isZoneDigital}
           />
         </CustomModal>
       )}

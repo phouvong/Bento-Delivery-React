@@ -3,6 +3,8 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { ChatSidebarDesktop } from "./Chat.style";
 import ChatContent from "./ChatContent";
 import { CustomPaperBigCard } from "../../styled-components/CustomStyles.style";
+import SimpleBar from "simplebar-react";
+import "simplebar-react/dist/simplebar.min.css";
 
 const ChatSideBar = ({
   chatFrom,

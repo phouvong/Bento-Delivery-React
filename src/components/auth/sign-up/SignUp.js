@@ -32,9 +32,6 @@ import AcceptTermsAndConditions from "../AcceptTermsAndConditions";
 import OtpForm from "./OtpForm";
 import SignUpValidation from "./SignUpValidation";
 import { setWelcomeModal } from "redux/slices/utils";
-// import CustomModal from "../../modal";
-// import OtpForm from "./OtpForm";
-// import { useVerifyPhone } from "../../../api-manage/hooks/auth/useVerifyPhone";
 
 const SignUp = ({ configData }) => {
   const router = useRouter();
@@ -198,7 +195,7 @@ const SignUp = ({ configData }) => {
         alignItems="center"
         pb="80px"
       >
-        <Box maxWidth="500px" width="100%">
+        <Box maxWidth="500px" width="100%" mt={{ xs: "0rem", md: "1rem" }}>
           <CustomPaperBigCard>
             <CustomStackFullWidth
               // justifyContent="center"

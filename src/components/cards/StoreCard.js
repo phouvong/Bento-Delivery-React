@@ -197,7 +197,9 @@ const StoreCard = (props) => {
             {/*<H4 text={item?.name} />*/}
           </Grid>
           <Grid item xs={2.5}>
-            <CustomRatingBox rating={item?.avg_rating} />
+            {item?.avg_rating > 0 && (
+              <CustomRatingBox rating={item?.avg_rating} />
+            )}
           </Grid>
           <Grid item xs={12} sx={{ mt: "10px" }}>
             <Body2 text={item?.address} />

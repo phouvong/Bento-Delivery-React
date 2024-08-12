@@ -384,7 +384,7 @@ const ProductInformation = ({
                 color={theme.palette.warning.main}
               />
               <Typography fontWeight="700" fontSize="12px">
-                ({state.modalData[0]?.avg_rating.toFixed(1)})
+                ({state.modalData[0]?.avg_rating?.toFixed(1)})
               </Typography>
             </Stack>
             <Typography color="customColor.textGray">|</Typography>

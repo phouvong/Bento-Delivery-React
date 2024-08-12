@@ -86,7 +86,7 @@ const SpecialFoodOffers = ({ title }) => {
       {
         breakpoint: 480,
         settings: {
-          slidesToShow: 1.6,
+          slidesToShow: 1.8,
           slidesToScroll: 1,
           infinite: data?.products?.length > 1 ? true : false,
         },

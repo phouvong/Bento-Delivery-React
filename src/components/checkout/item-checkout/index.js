@@ -15,7 +15,7 @@ import { getStoresOrRestaurants } from "helper-functions/getStoresOrRestaurants"
 import { getGuestId, getToken } from "helper-functions/getToken";
 import moment from "moment/moment";
 import Router from "next/router";
-import { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "react-query";
@@ -34,6 +34,7 @@ import {
 } from "styled-components/CustomStyles.style";
 import {
   getDayNumber,
+  getDigitalMethodFromZone,
   getFinalTotalPrice,
   getInfoFromZoneData,
   getProductDiscount,
@@ -72,20 +73,26 @@ import OfflineForm from "./offline-payment/OfflineForm";
 
 import useGetCashBackAmount from "api-manage/hooks/react-query/cashback/useGetCashBackAmount";
 import { ModuleTypes } from "helper-functions/moduleTypes";
-import { setGuestUserOrderId } from "redux/slices/guestUserInfo";
+import {
+  setGuestUserInfo,
+  setGuestUserOrderId,
+} from "redux/slices/guestUserInfo";
 import {
   setOrderDetailsModalOpen,
   setOrderInformation,
 } from "redux/slices/utils";
 import CustomImageContainer from "../../CustomImageContainer";
 import thunderstorm from "../assets/thunderstorm.svg";
+import { useFormik } from "formik";
+import SignUpValidation from "components/auth/sign-in/SignInValidation";
+import * as Yup from "yup";
 
 const ItemCheckout = (props) => {
   const { configData, router, page, cartList, campaignItemList, totalAmount } =
     props;
-
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
+  const [check, setCheck] = React.useState(null);
   const [orderType, setOrderType] = useState("delivery");
   const [payableAmount, setPayableAmount] = useState(null);
   const [address, setAddress] = useState(undefined);
@@ -114,15 +121,40 @@ const ItemCheckout = (props) => {
   const [cashbackAmount, setCashbackAmount] = useState(null);
   const [isPackaging, setIsPackaging] = useState(false);
   const [packagingCharge, setPackagingCharge] = useState(0);
+  const [paymentMethodImage, setPaymentMethodImage] = useState("");
   const [state, customDispatch] = useReducer(scheduleReducer, INITIAL_STATE);
   const { profileInfo } = useSelector((state) => state.profileInfo);
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
   const { offlinePaymentInfo } = useSelector((state) => state.offlinePayment);
+
   const token = getToken();
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const guest_id = getGuestId();
   const { method } = router.query;
+  const formik = useFormik({
+    initialValues: {
+      password: "",
+      confirm_password: "",
+    },
+    validationSchema: Yup.object({
+      password: Yup.string()
+        .required(t("Password is required"))
+        .min(6, t("Password is too short - should be 6 chars minimum.")),
+      confirm_password: Yup.string()
+        .required(t("Confirm Password"))
+        .oneOf([Yup.ref("password"), null], t("Passwords must match")),
+    }),
+    // onSubmit: async (values, helpers) => {
+    //   console.log({ values });
+    //   try {
+    //     //formSubmitHandler(values);
+    //   } catch (err) {
+    //     console.log(err);
+    //   }
+    // },
+  });
+
   const currentModuleType = getCurrentModuleType();
   const storeId =
     page === "campaign"
@@ -137,6 +169,14 @@ const ItemCheckout = (props) => {
     refetch: refetchOfflinePaymentOptions,
     isLoading: offlineIsLoading,
   } = useGetOfflinePaymentOptions();
+
+  const passwordHandler = (value) => {
+    formik.setFieldValue("password", value);
+  };
+  const confirmPasswordHandler = (value) => {
+    formik.setFieldValue("confirm_password", value);
+  };
+
   useEffect(() => {
     refetchOfflinePaymentOptions();
   }, []);
@@ -169,7 +209,11 @@ const ItemCheckout = (props) => {
     }
   );
 
-  const { data: distanceData, refetch: refetchDistance } = useQuery(
+  const {
+    data: distanceData,
+    refetch: refetchDistance,
+    isLoading,
+  } = useQuery(
     ["get-distance", storeData, address],
     () => GoogleApi.distanceApi(storeData, address),
     {
@@ -379,15 +423,16 @@ const ItemCheckout = (props) => {
         "is_buy_now",
         page === "buy_now" || page === "campaign" ? 1 : 0
       );
-      formData.append("house", address?.house);
-      formData.append("floor", address?.floor);
+      formData.append("house", token ? address?.house : guestUserInfo?.house);
+      formData.append("floor", token ? address?.floor : guestUserInfo?.floor);
+      formData.append("road", token ? address?.road : guestUserInfo?.road);
       formData.append(
         "contact_person_name",
         guestUserInfo?.contact_person_name
       );
       formData.append(
         "contact_person_number",
-        guestUserInfo?.contact_person_number
+        `+${guestUserInfo?.contact_person_number}`
       );
       formData.append(
         "contact_person_email",
@@ -402,6 +447,9 @@ const ItemCheckout = (props) => {
         "extra_packaging_amount",
         packagingCharge > 0 ? packagingCharge : 0
       );
+      formData.append("create_new_user", check ? 1 : 0);
+      formData.append("is_guest", token ? 0 : 1);
+      formData.append("password", formik.values.password);
       return formData;
     } else {
       return {
@@ -430,12 +478,15 @@ const ItemCheckout = (props) => {
         delivery_instruction: delivery_instruction,
         guest_id: guestId,
         contact_person_name: guestUserInfo?.contact_person_name,
-        contact_person_number: guestUserInfo?.contact_person_number,
+        contact_person_number: `+${guestUserInfo?.contact_person_number}`,
         contact_person_email: guestUserInfo?.contact_person_email,
-
-        house: address?.house,
-        floor: address?.floor,
+        house: token ? address?.house : guestUserInfo?.house,
+        floor: token ? address?.floor : guestUserInfo?.floor,
+        road: token ? address?.road : guestUserInfo?.road,
         extra_packaging_amount: packagingCharge > 0 ? packagingCharge : 0,
+        create_new_user: check ? 1 : 0,
+        password: formik.values.password,
+        is_guest: token ? 0 : 1,
       };
     }
   };
@@ -514,6 +565,7 @@ const ItemCheckout = (props) => {
               dispatch(setGuestUserOrderId(response?.data?.order_id));
               dispatch(setOrderInformation(response?.data));
               dispatch(setOrderDetailsModalOpen(true));
+              dispatch(setGuestUserInfo(null));
             }
             if (
               paymentMethod === "cash_on_delivery" ||
@@ -536,9 +588,12 @@ const ItemCheckout = (props) => {
               const url = `${baseUrl}/payment-mobile?order_id=${
                 response?.data?.order_id
               }&customer_id=${
-                customerData?.data?.id ?? guest_id
+                customerData?.data?.id ?? response?.data?.user_id
+                  ? response?.data?.user_id
+                  : guest_id
               }&payment_platform=${payment_platform}&callback=${callBackUrl}&payment_method=${paymentMethod}`;
               localStorage.setItem("totalAmount", totalAmount);
+              dispatch(setGuestUserInfo(null));
               //dispatch(setClearCart());
               Router.push(url, undefined, { shallow: true });
             } else if (paymentMethod === "offline_payment") {
@@ -851,6 +906,36 @@ const ItemCheckout = (props) => {
       setPackagingCharge(0);
     }
   }, [isPackaging]);
+  const isZoneDigital = getDigitalMethodFromZone(
+    storeData?.zone_id,
+    zoneData?.data
+  );
+  const isZoneCod = () => {};
+  const hasOnlyPaymentMethod = () => {
+    if (
+      !configData?.cash_on_delivery &&
+      configData?.customer_wallet_status !== 1 &&
+      configData?.offline_payment_status !== 1 &&
+      configData?.digital_payment &&
+      configData?.active_payment_method_list?.length === 1 &&
+      isZoneDigital?.digital_payment
+    ) {
+      setPaymentMethod(configData?.active_payment_method_list[0]?.gateway);
+      setPaymentMethodImage(
+        configData?.active_payment_method_list[0]?.gateway_image_full_url
+      );
+      // setSelected({ name: configData?.active_payment_method_list[0]?.gateway });
+      // setPaymentMethodDetails({
+      //   name: configData?.active_payment_method_list[0]?.gateway,
+      //   image:
+      //     configData?.active_payment_method_list[0]?.gateway_image_full_url,
+      // });
+    }
+  };
+
+  useEffect(() => {
+    hasOnlyPaymentMethod();
+  }, [configData, isZoneDigital]);
   return (
     <>
       {method === "offline" ? (
@@ -898,6 +983,9 @@ const ItemCheckout = (props) => {
                   usePartialPayment={usePartialPayment}
                   offlinePaymentOptions={offlinePaymentOptions}
                   setSwitchToWallet={setSwitchToWallet}
+                  isZoneDigital={isZoneDigital}
+                  setPaymentMethodImage={setPaymentMethodImage}
+                  paymentMethodImage={paymentMethodImage}
                 />
               )}
 
@@ -917,6 +1005,11 @@ const ItemCheckout = (props) => {
                 numberOfDay={numberOfDay}
                 configData={configData}
                 setScheduleAt={setScheduleAt}
+                formik={formik}
+                passwordHandler={passwordHandler}
+                confirmPasswordHandler={confirmPasswordHandler}
+                check={check}
+                setCheck={setCheck}
               />
 
               {Number.parseInt(configData?.dm_tips_status) === 1 &&
@@ -1016,47 +1109,47 @@ const ItemCheckout = (props) => {
                     data={deliveryInstructions}
                     handleChange={handleDeliveryInstructionNote}
                   />
-                  {distanceData && storeData ? (
-                    <OrderCalculation
-                      usePartialPayment={usePartialPayment}
-                      cartList={
-                        page === "campaign" ? campaignItemList : cartList
-                      }
-                      storeData={storeData}
-                      couponDiscount={couponDiscount}
-                      taxAmount={taxAmount}
-                      distanceData={distanceData}
-                      total_order_amount={total_order_amount}
-                      configData={configData}
-                      couponInfo={couponInfo}
-                      orderType={orderType}
-                      deliveryTip={deliveryTip}
-                      origin={{
-                        latitude: storeData?.latitude,
-                        longitude: storeData?.longitude,
-                      }}
-                      destination={address}
-                      zoneData={zoneData}
-                      extraCharge={extraCharge && extraCharge}
-                      setDeliveryFee={setDeliveryFee}
-                      extraChargeLoading={extraChargeLoading}
-                      walletBalance={customerData?.data?.wallet_balance}
-                      setPayableAmount={setPayableAmount}
-                      additionalCharge={
-                        configData?.additional_charge_status === 1 &&
-                        configData?.additional_charge
-                      }
-                      payableAmount={payableAmount}
-                      cashbackAmount={cashbackAmount}
-                      handleExtraPackaging={handleExtraPackaging}
-                      isPackaging={isPackaging}
-                      packagingCharge={packagingCharge}
-                      customerData={customerData}
-                      initVauleEx={storeData?.extra_packaging_amount}
-                    />
-                  ) : (
-                    extraChargeLoading && <OrderCalculationShimmer />
-                  )}
+                  <OrderCalculation
+                    usePartialPayment={usePartialPayment}
+                    cartList={page === "campaign" ? campaignItemList : cartList}
+                    storeData={storeData}
+                    couponDiscount={couponDiscount}
+                    taxAmount={taxAmount}
+                    distanceData={distanceData}
+                    total_order_amount={total_order_amount}
+                    configData={configData}
+                    couponInfo={couponInfo}
+                    orderType={orderType}
+                    deliveryTip={deliveryTip}
+                    origin={{
+                      latitude: storeData?.latitude,
+                      longitude: storeData?.longitude,
+                    }}
+                    destination={address}
+                    zoneData={zoneData}
+                    extraCharge={extraCharge && extraCharge}
+                    setDeliveryFee={setDeliveryFee}
+                    extraChargeLoading={extraChargeLoading}
+                    walletBalance={customerData?.data?.wallet_balance}
+                    setPayableAmount={setPayableAmount}
+                    additionalCharge={
+                      configData?.additional_charge_status === 1 &&
+                      configData?.additional_charge
+                    }
+                    payableAmount={payableAmount}
+                    cashbackAmount={cashbackAmount}
+                    handleExtraPackaging={handleExtraPackaging}
+                    isPackaging={isPackaging}
+                    packagingCharge={packagingCharge}
+                    customerData={customerData}
+                    initVauleEx={storeData?.extra_packaging_amount}
+                    isLoading={isLoading}
+                  />
+                  {/*{distanceData && storeData ? (*/}
+                  {/*  */}
+                  {/*) : (*/}
+                  {/*  <OrderCalculationShimmer />*/}
+                  {/*)}*/}
                   <PlaceOrder
                     placeOrder={placeOrder}
                     orderLoading={orderLoading}
@@ -1065,6 +1158,7 @@ const ItemCheckout = (props) => {
                     isSchedules={isSchedules}
                     storeCloseToast={storeCloseToast}
                     page={page}
+                    isLoading={isLoading}
                   />
                 </Stack>
               </CustomPaperBigCard>

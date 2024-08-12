@@ -5,7 +5,6 @@ import {
   CustomBoxFullWidth,
   SliderCustom,
 } from "styled-components/CustomStyles.style";
-
 import { styled } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import Slider from "react-slick";
@@ -69,7 +68,14 @@ const FeaturedCategories = ({ configData }) => {
           <CustomBoxFullWidth
             sx={{
               "& .slick-slider": {
-                paddingY: "30px",
+                paddingTop: {
+                  xs: "22px",
+                  md: "30px",
+                },
+                paddingBottom: {
+                  xs: "4px",
+                  md: "30px",
+                },
               },
             }}
           >
@@ -91,7 +97,7 @@ const FeaturedCategories = ({ configData }) => {
       case ModuleTypes.PHARMACY:
         return (
           <Slider {...settings} ref={slider}>
-            {featuredCategories?.map((item, index) => {
+            {[...featuredCategories].reverse()?.map((item, index) => {
               return (
                 <PharmacyCategoryCard
                   key={index}

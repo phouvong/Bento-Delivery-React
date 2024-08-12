@@ -37,10 +37,7 @@ const StoreList = ({ storeType, type, setType, data }) => {
         {data?.map((store) => {
           return (
             <Grid key={store?.id} item xs={matchesXs ? 12 : 6} sm={6} md={3}>
-              <StoreCard
-                item={store}
-                imageUrl={store?.store_cover_photo_full_url}
-              />
+              <StoreCard item={store} imageUrl={store?.cover_photo_full_url} />
             </Grid>
           );
         })}

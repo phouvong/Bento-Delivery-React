@@ -33,6 +33,8 @@ import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import { t } from "i18next";
 import { setWelcomeModal } from "redux/slices/utils";
+import { removeSpecialCharacters } from "utils/CustomFunctions";
+import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 
 export const HomeComponentsWrapper = styled(Box)(({ theme }) => ({
   width: "100%",
@@ -123,6 +125,7 @@ const HomePageComponents = ({ configData }) => {
   const handleCloseWelcomeModal = () => {
     dispatch(setWelcomeModal(false));
   };
+
   return (
     <PushNotificationLayout>
       <CustomStackFullWidth>
@@ -136,7 +139,7 @@ const HomePageComponents = ({ configData }) => {
             <SearchWithTitle
               zoneid={zoneid}
               token={token}
-              query={router.query.search}
+              query={removeSpecialCharacters(router.query.search)}
               name={router.query.name}
             />
           </CustomStackFullWidth>

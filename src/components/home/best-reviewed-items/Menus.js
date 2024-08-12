@@ -20,7 +20,8 @@ const CustomButtonWrapper = styled(Button)(({ theme }) => ({
   border: `1px solid ${theme.palette.primary.main}`,
 }));
 const Menus = (props) => {
-  const { selectedMenuIndex, setSelectedMenuIndex, menus } = props;
+  const { selectedMenuIndex, setSelectedMenuIndex, menus, setFilteredData } =
+    props;
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -28,11 +29,16 @@ const Menus = (props) => {
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleClose = (index) => {
+  const handleClose = (index, itemValue) => {
     setAnchorEl(null);
+    setFilteredData(itemValue?.value);
     if (typeof index === "number") {
       setSelectedMenuIndex(index);
     }
+  };
+  const handleTabChange = (index, value) => {
+    setFilteredData(value?.value);
+    setSelectedMenuIndex(index);
   };
   const SmallScreen = () => (
     <Stack>
@@ -52,10 +58,12 @@ const Menus = (props) => {
           return (
             <MenuItem
               key={index}
-              onClick={() => handleClose(index)}
+              onClick={() =>
+                handleClose(index, item?.value ? item?.value : item)
+              }
               selected={index === selectedMenuIndex}
             >
-              {t(item)}
+              {t(item?.label ? item?.label : item)}
             </MenuItem>
           );
         })}
@@ -71,15 +79,16 @@ const Menus = (props) => {
               cursor: "pointer",
               ml: index == 0 ? 0 : 3,
               color: selectedMenuIndex === index ? "primary.main" : "inherit",
+              fontWeight: selectedMenuIndex === index ? "700" : "inherit",
               transition: "all ease 0.5s",
               "&:hover": {
                 color: "primary.main",
               },
             }}
             key={index}
-            onClick={() => setSelectedMenuIndex(index)}
-            label={t(item)}
-            value={t(item)}
+            onClick={() => handleTabChange(index, item)}
+            label={item?.label ? item?.label : item}
+            value={t(item?.value ? item?.value : item)}
           />
         );
       })}

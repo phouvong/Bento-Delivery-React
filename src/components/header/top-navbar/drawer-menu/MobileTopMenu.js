@@ -75,7 +75,8 @@ const MobileTopMenu = ({
       refetchStore();
     }
   }, []);
-
+  const popular = t("Popular");
+  const latest = t("Latest");
   const collapsableMenu = {
     cat: {
       text: "Categories",
@@ -83,12 +84,12 @@ const MobileTopMenu = ({
       path: "/category",
     },
     latest: {
-      text: `Latest ${getStoresOrRestaurants()}`,
+      text: `${latest} ${getStoresOrRestaurants()}`,
       items: latestStore?.stores?.slice(0, 12)?.map((i) => i),
       path: "/store",
     },
     popularStore: {
-      text: `Popular ${getStoresOrRestaurants()}`,
+      text: `${popular} ${getStoresOrRestaurants()}`,
       items: popularStores?.map((i) => i),
       path: "/store",
     },

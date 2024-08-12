@@ -17,7 +17,7 @@ const FeatureImageBox = styled(Stack)(({ theme }) => ({
   width: "100%",
   paddingTop: "10px",
   borderRadius: "50%",
-  filter: "drop-shadow(0px 2px 5px rgba(255, 138, 0, 0.3))",
+  // filter: "drop-shadow(0px 2px 5px rgba(255, 138, 0, 0.3))",
   cursor: "pointer",
 }));
 const FoodCategoryCard = (props) => {

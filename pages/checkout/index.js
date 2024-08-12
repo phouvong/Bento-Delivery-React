@@ -1,8 +1,8 @@
 import CssBaseline from "@mui/material/CssBaseline";
 import { getCartListModuleWise } from "helper-functions/getCartListModuleWise";
-import { useRouter } from "next/router";
-import React from "react";
-import { useSelector } from "react-redux";
+import Router, { useRouter } from "next/router";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import PrescriptionCheckout from "../../src/components/checkout/Prescription";
 import RedirectWhenCartEmpty from "../../src/components/checkout/RedirectWhenCartEmpty";
 import ItemCheckout from "../../src/components/checkout/item-checkout";
@@ -13,8 +13,13 @@ import AuthGuard from "../../src/components/route-guard/AuthGuard";
 import SEO from "../../src/components/seo";
 import { getServerSideProps } from "../index";
 import { getImageUrl } from "utils/CustomFunctions";
+import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
+import { setConfigData } from "redux/slices/configData";
 
 const CheckOutPage = ({ configData, landingPageData }) => {
+  useScrollToTop();
+  const dispatch = useDispatch();
+
   const router = useRouter();
   const { page, store_id, id } = router.query;
   const {
@@ -24,7 +29,11 @@ const CheckOutPage = ({ configData, landingPageData }) => {
     totalAmount,
   } = useSelector((state) => state.cart);
   const cartList = getCartListModuleWise(aliasCartList);
-
+  useEffect(() => {
+    if (configData) {
+      dispatch(setConfigData(configData));
+    }
+  }, [configData]);
   return (
     <>
       <CssBaseline />

@@ -79,6 +79,7 @@ const OtherModulePayment = (props) => {
     usePartialPayment,
     offlinePaymentOptions,
     setPaymentMethodImage,
+    isZoneDigital,
   } = props;
 
   const theme = useTheme();
@@ -130,10 +131,11 @@ const OtherModulePayment = (props) => {
             spacing={{ xs: 0, md: 1.7 }}
             sx={{ flexWrap: "wrap", gap: "5px" }}
           >
-            {zoneData?.data?.zone_data?.[0]?.cash_on_delivery &&
-            (configData?.partial_payment_method === "both" ||
-              configData?.partial_payment_method === "cod" ||
-              configData?.partial_payment_method === null) ? (
+            {(isZoneDigital?.cash_on_delivery &&
+              configData?.cash_on_delivery &&
+              configData?.partial_payment_method === "both") ||
+            configData?.partial_payment_method === "cod" ||
+            configData?.partial_payment_method === null ? (
               <PayButton
                 value="cash_on_delivery"
                 paymentMethod={paymentMethod}
@@ -188,7 +190,7 @@ const OtherModulePayment = (props) => {
             {/*    </PayButton>*/}
             {/*  )}*/}
           </CustomStackFullWidth>
-          {zoneData?.data?.zone_data?.[0]?.digital_payment &&
+          {isZoneDigital?.digital_payment &&
             paidBy !== "receiver" &&
             forprescription !== "true" &&
             configData?.digital_payment_info?.digital_payment &&
@@ -207,7 +209,15 @@ const OtherModulePayment = (props) => {
                     {configData?.active_payment_method_list?.map(
                       (item, index) => {
                         return (
-                          <Grid item xs={6} key={index}>
+                          <Grid
+                            item
+                            xs={
+                              configData?.active_payment_method_list?.length > 1
+                                ? 6
+                                : 12
+                            }
+                            key={index}
+                          >
                             <PaymentMethodCard
                               parcel={parcel}
                               paymentType={item?.gateway_title}
@@ -239,7 +249,7 @@ const OtherModulePayment = (props) => {
         </CustomStackFullWidth>
         <Stack onClick={handleClickOffline} sx={{ cursor: "pointer" }}>
           {configData?.offline_payment_status === 1 &&
-          zoneData?.data?.zone_data?.[0]?.offline_payment &&
+          isZoneDigital?.offline_payment &&
           forprescription !== "true" &&
           typeof offlinePaymentOptions !== "undefined" &&
           Object?.keys(offlinePaymentOptions)?.length !== 0 ? (

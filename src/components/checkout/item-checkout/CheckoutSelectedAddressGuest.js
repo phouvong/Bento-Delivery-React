@@ -19,6 +19,7 @@ import CallIcon from "@mui/icons-material/Call";
 import MapsHomeWorkSharpIcon from "@mui/icons-material/MapsHomeWorkSharp";
 import CustomModal from "../../modal";
 import GuestUserInforForm from "../../address/GuestUserInforForm";
+import EmailIcon from "@mui/icons-material/Email";
 
 const CheckoutSelectedAddressGuest = ({
   address,
@@ -57,8 +58,17 @@ const CheckoutSelectedAddressGuest = ({
         >
           <CustomStackFullWidth padding="8px">
             {guestUserInfo ? (
-              <CustomStackFullWidth direction={{ xs: "column", md: "row" }}>
-                <CustomStackFullWidth
+              <CustomStackFullWidth
+                direction={{
+                  xs: "column",
+                  md: "row",
+                }}
+                sx={{
+                  flexWrap: "wrap",
+                  alignItems: "flex-start",
+                }}
+              >
+                <Stack
                   direction="row"
                   alignItems="center"
                   gap="5px"
@@ -66,8 +76,8 @@ const CheckoutSelectedAddressGuest = ({
                 >
                   <PersonIcon sx={{ color: theme.palette.primary.main }} />
                   <Typography>{guestUserInfo?.contact_person_name}</Typography>
-                </CustomStackFullWidth>
-                <CustomStackFullWidth
+                </Stack>
+                <Stack
                   direction="row"
                   alignItems="center"
                   gap="5px"
@@ -77,10 +87,23 @@ const CheckoutSelectedAddressGuest = ({
                   <Typography>
                     {`+ ${guestUserInfo?.contact_person_number}`}
                   </Typography>
-                </CustomStackFullWidth>
+                </Stack>
+                {guestUserInfo?.contact_person_email && (
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    gap="5px"
+                    padding="8px"
+                  >
+                    <EmailIcon sx={{ color: theme.palette.primary.main }} />
+                    <Typography>
+                      {`${guestUserInfo?.contact_person_email}`}
+                    </Typography>
+                  </Stack>
+                )}
                 {orderType !== "take_away" &&
                   (guestUserInfo?.house || guestUserInfo?.floor) && (
-                    <CustomStackFullWidth
+                    <Stack
                       direction="row"
                       alignItems="center"
                       gap="5px"
@@ -89,8 +112,8 @@ const CheckoutSelectedAddressGuest = ({
                       <MapsHomeWorkSharpIcon
                         sx={{ color: theme.palette.primary.main }}
                       />
-                      <Typography>{`House - ${guestUserInfo?.house} , Floor - ${guestUserInfo?.floor}`}</Typography>
-                    </CustomStackFullWidth>
+                      <Typography>{`Road - ${guestUserInfo?.road} , House - ${guestUserInfo?.house} , Floor - ${guestUserInfo?.floor}, `}</Typography>
+                    </Stack>
                   )}
               </CustomStackFullWidth>
             ) : (
@@ -118,22 +141,24 @@ const CheckoutSelectedAddressGuest = ({
               </CustomStackFullWidth>
             )}
           </CustomStackFullWidth>
-          <Tooltip
-            arrow
-            placement="top"
-            TransitionComponent={Zoom}
-            title={t("Please add your delivery address")}
-          >
-            <IconButton onClick={handleClick} padding="0px">
-              <CreateIcon
-                sx={{
-                  width: "20px",
-                  height: "26px",
-                  color: (theme) => theme.palette.primary.main,
-                }}
-              />
-            </IconButton>
-          </Tooltip>
+          <Stack marginBottom="auto">
+            <Tooltip
+              arrow
+              placement="top"
+              TransitionComponent={Zoom}
+              title={t("Please add your delivery address")}
+            >
+              <IconButton onClick={handleClick} padding="0px">
+                <CreateIcon
+                  sx={{
+                    width: "20px",
+                    height: "26px",
+                    color: (theme) => theme.palette.primary.main,
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+          </Stack>
         </CustomStackFullWidth>
         <CustomStackFullWidth
           direction="row"

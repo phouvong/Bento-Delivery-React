@@ -322,8 +322,13 @@ const MiddleSection = (props) => {
       }
     }
   }, [data, searchData, state.categoryId]);
+
   useEffect(() => {
-    if (inView) {
+    setOffset(1);
+  }, [storeId]);
+
+  useEffect(() => {
+    if (inView && limit < data?.pages[0]?.total_size) {
       if (!isLoadingStoresCategories) {
         dispatch({ type: ACTION.setOffSet, payload: 1 });
         setOffset((prev) => prev + 1);
@@ -487,7 +492,6 @@ const MiddleSection = (props) => {
   if (inView) {
     setExpanded(false);
   }
-
   return (
     <NoSsr>
       <CustomBoxFullWidth>

@@ -184,7 +184,7 @@ const StoreDetails = ({ storeDetails, storeImageBaseUrl }) => {
           <Grid item xs={4}>
             <CustomStackFullWidth alignItems="flex-start">
               <Typography sx={{ fontSize: "18px", fontWeight: "bold" }}>
-                {storeDetails?.positive_rating}%
+                {storeDetails?.positive_rating.toFixed(1)}%
               </Typography>
               <Typography
                 sx={{

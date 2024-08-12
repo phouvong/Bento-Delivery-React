@@ -270,7 +270,7 @@ const BestReviewedItems = (props) => {
                             height: {
                               xs: "200px",
                               sm: "300px",
-                              md: "330px",
+                              md: "352px",
                             },
                             margin: "10px",
                             display: { xs: "none", md: "inherit" },
@@ -291,7 +291,7 @@ const BestReviewedItems = (props) => {
                               height="100%"
                               width="100%"
                               borderRadius=".7rem"
-                              objectfit="contain"
+                              objectfit="cover"
                             />
                           )}
                         </CustomBoxFullWidth>
@@ -374,7 +374,7 @@ const BestReviewedItems = (props) => {
                             height: {
                               xs: "200px",
                               sm: "300px",
-                              md: "370px",
+                              md: "352px",
                             },
                             paddingTop: "8px",
                             display: { xs: "none", sm: "inherit" },

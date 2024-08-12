@@ -32,7 +32,6 @@ const GoogleLoginComp = (props) => {
   const router = useRouter();
 
   const { mutate } = usePostEmail();
-
   const clientId = google_client_id;
   const handleToken = (response) => {
     if (response?.token) {

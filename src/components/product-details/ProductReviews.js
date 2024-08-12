@@ -35,14 +35,14 @@ const ProductReviews = ({
         ) : (
           <>{isExpanded === "true" && t("No reviews found")}</>
         )}
-        {reviews?.length > 1 && (
-          <CustomPagination
-            total_size={total_size}
-            page_limit={page_limits}
-            offset={offSet}
-            setOffset={setOffSet}
-          />
-        )}
+        {/*{reviews?.length > 1 && (*/}
+        {/*  <CustomPagination*/}
+        {/*    total_size={total_size}*/}
+        {/*    page_limit={page_limits}*/}
+        {/*    offset={offSet}*/}
+        {/*    setOffset={setOffSet}*/}
+        {/*  />*/}
+        {/*)}*/}
       </CustomBoxFullWidth>
     </>
   );

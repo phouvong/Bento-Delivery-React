@@ -255,8 +255,16 @@ const MapModal = ({
             <CloseIcon sx={{ fontSize: { xs: "18px", md: "24px" } }} />
           </IconButton>
           <CustomStackFullWidth spacing={2}>
-            <SimpleBar style={{ maxHeight: "65vh" , paddingRight: "15px"}}>
-              <Typography fontSize={{ xs: "14px", md: "1rem" }} fontWeight={500}>
+            <SimpleBar
+              style={{
+                maxHeight: isModalExpand ? "100vh" : "65vh",
+                paddingRight: "15px",
+              }}
+            >
+              <Typography
+                fontSize={{ xs: "14px", md: "1rem" }}
+                fontWeight={500}
+              >
                 {t("Pick Location")}
               </Typography>
               <Typography
@@ -418,7 +426,8 @@ const MapModal = ({
                 ) : (
                   <PrimaryButton
                     disabled={
-                      isLoading || !geoCodeResults?.results[0]?.formatted_address
+                      isLoading ||
+                      !geoCodeResults?.results[0]?.formatted_address
                     }
                     variant="contained"
                     onClick={() => handlePickLocationOnClick()}
@@ -430,15 +439,14 @@ const MapModal = ({
             </SimpleBar>
           </CustomStackFullWidth>
         </CustomBoxWrapper>
-      </Modal >
+      </Modal>
       {openModuleSelection && (
         <ModuleSelection
           location={currentLocation}
           closeModal={handleCloseModuleModal}
           disableAutoFocus={disableAutoFocus}
         />
-      )
-      }
+      )}
     </>
   );
 };

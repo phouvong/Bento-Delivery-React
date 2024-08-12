@@ -192,7 +192,7 @@ const ProductInformationBottomSection = ({
             },
             "&:hover": {
               color: "black",
-              backgroundColor: alpha(theme.palette.customColor.buyButton, 0.8),
+              backgroundColor: alpha(theme.palette.customColor.buyButton, 0.6),
             },
           }}
         >

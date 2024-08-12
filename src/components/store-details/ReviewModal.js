@@ -6,9 +6,9 @@ import { styled } from "@mui/material/styles";
 
 import { Box, Stack } from "@mui/system";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useQuery } from "react-query";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import SimpleBar from "simplebar-react";
 import "simplebar/dist/simplebar.min.css";
 import useGetStoreReviews from "api-manage/hooks/react-query/review/useGetStoreReviews";
@@ -23,6 +23,18 @@ import CustomImageContainer from "components/CustomImageContainer";
 import DotSpin from "components/DotSpin";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { ReadMore } from "components/store-details/ReadMore";
+import { getModuleId } from "helper-functions/getModuleId";
+import { ACTION } from "components/product-details/product-details-section/states";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import FoodDetailModal from "components/food-details/foodDetail-modal/FoodDetailModal";
+import ModuleModal from "components/cards/ModuleModal";
+import { useRouter } from "next/router";
+import { addWishList, removeWishListItem } from "redux/slices/wishList";
+import toast from "react-hot-toast";
+import { not_logged_in_message } from "utils/toasterMessages";
+import useAddCartItem from "api-manage/hooks/react-query/add-cart/useAddCartItem";
+import { useAddToWishlist } from "api-manage/hooks/react-query/wish-list/useAddWishList";
+import { useWishListDelete } from "api-manage/hooks/react-query/wish-list/useWishListDelete";
 
 const BorderLinearProgress = styled(LinearProgress)(({ theme }) => ({
   height: 8,
@@ -52,17 +64,92 @@ const RestaurantReviewModal = ({
 }) => {
   const [review_count, setReview_Count] = useState({});
   const theme = useTheme();
-
+  const router = useRouter();
+  const reduxDispatch = useDispatch();
+  const [openModal, setOpenModal] = useState(false);
+  const [productData, setProductData] = useState({});
+  const { wishLists } = useSelector((state) => state.wishList);
   const { data, refetch, isLoading } = useGetStoreReviews(id);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { mutate: addFavoriteMutation } = useAddToWishlist();
+  const { mutate } = useWishListDelete();
+
   useEffect(() => {
     refetch();
   }, []);
+
+  useEffect(() => {
+    wishlistItemExistHandler();
+  }, [wishLists]);
+  const wishlistItemExistHandler = () => {
+    if (wishLists?.item?.find((wishItem) => wishItem.id === productData?.id)) {
+      setIsWishlisted(true);
+    } else {
+      setIsWishlisted(false);
+    }
+  };
   const getPercentOfNumber = (percentRate) => {
     const total = restaurantDetails?.ratings.reduce(
       (sum, current) => sum + current,
       0
     );
     return percentRate ? ((percentRate / total) * 100).toFixed(1) : 0;
+  };
+  const handleClick = (itemReview) => {
+    setProductData(itemReview);
+
+    if (itemReview?.item?.module_type === "ecommerce") {
+      router.push({
+        pathname: "/product/[id]",
+        query: {
+          id: `${
+            itemReview?.item?.slug
+              ? itemReview?.item?.slug
+              : itemReview?.item?.id
+          }`,
+          module_id: `${getModuleId()}`,
+        },
+      });
+    } else {
+      setOpenModal(true);
+    }
+  };
+  const addToWishlistHandler = (e) => {
+    e.stopPropagation();
+    let token = undefined;
+    if (typeof window !== "undefined") {
+      token = localStorage.getItem("token");
+    }
+    if (token) {
+      addFavoriteMutation(item?.id, {
+        onSuccess: (response) => {
+          if (response) {
+            reduxDispatch(addWishList(item));
+            setIsWishlisted(true);
+            toast.success(response?.message);
+          }
+        },
+        onError: (error) => {
+          toast.error(error.response.data.message);
+        },
+      });
+    } else toast.error(t(not_logged_in_message));
+  };
+  const removeFromWishlistHandler = (e) => {
+    e.stopPropagation();
+    const onSuccessHandlerForDelete = (res) => {
+      reduxDispatch(removeWishListItem(item?.id));
+      setIsWishlisted(false);
+      toast.success(res.message, {
+        id: "wishlist",
+      });
+    };
+    mutate(item?.id, {
+      onSuccess: onSuccessHandlerForDelete,
+      onError: (error) => {
+        toast.error(error.response.data.message);
+      },
+    });
   };
 
   return (
@@ -266,7 +353,12 @@ const RestaurantReviewModal = ({
                   </Stack>
                 </Grid>
                 <Grid item xs={4} sm={4} md={2.5}>
-                  <Stack justifyContent="center" spacing={0.5}>
+                  <Stack
+                    justifyContent="center"
+                    spacing={0.5}
+                    sx={{ cursor: "pointer" }}
+                    onClick={() => handleClick(review?.item)}
+                  >
                     <Stack
                       padding="7px"
                       borderRadius="8px"
@@ -343,6 +435,28 @@ const RestaurantReviewModal = ({
           )}
         </StyledSimpleBar>
       </CustomStackFullWidth>
+      {openModal && getCurrentModuleType() === "food" && productData ? (
+        <FoodDetailModal
+          product={productData}
+          //imageBaseUrl={imageBaseUrl}
+          open={openModal}
+          handleModalClose={() => setOpenModal(false)}
+          setOpen={setOpenModal}
+          addToWishlistHandler={addToWishlistHandler}
+          removeFromWishlistHandler={removeFromWishlistHandler}
+          isWishlisted={isWishlisted}
+        />
+      ) : (
+        <ModuleModal
+          open={openModal}
+          handleModalClose={() => setOpenModal(false)}
+          configData={configData}
+          productDetailsData={productData}
+          addToWishlistHandler={addToWishlistHandler}
+          removeFromWishlistHandler={removeFromWishlistHandler}
+          isWishlisted={isWishlisted}
+        />
+      )}
     </Paper>
   );
 };

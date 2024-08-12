@@ -74,7 +74,7 @@ const VisitAgain = (props) => {
           alignItems={getModuleWiseData?.()?.mainPosition}
           justyfyContent={getModuleWiseData?.()?.mainPosition}
           mt={IsSmallScreen() ? "2px" : "16px"}
-          spacing={1}
+          spacing={{ xs: 2, md: 1 }}
         >
           {IsSmallScreen() ? (
             <CustomContainer>

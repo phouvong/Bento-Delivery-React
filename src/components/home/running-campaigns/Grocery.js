@@ -34,6 +34,7 @@ export const Shimmer = () => (
 );
 const Grocery = (props) => {
   const { runningCampaigns, handleClick, configData, isFetching } = props;
+
   return (
     <Grid container spacing={2}>
       {runningCampaigns?.map((item, index) => {

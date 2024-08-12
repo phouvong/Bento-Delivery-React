@@ -10,6 +10,7 @@ import placeholder from "../assets/product.png";
 const BrandCard = (props) => {
   const { image, name, stock, id, horizontal, baseUrl, items_count } = props;
   const theme = useTheme();
+  const imageUrl = image || placeholder.src;
   const tabScreen = useMediaQuery("(max-width: 991px)");
 
   return (
@@ -51,7 +52,7 @@ const BrandCard = (props) => {
           className="brand-card-image"
         >
           <img
-            src={image}
+            src={imageUrl}
             onError={(e) => {
               e.target.onerror = null; // Prevent infinite loop if fallback image also fails
               e.target.src = placeholder.src; // Replace with your fallback image path

@@ -7,8 +7,13 @@ import toast from "react-hot-toast";
 import CopyCodeIcon from "../referral-code/svg/CopyCodeIcon";
 
 const CustomCopyWithTooltip = (props) => {
-  const { t, value, forModal } = props;
+  const { t, value, forModal, companyName, referralCode } = props;
   const [copy, setCopy] = useState(false);
+  const copyReferCode = async (text) => {
+    if (typeof window !== undefined) {
+      await window.navigator.clipboard.writeText(text);
+    }
+  };
   const handleCopy = (coupon_code) => {
     navigator.clipboard
       .writeText(coupon_code)
@@ -18,7 +23,7 @@ const CustomCopyWithTooltip = (props) => {
           <span>
             {t("Code")}
             <b style={{ marginLeft: "4px", marginRight: "4px" }}>
-              {coupon_code}
+              {referralCode}
             </b>
             {t("has been copied")}
           </span>
@@ -31,10 +36,14 @@ const CustomCopyWithTooltip = (props) => {
   return (
     <Tooltip arrow placement="top" title={copy ? t("Copied") : t("Copy")}>
       {forModal ? (
-        <Button variant="contained" onMouseEnter={() => copy && setCopy(false)}
-          onClick={() => handleCopy(value)}>Copy</Button>
+        <Button
+          variant="contained"
+          onMouseEnter={() => copy && setCopy(false)}
+          onClick={() => handleCopy(value)}
+        >
+          Copy
+        </Button>
       ) : (
-
         <IconButton
           onMouseEnter={() => copy && setCopy(false)}
           onClick={() => handleCopy(value)}

@@ -142,6 +142,7 @@ const Testimonials = ({ isSmall, landingPageData }) => {
               variant={isSmall ? "h7" : "h4"}
               fontSize={{ xs: "17px", sm: "24px", md: "30px" }}
               fontWeight={500}
+              sx={{ opacity: ".9" }}
             >
               <DollarSignHighlighter
                 theme={theme}

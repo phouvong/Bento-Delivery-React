@@ -2,18 +2,30 @@ import React from "react";
 // import { DeliveryCaption, DeliveryTitle, StyledPaper } from "./CheckOut.style";
 import { useTranslation } from "react-i18next";
 
-import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { DeliveryCaption } from "../CheckOut.style";
 import DeliveryAddress from "../delivery-address";
 import { Stack } from "@mui/system";
-import { DeliveryOptionButton } from "../../../styled-components/CustomButtons.style";
+import { DeliveryOptionButton } from "styled-components/CustomButtons.style";
 import homeImg from "../assets/image 1256.png";
 import takeaway from "../assets/takeaway.png";
 import schedule from "../assets/schedule.png";
 import CustomImageContainer from "../../CustomImageContainer";
-import { Typography, useMediaQuery } from "@mui/material";
+import {
+  alpha,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  InputAdornment,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import { useTheme } from "@emotion/react";
 import RestaurantScheduleTime from "./RestaurantScheduleTime";
+import { t } from "i18next";
+import CustomTextFieldWithFormik from "components/form-fields/CustomTextFieldWithFormik";
+import { getToken } from "helper-functions/getToken";
+import LockIcon from "@mui/icons-material/Lock";
 
 const DeliveryDetails = (props) => {
   const {
@@ -33,6 +45,11 @@ const DeliveryDetails = (props) => {
     tomorrow,
     numberOfDay,
     setScheduleAt,
+    formik,
+    confirmPasswordHandler,
+    passwordHandler,
+    check,
+    setCheck,
   } = props;
   const { t } = useTranslation();
   const theme = useTheme();
@@ -54,6 +71,9 @@ const DeliveryDetails = (props) => {
       setDeliveryTip(0);
     }
     setOrderType(value);
+  };
+  const handleCheckbox = (e) => {
+    setCheck(e.target.checked);
   };
   return (
     <CustomStackFullWidth spacing={{ xs: 1.5, md: 3 }}>
@@ -179,6 +199,69 @@ const DeliveryDetails = (props) => {
         storeZoneId={storeData?.zone_id}
         orderType={orderType}
       />
+      {!getToken() && (
+        <Stack>
+          <Stack>
+            <FormControlLabel
+              onChange={(e) => handleCheckbox(e)}
+              control={<Checkbox />}
+              label={
+                <Typography
+                  fontWeight="500"
+                  fontSize="16px"
+                  color={theme.palette.neutral[1000]}
+                >
+                  {t("Create account with exiting info.")}
+                </Typography>
+              }
+            />
+          </Stack>
+          {check && (
+            <Grid container spacing={2} pt="10px">
+              <Grid item sm={12} md={6}>
+                <CustomTextFieldWithFormik
+                  required="true"
+                  type="password"
+                  label={t("Password")}
+                  placeholder={t("Password")}
+                  touched={formik.touched.password}
+                  errors={formik.errors.password}
+                  fieldProps={formik.getFieldProps("password")}
+                  onChangeHandler={passwordHandler}
+                  value={formik.values.password}
+                  startIcon={
+                    <InputAdornment position="start">
+                      <LockIcon
+                        sx={{ color: (theme) => theme.palette.neutral[400] }}
+                      />
+                    </InputAdornment>
+                  }
+                />
+              </Grid>
+              <Grid item sm={12} md={6}>
+                <CustomTextFieldWithFormik
+                  label={t("Confirm Password")}
+                  required="true"
+                  type="password"
+                  placeholder={t("Confirm Password")}
+                  touched={formik.touched.confirm_password}
+                  errors={formik.errors.confirm_password}
+                  fieldProps={formik.getFieldProps("confirm_password")}
+                  onChangeHandler={confirmPasswordHandler}
+                  value={formik.values.confirm_password}
+                  startIcon={
+                    <InputAdornment position="start">
+                      <LockIcon
+                        sx={{ color: (theme) => theme.palette.neutral[400] }}
+                      />
+                    </InputAdornment>
+                  }
+                />
+              </Grid>
+            </Grid>
+          )}
+        </Stack>
+      )}
     </CustomStackFullWidth>
   );
 };

@@ -13,6 +13,7 @@ import { alpha } from "@mui/material";
 import useGetItemOrStore from "../../../api-manage/hooks/react-query/search/useGetItemOrStore";
 import { debounce } from "lodash";
 import jwt from "base-64";
+import { removeSpecialCharacters } from "utils/CustomFunctions";
 
 const ManageSearch = ({ zoneid, token, maxwidth, fullWidth, query, name }) => {
   const router = useRouter();
@@ -71,7 +72,7 @@ const ManageSearch = ({ zoneid, token, maxwidth, fullWidth, query, name }) => {
     data: itemOrStoreSuggestionData,
     refetch: refetchItemOrStoreSuggestion,
     isRefetching: isRefetchingItemOrStoreSuggestion,
-  } = useGetItemOrStore(searchValue);
+  } = useGetItemOrStore(removeSpecialCharacters(searchValue));
 
   const getSearchSuggestions = debounce(async () => {
     await refetchItemOrStoreSuggestion();

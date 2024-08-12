@@ -2,7 +2,7 @@ import toast from "react-hot-toast";
 import { t } from "i18next";
 import Router from "next/router";
 
-const handleTokenExpire = (item, status) => {
+export const handleTokenExpire = (item, status) => {
   if (status === 401) {
     if (window.localStorage.getItem("token")) {
       toast.error(t("Your account is inactive or Your token has been expired"));

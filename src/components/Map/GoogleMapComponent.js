@@ -6,9 +6,17 @@ import React, {
   useState,
 } from "react";
 import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
-import { CircularProgress, Stack, useMediaQuery } from "@mui/material";
+import {
+  alpha,
+  CircularProgress,
+  IconButton,
+  Stack,
+  useMediaQuery,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import pickMarker from "./assets/pick_marker.png";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 
 const GoogleMapComponent = ({
   setDisablePickButton,
@@ -23,14 +31,16 @@ const GoogleMapComponent = ({
   setPlaceDescription,
   height,
   isModalExpand,
+  left,
+  bottom,
 }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const containerStyle = {
     width: "100%",
-    maxHeight: "50dvh",
+    maxHeight: isModalExpand ? "70dvh" : "50dvh",
     height: isModalExpand
-      ? "70vh"
+      ? "90vh"
       : height
       ? height
       : isSmall
@@ -65,11 +75,11 @@ const GoogleMapComponent = ({
   const [mapSetup, setMapSetup] = useState(false);
   useEffect(() => setIsMounted(true), []);
   const [map, setMap] = useState(null);
-  const [zoom, setZoom] = useState(10);
+  const [zoom, setZoom] = useState(17);
   const [centerPosition, setCenterPosition] = useState(center);
 
   const onLoad = useCallback(function callback(map) {
-    setZoom(17);
+    // setZoom(17);
     setMap(map);
   }, []);
   useEffect(() => {
@@ -90,7 +100,17 @@ const GoogleMapComponent = ({
     setMap(null);
     // setMapSetup(false)
   }, []);
+  const handleZoomIn = () => {
+    if (zoom <= 21) {
+      setZoom((prevZoom) => Math.min(prevZoom + 1));
+    }
+  };
 
+  const handleZoomOut = () => {
+    if (map && zoom >= 1) {
+      setZoom((prevZoom) => Math.max(prevZoom - 1));
+    }
+  };
   return isLoaded ? (
     <Stack
       padding="0px"
@@ -98,8 +118,44 @@ const GoogleMapComponent = ({
         boxShadow: "inset 0px 4px 4px rgba(0, 0, 0, 0.1)",
         borderRadius: "10px",
         p: "4px",
+        position: "relative",
       }}
     >
+      <Stack
+        position="absolute"
+        zIndex={1}
+        left={left ? left : "15px"}
+        bottom={bottom ? bottom : "6%"}
+        direction="column"
+        spacing={1}
+      >
+        <IconButton
+          sx={{
+            background: (theme) => theme.palette.neutral[100],
+            "&:hover": {
+              background: (theme) => alpha(theme.palette.neutral[100], 0.8),
+            },
+          }}
+          padding={{ xs: "3px", sm: "5px" }}
+          onClick={handleZoomIn}
+          disabled={zoom > 21}
+        >
+          <AddIcon color="primary" />
+        </IconButton>
+        <IconButton
+          sx={{
+            background: (theme) => theme.palette.neutral[100],
+            "&:hover": {
+              background: (theme) => alpha(theme.palette.neutral[100], 0.8),
+            },
+          }}
+          padding={{ xs: "3px", sm: "5px" }}
+          onClick={handleZoomOut}
+          disabled={zoom < 1}
+        >
+          <RemoveIcon color="primary" />
+        </IconButton>
+      </Stack>
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={center ?? centerPosition}

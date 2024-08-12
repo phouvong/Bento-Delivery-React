@@ -15,6 +15,7 @@ import { useSelector } from "react-redux";
 import { getModuleId } from "../../../../../helper-functions/getModuleId";
 import { useRouter } from "next/router";
 import { getImageUrl } from "utils/CustomFunctions";
+import { getLanguage } from "helper-functions/getLanguage";
 
 const CustomTypography = styled(Typography)(({ theme }) => ({
   fontFamily: "Quicksand",
@@ -99,10 +100,11 @@ const PharmacyStaticBanners = (props) => {
       { shallow: true }
     );
   };
+
   const settings = {
     dots: false,
     infinite: data?.length > 2 && true,
-    slidesToShow: 2,
+    slidesToShow: data?.length == 1 ? 1 : 2,
     slidesToScroll: 1,
     autoplay: true,
     speed: 800,
@@ -151,7 +153,7 @@ const PharmacyStaticBanners = (props) => {
               </Grid>
             </Grid>
           ) : (
-            <SliderCustom>
+            <SliderCustom float="center">
               <Slider {...settings}>
                 {data?.length > 0 &&
                   data?.map((item, index) => {

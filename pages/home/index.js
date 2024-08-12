@@ -9,6 +9,7 @@ import ZoneGuard from "../../src/components/route-guard/ZoneGuard";
 // import { getServerSideProps } from "../index";
 import SEO from "../../src/components/seo";
 import { getImageUrl } from "utils/CustomFunctions";
+import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 
 const Home = ({ configData, landingPageData }) => {
   const dispatch = useDispatch();

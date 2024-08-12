@@ -10,6 +10,7 @@ import {
   alpha,
   Divider,
   Grid,
+  IconButton,
   Skeleton,
   Step,
   StepConnector,
@@ -42,6 +43,9 @@ import { Check } from "@mui/icons-material";
 import CustomImageContainer from "../CustomImageContainer";
 import { Stack } from "@mui/system";
 import moment from "moment";
+import GpsFixedIcon from "@mui/icons-material/GpsFixed";
+import { useGeolocated } from "react-geolocated";
+import TrackOrderMap from "components/track-order/TrackOrderMap";
 const CustomStepperLabels = styled(Stepper)(({ theme }) => ({
   "& .MuiStepLabel-label.MuiStepLabel-alternativeLabel": {
     marginTop: "-80px",
@@ -121,10 +125,21 @@ function QontoStepIcon(props) {
   );
 }
 const TrackOrder = ({ configData, trackOrderData }) => {
+  const [userLocation, setUserLocation] = useState({});
   const { t } = useTranslation();
   const [actStep, setActStep] = useState(1);
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
+  let currentLatLng = undefined;
+  if (typeof window !== "undefined") {
+    currentLatLng = JSON.parse(window.localStorage.getItem("currentLatLng"));
+  }
+  useEffect(() => {
+    setUserLocation({
+      lat: trackOrderData?.delivery_address?.latitude,
+      lng: trackOrderData?.delivery_address?.longitude,
+    });
+  }, []);
   const steps = [
     {
       label: "Order Confirmed",
@@ -171,11 +186,24 @@ const TrackOrder = ({ configData, trackOrderData }) => {
   useEffect(() => {
     handleStepper();
   }, [actStep, trackOrderData]);
+  const { coords, isGeolocationAvailable, isGeolocationEnabled, getPosition } =
+    useGeolocated({
+      positionOptions: {
+        enableHighAccuracy: false,
+      },
+      userDecisionTimeout: 5000,
+      isGeolocationEnabled: true,
+    });
+  const getCurrentLocation = () => {
+    setUserLocation({ lat: coords.latitude, lng: coords.longitude });
+  };
+
   return (
     <CustomStackFullWidth
       mt={{ xs: "20px", md: "70px" }}
       minHeight="30vh"
       alignItems={isSmall ? "center" : "initial"}
+      spacing={4}
     >
       {isSmall ? (
         <Stepper
@@ -241,6 +269,11 @@ const TrackOrder = ({ configData, trackOrderData }) => {
           ))}
         </CustomStepperLabels>
       )}
+      <TrackOrderMap
+        getCurrentLocation={getCurrentLocation}
+        trackOrderData={trackOrderData}
+        userLocation={userLocation}
+      />
     </CustomStackFullWidth>
   );
 };

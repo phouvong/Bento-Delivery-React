@@ -35,6 +35,7 @@ export const CustomPaper = styled(Paper)(({ theme }) => ({
   //minWidth: "500px",
   borderRadius: "4px",
   padding: "2rem",
+  background: theme.palette.neutral[100],
   [theme.breakpoints.down("sm")]: {
     padding: ".6rem",
     // minWidth: "320px",

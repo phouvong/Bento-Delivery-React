@@ -18,6 +18,7 @@ import { getCurrentModuleId } from "helper-functions/getCurrentModuleType";
 import { useGetVisitAgain } from "api-manage/hooks/react-query/useGetVisitAgain";
 import useGetNewArrivalStores from "api-manage/hooks/react-query/store/useGetNewArrivalStores";
 import { getModuleId } from "helper-functions/getModuleId";
+import PaidAds from "components/home/paid-ads";
 
 const menus = ["All", "New", "Baby Care", "Womans Care", "Mens"];
 
@@ -85,7 +86,11 @@ const Pharmacy = ({ configData }) => {
           />
         </CustomContainer>
       </Grid>
-
+      <Grid item sm={12}>
+        <CustomContainer>
+          <PaidAds />
+        </CustomContainer>
+      </Grid>
       <Grid item xs={12}>
         <CustomContainer>
           <BestReviewedItems
