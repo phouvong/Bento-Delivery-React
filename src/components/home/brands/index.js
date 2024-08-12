@@ -31,7 +31,7 @@ export const CustomSkeleton = styled(Skeleton)(({ theme }) => ({
   maxWidth: "100%",
 }));
 const Brands = ({ viewAll }) => {
-  const [sortBy, setSortBy] = useState("AtoZ");
+  const [sortBy, setSortBy] = useState("Default");
   const theme = useTheme();
   const sliderRef = useRef();
   const tabScreen = useMediaQuery("(max-width: 991px)");
@@ -57,7 +57,7 @@ const Brands = ({ viewAll }) => {
     setSortBy(value);
   };
 
-  const [filteredData, setFilteredData] = useState([]);
+  const [filteredData, setFilteredData] = useState(data);
   useEffect(() => {
     if (data) {
       if (sortBy === "AtoZ") {

@@ -17,19 +17,23 @@ const ButtonContainer = styled(Box)(
       noBackground === "true"
         ? null
         : right === "true"
-          ? `linear-gradient(270deg, ${isRtl === "rtl"
-            ? "rgba(255, 255, 255, 0)"
-            : theme.palette.neutral[100]
-          } 0%, ${isRtl === "rtl"
-            ? theme.palette.neutral[100]
-            : "rgba(75, 86, 107, 0.05) -28.57%, rgba(255, 255, 255, 0) 122.62%"
+        ? `linear-gradient(270deg, ${
+            isRtl === "rtl"
+              ? "rgba(255, 255, 255, 0)"
+              : theme.palette.neutral[100]
+          } 0%, ${
+            isRtl === "rtl"
+              ? theme.palette.neutral[100]
+              : "rgba(75, 86, 107, 0.05) -28.57%, rgba(255, 255, 255, 0) 122.62%"
           } 100%)`
-          : `linear-gradient(${isRtl === "rtl" ? "to left" : "to right"},  ${isRtl === "rtl"
-            ? "rgba(255, 255, 255, 0)"
-            : "rgba(75, 86, 107, 0.05) -28.57%, rgba(255, 255, 255, 0) 122.62%"
-          } 0%, ${isRtl === "rtl"
-            ? theme.palette.neutral[100]
-            : "rgba(255, 255, 255, 0)"
+        : `linear-gradient(${isRtl === "rtl" ? "to left" : "to right"},  ${
+            isRtl === "rtl"
+              ? "rgba(255, 255, 255, 0)"
+              : "rgba(75, 86, 107, 0.05) -28.57%, rgba(255, 255, 255, 0) 122.62%"
+          } 0%, ${
+            isRtl === "rtl"
+              ? theme.palette.neutral[100]
+              : "rgba(255, 255, 255, 0)"
           }  100%)`,
 
     zIndex: 1,
@@ -59,6 +63,9 @@ const PrevWrapper = styled(Box)(({ theme, isdisabled }) => ({
   height: "35px",
   width: "35px",
   borderRadius: "50%",
+  "&:hover": {
+    backgroundColor: theme.palette.primary.dark,
+  },
 }));
 const NextWrapper = styled(Box)(({ theme, isdisabled }) => ({
   top: "50%",
@@ -73,6 +80,9 @@ const NextWrapper = styled(Box)(({ theme, isdisabled }) => ({
   justifyContent: "center",
   height: "35px",
   width: "35px",
+  "&:hover": {
+    backgroundColor: theme.palette.primary.deep,
+  },
 }));
 export const NextFood = ({
   onClick,
@@ -102,6 +112,9 @@ export const NextFood = ({
             sx={{
               fontSize: "30px",
               color: (theme) => theme.palette.neutral[600],
+              "&:hover": {
+                color: theme.palette.neutral[100],
+              },
             }}
           />
         ) : (
@@ -109,6 +122,9 @@ export const NextFood = ({
             sx={{
               fontSize: "30px",
               color: (theme) => theme.palette.neutral[600],
+              "&:hover": {
+                color: theme.palette.neutral[100],
+              },
             }}
           />
         )}
@@ -144,6 +160,9 @@ export const PrevFood = ({
             sx={{
               fontSize: "30px",
               color: (theme) => theme.palette.neutral[600],
+              "&:hover": {
+                color: theme.palette.neutral[100],
+              },
             }}
           />
         ) : (
@@ -151,6 +170,9 @@ export const PrevFood = ({
             sx={{
               fontSize: "30px",
               color: (theme) => theme.palette.neutral[600],
+              "&:hover": {
+                color: theme.palette.neutral[100],
+              },
             }}
           />
         )}
@@ -158,4 +180,3 @@ export const PrevFood = ({
     </ButtonContainer>
   );
 };
-

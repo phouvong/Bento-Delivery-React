@@ -4,5 +4,5 @@ export const appleLoginCredential = {
   appleId: "",
   serviceId: "",
   privateKey: "",
-  redirectURI: ``,
+  redirectURI: `k`,
 };

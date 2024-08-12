@@ -21,10 +21,11 @@ const CustomImageContainer = ({
   smWidth,
   aspectRatio,
   padding,
+  boxShadow,
 }) => {
   const [imageFile, setState] = useState(null);
   useEffect(() => {
-    setState(src);
+    setState(src ? src : placeholder.src);
   }, [src]);
 
   return (

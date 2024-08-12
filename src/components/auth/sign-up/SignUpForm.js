@@ -22,7 +22,6 @@ const SignUpForm = ({
 }) => {
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
   const theme = useTheme();
-
   return (
     <NoSsr>
       <CustomStackFullWidth alignItems="center" spacing={{ xs: 3, md: 4 }}>

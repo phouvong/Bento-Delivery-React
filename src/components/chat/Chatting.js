@@ -9,7 +9,6 @@ import { alpha, Stack } from "@mui/material";
 import EmptyView from "./EmptyView";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useRouter } from "next/router";
-
 import { useTheme } from "@mui/material/styles";
 import ConversationInfoTop from "./ConversationInfoTop";
 import LoadingBox from "./LoadingBox";

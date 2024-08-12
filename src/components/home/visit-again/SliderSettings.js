@@ -39,8 +39,8 @@ const ButtonContainer = styled(Box)(
     background: noboxshadow
       ? "inherit"
       : right === "true"
-        ? "linear-gradient(270deg, rgba(75, 86, 107, 0.15) 0%, rgba(75, 86, 107, 0) 100%)"
-        : "linear-gradient(to right, rgba(75, 86, 107, 0.15) 0%, rgba(75, 86, 107, 0) 100%)",
+      ? "linear-gradient(270deg, rgba(75, 86, 107, 0.15) 0%, rgba(75, 86, 107, 0) 100%)"
+      : "linear-gradient(to right, rgba(75, 86, 107, 0.15) 0%, rgba(75, 86, 107, 0) 100%)",
 
     zIndex: 1,
     right: right === "true" && 0,
@@ -215,14 +215,14 @@ export const settings = {
     {
       breakpoint: 450,
       settings: {
-        slidesToShow: 1.6,
+        slidesToShow: 1.8,
         slidesToScroll: 1,
       },
     },
     {
       breakpoint: 400,
       settings: {
-        slidesToShow: 1.5,
+        slidesToShow: 1.7,
         slidesToScroll: 1,
       },
     },

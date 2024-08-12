@@ -1,5 +1,6 @@
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import DirectionsIcon from "@mui/icons-material/Directions";
 import {
   alpha,
   Grid,
@@ -194,15 +195,15 @@ const Top = (props) => {
           };
         case ModuleTypes.PHARMACY:
           return {
-            bgColor: theme.palette.info.custom1,
+            bgColor: theme.palette.primary.main,
           };
         case ModuleTypes.ECOMMERCE:
           return {
-            bgColor: theme.palette.info.blue,
+            bgColor: theme.palette.primary.main,
           };
         case ModuleTypes.FOOD:
           return {
-            bgColor: theme.palette.moduleTheme.food,
+            bgColor: theme.palette.primary.main,
           };
       }
     } else {
@@ -401,7 +402,6 @@ const Top = (props) => {
                 </CustomBoxFullWidth>
               </CustomBoxFullWidth>
             </CustomBoxFullWidth>
-
             <CustomBoxFullWidth
               sx={{
                 // backdropFilter: "blur(10px)",
@@ -650,6 +650,14 @@ const Top = (props) => {
                           </RoundedIconButton>
                         </Tooltip>
                       )}
+
+                      <Box mt="10px">
+                        <Tooltip title={"Location"} arrow placement={"bottom"}>
+                          <RoundedIconButton onClick={openMapHandler}>
+                            <DirectionsIcon color="primary" />
+                          </RoundedIconButton>
+                        </Tooltip>
+                      </Box>
                     </Grid>
                   </Grid>
                 </CustomBoxFullWidth>
@@ -783,6 +791,7 @@ const Top = (props) => {
           latitude={storeDetails?.latitude}
           longitude={storeDetails?.longitude}
           address={storeDetails?.address}
+          storeDetails={storeDetails}
         />
       )}
     </>

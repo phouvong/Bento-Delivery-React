@@ -62,7 +62,7 @@ export const PrimaryButton = styled(Button)(
       : theme.palette.primary.main,
     "&:hover": {
       backgroundColor: theme.palette.primary.dark,
-      color: theme.palette.neutral[100],
+      // color: theme.palette.neutral[100],
     },
   })
 );

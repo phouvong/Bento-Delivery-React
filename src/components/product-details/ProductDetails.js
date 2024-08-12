@@ -1,12 +1,10 @@
-import React, { useState } from "react";
-import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
+import React, { useEffect, useState } from "react";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { Grid } from "@mui/material";
 import ProductDetailsSection from "./product-details-section/ProductDetailsSection";
-
 import StoreDetails from "./StoreDetails";
 import ProductsMoreFromTheStore from "./ProductsMoreFromTheStore";
 import FeaturedStores from "../home/module-wise-components/pharmacy/featured-stores";
-
 import DetailsAndReviews from "./details-and-reviews/DetailsAndReviews";
 import SinglePoster from "../home/module-wise-components/ecommerce/SinglePoster";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,6 +14,7 @@ import { addWishList, removeWishListItem } from "redux/slices/wishList";
 import toast from "react-hot-toast";
 import { not_logged_in_message } from "utils/toasterMessages";
 import { t } from "i18next";
+import useGetStoreDetails from "api-manage/hooks/react-query/store/useGetStoreDetails";
 
 const ProductDetails = ({ productDetailsData, configData }) => {
   const storeImageBaseUrl = configData?.base_urls?.store_image_url;
@@ -24,6 +23,14 @@ const ProductDetails = ({ productDetailsData, configData }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const { mutate: addFavoriteMutation } = useAddToWishlist();
   const { mutate } = useWishListDelete();
+  const { data: storeData, refetch } = useGetStoreDetails(
+    productDetailsData?.store_id
+  );
+  useEffect(() => {
+    if (productDetailsData?.store_id) {
+      refetch();
+    }
+  }, []);
   const addToWishlistHandler = (e) => {
     e.stopPropagation();
     let token = undefined;
@@ -69,7 +76,7 @@ const ProductDetails = ({ productDetailsData, configData }) => {
       paddingBottom="2.5rem"
       sx={{ minHeight: "100vh" }}
     >
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         <Grid item xs={12} md={8}>
           <CustomStackFullWidth spacing={5}>
             <ProductDetailsSection
@@ -85,12 +92,19 @@ const ProductDetails = ({ productDetailsData, configData }) => {
               reviews={productDetailsData?.reviews}
               productId={productDetailsData?.id}
             />
+            <CustomStackFullWidth>
+              <FeaturedStores
+                slide="3"
+                title="Popular Store"
+                configData={configData}
+              />
+            </CustomStackFullWidth>
           </CustomStackFullWidth>
         </Grid>
         <Grid item xs={12} md={4}>
           <CustomStackFullWidth spacing={3}>
             <StoreDetails
-              storeDetails={productDetailsData?.store_details}
+              storeDetails={productDetailsData?.store_details ?? storeData}
               storeImageBaseUrl={storeImageBaseUrl}
             />
             <ProductsMoreFromTheStore productDetails={productDetailsData} />
@@ -103,9 +117,9 @@ const ProductDetails = ({ productDetailsData, configData }) => {
         <Grid item xs={12}>
           <SinglePoster />
         </Grid>
-        <Grid item xs={12}>
-          <FeaturedStores title="Popular Store" configData={configData} />
-        </Grid>
+        {/*<Grid item xs={12}>*/}
+        {/*  <FeaturedStores title="Popular Store" configData={configData} />*/}
+        {/*</Grid>*/}
         {/*<Grid item xs={12}>*/}
         {/*  <DiscountedProductRedirectBanner />*/}
         {/*</Grid>*/}

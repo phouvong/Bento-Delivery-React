@@ -12,7 +12,10 @@ const Wrapper = styled("div")(({ theme }) => ({
   width: "100%",
   padding: theme.spacing(2),
   backgroundColor: theme.palette.background.default,
-  boxShadow: "0px -2px 4px rgba(0, 0, 0, 0.1)",
+  boxShadow:
+    theme.palette.mode === "dark"
+      ? "0px -2px 4px rgb(223 223 223 / 10%)"
+      : "0px -2px 4px rgba(0, 0, 0, 0.1)",
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",

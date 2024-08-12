@@ -2,20 +2,24 @@ import {
   Checkbox,
   FormControlLabel,
   Grid,
+  Skeleton,
   Stack,
+  Tooltip,
   Typography,
 } from "@mui/material";
+import InfoIcon from "@mui/icons-material/Info";
 import { useTheme } from "@mui/material/styles";
 import { alpha, Box } from "@mui/system";
 import {
   getAmountWithSign,
   getReferDiscount,
 } from "helper-functions/CardHelpers";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { setTotalAmount } from "redux/slices/cart";
 import {
+  bad_weather_fees,
   getCalculatedTotal,
   getCouponDiscount,
   getDeliveryFees,
@@ -27,6 +31,7 @@ import {
 import CustomDivider from "../../CustomDivider";
 import { CalculationGrid, TotalGrid } from "../CheckOut.style";
 import { getToken } from "helper-functions/getToken";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 
 const OrderCalculation = (props) => {
   const {
@@ -57,12 +62,14 @@ const OrderCalculation = (props) => {
     packagingCharge,
     customerData,
     initVauleEx,
+    isLoading,
   } = props;
 
   const token = getToken();
   const { t } = useTranslation();
   const [freeDelivery, setFreeDelivery] = useState("false");
   const { profileInfo } = useSelector((state) => state.profileInfo);
+  const tempExtraCharge = extraCharge ?? 0;
   const theme = useTheme();
   let couponType = "coupon";
   const handleDeliveryFee = () => {
@@ -77,7 +84,7 @@ const OrderCalculation = (props) => {
       zoneData,
       origin,
       destination,
-      extraCharge
+      tempExtraCharge
     );
     setDeliveryFee(orderType === "delivery" ? 0 : price);
     if (price === 0) {
@@ -169,6 +176,15 @@ const OrderCalculation = (props) => {
     "cashback. The minimum purchase required to avail this offer is"
   );
   const text3 = t("However, the maximum cashback amount is");
+  const extraText = t("This charge includes extra vehicle charge");
+  const badText = t("and bad weather charge");
+  const deliveryToolTipsText = `${extraText} ${getAmountWithSign(
+    tempExtraCharge
+  )}${
+    bad_weather_fees !== 0
+      ? ` ${badText} ${getAmountWithSign(bad_weather_fees)}`
+      : ""
+  }`;
   return (
     <>
       <CalculationGrid container item md={12} xs={12} spacing={1} mt="1rem">
@@ -364,36 +380,106 @@ const OrderCalculation = (props) => {
             </Grid>
           </>
         ) : null}
-        {orderType === "delivery" || orderType === "schedule_order" ? (
+        {
           <>
-            <Grid item md={8} xs={8} sx={{ textTransform: "capitalize" }}>
-              {t("Delivery fee")}
-            </Grid>
-            <Grid item md={4} xs={4} align="right">
-              {couponDiscount ? (
-                couponDiscount?.coupon_type === "free_delivery" ? (
-                  <Typography>{t("Free")}</Typography>
-                ) : (
-                  storeData && handleDeliveryFee()
-                )
-              ) : (
-                storeData && handleDeliveryFee()
-              )}
-            </Grid>
+            {isLoading ? (
+              <CustomStackFullWidth
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                sx={{ paddingInlineStart: "5px" }}
+              >
+                <Skeleton variant="text" width="50px" />
+                <Skeleton variant="text" width="50px" />
+              </CustomStackFullWidth>
+            ) : (
+              <>
+                {orderType === "delivery" || orderType === "schedule_order" ? (
+                  <>
+                    <Grid
+                      item
+                      md={8}
+                      xs={8}
+                      sx={{ textTransform: "capitalize" }}
+                    >
+                      <Typography component="span" align="center">
+                        {t("Delivery fee")}
+                        {Number.parseInt(storeData?.self_delivery_system) !==
+                          1 && (
+                          <Typography component="span">
+                            <Tooltip
+                              title={deliveryToolTipsText}
+                              placement="top"
+                              arrow={true}
+                            >
+                              <InfoIcon sx={{ fontSize: "11px" }} />
+                            </Tooltip>
+                          </Typography>
+                        )}
+                      </Typography>
+                    </Grid>
+                    <Grid item md={4} xs={4} align="right">
+                      {couponDiscount ? (
+                        couponDiscount?.coupon_type === "free_delivery" ? (
+                          <Typography>{t("Free")}</Typography>
+                        ) : (
+                          storeData && handleDeliveryFee()
+                        )
+                      ) : (
+                        storeData && handleDeliveryFee()
+                      )}
+                    </Grid>
+                  </>
+                ) : null}
+              </>
+            )}
           </>
-        ) : null}
+        }
+
         <CustomDivider border="1px" />
         <TotalGrid container md={12} xs={12} mt="1rem">
-          <Grid item md={8} xs={8} pl=".5rem">
-            <Typography fontWeight="bold" color={theme.palette.primary.main}>
-              {t("Total")}
-            </Typography>
-          </Grid>
-          <Grid item md={4} xs={4} align="right">
-            <Typography color={theme.palette.primary.main} align="right">
-              {storeData && cartList && getAmountWithSign(finalTotalAmount)}
-            </Typography>
-          </Grid>
+          {isLoading ? (
+            <CustomStackFullWidth
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ paddingInlineStart: "5px" }}
+            >
+              <Skeleton variant="text" width="50px" />
+              <Skeleton variant="text" width="50px" />
+            </CustomStackFullWidth>
+          ) : (
+            <>
+              <Grid
+                item
+                md={8}
+                xs={8}
+                sx={{
+                  textTransform: "capitalize",
+                  fontWeight: "700",
+                  color: (theme) => theme.palette.primary.main,
+                  paddingInlineStart: "7px",
+                }}
+              >
+                {t("Total")}
+              </Grid>
+              <Grid item md={4} xs={4} align="right">
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="flex-end"
+                  spacing={0.5}
+                >
+                  <Typography color={theme.palette.primary.main} align="right">
+                    {" "}
+                    {storeData &&
+                      cartList &&
+                      getAmountWithSign(finalTotalAmount)}
+                  </Typography>
+                </Stack>
+              </Grid>
+            </>
+          )}
         </TotalGrid>
         {usePartialPayment && payableAmount > walletBalance ? (
           <>

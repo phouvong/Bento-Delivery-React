@@ -29,7 +29,7 @@ const CategoryInformation = (props) => {
       {categories?.length > 0 && (
         <Stack direction="row" alignItems="center" spacing={0.5}>
           <Typography fontSize={{ xs: "14px", md: "16px" }}>
-            {"Category:"}
+            {t("Category:")}
           </Typography>
           {categories?.map((item, index) => {
             return (

@@ -26,6 +26,7 @@ import {
 } from "api-manage/hooks/react-query/useGetVisitAgain";
 import useGetNewArrivalStores from "api-manage/hooks/react-query/store/useGetNewArrivalStores";
 import { getModuleId } from "helper-functions/getModuleId";
+import PaidAds from "components/home/paid-ads";
 
 const menus = ["All", "Beauty", "Bread & Juice", "Drinks", "Milks"];
 const Grocery = (props) => {
@@ -81,7 +82,7 @@ const Grocery = (props) => {
           <FeaturedCategories configData={configData} />
         </CustomContainer>
       </Grid>
-      <Grid item xs={12} mb={3}>
+      <Grid item xs={12} mb={3} sx={{ display: token ? "" : "none" }}>
         {IsSmallScreen() ? (
           <VisitAgain
             configData={configData}
@@ -98,7 +99,11 @@ const Grocery = (props) => {
           </CustomContainer>
         )}
       </Grid>
-
+      <Grid item xs={12} mb={3}>
+        <CustomContainer>
+          <PaidAds />
+        </CustomContainer>
+      </Grid>
       <Grid item xs={12}>
         <CustomContainer>
           <PopularItemsNearby
@@ -162,7 +167,9 @@ const Grocery = (props) => {
         </CustomContainer>
       </Grid>
       <Grid item xs={12}>
-        <PromotionalBanner bannerData={data} />
+        <CustomContainer>
+          <PromotionalBanner bannerData={data} />
+        </CustomContainer>
       </Grid>
 
       <Grid item xs={12}>

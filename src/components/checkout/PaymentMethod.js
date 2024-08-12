@@ -19,6 +19,7 @@ const PaymentMethod = ({
   usePartialPayment,
   setPaymentMethodImage,
   setSwitchToWallet,
+  isZoneDigital,
 }) => {
   return (
     <CustomStackFullWidth spacing={2} p={parcel === "true" ? "0px" : "25px"}>
@@ -49,6 +50,7 @@ const PaymentMethod = ({
           offlinePaymentOptions={offlinePaymentOptions}
           setPaymentMethodImage={setPaymentMethodImage}
           setSwitchToWallet={setSwitchToWallet}
+          isZoneDigital={isZoneDigital}
         />
       )}
     </CustomStackFullWidth>

@@ -19,7 +19,7 @@ const InstructionBox = ({ title, note }) => {
         {t(title)}
       </Typography>
       <NoteStyledBox>
-        <Typography fontSize="14px" color={theme.palette.neutral[400]}>
+        <Typography fontSize="14px" color={theme.palette.neutral[600]}>
           {note}
         </Typography>
       </NoteStyledBox>

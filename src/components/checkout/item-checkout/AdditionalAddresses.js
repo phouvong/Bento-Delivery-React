@@ -63,10 +63,10 @@ const AdditionalAddresses = (props) => {
   };
   return (
     // eslint-disable-next-line react/jsx-no-undef
-    <CustomStackFullWidth mt="1rem">
-      <CustomStackFullWidth mt=".5rem">
+    <CustomStackFullWidth>
+      <CustomStackFullWidth>
         <FormGroup>
-          <Grid container spacing={{ xs: 1, sm: 2, md: 3 }}>
+          <Grid container spacing={{ xs: 1, sm: 2, md: 2 }}>
             <Grid item xs={12}>
               <CustomTextField
                 label={t("Street number")}

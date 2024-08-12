@@ -200,7 +200,6 @@ export const getCouponDiscount = (couponDiscount, storeData, cartList) => {
       switch (couponDiscount.coupon_type) {
         case "zone_wise":
           let zoneId = JSON.parse(localStorage.getItem("zoneid"));
-
           if (
             Number.parseInt(zoneId[0]) ===
             Number.parseInt(couponDiscount.zoneId[0])
@@ -709,7 +708,7 @@ export const getInfoFromZoneData = (zoneData) => {
   }
   return chargeInfo;
 };
-
+export let bad_weather_fees = 0;
 const getDeliveryFeeByBadWeather = (
   charge,
   increasedDeliveryFee,
@@ -717,7 +716,9 @@ const getDeliveryFeeByBadWeather = (
 ) => {
   const totalCharge = charge;
   if (increasedDeliveryFeeStatus === 1) {
-    return totalCharge + totalCharge * (increasedDeliveryFee / 100);
+    const tempValue = totalCharge * (increasedDeliveryFee / 100);
+    bad_weather_fees = tempValue;
+    return totalCharge + tempValue;
   } else {
     return totalCharge;
   }
@@ -1079,7 +1080,6 @@ export const removeDuplicates = (array, property) => {
     return false;
   });
 };
-
 export const getImageUrl = (storage, imageType, configData) => {
   if (!configData) return null;
   const storageMapping = {
@@ -1126,5 +1126,20 @@ export const getHomePageBannerImageUrl = (storage, imageType, bannerData) => {
       bannerData?.why_choose_s3_url ||
       bannerData?.banner_video_content_s3_url
     );
+  }
+};
+export const removeSpecialCharacters = (inputString) => {
+  // Define the pattern for special characters
+  const pattern = /[^a-zA-Z0-9\s]/g;
+
+  // Use the replace method to remove special characters
+  return inputString?.replace(pattern, "");
+};
+export const getDigitalMethodFromZone = (storeId, zoneData) => {
+  if (zoneData?.zone_data?.length > 0) {
+    const zone = zoneData?.zone_data?.find((item) => item?.id === storeId);
+    if (store) {
+      return zone;
+    }
   }
 };

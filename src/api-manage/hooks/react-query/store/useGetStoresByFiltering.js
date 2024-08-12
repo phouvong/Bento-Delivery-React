@@ -4,19 +4,20 @@ import { useInfiniteQuery, useQuery } from "react-query";
 import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
 
 const getData = async (pageParams) => {
-  const { offset, limit, type, pageParam } = pageParams;
+  const { offset, limit, type, pageParam, filteredData } = pageParams;
   const { data } = await MainApi.get(
     `${filtered_stores_api}/${
       type === "take away" ? "take_away" : type
-    }?offset=${pageParam}&limit=${limit}`
+    }?offset=${pageParam}&limit=${limit}&store_type=${filteredData}`
   );
   return data;
 };
 
 export default function useGetStoresByFiltering(pageParams) {
-  const { offset, limit, type } = pageParams;
+  const { offset, limit, type, filteredData } = pageParams;
+
   return useInfiniteQuery(
-    ["all stores", type, pageParams?.currentTab],
+    [type, pageParams?.currentTab, filteredData, offset],
     ({ pageParam = 1 }) => getData({ ...pageParams, pageParam }),
     {
       getNextPageParam: (lastPage, allPages) => {

@@ -12,9 +12,13 @@ import { settings } from "./SliderSettings";
 import { Skeleton } from "@mui/material";
 import SpecialOfferCardShimmer from "../../../../Shimmer/SpecialOfferCardSimmer";
 import { getImageUrl } from "utils/CustomFunctions";
+import {
+  WhiteNext,
+  WhitePrev,
+} from "components/home/visit-again/SliderSettings";
 
 const FeaturedStores = (props) => {
-  const { title, configData } = props;
+  const { title, configData, slide } = props;
   const type = "all";
   const offset = 1;
   const page_limit = 20;
@@ -39,6 +43,71 @@ const FeaturedStores = (props) => {
     }
   }
 
+  const settings = {
+    dots: false,
+    infinite: false,
+    speed: 500,
+    slidesToShow: slide ?? 4,
+    slidesToScroll: 1,
+    nextArrow: <WhiteNext />,
+    prevArrow: <WhitePrev />,
+    responsive: [
+      {
+        breakpoint: 1450,
+        settings: {
+          slidesToShow: 4,
+          slidesToScroll: 3,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 1250,
+        settings: {
+          slidesToShow: 3.5,
+          slidesToScroll: 2,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 2,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 700,
+        settings: {
+          slidesToShow: 2.5,
+          slidesToScroll: 2,
+          initialSlide: 2,
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 479,
+        settings: {
+          slidesToShow: 1.7,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 420,
+        settings: {
+          slidesToShow: 1.3,
+          slidesToScroll: 1,
+        },
+      },
+    ],
+  };
+
   return (
     <HomeComponentsWrapper>
       {isLoading ? (
@@ -46,7 +115,7 @@ const FeaturedStores = (props) => {
           <Skeleton width="200px" />
           <Slider {...settings}>
             {[...Array(6)].map((item, index) => {
-              return <SpecialOfferCardShimmer key={index} width={290} />;
+              return <SpecialOfferCardShimmer key={index} width="290px" />;
             })}
           </Slider>
         </CustomStackFullWidth>

@@ -215,11 +215,11 @@ const OrderSummery = (props) => {
             >
               <CustomStackFullWidth
                 direction={{ xs: "column", md: "row" }}
-                spacing={2}
                 sx={{
                   flexWrap: "wrap",
                   justifyContent: "space-between",
                   padding: { xs: "0px , 20px", md: "0px 25px" },
+                  gap: { xs: "10px", md: "0px" },
                 }}
               >
                 <Stack spacing={1}>
@@ -377,27 +377,7 @@ const OrderSummery = (props) => {
                     }}
                   ></Stack>
                 )}
-                {trackOrderData?.unavailable_item_note && (
-                  <Stack spacing={1}>
-                    <Typography
-                      fontSize={{ xs: "14px", md: "16px" }}
-                      fontWeight="500"
-                      textTransform="capitalize"
-                    >
-                      {t("Unavailable item Note")}
-                    </Typography>
-                    <Typography
-                      fontSize={{ xs: "12px", md: "14px" }}
-                      fontWeight="400"
-                      color={theme.palette.neutral[500]}
-                      width="215px"
-                      lineHeight="25px"
-                      textTransform="capitalize"
-                    >
-                      {trackOrderData?.unavailable_item_note}
-                    </Typography>
-                  </Stack>
-                )}
+
                 {trackOrderData?.cutlery && (
                   <Stack
                     spacing={1}
@@ -431,6 +411,12 @@ const OrderSummery = (props) => {
               md={12}
               pl={{ xs: "0px", sm: "20px", md: "25px" }}
             >
+              {trackOrderData?.unavailable_item_note && (
+                <InstructionBox
+                  title="Unavailable item Note"
+                  note={trackOrderData?.unavailable_item_note}
+                />
+              )}
               {trackOrderData?.delivery_instruction && (
                 <InstructionBox
                   title="delivery instruction"

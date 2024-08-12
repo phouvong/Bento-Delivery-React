@@ -25,6 +25,7 @@ import SinglePoster from "./SinglePoster";
 import { useGetVisitAgain } from "api-manage/hooks/react-query/useGetVisitAgain";
 import useGetNewArrivalStores from "api-manage/hooks/react-query/store/useGetNewArrivalStores";
 import { getModuleId } from "helper-functions/getModuleId";
+import PaidAds from "components/home/paid-ads";
 
 const Shop = (props) => {
   const { configData } = props;
@@ -99,6 +100,11 @@ const Shop = (props) => {
             />
           </CustomContainer>
         )}
+      </Grid>
+      <Grid item sm={12}>
+        <CustomContainer>
+          <PaidAds />
+        </CustomContainer>
       </Grid>
       <Grid item xs={12}>
         <CustomContainer>

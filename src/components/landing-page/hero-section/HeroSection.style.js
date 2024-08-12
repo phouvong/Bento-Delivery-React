@@ -8,17 +8,25 @@ export const CustomSearchField = styled(Paper)(({ theme }) => ({
   border: "none",
 }));
 export const SearchLocationTextField = styled(TextField)(
-  ({ theme, language_direction, frommap, fromparcel, margin_top, isLanding,isXSmall }) => ({
+  ({
+    theme,
+    language_direction,
+    frommap,
+    fromparcel,
+    margin_top,
+    isLanding,
+    isXSmall,
+  }) => ({
     width: "100%",
     backgroundColor: theme.palette.neutral[100],
     height: "56px",
-    borderRadius : (isXSmall && isLanding) ? "4px": "0 0 4px 4px",
+    borderRadius: isXSmall && isLanding ? "4px" : "0 0 4px 4px",
     border: "none",
     "& .MuiOutlinedInput-notchedOutline": {
       border: "none",
     },
     "& .MuiOutlinedInput-root": {
-      color: theme.palette.primary.main,
+      //color: theme.palette.primary.main,
       fontSize: "14px",
       fontSize: fromparcel === "true" && "12px",
       padding: fromparcel === "true" && "5px",
@@ -52,6 +60,9 @@ export const SearchLocationTextField = styled(TextField)(
       //   border: "1px solid red",
       //   paddingRight: isLanding && "110px"
       // },
+      "& .MuiInputBase-input::placeholder": {
+        opacity: theme.palette.mode === "dark" ? ".8" : "10",
+      },
     },
   })
 );
@@ -98,20 +109,14 @@ export const CustomTypography = styled(Typography)(
     textAlign: align ? align : "",
   })
 );
-export const HeroFormInputWrapper = styled(Stack)(
-  ({ theme }) => ({
-    flexDirection: "row",
-    position: "relative"
-  })
-);
-export const HeroFormItem = styled(Stack)(
-  ({ theme }) => ({
-    flexDirection: "row",
-    position: "absolute",
-    marginRight:"5px",
-    top: "0",
-    right: "0"
-  })
-);
-
-
+export const HeroFormInputWrapper = styled(Stack)(({ theme }) => ({
+  flexDirection: "row",
+  position: "relative",
+}));
+export const HeroFormItem = styled(Stack)(({ theme }) => ({
+  flexDirection: "row",
+  position: "absolute",
+  marginRight: "5px",
+  top: "0",
+  right: "0",
+}));

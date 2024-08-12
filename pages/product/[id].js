@@ -5,8 +5,10 @@ import ProductDetails from "../../src/components/product-details/ProductDetails"
 import { useSelector } from "react-redux";
 import SEO from "../../src/components/seo";
 import CustomContainer from "../../src/components/container";
+import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 
 const Index = ({ configData, productDetailsData, landingPageData }) => {
+  useScrollToTop();
   const { cartList, campaignItem } = useSelector((state) => state.cart);
   const [productDetails, setProductDetails] = useState([]);
 
@@ -22,9 +24,10 @@ const Index = ({ configData, productDetailsData, landingPageData }) => {
         );
 
         if (isExist) {
-          let tempData={
-            ...isExist,store_details:productDetailsData?.store_details
-          }
+          let tempData = {
+            ...isExist,
+            store_details: productDetailsData?.store_details,
+          };
           setProductDetails([tempData]);
         } else {
           setProductDetails([productDetailsData]);

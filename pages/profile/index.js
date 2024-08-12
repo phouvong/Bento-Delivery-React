@@ -53,11 +53,7 @@ const Index = ({ configData, landingPageData }) => {
       <CssBaseline />
       <SEO
         title={configData ? `Profile` : "Loading..."}
-        image={`${getImageUrl(
-          { value: configData?.logo_storage },
-          "business_logo_url",
-          configData
-        )}/${configData?.fav_icon}`}
+        image={configData?.fav_icon_full_url}
         businessName={configData?.business_name}
         configData={configData}
       />

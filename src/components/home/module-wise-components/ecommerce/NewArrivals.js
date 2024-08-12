@@ -25,6 +25,7 @@ const NewArrivals = ({ bannerData }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const isMedium = useMediaQuery(theme.breakpoints.only("sm"));
+
   useEffect(() => {
     refetch();
   }, []);
@@ -83,7 +84,7 @@ const NewArrivals = ({ bannerData }) => {
                 {isLoading ? (
                   <Skeleton varient="text" width="110px" />
                 ) : (
-                  <H2 text="New Arrivals" />
+                  <>{data?.products ? <H2 text="New Arrivals" /> : null}</>
                 )}
                 <ScrollBox>
                   {isLoading ? (
@@ -126,7 +127,7 @@ const NewArrivals = ({ bannerData }) => {
           {isLoading ? (
             <Skeleton varient="text" width="110px" />
           ) : (
-            <H2 text="New Arrivals" />
+            <>{data?.products ? <H2 text="New Arrivals" /> : null}</>
           )}
           <CustomStackFullWidth
             justifyContent="center"
@@ -137,7 +138,8 @@ const NewArrivals = ({ bannerData }) => {
               {isLoading ? (
                 <MenuSimmer count={12} />
               ) : (
-                menu?.length > 0 && (
+                menu?.length > 0 &&
+                data?.categories?.length > 0 && (
                   <TabMenu
                     selectedMenuIndex={selectedMenuIndex}
                     setSelectedMenuIndex={setSelectedMenuIndex}

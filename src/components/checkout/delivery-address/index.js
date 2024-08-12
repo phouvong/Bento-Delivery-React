@@ -49,7 +49,6 @@ const DeliveryAddress = ({
   const [editAddress, setEditAddress] = useState(null);
   const token = localStorage.getItem("token");
 
-
   const saveAddressModalClose = () => {
     setOpenSaveAddress(false);
   };
@@ -97,7 +96,6 @@ const DeliveryAddress = ({
       house: state?.houseNumber,
       floor: state?.floor,
       road: state?.streetNumber,
-
     };
     mutate(formData, {
       onSuccess: (response) => {
@@ -180,17 +178,18 @@ const DeliveryAddress = ({
               </IconButton>
             </Stack>
           ) : (
-            <>{!token &&
-              <Stack>
-                <CheckoutSelectedAddressGuest
-                  address={address}
-                  configData={configData}
-                  editAddress={editAddress}
-                  setEditAddress={setEditAddress}
-                  orderType={orderType}
-                />
-              </Stack>
-            }
+            <>
+              {!token && (
+                <Stack>
+                  <CheckoutSelectedAddressGuest
+                    address={address}
+                    configData={configData}
+                    editAddress={editAddress}
+                    setEditAddress={setEditAddress}
+                    orderType={orderType}
+                  />
+                </Stack>
+              )}
             </>
           )}
         </>

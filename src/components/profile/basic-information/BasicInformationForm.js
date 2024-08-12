@@ -282,6 +282,7 @@ const BasicInformationForm = ({
           </Grid>
           <Grid item md={6} xs={12}>
             <TextField
+              disabled
               label={
                 <span>
                   {t("Phone")}{" "}

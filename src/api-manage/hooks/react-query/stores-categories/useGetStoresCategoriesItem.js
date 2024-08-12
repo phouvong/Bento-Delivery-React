@@ -60,7 +60,7 @@ const getData = async (pageParams) => {
 
 export default function useGetStoresCategoriesItem(pageParams, handleSuccess) {
   return useInfiniteQuery(
-    ["stores-categories-item", pageParams.offset],
+    ["stores-categories-item", pageParams.offset, pageParams.storeId],
     () => getData(pageParams),
     {
       // enabled: false,

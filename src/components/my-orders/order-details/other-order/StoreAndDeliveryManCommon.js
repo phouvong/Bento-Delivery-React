@@ -50,7 +50,7 @@ const StoreAndDeliveryManCommon = ({
             ml="9px"
             paddingLeft="9px"
             sx={{
-              textDecoration: "underLine",
+              //textDecoration: "underLine",
               borderLeft: "2px solid",
               borderColor: (theme) => alpha(theme.palette.neutral[400], 0.4),
               color: (theme) => alpha(theme.palette.neutral[600], 0.9),

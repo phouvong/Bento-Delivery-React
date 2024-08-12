@@ -87,11 +87,12 @@ const ContactLists = ({
   return (
     <CustomStackFullWidth>
       {channelList?.length > 0 && (
-        <SimpleBar style={{ maxHeight: "60vh" }}>
+        <SimpleBar style={{ maxHeight: selectedId ? "430px" : "270px" }}>
           <List disablePadding>
             {channelList?.map(
               (item, index) =>
-                item?.receiver_type == activeTab && (
+                (item?.receiver_type == activeTab ||
+                  item?.sender_type == activeTab) && (
                   <CustomListItem
                     key={index}
                     disableGutters

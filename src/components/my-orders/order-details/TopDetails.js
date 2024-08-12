@@ -192,7 +192,13 @@ const TopDetails = (props) => {
     dispatch(setOrderDetailsModal(false));
     setOpenModelOffline(false);
   };
-
+  const capitalizeText = (text) => {
+    if (!text) return "";
+    return text
+      .toLowerCase()
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  };
   return (
     // <HeadingBox>
     <CustomStackFullWidth
@@ -234,7 +240,7 @@ const TopDetails = (props) => {
                 fontWeight: "600",
               }}
             >
-              {trackData?.order_status?.replace(/_/g, " ")}
+              {capitalizeText(trackData?.order_status)}
             </Typography>
             <Typography
               component="span"
@@ -249,7 +255,7 @@ const TopDetails = (props) => {
                 fontWeight: "600",
               }}
             >
-              {trackData?.order_type?.replace("_", " ")}
+              {capitalizeText(trackData?.order_type)}
             </Typography>
           </Typography>
         )}

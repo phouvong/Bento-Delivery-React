@@ -8,6 +8,7 @@ import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { NoSsr } from "@mui/material";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import { useSelector } from "react-redux";
 
 const CustomPhoneNumberInputStyled = styled(PhoneInput)(
   ({ theme, languageDirection, borderRadius }) => ({
@@ -109,7 +110,7 @@ const CustomPhoneInput = ({
   const changeHandler = (e) => {
     onHandleChange(e);
   };
-
+  const { configData } = useSelector((state) => state.configData);
   const { t } = useTranslation();
   const defaultCountry = initCountry?.toLowerCase();
   return (
@@ -138,6 +139,9 @@ const CustomPhoneInput = ({
             }}
             languageDirection={lanDirection}
             buttonClass={{ "background-color": "red" }}
+            {...(configData?.country_picker_status !== 1 && {
+              disableDropdown: true,
+            })}
           />
         )}
         {touched && errors && (

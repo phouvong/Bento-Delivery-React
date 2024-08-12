@@ -5,11 +5,11 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import {
   UserProfileTab,
   UserProfileTabs,
-} from "../../styled-components/CustomStyles.style";
+} from "styled-components/CustomStyles.style";
 import { t } from "i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { useRouter } from "next/router";
-import { getToken } from "../../helper-functions/getToken";
+import { getToken } from "helper-functions/getToken";
 import DeleteAccount from "./DeleteAccount";
 import CustomModal from "../modal";
 
@@ -82,15 +82,17 @@ const ProfileTab = ({
                   marginright={marginright}
                   fontSize={fontSize}
                   item={item}
-                  page={page}
+                  page={page.split("?")[0]}
                   onClick={() => handleClick(item)}
                   value={page}
                   borderRadius={borderRadius}
                 >
                   <Typography
-                    fontWeight={item?.name === page ? "600" : "400"}
+                    fontWeight={
+                      item?.name === page.split("?")[0] ? "600" : "400"
+                    }
                     color={
-                      item?.name === page
+                      item?.name === page.split("?")[0]
                         ? theme.palette.primary.main
                         : theme.palette.neutral[400]
                     }
@@ -103,7 +105,7 @@ const ProfileTab = ({
                     fontSize={{
                       xs: "12px",
                       md:
-                        item?.name === page
+                        item?.name === page.split("?")[0]
                           ? "16px"
                           : fontSize
                           ? fontSize

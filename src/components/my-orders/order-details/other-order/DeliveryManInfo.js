@@ -48,7 +48,7 @@ const DeliveryManInfo = ({ configData, deliveryManData, storeData }) => {
               image={deliveryManData?.image_full_url}
               fromDelivery="true"
             />
-            {getToken() && hasChatAndReview(storeData?.store)?.isChat === 1 && (
+            {getToken() && hasChatAndReview(storeData)?.isChat === 1 && (
               <StoreChatButton
                 variant="contained"
                 startIcon={!isSmall && <MessageSvg />}

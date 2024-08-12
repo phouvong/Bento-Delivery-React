@@ -21,7 +21,7 @@ import DeliveryImage from "./svg-components/deliveryImage";
 
 export const CustomButton = styled(Button)(({ theme, boxshadow }) => ({
   backgroundColor: theme.palette.primary.main,
-//   width: "150px",
+  //   width: "150px",
   height: "45px",
   borderRadius: "30px",
   boxShadow: "0px 4px 60px rgba(3, 157, 85, 0.2)",
@@ -77,7 +77,10 @@ const ComponentOne = ({ landingPageData, configData, handleOrderNow }) => {
                       text={landingPageData?.company_title}
                     />
                   </Typography>
-                  <Typography variant={isSmall ? "h6" : "h4"}>
+                  <Typography
+                    variant={isSmall ? "h6" : "h4"}
+                    sx={{ opacity: ".9" }}
+                  >
                     <DollarSignHighlighter
                       theme={theme}
                       text={landingPageData?.company_sub_title}

@@ -40,7 +40,7 @@ const PaymentMethodCard = (props) => {
     setPaymentMethod(type);
     if (!parcel) {
       setPaymentMethodImage(
-        digitalPaymentMethodActive ? `${imageUrl}/${image}` : image.src
+        digitalPaymentMethodActive ? `${image}` : image.src
       );
     }
     dispatch(setOfflineMethod(""));
@@ -52,7 +52,7 @@ const PaymentMethodCard = (props) => {
     return (
       <Stack
         direction="row"
-        gap="16px"
+        gap="8px"
         alignItems="center"
         paddingLeft={{ xs: "5px", sm: "5px", md: "15px" }}
       >

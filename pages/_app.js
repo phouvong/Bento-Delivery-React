@@ -20,6 +20,7 @@ import Router from "next/router";
 import { persistStore } from "redux-persist";
 import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
+import useScrollRestoration from "api-manage/hooks/custom-hooks/useSCrollRestoration";
 
 Router.events.on("routeChangeStart", nProgress.start);
 Router.events.on("routeChangeError", nProgress.done);
@@ -55,6 +56,7 @@ function MyApp(props) {
       localStorage.setItem("appVersion", currentVersion); // Update stored version
     }
   }, []);
+  useScrollRestoration();
   return (
     <>
       <CacheProvider value={emotionCache}>

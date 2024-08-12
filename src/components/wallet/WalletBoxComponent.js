@@ -13,10 +13,13 @@ import Router from "next/router";
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import * as Yup from "yup";
-import { onErrorResponse } from "../../api-manage/api-error-response/ErrorResponses";
-import { useAddFundToWallet } from "../../api-manage/hooks/react-query/payment-method/useAddFundToWallet";
-import { getAmountWithSign } from "../../helper-functions/CardHelpers";
-import { CustomButtonSuccess } from "../../styled-components/CustomButtons.style";
+import {
+  handleTokenExpire,
+  onErrorResponse,
+} from "api-manage/api-error-response/ErrorResponses";
+import { useAddFundToWallet } from "api-manage/hooks/react-query/payment-method/useAddFundToWallet";
+import { getAmountWithSign } from "helper-functions/CardHelpers";
+import { CustomButtonSuccess } from "styled-components/CustomButtons.style";
 import {
   CustomStackFullWidth,
   RoundedStack,
@@ -28,6 +31,8 @@ import walletIcon from "./assets/wallet-icon.png";
 import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { getLanguage } from "../../helper-functions/getLanguage";
+import "simplebar-react/dist/simplebar.min.css";
+import SimpleBar from "simplebar-react";
 
 const validationSchema = Yup.object({
   amount: Yup.string().required("Please Enter amount"),
@@ -45,12 +50,12 @@ const WalletBoxComponent = (props) => {
   } = props;
   const theme = useTheme();
   const [open, setOpen] = useState(false);
+  const [isFocus, setFocus] = useState(false);
   const [loading, setLoading] = useState(false);
   const { configData } = useSelector((state) => state?.configData);
   const [value, setValue] = useState(
     configData?.active_payment_method_list[0]?.gateway
   );
-
   const base_url = configData?.base_urls?.gateway_image_url;
 
   const formik = useFormik({
@@ -84,12 +89,18 @@ const WalletBoxComponent = (props) => {
         const url = response?.redirect_link;
         Router.push(url);
       },
-      onError: onErrorResponse,
+      onError: (error) => {
+        error?.response?.data?.errors?.forEach((item) => {
+          handleTokenExpire(item);
+        });
+        setLoading(false);
+      },
     });
   };
 
   const handleClose = () => {
     setOpen(false);
+    setFocus(false);
   };
 
   if (title === "Total points") {
@@ -181,7 +192,12 @@ const WalletBoxComponent = (props) => {
                 marginTop: "-35px",
               }}
             >
-              <Image src={walletIcon.src} width="110" height="110" />
+              <Image
+                alt="wallet_image"
+                src={walletIcon.src}
+                width="110"
+                height="110"
+              />
             </Box>
             <Stack>
               <Typography
@@ -300,19 +316,20 @@ const WalletBoxComponent = (props) => {
               onChange={formik.handleChange}
               error={formik.touched.amount && Boolean(formik.errors.amount)}
               helpertext={formik.touched.amount && formik.errors.amount}
+              onFocus={() => setFocus(true)}
             />
-            <Box mt={3}>
-              <Typography variant="body1" fontWeight="600" mb={2}>
-                {t("Payment Methods")}
-                <Typography
-                  variant="body1"
-                  component="span"
-                  sx={{ fontSize: "12px" }}
-                >
-                  ({t("Faster & secure way to pay bill")})
+            <SimpleBar style={{ maxHeight: "300px" }}>
+              <Box mt={3}>
+                <Typography variant="body1" fontWeight="600" mb={2}>
+                  {t("Payment Methods")}
+                  <Typography
+                    variant="body1"
+                    component="span"
+                    sx={{ fontSize: "12px" }}
+                  >
+                    ({t("Faster & secure way to pay bill")})
+                  </Typography>
                 </Typography>
-              </Typography>
-              {formik.values.amount > 0 && (
                 <>
                   <Stack>
                     {configData?.active_payment_method_list?.map((item, i) => (
@@ -369,8 +386,8 @@ const WalletBoxComponent = (props) => {
                     ))}
                   </Stack>
                 </>
-              )}
-            </Box>
+              </Box>
+            </SimpleBar>
             <Box mt={4}>
               <CustomButtonSuccess
                 width="100%"

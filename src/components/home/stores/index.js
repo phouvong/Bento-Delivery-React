@@ -31,7 +31,12 @@ import PopularStores from "./PopularStores";
 import TopRatedStores from "./TopRatedStores";
 import { t } from "i18next";
 
-const menus = ["All", "Newly Joined", "Popular", "Top Rated"];
+const menus = [
+  { label: "All", value: "all" },
+  { label: "Newly Joined", value: "newly_joined" },
+  { label: "Popular", value: "popular" },
+  { label: "Top Rated", value: "top_rated" },
+];
 const filterLabels = [
   { label: "All", value: "all" },
   { label: "Delivery", value: "delivery" },
@@ -109,6 +114,7 @@ const Filter = (props) => {
 const Stores = (props) => {
   const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
   const [selectedFilterValue, setSelectedFilterValue] = useState("all");
+  const [filteredData, setFilteredData] = useState("all");
   const [totalDataCount, setTotalDataCount] = useState(null);
   const { configData } = useSelector((state) => state.configData);
   const theme = useTheme();
@@ -116,7 +122,7 @@ const Stores = (props) => {
   const stores = t("Stores");
   const handleSelectedMenuIndex = (value) => {
     setSelectedMenuIndex(value);
-    setSelectedFilterValue("all");
+    //setSelectedFilterValue("all");
   };
 
   const desktopScreenHandler = () => {
@@ -131,6 +137,7 @@ const Stores = (props) => {
           selectedMenuIndex={selectedMenuIndex}
           setSelectedMenuIndex={handleSelectedMenuIndex}
           menus={menus}
+          setFilteredData={setFilteredData}
         />
         <Filter
           selectedFilterValue={selectedFilterValue}
@@ -151,45 +158,45 @@ const Stores = (props) => {
     );
   };
 
-  const handleStoresLayout = useCallback(() => {
-    if (selectedMenuIndex === 0) {
-      return (
-        <AllStores
-          selectedFilterValue={selectedFilterValue}
-          configData={configData}
-          totalDataCount={totalDataCount}
-          setTotalDataCount={setTotalDataCount}
-        />
-      );
-    } else if (selectedMenuIndex === 1) {
-      return (
-        <NewlyJoined
-          selectedFilterValue={selectedFilterValue}
-          configData={configData}
-          totalDataCount={totalDataCount}
-          setTotalDataCount={setTotalDataCount}
-        />
-      );
-    } else if (selectedMenuIndex === 2) {
-      return (
-        <PopularStores
-          selectedFilterValue={selectedFilterValue}
-          configData={configData}
-          totalDataCount={totalDataCount}
-          setTotalDataCount={setTotalDataCount}
-        />
-      );
-    } else {
-      return (
-        <TopRatedStores
-          selectedFilterValue={selectedFilterValue}
-          configData={configData}
-          totalDataCount={totalDataCount}
-          setTotalDataCount={setTotalDataCount}
-        />
-      );
-    }
-  }, [selectedMenuIndex, selectedFilterValue]);
+  // const handleStoresLayout = useCallback(() => {
+  //   if (selectedMenuIndex === 0) {
+  //     return (
+  //       <AllStores
+  //         selectedFilterValue={selectedFilterValue}
+  //         configData={configData}
+  //         totalDataCount={totalDataCount}
+  //         setTotalDataCount={setTotalDataCount}
+  //       />
+  //     );
+  //   } else if (selectedMenuIndex === 1) {
+  //     return (
+  //       <NewlyJoined
+  //         selectedFilterValue={selectedFilterValue}
+  //         configData={configData}
+  //         totalDataCount={totalDataCount}
+  //         setTotalDataCount={setTotalDataCount}
+  //       />
+  //     );
+  //   } else if (selectedMenuIndex === 2) {
+  //     return (
+  //       <PopularStores
+  //         selectedFilterValue={selectedFilterValue}
+  //         configData={configData}
+  //         totalDataCount={totalDataCount}
+  //         setTotalDataCount={setTotalDataCount}
+  //       />
+  //     );
+  //   } else {
+  //     return (
+  //       <TopRatedStores
+  //         selectedFilterValue={selectedFilterValue}
+  //         configData={configData}
+  //         totalDataCount={totalDataCount}
+  //         setTotalDataCount={setTotalDataCount}
+  //       />
+  //     );
+  //   }
+  // }, [selectedMenuIndex, selectedFilterValue]);
   return (
     <HomeComponentsWrapper sx={{ paddingTop: "1rem" }}>
       <CustomStackFullWidth
@@ -214,12 +221,18 @@ const Stores = (props) => {
         {isSmall ? mobileScreenHandler() : desktopScreenHandler()}
       </CustomStackFullWidth>
       <CustomBoxFullWidth
-        key={selectedFilterValue}
+        key={`${filteredData}${selectedFilterValue}`}
         sx={{
           minHeight: "20vh",
         }}
       >
-        {handleStoresLayout()}
+        <AllStores
+          selectedFilterValue={selectedFilterValue}
+          configData={configData}
+          totalDataCount={totalDataCount}
+          setTotalDataCount={setTotalDataCount}
+          filteredData={filteredData}
+        />
       </CustomBoxFullWidth>
     </HomeComponentsWrapper>
   );

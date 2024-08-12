@@ -12,18 +12,27 @@ import DotSpin from "../../DotSpin";
 
 const AllStores = (props) => {
   const theme = useTheme();
-  const { selectedFilterValue, configData, totalDataCount, setTotalDataCount } =
-    props;
+  const {
+    selectedFilterValue,
+    configData,
+    totalDataCount,
+    setTotalDataCount,
+    filteredData,
+  } = props;
   const [offset, setOffSet] = useState(1);
   const [page_limit, setPage_Limit] = useState(12);
   const [storeData, setStoreData] = useState([]);
+  const [convertFilterText, setConvertText] = useState("all");
   const { ref, inView } = useInView();
   const prevSelectedFilter = useRef();
+  const preFilterData = useRef();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+
   const pageParams = {
     type: selectedFilterValue,
     offset,
     limit: page_limit,
+    filteredData,
   };
   const {
     data,
@@ -33,20 +42,26 @@ const AllStores = (props) => {
     isLoading,
     hasNextPage,
   } = useGetStoresByFiltering(pageParams);
+  // useEffect(() => {
+  //   refetch();
+  // }, [convertFilterText]);
 
   useEffect(() => {
     setOffSet(1);
-  }, [selectedFilterValue]);
+  }, [selectedFilterValue, filteredData]);
   const handleAPiCallOnSuccess = (item) => {
     setTotalDataCount(item.total_size);
-    if (selectedFilterValue === prevSelectedFilter?.current) {
+    if (
+      filteredData === preFilterData.current ||
+      selectedFilterValue === prevSelectedFilter?.current
+    ) {
       setStoreData((prev) =>
         removeDuplicates([...new Set([...prev, ...item?.stores])], "id")
       );
     } else {
       setStoreData(item?.stores);
     }
-
+    preFilterData.current = filteredData;
     prevSelectedFilter.current = selectedFilterValue;
   };
 
@@ -67,7 +82,7 @@ const AllStores = (props) => {
       //   setOffSet((prevState) => prevState + 1);
       // }
     }
-  }, [inView, selectedFilterValue]);
+  }, [inView, selectedFilterValue, filteredData]);
   // useEffect(() => {
   //   if (offset === 1) {
   //     refetch();
@@ -80,6 +95,7 @@ const AllStores = (props) => {
     <CustomBoxFullWidth>
       <Grid container spacing={2}>
         {storeData?.length > 0 &&
+          !isLoading &&
           storeData?.map((item, index) => {
             return (
               <Grid key={index} item xs={12} sm={6} md={3}>

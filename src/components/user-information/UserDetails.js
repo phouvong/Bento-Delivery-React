@@ -34,7 +34,6 @@ const UserDetails = ({
   const handleOpenPopover = () => {
     setOpenPopover(true);
   };
-
   return (
     <>
       <Stack

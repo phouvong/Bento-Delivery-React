@@ -59,7 +59,7 @@ const ProfileStatistics = ({
           borderRadius="50%"
         >
           <CustomImageContainer
-            src={title === "Days Since Joining" ? image : image}
+            src={image}
             width="20px"
             height="20px"
             alt="join"

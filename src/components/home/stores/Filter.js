@@ -62,7 +62,6 @@ const Filter = (props) => {
   const midpoint = Math.ceil(dataWithoutPrice.length / 2);
   const firstHalf = dataWithoutPrice.slice(0, midpoint + 1);
   const secondHalf = dataWithoutPrice.slice(midpoint + 1);
-
   return (
     <div>
       <Button

@@ -174,6 +174,7 @@ const NewArrivalStores = () => {
                 )}
               </CustomStackFullWidth>
               <SliderWrapper
+                float="left"
                 sx={{
                   "& .slick-slide": {
                     paddingRight: { xs: "10px", sm: "20px" },

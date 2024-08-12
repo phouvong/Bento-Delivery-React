@@ -124,10 +124,10 @@ export const CardWrapper = styled(Card)(
       `1px solid ${alpha(theme.palette.moduleTheme.food, 0.1)}`,
 
     "&:hover": {
-      boxShadow: ` 0px 10px 20px 0px ${alpha(
-        theme.palette.neutral[1000],
-        0.1
-      )}`,
+      boxShadow:
+        theme.palette.mode !== "dark"
+          ? ` 0px 10px 20px 0px ${alpha(theme.palette.neutral[1000], 0.1)}`
+          : "0px 10px 20px 0px rgba(88, 110, 125, 0.10)",
       img: {
         transform: "scale(1.05)",
       },
@@ -225,7 +225,6 @@ const ProductCard = (props) => {
     pharmaCommon,
     noRecommended,
   } = props;
-
   const [state, dispatch] = useReducer(reducer, initialState);
   const [openModal, setOpenModal] = React.useState(false);
   const [openLocationAlert, setOpenLocationAlert] = useState(false);

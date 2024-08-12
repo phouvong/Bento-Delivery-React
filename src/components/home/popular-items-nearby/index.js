@@ -17,15 +17,15 @@ import ProductCardSimmerHorizontal from "../../Shimmer/ProductCardSimmerHorizont
 import CampaignSimmerTimmer from "../../Shimmer/CampaignSimmerTimmer";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
-import { setPopularItemsNearby } from "../../../redux/slices/storedData";
+import { setPopularItemsNearby } from "redux/slices/storedData";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
   SliderCustom,
-} from "../../../styled-components/CustomStyles.style";
+} from "styled-components/CustomStyles.style";
 import { NextFood, PrevFood } from "../best-reviewed-items/SliderSettings";
-import { useGetFlashSales } from "../../../api-manage/hooks/react-query/useGetFlashSales";
-import { getLanguage } from "../../../helper-functions/getLanguage";
+import { useGetFlashSales } from "api-manage/hooks/react-query/useGetFlashSales";
+import { getLanguage } from "helper-functions/getLanguage";
 
 const PopularItemsNearby = ({ title, subTitle }) => {
   const { popularItemsNearby } = useSelector((state) => state.storedData);
@@ -52,7 +52,7 @@ const PopularItemsNearby = ({ title, subTitle }) => {
 
   useEffect(() => {
     flashSalesRefetch();
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (data) {
@@ -74,7 +74,7 @@ const PopularItemsNearby = ({ title, subTitle }) => {
     } else {
       return true;
     }
-  }
+  };
 
   const settings = {
     dots: false,
@@ -170,7 +170,7 @@ const PopularItemsNearby = ({ title, subTitle }) => {
           <CustomStackFullWidth
             alignItems="center"
             justyfyContent="center"
-            mt="30px"
+            mt={{ xs: "10x", md: "16px" }}
             spacing={1}
           >
             {isLoading ? (
