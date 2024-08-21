@@ -46,7 +46,7 @@ const SearchResult = (props) => {
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
   const [filterValue, setFilterValue] = useState([]);
   //const [rating_count, setRatingCount] = useState(0);
-  const [minMax, setMinMax] = useState([0, 20000]);
+  const [minMax, setMinMax] = useState([0, 2000000]);
   const [type, setType] = useState("all");
   const [category_id, setCategoryId] = useState(id);
   const [sortBy, setSortBy] = useState("high2Low");
@@ -63,6 +63,7 @@ const SearchResult = (props) => {
     dispatch(setSelectedCategories(data_type === "category" ? [id] : []));
     ///dispatch(setStoreSelectedItems(data_type === "category" ? [id] : []));
   }, []);
+  useEffect(() => {}, []);
 
   const page_limit = 12;
 
