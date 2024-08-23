@@ -1,8 +1,8 @@
 export const lao = {
   "Valid till": "ໃຊ້ໄດ້ເຖິງ",
   get: "ເອົາ",
-  Sold: "ຂາຍແບ້ວ",
-  "Whats New": "What's New",
+  Sold: "ຂາຍແລ້ວ",
+  "Whats New": "ມີຫຍັງມາໃໝ່",
   "Cash On Delivery": "ເກັບປາຍທາງ",
   "Your account is inactive or Your token has been expired":
     "Your account is inactive or Your token has been expired",
