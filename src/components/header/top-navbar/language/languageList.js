@@ -16,12 +16,12 @@ export const languageList = [
     countryCode: "LA",
     countryFlag: loFlag.src,
   },
-  // {
-  //   languageName: "Spanish",
-  //   languageCode: "es",
-  //   countryCode: "es",
-  //   countryFlag: spain.src,
-  // },
+  //{
+    //languageName: "Spanish",
+    //languageCode: "es",
+    //countryCode: "es",
+    //countryFlag: spain.src,
+  //},
   //{
   //  languageName: "Arabic",
   //  languageCode: "ar",
