@@ -7,13 +7,13 @@ import {
 	onMessage,
 } from "firebase/messaging";
 const firebaseConfig = {
-	apiKey: "",
-	authDomain: "",
-	projectId: "",
-	storageBucket: "",
-	messagingSenderId: "",
-	appId: "",
-	measurementId: "",
+	apiKey: "AIzaSyBV4ueEuzRBy0Yehx-OvUi68pHznhGnT0E",
+	authDomain: "bento-delivery-service.firebaseapp.com",
+	projectId: "bento-delivery-service",
+	storageBucket: "bento-delivery-service.appspot.com",
+	messagingSenderId: "787586896333",
+	appId: "1:787586896333:web:f6fead1c4225e3e0c6b484",
+	measurementId: "G-HP95SH6F7R",
 };
 const firebaseApp = !getApps().length
 	? initializeApp(firebaseConfig)
@@ -32,7 +32,7 @@ const messaging = (async () => {
 
 export const fetchToken = async (setTokenFound, setFcmToken) => {
 	return getToken(await messaging, {
-		vapidKey: "",
+		vapidKey: "EjQtyzBKuKjholh6KNQdzbXdXewm7npbrvsotqXDpXcBEIApsXNfm8bousboQqDUM0MSk4kR3VNv2I-3jbdrxgYxTAeqiNMM8dakFkYubdgfEkoFfmU-Mx47XBASHp8Z2Q",
 	})
 		.then((currentToken) => {
 			if (currentToken) {
