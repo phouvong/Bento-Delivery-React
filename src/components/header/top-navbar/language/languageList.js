@@ -7,7 +7,13 @@ export const languageList = [
     languageName: "English",
     languageCode: "en",
     countryCode: "US",
-    countryFlag: usFlag.src,
+    countryFlag: english.png,
+  },
+  {
+    languageName: "ພາສາລາວ",
+    languageCode: "lo",
+    countryCode: "LA",
+    countryFlag: Loading.png,
   },
   // {
   //   languageName: "Spanish",
@@ -15,12 +21,12 @@ export const languageList = [
   //   countryCode: "es",
   //   countryFlag: spain.src,
   // },
-  {
-    languageName: "Arabic",
-    languageCode: "ar",
-    countryCode: "SA",
-    countryFlag: arabicFlag.src,
-  },
+  //{
+  //  languageName: "Arabic",
+    //languageCode: "ar",
+    //countryCode: "SA",
+    //countryFlag: arabicFlag.src,
+  //},
   // {
   //   languageName: "Bengali",
   //   languageCode: "bn",
