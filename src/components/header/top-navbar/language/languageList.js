@@ -10,7 +10,7 @@ export const languageList = [
     countryFlag: english.png,
   },
   {
-    languageName: "ພາສາລາວ",
+    languageName: "Lao",
     languageCode: "lo",
     countryCode: "LA",
     countryFlag: lao.png,

@@ -1,4 +1,4 @@
-export const english = {
+export const lao = {
   "Valid till": "Valid till",
   get: "get",
   Sold: "Sold",
