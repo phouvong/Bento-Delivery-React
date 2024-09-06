@@ -6,7 +6,15 @@ import RoomIcon from "@mui/icons-material/Room";
 import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import { t } from "i18next";
 
-const DeliveryInfoCard = ({ title, name, phone, address }) => {
+const DeliveryInfoCard = ({
+  title,
+  name,
+  phone,
+  address,
+  houseNumber,
+  floor,
+  roadNumber,
+}) => {
   const theme = useTheme();
   return (
     <CustomStackFullWidth spacing={0.5}>
@@ -45,6 +53,9 @@ const DeliveryInfoCard = ({ title, name, phone, address }) => {
             {address}
           </Typography>
         </Stack>
+        <Typography fontSize="12px" color={theme.palette.neutral[500]}>
+          Road: {roadNumber ?? 0} House : {houseNumber ?? 0},Floor: {floor ?? 0}
+        </Typography>
       </Stack>
     </CustomStackFullWidth>
   );

@@ -17,7 +17,7 @@ import useGetTrackOrderData from "../../api-manage/hooks/react-query/order/useGe
 import { useDispatch } from "react-redux";
 
 const TrackOrderInput = ({ configData }) => {
-  const dispatch=useDispatch()
+  const dispatch = useDispatch();
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const trackOrderFormik = useFormik({
     initialValues: {
@@ -29,7 +29,7 @@ const TrackOrderInput = ({ configData }) => {
         dispatch(setGuestUserInfo(values));
         setShowOrderDetails(true);
         refetchTrackOrder();
-       
+
         //dispatch(setTrackContactNumber(values));
         // handleClose();
       } catch (err) {}
@@ -40,7 +40,7 @@ const TrackOrderInput = ({ configData }) => {
     trackOrderFormik.setFieldValue("order_id", value);
   };
   const numberHandler = (value) => {
-    trackOrderFormik.setFieldValue("contact_person_number", value);
+    trackOrderFormik.setFieldValue("contact_person_number", `+${value}`);
   };
   const guestId = getGuestId();
   const {
@@ -57,7 +57,7 @@ const TrackOrderInput = ({ configData }) => {
   //     refetchTrackOrder();
   //   }
   // }, [trackOrderFormik?.values?.order_id]);
-
+  console.log(trackOrderFormik?.values?.contact_person_number);
   return (
     <CustomStackFullWidth pt="40px" spacing={2}>
       <CustomPaperBigCard>

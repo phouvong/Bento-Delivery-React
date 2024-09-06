@@ -51,9 +51,7 @@ const DeliveryManInfoCard = ({ deliveryManInfo }) => {
   return (
     <ColorCard direction="row">
       <Stack direction="row" spacing={1.5}>
-        <Avatar
-          src={`${configData?.base_urls?.delivery_man_image_url}/${deliveryManInfo?.image}`}
-        />
+        <Avatar src={deliveryManInfo?.image_full_url} />
         <Stack>
           <Typography>{name}</Typography>
           <Typography fontSize="13px" color={theme.palette.neutral[500]}>

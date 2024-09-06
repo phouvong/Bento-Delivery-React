@@ -31,13 +31,18 @@ const Menus = (props) => {
   };
   const handleClose = (index, itemValue) => {
     setAnchorEl(null);
-    setFilteredData(itemValue?.value);
+    if (itemValue?.value) {
+      setFilteredData(itemValue?.value);
+    }
     if (typeof index === "number") {
       setSelectedMenuIndex(index);
     }
   };
   const handleTabChange = (index, value) => {
-    setFilteredData(value?.value);
+    console.log({ value });
+    if (value?.value) {
+      setFilteredData(value?.value);
+    }
     setSelectedMenuIndex(index);
   };
   const SmallScreen = () => (

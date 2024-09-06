@@ -2,10 +2,11 @@ import MainApi from "../../../MainApi";
 import { track_order_api } from "../../../ApiRoutes";
 import { useQuery } from "react-query";
 import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
-import {getToken} from "../../../../helper-functions/getToken";
+import { getToken } from "../../../../helper-functions/getToken";
 
 const getData = async (order_id, phone, guestId) => {
-  const userToken=getToken()
+  console.log({ phone });
+  const userToken = getToken();
   try {
     const params = !userToken
       ? `?order_id=${order_id}&guest_id=${guestId}&contact_number=${phone}`

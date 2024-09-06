@@ -253,6 +253,7 @@ const FooterMiddle = (props) => {
           latitude={configData?.default_location?.lat}
           longitude={configData?.default_location?.lng}
           address={configData?.address}
+          isFooter
         />
       )}
     </CustomStackFullWidth>

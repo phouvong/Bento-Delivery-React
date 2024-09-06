@@ -92,6 +92,7 @@ const ItemCheckout = (props) => {
     props;
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
+  const [enabled, setEnabled] = useState(cartList?.length ? true : false);
   const [check, setCheck] = React.useState(null);
   const [orderType, setOrderType] = useState("delivery");
   const [payableAmount, setPayableAmount] = useState(null);
@@ -99,13 +100,12 @@ const ItemCheckout = (props) => {
   const { couponInfo } = useSelector((state) => state.profileInfo);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [numberOfDay, setDayNumber] = useState(getDayNumber(today));
-  const [couponDiscount, setCouponDiscount] = useState(null);
   const [offlinePayments, setOfflinePayments] = useState("");
+  const [couponDiscount, setCouponDiscount] = useState(null);
   const [scheduleAt, setScheduleAt] = useState("now");
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [taxAmount, setTaxAmount] = useState(0);
   const [total_order_amount, setTotalOrderAmount] = useState(0);
-  const [enabled, setEnabled] = useState(cartList?.length ? true : false);
   const [deliveryTip, setDeliveryTip] = useState(0);
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [isImageSelected, setIsImageSelected] = useState([]);
