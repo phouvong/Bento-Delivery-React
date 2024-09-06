@@ -12,8 +12,15 @@ import { useGeolocated } from "react-geolocated";
 import GpsFixedIcon from "@mui/icons-material/GpsFixed";
 
 const LocationViewOnMap = (props) => {
-  const { open, handleClose, latitude, longitude, address, storeDetails } =
-    props;
+  const {
+    open,
+    handleClose,
+    latitude,
+    longitude,
+    address,
+    storeDetails,
+    isFooter,
+  } = props;
   const theme = useTheme();
   const [userLocation, setUserLocation] = useState({});
   const [rerenderMap, setRerenderMap] = useState(false);
@@ -76,32 +83,36 @@ const LocationViewOnMap = (props) => {
           <CloseIcon sx={{ fontSize: "16px" }} />
         </IconButton>
         <CustomStackFullWidth>
-          <Stack mb="10px">
-            <CustomImageContainer
-              src={storeDetails?.cover_photo_full_url}
-              objectfit="cover"
-              height="200px"
-            />
-            <Stack mt="10px" direction="row" justifyContent="space-between">
-              <Stack>
-                <Typography fontSize="18px" fontWeight={500}>
-                  {storeDetails?.name}
-                </Typography>
-                <Typography fontSize="14px" fontWeight={500}>
-                  {address}
-                </Typography>
+          {!isFooter && (
+            <Stack mb="10px">
+              <CustomImageContainer
+                src={storeDetails?.cover_photo_full_url}
+                objectfit="cover"
+                height="200px"
+              />
+              <Stack mt="10px" direction="row" justifyContent="space-between">
+                <Stack>
+                  <Typography fontSize="18px" fontWeight={500}>
+                    {storeDetails?.name}
+                  </Typography>
+                  <Typography fontSize="14px" fontWeight={500}>
+                    {address}
+                  </Typography>
+                </Stack>
+                <RoundedIconButton onClick={openGoogleMaps}>
+                  <DirectionsIcon color="primary" />
+                </RoundedIconButton>
               </Stack>
-              <RoundedIconButton onClick={openGoogleMaps}>
-                <DirectionsIcon color="primary" />
-              </RoundedIconButton>
             </Stack>
-          </Stack>
+          )}
+
           <Stack position="relative">
             <MapComponent
               latitude={latitude}
               longitude={longitude}
               deliveryManLat={userLocation?.lat}
               deliveryManLng={userLocation?.lng}
+              isFooter={isFooter}
             />
             <RoundedIconButton
               sx={{

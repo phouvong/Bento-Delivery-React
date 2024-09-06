@@ -23,7 +23,7 @@ import DeliveryManInfoCard from "../../../checkout/parcel/DeliveryManInfo";
 import ParcelTrackOderStepper from "../../../parcel/ParcelTrackOderStepper";
 import useGetTrackOrderData from "../../../../api-manage/hooks/react-query/order/useGetTrackOrderData";
 import CustomEmptyResult from "../../../custom-empty-result";
-import { getGuestId } from "../../../../helper-functions/getToken";
+import { getGuestId, getToken } from "../../../../helper-functions/getToken";
 import { getAmountWithSign } from "../../../../helper-functions/CardHelpers";
 import emptyImage from "../../../../assets/img/fi_10608837 (2).png";
 import { CustomCloseIconButton } from "../../../added-cart-view/Cart.style";
@@ -45,6 +45,7 @@ const TrackParcelOrderDrawer = (props) => {
   const [actStep, setActStep] = useState(1);
   const guestId = getGuestId();
   const phone = phoneOrEmail;
+  console.log({ phone });
 
   const handleSuccess = (res) => {
     setOrderData(res);
@@ -168,7 +169,7 @@ const TrackParcelOrderDrawer = (props) => {
                 position="absolute"
                 bottom="-80px"
                 width="280px"
-                left={{ xs: "5%", sm: "8%", md: "13%" }}
+                left={{ xs: "5%", sm: "8%", md: "16%" }}
               >
                 <CustomPaperBigCard padding="10px">
                   <CustomStackFullWidth
@@ -257,7 +258,7 @@ const TrackParcelOrderDrawer = (props) => {
               </Typography>
             </CustomStackFullWidth>
           </CustomStackFullWidth>
-          {trackOrderData?.delivery_man && (
+          {trackOrderData?.delivery_man && getToken() && (
             <DeliveryManInfoCard
               deliveryManInfo={trackOrderData?.delivery_man}
             />

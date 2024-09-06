@@ -1,16 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
-import { Button, Card, Typography, useTheme } from "@mui/material";
+import {
+  alpha,
+  Button,
+  Card,
+  InputAdornment,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { Stack } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import CustomTextFieldWithFormik from "../../form-fields/CustomTextFieldWithFormik";
-import PinDropIcon from '@mui/icons-material/PinDrop';
+import PinDropIcon from "@mui/icons-material/PinDrop";
 import SaveAddress from "../../SaveAddress";
 import GetLocationFrom from "./GetLocationFrom";
 import MapModal from "../../Map/MapModal";
 import CustomPhoneInput from "../../custom-component/CustomPhoneInput";
 import { getLanguage } from "helper-functions/getLanguage";
 import { getToken } from "helper-functions/getToken";
+import { t } from "i18next";
+import MailIcon from "@mui/icons-material/Mail";
 
 const SenderInfoForm = ({
   addAddressFormik,
@@ -25,6 +34,7 @@ const SenderInfoForm = ({
   senderRoadHandler,
   senderHouseHandler,
   senderFloorHandler,
+  senderEmailHandler,
 }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
@@ -70,9 +80,11 @@ const SenderInfoForm = ({
       <Card sx={{ padding: "1.2rem", height: "100%" }}>
         <CustomStackFullWidth spacing={2}>
           <Stack align="center" width="100%">
-            <Typography fontWeight={500} fontSize="16px">{t("Sender Information")}</Typography>
+            <Typography fontWeight={500} fontSize="16px">
+              {t("Sender Information")}
+            </Typography>
           </Stack>
-          <CustomStackFullWidth alignItems="center" spacing={2}>
+          <CustomStackFullWidth alignItems="center" spacing={3}>
             <CustomStackFullWidth alignItems="center">
               <CustomTextFieldWithFormik
                 required="true"
@@ -85,6 +97,15 @@ const SenderInfoForm = ({
                 value={addAddressFormik.values.senderName}
               />
             </CustomStackFullWidth>
+            <CustomTextFieldWithFormik
+              required
+              label={t("Email")}
+              touched={addAddressFormik.touched.senderEmail}
+              errors={addAddressFormik.errors.senderEmail}
+              fieldProps={addAddressFormik.getFieldProps("senderEmail")}
+              onChangeHandler={senderEmailHandler}
+              value={addAddressFormik.values.senderEmail}
+            />
             <CustomStackFullWidth alignItems="center">
               <CustomPhoneInput
                 value={addAddressFormik.values.senderPhone}

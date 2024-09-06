@@ -63,6 +63,7 @@ const MapComponent = (props) => {
     deliveryManLat,
     deliveryManLng,
     isStore,
+    isFooter,
   } = props;
   const theme = useTheme();
   const lineColor = theme.palette.primary.main;
@@ -199,7 +200,8 @@ const MapComponent = (props) => {
                 suppressMarkers: true,
                 polylineOptions: {
                   strokeColor: lineColor, // Customize the route path color
-                  strokeWeight: 4, // Customize the route path thickness
+                  strokeWeight: isFooter ? 0 : 4, // Customize the route path
+                  // thickness
                 },
               }}
               directions={directionsResponse}
@@ -217,31 +219,33 @@ const MapComponent = (props) => {
             >
               <CustomImageContainer src={ddd.src} width="40px" height="40px" />
             </OverlayView>
-            <OverlayView
-              position={{
-                lat: directionsResponse.routes[0].legs[0].end_location.lat(),
-                lng: directionsResponse.routes[0].legs[0].end_location.lng(),
-              }}
-              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-              getPixelPositionOffset={(width, height) => ({
-                x: -width / 2,
-                y: -height / 1.5,
-              })}
-            >
-              {isStore ? (
-                <StoreIcon
-                  sx={{
-                    color: (theme) => theme.palette.error.main,
-                    width: "40px",
-                    height: "40px",
-                    background: (theme) => theme.palette.neutral[100],
-                    borderRadius: "50%",
-                  }}
-                />
-              ) : (
-                <DeliveryManMapMarker />
-              )}
-            </OverlayView>
+            {isFooter ? null : (
+              <OverlayView
+                position={{
+                  lat: directionsResponse.routes[0].legs[0].end_location.lat(),
+                  lng: directionsResponse.routes[0].legs[0].end_location.lng(),
+                }}
+                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
+                getPixelPositionOffset={(width, height) => ({
+                  x: -width / 2,
+                  y: -height / 1.5,
+                })}
+              >
+                {isStore ? (
+                  <StoreIcon
+                    sx={{
+                      color: (theme) => theme.palette.error.main,
+                      width: "40px",
+                      height: "40px",
+                      background: (theme) => theme.palette.neutral[100],
+                      borderRadius: "50%",
+                    }}
+                  />
+                ) : (
+                  <DeliveryManMapMarker />
+                )}
+              </OverlayView>
+            )}
           </>
         ) : (
           <Marker

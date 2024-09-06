@@ -62,6 +62,11 @@ const SenderOrReceiverDetails = (props) => {
             />
             <Typography fontSize="12px">{phone}</Typography>
           </Stack>
+          <Typography fontSize="12px">
+            {props.road ? `Floor: ${props.road}, ` : ""}
+            {props.house ? `House: ${props.house}, ` : ""}
+            {props.floor ? `Floor: ${props.floor}, ` : ""}
+          </Typography>
         </Stack>
       </Stack>
     </Stack>

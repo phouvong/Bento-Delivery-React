@@ -1,6 +1,6 @@
 import React from "react";
 import { Stack } from "@mui/system";
-import { Typography } from "@mui/material";
+import { TextField, Typography } from "@mui/material";
 import {
   CustomPaperBigCard,
   CustomStackFullWidth,
@@ -9,6 +9,8 @@ import { t } from "i18next";
 import DeliveryFree from "./DeliveryFree";
 import DeliveryManTip from "./DeliveryManTip";
 import ChangePayBy from "./ChangePayBy";
+import { DeliveryCaption } from "components/checkout/CheckOut.style";
+import { getToken } from "helper-functions/getToken";
 
 const Billing = ({
   deliveryTip,
@@ -22,12 +24,18 @@ const Billing = ({
   receiverLocation,
   configData,
   extraChargeLoading,
+  setGuestUserEmail,
+  emailError,
+  guestUserEmail,
+  handleEmailChange,
 }) => {
   return (
     <CustomPaperBigCard>
       <CustomStackFullWidth spacing={4}>
         <Stack align="center">
-          <Typography fontWeight={500} fontSize="16px">{t("Billing")}</Typography>
+          <Typography fontWeight={500} fontSize="16px">
+            {t("Billing")}
+          </Typography>
         </Stack>
         <DeliveryFree
           data={data}
@@ -37,6 +45,7 @@ const Billing = ({
           configData={configData}
           extraChargeLoading={extraChargeLoading}
         />
+
         <DeliveryManTip
           parcel="true"
           deliveryTip={deliveryTip}
@@ -47,6 +56,20 @@ const Billing = ({
           setPaidBy={setPaidBy}
           zoneData={zoneData}
         />
+        {/*{!getToken() ? (*/}
+        {/*  <Stack width="100%" spacing={1}>*/}
+        {/*    <DeliveryCaption>{t("Guest user email")}</DeliveryCaption>*/}
+        {/*    <TextField*/}
+        {/*      value={guestUserEmail}*/}
+        {/*      type="email"*/}
+        {/*      name="email"*/}
+        {/*      label={t("Email")}*/}
+        {/*      onChange={handleEmailChange}*/}
+        {/*      error={Boolean(emailError)}*/}
+        {/*      helperText={emailError}*/}
+        {/*    />*/}
+        {/*  </Stack>*/}
+        {/*) : null}*/}
       </CustomStackFullWidth>
     </CustomPaperBigCard>
   );

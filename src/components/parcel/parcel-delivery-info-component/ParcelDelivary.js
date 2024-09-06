@@ -62,8 +62,10 @@ const PercelDelivery = ({ configData }) => {
         : profileInfo?.phone
         ? profileInfo?.phone
         : "",
+      senderEmail: parcelInfo?.email ? parcelInfo?.email : "",
       receiverName: parcelInfo?.receiverName ? parcelInfo?.receiverName : "",
       receiverPhone: parcelInfo?.receiverPhone ? parcelInfo?.receiverPhone : "",
+      receiverEmail: "",
       senderRoad: "",
       senderHouse: "",
       senderFloor: "",
@@ -127,6 +129,10 @@ const PercelDelivery = ({ configData }) => {
     addAddressFormik.setFieldValue("senderFloor", value);
   };
 
+  const senderEmailHandler = (value) => {
+    addAddressFormik?.setFieldValue("senderEmail", value);
+  };
+
   const handleRoute = () => {
     router.push("/checkout?page=parcel", undefined, { shallow: true });
   };
@@ -139,7 +145,7 @@ const PercelDelivery = ({ configData }) => {
       receiverLocations: receiverLocation,
       receiverAddress: receiverFormattedAddress,
       name: parcelCategories?.name,
-      image: parcelCategories?.image,
+      image: parcelCategories?.image_full_url,
       description: parcelCategories?.description,
     };
     if (senderLocation && receiverLocation) {
@@ -172,6 +178,9 @@ const PercelDelivery = ({ configData }) => {
     setReceiverLocation(location);
     setReceiverFormattedAddress(currentLocation);
   };
+  const receiverEmailHandler = (value) => {
+    addAddressFormik?.setFieldValue("receiverEmail", value);
+  };
   return (
     <CustomStackFullWidth
       paddingBottom={{ xs: "20px", sm: "20px", md: "80px" }}
@@ -200,6 +209,7 @@ const PercelDelivery = ({ configData }) => {
               senderRoadHandler={senderRoadHandler}
               senderHouseHandler={senderHouseHandler}
               senderFloorHandler={senderFloorHandler}
+              senderEmailHandler={senderEmailHandler}
             />
           </Grid>
           <Grid item xs={12} sm={12} md={4}>
@@ -216,6 +226,7 @@ const PercelDelivery = ({ configData }) => {
               setReceiverLocation={setReceiverLocation}
               setReceiverFormattedAddress={setReceiverFormattedAddress}
               configData={configData}
+              receiverEmailHandler={receiverEmailHandler}
             />
           </Grid>
           <Grid item xs={12} sm={12} md={4}>

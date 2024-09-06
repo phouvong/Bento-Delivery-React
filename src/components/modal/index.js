@@ -18,7 +18,15 @@ const CustomModal = (props) => {
 	};
 	const theme = useTheme();
 	return (
-		<Dialog open={openModal} onClose={handleCloseModal}>
+		<Dialog
+			open={openModal}
+			onClose={handleCloseModal}
+			sx={{
+				".MuiDialog-paper": {
+					margin: "16px",
+				},
+			}}
+		>
 			{closeButton && (
 				<Stack direction={"row"} justifyContent={"flex-end"}>
 					<Box

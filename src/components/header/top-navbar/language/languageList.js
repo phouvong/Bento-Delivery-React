@@ -1,5 +1,4 @@
 import usFlag from "./assets/us.svg";
-import loFlag from "./assets/lo.svg";
 import arabicFlag from "./assets/arabic-flag-svg.svg";
 import spain from "./assets/spain.png";
 import bangladesh from "./assets/bangladesh.png";
@@ -10,24 +9,18 @@ export const languageList = [
     countryCode: "US",
     countryFlag: usFlag.src,
   },
+  // {
+  //   languageName: "Spanish",
+  //   languageCode: "es",
+  //   countryCode: "es",
+  //   countryFlag: spain.src,
+  // },
   {
-    languageName: "ພາສາລາວ",
-    languageCode: "lo",
-    countryCode: "LA",
-    countryFlag: loFlag.src,
+    languageName: "Arabic",
+    languageCode: "ar",
+    countryCode: "SA",
+    countryFlag: arabicFlag.src,
   },
-  //{
-    //languageName: "Spanish",
-    //languageCode: "es",
-    //countryCode: "es",
-    //countryFlag: spain.src,
-  //},
-  //{
-  //  languageName: "Arabic",
-  //  languageCode: "ar",
-  //  countryCode: "SA",
-  //  countryFlag: arabicFlag.src,
-  //},
   // {
   //   languageName: "Bengali",
   //   languageCode: "bn",

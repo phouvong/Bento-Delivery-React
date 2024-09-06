@@ -1,5 +1,5 @@
-import React from "react";
-import { Stack, Typography } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import { Box, Stack, Typography, useTheme } from "@mui/material";
 import {
   CustomPaperBigCard,
   CustomStackFullWidth,
@@ -8,11 +8,14 @@ import {
 import { useTranslation } from "react-i18next";
 import { useFormik } from "formik";
 import LoadingButton from "@mui/lab/LoadingButton";
+import OtpInput from "react-otp-input";
 
 import * as Yup from "yup";
 
 const OtpForm = ({ data, formSubmitHandler, isLoading }) => {
+  const theme = useTheme();
   const { t } = useTranslation();
+  const [otp, setOtp] = useState("");
   const otpFormik = useFormik({
     //here reset_token is otp inputs
     initialValues: {
@@ -28,7 +31,9 @@ const OtpForm = ({ data, formSubmitHandler, isLoading }) => {
       } catch (err) {}
     },
   });
-
+  useEffect(() => {
+    otpFormik.setFieldValue("reset_token", otp);
+  }, [otp]);
   return (
     <CustomPaperBigCard width="auto" noboxshadow="true">
       <CustomStackFullWidth>
@@ -45,23 +50,34 @@ const OtpForm = ({ data, formSubmitHandler, isLoading }) => {
             alignItems="center"
             justifyContent="center"
           >
-            <StyledInputBase
-              // inputRef={input => input && input.focus()}
-              inputProps={{ maxLength: 4 }}
-              width="100px"
-              onChange={otpFormik.handleChange}
-              value={otpFormik.values.reset_token}
-              name="reset_token"
-              error={
-                otpFormik.touched.reset_token &&
-                Boolean(otpFormik.errors.reset_token)
-              }
-              helperText={
-                otpFormik.touched.reset_token && otpFormik.errors.reset_token
-              }
-              touched={otpFormik.touched.reset_token}
-              required
-            />
+            <Box
+              sx={{
+                mt: 3,
+                mb: 1,
+                mx: "auto",
+                maxWidth: "380px",
+                div: {
+                  gap: "20px",
+                },
+                input: {
+                  flexGrow: "1",
+                  background: "transparent",
+                  color: theme.palette.primary.main,
+                  fontSize: "24px",
+                  border: "none",
+                  outline: "none",
+                  height: "45px",
+                  borderBottom: "1px solid " + theme.palette.primary.main,
+                },
+              }}
+            >
+              <OtpInput
+                value={otp}
+                onChange={setOtp}
+                numInputs={6}
+                renderInput={(props) => <input {...props} />}
+              />
+            </Box>
 
             <LoadingButton
               disabled={!otpFormik.values.reset_token}

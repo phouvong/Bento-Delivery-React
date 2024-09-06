@@ -239,6 +239,7 @@ const OtherOrder = (props) => {
           sideDrawerOpen={sideDrawerOpen}
           setSideDrawerOpen={setSideDrawerOpen}
           closeHandler={() => setSideDrawerOpen(false)}
+          phoneOrEmail={phone}
         />
       )}
     </CustomStackFullWidth>
