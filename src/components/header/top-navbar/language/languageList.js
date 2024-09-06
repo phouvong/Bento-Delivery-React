@@ -13,7 +13,7 @@ export const languageList = [
     languageName: "ພາສາລາວ",
     languageCode: "lo",
     countryCode: "LA",
-    countryFlag: Loading.png,
+    countryFlag: lao.png,
   },
   // {
   //   languageName: "Spanish",
