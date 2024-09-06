@@ -7,7 +7,7 @@ export const languageList = [
     languageName: "English",
     languageCode: "en",
     countryCode: "US",
-    countryFlag: english.png,
+    countryFlag: eng.png,
   },
   {
     languageName: "Lao",
