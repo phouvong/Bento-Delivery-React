@@ -253,7 +253,7 @@ export const baseThemeOptions = {
     button: {
       fontWeight: 600,
     },
-    fontFamily: '"Noto Sans Lao Looped", sans-serif',
+    fontFamily: '"Noto Sans Lao Looped","sans-serif"',
     //this is default font size for typography
     body1: {
       fontSize: "0.875rem",
