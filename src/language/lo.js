@@ -2,7 +2,7 @@ export const lao = {
   "Valid till": "ໃຊ້ໄດ້ເຖິງ",
   get: "ເອົາ",
   Sold: "ຂາຍແລ້ວ",
-  "Create account with exiting info.": "ສ້າງບັນຊີດ້ວຍຂໍ້ມູນທີ່ມີຢູ້.",
+  "Create account with exiting info.": "ສ້າງບັນຊີດ້ວຍຂໍ້ມູນທີ່ມີຢູ່.",
   "Whats New": "ແມ່ນຫຍັງມາໃໝ່",
   "Cash On Delivery": "ເກັບເງິນປາຍທາງ",
   "Your account is inactive or Your token has been expired":
@@ -200,7 +200,7 @@ export const lao = {
   " Show less": " ສະແດງໜ້ອຍລົງ",
   "Filter By": "ກັ່ນຕອງຕາມ",
   "Forget password?": "ລືມລະຫັດຜ່ານ?",
-  "Welcome to React": ຍິນດີຕ້ອນຮັບສູ່ React ແລະ react-i18next",
+  "Welcome to React": "ຍິນດີຕ້ອນຮັບສູ່ React ແລະ react-i18next",
   "Category:": "ໝວດໝູ່",
   "...Read more": "...ອ່ານຕື່ມ",
   Email: "ອີເມວ",
