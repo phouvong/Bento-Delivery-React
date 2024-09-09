@@ -745,7 +745,7 @@ export const lao = {
   "Minimum purchase value": "ມູນຄ່າການຊື້ຂັ້ນຕ່ໍາ",
   "Max Discount": "ສ່ວນຫຼຸດສູງສຸດ",
 
-  "Cart is Empty": "ກະຕ່າເປົ່າວ່າງ
+  "Cart is Empty": "ກະຕ່າເປົ່າວ່າງ",
   min: "ນາທີ",
   "Clear All": "ລົບລ້າງໝົດ",
   "Total Price": "ລາຄາທັງໝົດ",
