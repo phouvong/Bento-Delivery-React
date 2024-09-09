@@ -68,10 +68,10 @@ export const lao = {
   "I’ll Pick It Up MySelf": "ຂ້ອຍຈະເອົາມັນມາເອງ",
   "Most Tipped": "ສ່ວນຫຼາຍມັກ",
   Custom: "ກຳນົດເອງ",
-  "Download ON": "ດາວໂຫຼດ ON",
+  "Download ON": "ດາວໂຫຼດທີ່",
   "No items added in your cart. Please add product to your cart list.":
     "ບໍ່ໄດ້ເພີ່ມລາຍການໃນກະຕ່າຂອງທ່ານ. ກະລຸນາເພີ່ມສິນຄ້າໃສ່ລາຍການກະຕ່າຂອງທ່ານ.",
-  "GET IT ON": "ເອົາມັນໃສ່",
+  "GET IT ON": "ໂຫຼດໄດ້ທີ່",
   "Add Payment Method": "ເພີ່ມວິທີການຊໍາລະ",
   "Save this Address": "ບັນທຶກທີ່ຢູ່ນີ້",
   "Become a store owner": "ເປັນເຈົ້າຂອງຮ້ານ",
@@ -1002,7 +1002,7 @@ export const lao = {
     "ຂ້າພະເຈົ້າຕົກລົງເຫັນດີວ່າການວາງຄໍາສັ່ງເຮັດໃຫ້ຂ້າພະເຈົ້າຢູ່ພາຍໃຕ້",
   "Terms and Conditions": "ຂໍ້ກໍານົດແລະເງື່ອນໄຂ",
   "Subscribe to our weekly newsletter and be a part of our journey to self discovery and love.":
-    "ຈອງຈົດຫມາຍຂ່າວປະ ຈຳ ອາທິດຂອງພວກເຮົາແລະເປັນສ່ວນ ໜຶ່ງ ຂອງການເດີນທາງໄປສູ່ການຄົ້ນພົບຕົວເອງແລະຄວາມຮັກ.",
+    "ລົງທະບຽນຈົດຫມາຍຂ່າວປະ ຈຳ ອາທິດຂອງພວກເຮົາແລະເປັນສ່ວນ ໜຶ່ງ ຂອງການເດີນທາງໄປສູ່ການຄົ້ນພົບຕົວເອງແລະຄວາມຮັກ.",
   "Join Us!": "ເຂົ້າຮ່ວມກັບເຮົາ!",
   "Recent Searches": "ຄົ້ນຫາລ່າສຸດ",
   "Quick View": "ເບິ່ງໄວ",
@@ -1064,7 +1064,7 @@ export const lao = {
   Accept: "ຍອມຮັບ",
   "Without any payment method, you can not place the order.":
     "ໂດຍບໍ່ມີວິທີການຊໍາລະເງິນໃດໆ, ທ່ານບໍ່ສາມາດອໍເດີ້ໄດ້.",
-  Subscribe: "ຈອງ",
+  Subscribe: "ລົງທະບຽນ",
   "Nothing found": "ບໍ່ພົບຫຍັງ",
   Unit: "ຫົວໜ່ວຍ",
   "In Stock": "ມີໃນສະຕັອກ",
