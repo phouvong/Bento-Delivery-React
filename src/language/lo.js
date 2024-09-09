@@ -227,7 +227,7 @@ export const lao = {
   Mails: "ເມວ",
   Notification: "ການແຈ້ງເຕືອນ",
   Restaurants: "ຮ້ານອາຫານ",
-  Categories: "ໝວດມູ່",
+  Categories: "ໝວດໝູ່",
   "SOME COMPONENTS": "ອົງປະກອບບາງອັນ",
   Components: "ອົງປະກອບ",
   Tables: "ໂຕະ",
