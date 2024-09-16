@@ -42,10 +42,10 @@ const roundStackTwo = "rgba(255, 255, 255, 0.06)";
 const primary = {
   main: "#FF4940",
   light: "#909BEF",
-  dark: "#1c6641",
-  deep: "#026034",
+  dark: "#FF4940",
+  deep: "#FF4940",
   contrastText: neutral[900],
-  semiLight: "#E4FFF3",
+  semiLight: "#f27f79",
   overLay: "#000000",
   customType2: "#3BB77E",
   lite: "rgba(3, 157, 85, 0.1)",
