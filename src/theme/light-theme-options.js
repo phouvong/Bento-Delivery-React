@@ -31,11 +31,11 @@ const background = {
 const divider = "#E6E8F0";
 
 const primary = {
-  main: "#FF4940",
-  deep: "#FF4940",
+  main: "#039D55",
+  deep: "#026034",
   light: "#EBFDF2",
   dark: "#1c6641",
-  semiLight: "#EBFDF2",
+  semiLight: "#E4FFF3",
   contrastText: "#FFFFFF",
   customType1: "#0DCB72",
   customType2: "#3BB77E",
