@@ -8,11 +8,13 @@ import axios from "axios";
 const getPopularProductsInStore = async (params) => {
   const { id, moduleId, storeZoneId } = params;
   if (getCurrentModuleType()) {
-    const { data } = await MainApi.get(`${popular_items_in_store}`);
+    const { data } = await MainApi.get(
+      `${popular_items_in_store}?store_id=${id}`
+    );
     return data;
   } else {
     const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_BASE_URL}${popular_items_in_store}`,
+      `${process.env.NEXT_PUBLIC_BASE_URL}${popular_items_in_store}?store_id=${id}`,
       {
         headers: {
           "Content-Type": "application/json",
