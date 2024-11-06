@@ -18,7 +18,7 @@ const Parcel = ({ configData }) => {
   useEffect(() => {
     dispatch(setParcelData(null));
   }, []);
-  console.log({ orderDetailsModalOpen });
+
   return (
     <Grid container spacing={1}>
       <Grid item xs={12}>

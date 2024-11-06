@@ -48,7 +48,7 @@ const ModuleModal = (props) => {
                 <CloseIcon sx={{ fontSize: "16px", fontWeight: "700" }} />
               </IconButton>
             </CustomStackFullWidth>
-            <Scrollbar style={{ maxHeight: "80vh" }}>
+            <Scrollbar style={{ maxHeight: "calc(100vh - 120px)" }}>
               <ProductDetailsSection
                 productDetailsData={productDetailsData}
                 configData={configData}

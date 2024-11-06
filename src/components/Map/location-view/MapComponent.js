@@ -134,6 +134,7 @@ const MapComponent = (props) => {
       setZoom((prevZoom) => Math.max(prevZoom - 1));
     }
   };
+
   return isLoaded ? (
     <Stack>
       <Stack

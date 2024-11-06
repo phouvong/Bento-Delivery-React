@@ -12,6 +12,7 @@ import { useTheme } from "@mui/material/styles";
 import { getImageUrl, onlyTimeFormat } from "utils/CustomFunctions";
 import useGetUserInfo from "../../api-manage/hooks/react-query/user/useGetUserInfo";
 import { CustomTypographyEllipsis } from "styled-components/CustomTypographies.style";
+import moment from "moment";
 // import adminImage from "../../../public/static/food.png";
 
 export const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -108,7 +109,9 @@ const InfoCard = ({
           <Typography fontSize="14px" fontWeight="500">
             {receiver}
           </Typography>
-          <Typography fontSize="12px">{onlyTimeFormat(messageTime)}</Typography>
+          <Typography fontSize="12px">
+            {moment(messageTime).format("hh:mm A")}
+          </Typography>
         </Stack>
         <Stack
           direction="row"

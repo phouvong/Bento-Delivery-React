@@ -24,5 +24,7 @@ export const FoodDetailModalStyle = styled(Box)(({ theme, foodmodal }) => ({
   [theme.breakpoints.down("sm")]: {
     width: "85%",
     overflowY: "auto",
+    top: "70px",
+    transform: "translateX(-50%)",
   },
 }));

@@ -15,6 +15,7 @@ const ProductReviews = ({
   setOffSet,
   page_limits,
   isExpanded,
+  storename,
 }) => {
   const theme = useTheme();
   const SliderRef = useRef(null);
@@ -29,6 +30,7 @@ const ProductReviews = ({
                 key={review?.id}
                 review={review}
                 configData={configData}
+                storename={storename}
               />
             );
           })

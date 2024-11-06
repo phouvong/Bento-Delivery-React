@@ -22,6 +22,7 @@ const AdditionalAddresses = (props) => {
     additionalInformationDispatch,
     saveAddress,
     address,
+    setAddress,
   } = props;
   const [street, setStreet] = useState(
     additionalInformationStates.streetNumber
@@ -61,6 +62,9 @@ const AdditionalAddresses = (props) => {
       saveAddress();
     }
   };
+  useEffect(() => {
+    setAddress({ ...address, road: street, house: house, floor: floor });
+  }, [street, house, floor]);
   return (
     // eslint-disable-next-line react/jsx-no-undef
     <CustomStackFullWidth>

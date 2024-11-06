@@ -61,7 +61,7 @@ const DeliveryInfo = ({
   const handleCheckbox = (e) => {
     setCheck(e.target.checked);
   };
-  console.log({ parcelInfo });
+
   return (
     <CustomPaperBigCard>
       <CustomStackFullWidth spacing={3}>

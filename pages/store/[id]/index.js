@@ -12,7 +12,6 @@ import scrollToTop from "components/ScrollToTop";
 import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 
 const Index = ({ configData, storeDetails, landingPageData }) => {
-  useScrollToTop();
   const dispatch = useDispatch();
   const router = useRouter();
   const { distance } = router.query;

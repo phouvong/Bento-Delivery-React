@@ -169,6 +169,7 @@ const MobileTopMenu = ({
                   countryCode={countryCode}
                   language={language}
                   noText
+                  key={countryCode}
                 />
               </ListItemButton>
               {/*{token && (*/}

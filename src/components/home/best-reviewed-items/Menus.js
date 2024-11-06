@@ -39,7 +39,6 @@ const Menus = (props) => {
     }
   };
   const handleTabChange = (index, value) => {
-    console.log({ value });
     if (value?.value) {
       setFilteredData(value?.value);
     }

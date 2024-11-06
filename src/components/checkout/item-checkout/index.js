@@ -33,6 +33,7 @@ import {
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
 import {
+  formatPhoneNumber,
   getDayNumber,
   getDigitalMethodFromZone,
   getFinalTotalPrice,
@@ -432,7 +433,11 @@ const ItemCheckout = (props) => {
       );
       formData.append(
         "contact_person_number",
-        `+${guestUserInfo?.contact_person_number}`
+        token
+          ? address?.contact_person_number
+            ? address?.contact_person_number
+            : profileInfo?.phone
+          : `+${guestUserInfo?.contact_person_number}`
       );
       formData.append(
         "contact_person_email",
@@ -477,8 +482,18 @@ const ItemCheckout = (props) => {
         unavailable_item_note: unavailable_item_note,
         delivery_instruction: delivery_instruction,
         guest_id: guestId,
-        contact_person_name: guestUserInfo?.contact_person_name,
-        contact_person_number: `+${guestUserInfo?.contact_person_number}`,
+        contact_person_name: token
+          ? address?.contact_person_name
+            ? address?.contact_person_name
+            : profileInfo?.name
+          : guestUserInfo?.contact_person_name,
+        contact_person_number: formatPhoneNumber(
+          token
+            ? address?.contact_person_number
+              ? address?.contact_person_number
+              : profileInfo?.phone
+            : `${guestUserInfo?.contact_person_number}`
+        ),
         contact_person_email: guestUserInfo?.contact_person_email,
         house: token ? address?.house : guestUserInfo?.house,
         floor: token ? address?.floor : guestUserInfo?.floor,
@@ -910,6 +925,7 @@ const ItemCheckout = (props) => {
     storeData?.zone_id,
     zoneData?.data
   );
+
   const isZoneCod = () => {};
   const hasOnlyPaymentMethod = () => {
     if (
@@ -936,6 +952,11 @@ const ItemCheckout = (props) => {
   useEffect(() => {
     hasOnlyPaymentMethod();
   }, [configData, isZoneDigital]);
+  //  const [state:addState] = useReducer(reducer, initialState);
+  //
+  // useEffect(() => {
+  //   setAddress({...address,house:})
+  // }, []);
   return (
     <>
       {method === "offline" ? (

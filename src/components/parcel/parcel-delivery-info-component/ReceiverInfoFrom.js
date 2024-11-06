@@ -55,13 +55,19 @@ const ReceiverInfoFrom = ({
 
   useEffect(() => {
     roadHandler(
-      receiverOptionalAddress?.road ? receiverOptionalAddress?.road : ""
+      receiverOptionalAddress?.road
+        ? receiverOptionalAddress?.road
+        : addAddressFormik.values.road
     );
     floorHandler(
-      receiverOptionalAddress?.floor ? receiverOptionalAddress?.floor : ""
+      receiverOptionalAddress?.floor
+        ? receiverOptionalAddress?.floor
+        : addAddressFormik.values.floor
     );
     houseHandler(
-      receiverOptionalAddress?.house ? receiverOptionalAddress?.house : ""
+      receiverOptionalAddress?.house
+        ? receiverOptionalAddress?.house
+        : addAddressFormik.values.house
     );
   }, [receiverOptionalAddress]);
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
@@ -90,11 +96,11 @@ const ReceiverInfoFrom = ({
             <CustomTextFieldWithFormik
               required
               label={t("Email")}
-              touched={addAddressFormik.touched.email}
-              errors={addAddressFormik.errors.email}
-              fieldProps={addAddressFormik.getFieldProps("email")}
+              touched={addAddressFormik.touched.receiverEmail}
+              errors={addAddressFormik.errors.receiverEmail}
+              fieldProps={addAddressFormik.getFieldProps("receiverEmail")}
               onChangeHandler={receiverEmailHandler}
-              value={addAddressFormik.values.email}
+              value={addAddressFormik.values.receiverEmail}
             />
             <CustomStackFullWidth alignItems="center">
               <CustomPhoneInput

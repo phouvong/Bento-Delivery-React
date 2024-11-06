@@ -5,7 +5,6 @@ import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { getToken } from "../../../../helper-functions/getToken";
 
 const getData = async (order_id, phone, guestId) => {
-  console.log({ phone });
   const userToken = getToken();
   try {
     const params = !userToken

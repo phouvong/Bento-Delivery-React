@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import {
   Button,
   Grid,
@@ -11,14 +11,14 @@ import {
 } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import CustomEmptyResult from "../custom-empty-result";
-import nodata from "../loyalty-points/assets/no-address-2.png";
+import nodata from "./assets/Group 1597886316.svg";
 import Shimmer from "./Shimmer";
 import AddressCard from "./address-card";
 import { useDispatch, useSelector } from "react-redux";
 import { t } from "i18next";
 import { SmallDeviceIconButton } from "../profile/basic-information";
 import { useTheme } from "@emotion/react";
-import { setAllSaveAddress } from "../../redux/slices/storedData";
+import { setAllSaveAddress } from "redux/slices/storedData";
 
 export const GrayButton = styled(Button)(({ theme }) => ({
   color: theme.palette.neutral[400],
@@ -145,10 +145,10 @@ const Address = (props) => {
                 height="100%"
               >
                 <CustomEmptyResult
-                  label="No Address Found"
+                  label="No address found"
                   image={nodata}
                   width="128px"
-                  height="170px"
+                  height="80"
                 />
               </Stack>
             )}

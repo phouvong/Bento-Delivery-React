@@ -315,7 +315,7 @@ const AddressForm = ({
               value={addAddressFormik.values.floor}
             />
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={token ? "12" : "6"}>
             <CustomTextFieldWithFormik
               type="text"
               label={t("Road")}

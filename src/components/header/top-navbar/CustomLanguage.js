@@ -84,7 +84,8 @@ const CustomLanguage = ({ formmobilemenu }) => {
       });
     }
     toast.success(t("Language changed"));
-    handleClose?.();
+
+    window.location.reload();
   };
 
   return (

@@ -2,8 +2,14 @@ export const english = {
   "Valid till": "Valid till",
   get: "get",
   Sold: "Sold",
+  "Allergic Ingredients": "Allergic Ingredients",
+  "Nutrition Details": "Nutrition Details",
   "Create account with exiting info.": "Create account with exiting info.",
+  "Select the Reason for Support": "Select the Reason for Support",
   "Whats New": "What's New",
+  "Or Custom Massage": "Or Custom Massage",
+  "Send Massage": "Send Massage",
+  "Type here to write a custom message": "Type here to write a custom message",
   "Cash On Delivery": "Cash On Delivery",
   "Your account is inactive or Your token has been expired":
     "Your account is inactive or Your token has been expired",
@@ -530,13 +536,13 @@ export const english = {
   "Store for you !": "Store for you !",
   items: "items",
   "Coupon Applied": "Coupon Applied",
-  Paid: "Paid",
 
   Unpaid: "Unpaid",
   "Order Summery": "Order Summery",
   "Your food will be delivered within": "Your food will be delivered within",
   "Back to home": "Back to home",
   "Order Place Failed": "Order Place Failed",
+  "Massage to ": "Massage to ",
   "Order didn't place successfully.": "Order didn't place successfully.",
   "Are you sure you want to cancel this order?":
     "Are you sure you want to cancel this order?",
@@ -677,7 +683,7 @@ export const english = {
   Wallets: "Wallets",
   "Your Address": "Your Address",
   "Loyalty Points": "Loyalty Points",
-  "Order placed ": "Order placed ",
+  "Order Placed": "Order Placed",
   "Restaurant Information's": "Restaurant Information's",
   "Items Price": "Items Price",
   "Addons Price": "Addons Price",
@@ -749,12 +755,14 @@ export const english = {
   "in your cart": "in your cart",
   min: "min",
   "Clear All": "Clear All",
+  "Order date:": "Order date:",
   "Total Price": "Total Price",
   "Wallet balance is below total amount":
     "Wallet balance is below total amount",
   "Selected Address": "Selected Address",
   "Enter Your Coupon..": "Enter Your Coupon..",
   "Order Summary": "Order Summary",
+  "Order OTP": "Order OTP",
   Total: "Total",
   "Restaurant Informations": "Restaurant Informations",
   "Give a review": "Give a review",
@@ -977,7 +985,8 @@ export const english = {
     "The total amount of the order, exceeds maximum amount of the cash on delivery method",
   "Select a type of module for your orders":
     "Select a type of module for your orders",
-
+  "No module available": "No module available",
+  "Modules are": "Modules are",
   "You have item from another store in cart. If you continue, your all previous item from cart will be removed and this one will be added.":
     "You have item from another store in cart. If you continue, your all previous item from cart will be removed and this one will be added.",
   "More products need to apply the coupon":
@@ -1234,14 +1243,19 @@ export const english = {
   Payment: "Payment",
   Summary: "Summary",
   "No delivery man assigned": "No delivery man assigned",
+  "Highlights for you": "Highlights for you",
+  "See our most popular restaurant and foods":
+    "See our most popular store and items",
   "delivery man info": "delivery man info",
   "seller info": "seller info",
+  "order-summary": "order-summary",
   "See Chat History": "See Chat History",
   "Unit Price": "Unit Price",
   "How was your experience with your last order ?":
     "How was your experience with your last order ?",
   "Share us your valuable feedbacks": "Share us your valuable feedbacks",
   "Rate the item": "Rate the item",
+  "Order ID:": "Order ID:",
   Groceries: "Groceries",
   "Make sure to remember your ": "Make sure to remember your ",
   "order ID and phone number": "order ID and phone number",

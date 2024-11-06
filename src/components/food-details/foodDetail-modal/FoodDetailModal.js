@@ -920,7 +920,7 @@ const FoodDetailModal = ({
                   alignItems="center"
                   flexWrap="wrap"
                   justifyContent="space-between"
-                  gap="35px"
+                  gap={{ xs: "10px", sm: "10px", md: "35px" }}
                 >
                   {modalData.length > 0 && (
                     <StartPriceView

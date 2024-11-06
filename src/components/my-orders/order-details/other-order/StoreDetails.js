@@ -89,7 +89,7 @@ const StoreDetails = (props) => {
               gap={{ xs: "15px", sm: "50px", md: "50px" }}
             >
               <StoreFeature
-                count={`${storeData?.positive_rating}% `}
+                count={`${storeData?.positive_rating?.toFixed(2)}% `}
                 title="Positive Review"
               />
               {storeData?.total_items && (

@@ -7,6 +7,7 @@ import {
 } from "../../../../styled-components/CustomStyles.style";
 import {
   alpha,
+  Button,
   IconButton,
   Skeleton,
   Typography,
@@ -28,16 +29,18 @@ import { getAmountWithSign } from "../../../../helper-functions/CardHelpers";
 import emptyImage from "../../../../assets/img/fi_10608837 (2).png";
 import { CustomCloseIconButton } from "../../../added-cart-view/Cart.style";
 import ClearIcon from "@mui/icons-material/Clear";
+import { useRouter } from "next/router";
 
 const CustomLine = styled(Box)(({ theme }) => ({
   borderLeft: "1px dashed",
   borderColor: alpha(theme.palette.neutral[500], 0.5),
-  height: "50px",
+  height: "81px",
   marginLeft: "8px",
 }));
 
 const TrackParcelOrderDrawer = (props) => {
   const theme = useTheme();
+  const router = useRouter();
   //const [error, setError] = useState(true);
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const [orderData, setOrderData] = useState(null);
@@ -45,7 +48,6 @@ const TrackParcelOrderDrawer = (props) => {
   const [actStep, setActStep] = useState(1);
   const guestId = getGuestId();
   const phone = phoneOrEmail;
-  console.log({ phone });
 
   const handleSuccess = (res) => {
     setOrderData(res);
@@ -113,6 +115,16 @@ const TrackParcelOrderDrawer = (props) => {
     setOrderData(null);
     setSideDrawerOpen(false);
   };
+  const handleClick = () => {
+    router.push(
+      {
+        pathname: "/profile",
+        query: { orderId: trackOrderData?.id, page: "my-orders" },
+      },
+      undefined,
+      { shallow: true }
+    );
+  };
   return (
     <CustomSideDrawer
       anchor="right"
@@ -162,8 +174,16 @@ const TrackParcelOrderDrawer = (props) => {
               <MapComponent
                 latitude={trackOrderData?.delivery_address?.latitude}
                 longitude={trackOrderData?.delivery_address?.longitude}
-                deliveryManLat={trackOrderData?.delivery_man?.lat}
-                deliveryManLng={trackOrderData?.delivery_man?.lng}
+                deliveryManLat={
+                  trackOrderData?.order_status === "picked_up"
+                    ? trackOrderData?.delivery_man?.lat
+                    : trackOrderData?.receiver_details?.latitude
+                }
+                deliveryManLng={
+                  trackOrderData?.order_status === "picked_up"
+                    ? trackOrderData?.delivery_man?.lng
+                    : trackOrderData?.receiver_details?.longitude
+                }
               />
               <Stack
                 position="absolute"
@@ -227,6 +247,11 @@ const TrackParcelOrderDrawer = (props) => {
                         >
                           {trackOrderData?.receiver_details?.address}
                         </Typography>
+                        {router.pathname !== "/profile" && (
+                          <Button onClick={handleClick}>
+                            {t("View Details")}
+                          </Button>
+                        )}
                       </Stack>
                     </Stack>
                   </CustomStackFullWidth>

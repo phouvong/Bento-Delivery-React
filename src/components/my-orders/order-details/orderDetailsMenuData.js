@@ -1,7 +1,9 @@
+import { t } from "i18next";
+
 export const orderDetailsMenuData = [
   {
     id: 1,
-    name: "order-summary",
+    name: t("order-summary"),
   },
   {
     id: 2,

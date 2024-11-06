@@ -28,6 +28,7 @@ const ChatContent = ({
 }) => {
   const isAdmin =
     channelList && channelList?.find((item) => item.receiver_type === "admin");
+
   const handleChatWithAdmin = () => {
     if (channelList.length === 0 || !isAdmin) {
       return (
@@ -82,7 +83,6 @@ const ChatContent = ({
         handleReset={handleReset}
         setResetState={setResetState}
       />
-
       <ContactLists
         channelList={channelList}
         handleChannelOnClick={handleChannelOnClick}

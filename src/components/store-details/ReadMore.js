@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useTheme } from "@emotion/react";
 import { t } from "i18next";
 
-export const ReadMore = ({ children, limits, color }) => {
+export const ReadMore = ({ children, limits, color, font }) => {
   const fontLimits = limits ? limits : 70;
   const theme = useTheme();
   const text = children;
@@ -15,7 +15,7 @@ export const ReadMore = ({ children, limits, color }) => {
   const fontColor = theme.palette.primary.main;
   return (
     <Typography
-      fontSize={{ xs: "10px", sm: "14px", md: "14px" }}
+      fontSize={{ xs: "10px", sm: font ?? "14px", md: font ?? "14px" }}
       fontWeight="400"
       color={color ? color : theme.palette.neutral[600]}
     >

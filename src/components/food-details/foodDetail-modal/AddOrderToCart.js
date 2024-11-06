@@ -90,6 +90,9 @@ const AddOrderToCart = (props) => {
                 sx={{
                   backgroundColor: theme.palette.customColor.buyButton,
                   color: "black",
+                  fontSize: {
+                    xs: "12px",
+                  },
                 }}
               >
                 {t("Buy Now")}
@@ -212,6 +215,9 @@ const AddOrderToCart = (props) => {
               sx={{
                 color: "black",
                 backgroundColor: theme.palette.customColor.buyButton,
+                fontSize: {
+                  xs: "12px",
+                },
               }}
             >
               {t("Buy Now")}
@@ -240,7 +246,7 @@ const AddOrderToCart = (props) => {
               <PrimaryButton
                 onClick={() => addToCard()}
                 loading={isLoading}
-                sx={{ width: 200, fontSize: { xs: "12px", md: "14px" } }}
+                sx={{ fontSize: { xs: "12px", md: "14px" } }}
               >
                 {isLoading ? (
                   <Stack

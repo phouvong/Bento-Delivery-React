@@ -119,8 +119,9 @@ const CustomLanguage = ({
       ...values,
       direction: isRTLLanguage(lan?.languageCode) ? "rtl" : "ltr",
     });
-    handleClose?.();
     window.location.reload();
+    handleClose?.();
+
     // window.location.reload();
     // setTimeout(() => {
     //   // toast.success(t("Language has been changed"),{
@@ -137,7 +138,6 @@ const CustomLanguage = ({
   };
   const handleYes = (value) => {
     handleChangeLanguage(value);
-
     handleCloseModal();
   };
 

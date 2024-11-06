@@ -21,6 +21,7 @@ const ContactLists = ({
   selectedId,
   activeTab,
   setResetState,
+  notAdmin,
 }) => {
   const { configData } = useSelector((state) => state.configData);
 
@@ -53,7 +54,7 @@ const ContactLists = ({
       return (
         <InfoCard
           name={item.receiver_type.replaceAll("_", " ")}
-          messageTime={item.created_at}
+          messageTime={item.last_message_time}
           last_message={item?.last_message}
           receiver={
             item.receiver ? item.receiver.f_name : configData?.business_name
@@ -69,7 +70,7 @@ const ContactLists = ({
       return (
         <InfoCard
           name={item.sender_type.replaceAll("_", " ")}
-          messageTime={item.created_at}
+          messageTime={item.last_message_time}
           last_message={item?.last_message}
           receiver={
             item?.sender?.f_name.concat(" ", item?.sender?.l_name) || " "

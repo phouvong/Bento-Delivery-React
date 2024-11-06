@@ -17,7 +17,10 @@ import { t } from "i18next";
 import OrderCalculationShimmer from "../item-checkout/OrderCalculationShimmer";
 import PrescriptionOrderCalculation from "../../Prescription/PrescriptionOrderCalculation";
 import PrescriptionUpload from "../../Prescription/PrescriptionUpload";
-import { handleDistance } from "utils/CustomFunctions";
+import {
+  getDigitalMethodFromZone,
+  handleDistance,
+} from "utils/CustomFunctions";
 import { OrderApi } from "api-manage/another-formated-api/orderApi";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/router";
@@ -47,6 +50,7 @@ const PrescriptionCheckout = ({ storeId }) => {
   const [delivery_instruction, setDelivery_instruction] = useState(null);
   const [deliveryTip, setDeliveryTip] = useState(0);
   const [note, setNote] = useState("");
+  const [paymentMethodImage, setPaymentMethodImage] = useState("");
   const { configData } = useSelector((state) => state.configData);
   const { data: storeData, refetch } = useGetStoreDetails(storeId);
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
@@ -187,6 +191,10 @@ const PrescriptionCheckout = ({ storeId }) => {
     setDelivery_instruction(value);
   };
   const { data: tripsData } = useGetMostTrips();
+  const isZoneDigital = getDigitalMethodFromZone(
+    storeData?.zone_id,
+    zoneData?.data
+  );
   return (
     <Grid
       container
@@ -205,6 +213,9 @@ const PrescriptionCheckout = ({ storeId }) => {
               configData={configData}
               orderType={orderType}
               forprescription="true"
+              isZoneDigital={isZoneDigital}
+              setPaymentMethodImage={setPaymentMethodImage}
+              paymentMethodImage={paymentMethodImage}
             />
           )}
           <PrescriptionUpload

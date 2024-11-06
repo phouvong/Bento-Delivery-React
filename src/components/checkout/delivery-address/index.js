@@ -201,6 +201,7 @@ const DeliveryAddress = ({
           additionalInformationStates={state}
           saveAddress={saveAddress}
           address={address}
+          setAddress={setAddress}
         />
       )}
 

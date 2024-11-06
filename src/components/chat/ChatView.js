@@ -47,6 +47,10 @@ const ChatView = ({
   handleScroll,
   scrollBottom,
   receiverType,
+  isLoadingMessageSend,
+  userType,
+  channelId,
+  orderId,
 }) => {
   const classes = useStyles();
   return (
@@ -69,7 +73,13 @@ const ChatView = ({
         )}
       </Box>
 
-      <ChatMessageAdd onSend={handleChatMessageSend} />
+      <ChatMessageAdd
+        onSend={handleChatMessageSend}
+        isLoadingMessageSend={isLoadingMessageSend}
+        userType={userType}
+        channelId={channelId}
+        orderId={orderId}
+      />
     </StyledBox>
   );
 };

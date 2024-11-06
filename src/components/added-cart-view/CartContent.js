@@ -42,6 +42,7 @@ import {
   getTotalVariationsPrice,
   handleTotalAmountWithAddons,
 } from "utils/CustomFunctions";
+import Body2 from "components/typographies/Body2";
 
 const CartContent = (props) => {
   const { cartItem, imageBaseUrl } = props;
@@ -245,6 +246,24 @@ const CartContent = (props) => {
           <Typography fontWeight="500" fontSize={{ xs: "12px", md: "14px" }}>
             {cartItem?.name}
           </Typography>
+          {cartItem?.module_type === "pharmacy" && (
+            <Typography
+              sx={{
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                display: "-webkit-box",
+                WebkitLineClamp: "1",
+                WebkitBoxOrient: "vertical",
+                paddingTop: "3px",
+                wordWrap: "break-word",
+              }}
+              variant="body2"
+              color="#93A2AE"
+              textAlign="center"
+            >
+              {cartItem?.generic_name[0]}
+            </Typography>
+          )}
           {cartItem?.is_prescription_required == 1 && (
             <Typography
               color={theme.palette.error.main}

@@ -20,12 +20,16 @@ const TrackOrderMap = ({
         longitude={userLocation?.lng}
         deliveryManLat={
           trackOrderData?.order_status === "picked_up"
-            ? trackOrderData?.delivery_man?.latitude
+            ? trackOrderData?.delivery_man?.lat
+            : trackOrderData?.module_type === "parcel"
+            ? trackOrderData?.receiver_details?.latitude
             : trackOrderData?.store?.latitude
         }
         deliveryManLng={
           trackOrderData?.order_status === "picked_up"
-            ? trackOrderData?.delivery_man?.longitude
+            ? trackOrderData?.delivery_man?.lng
+            : trackOrderData?.module_type === "parcel"
+            ? trackOrderData?.receiver_details?.longitude
             : trackOrderData?.store?.longitude
         }
         isStore={trackOrderData?.order_status === "picked_up" ? false : true}

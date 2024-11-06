@@ -5,7 +5,7 @@ import { Typography, useMediaQuery } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { Stack } from "@mui/system";
 import CustomEmptyResult from "../custom-empty-result";
-import nodataimage from "../../../public/static/newnoitem.png";
+import nodataimage from "../../../public/static/no_wish_list.svg";
 import { getItemsOrFoods } from "helper-functions/getItemsOrFoods";
 import { getStoresOrRestaurants } from "helper-functions/getStoresOrRestaurants";
 import { useTheme } from "@mui/material/styles";
@@ -63,8 +63,8 @@ const WishLists = (props) => {
                   <CustomEmptyResult
                     label={t(empty_stores_text)}
                     image={nodataimage}
-                    width="200px"
-                    height="200px"
+                    width="150px"
+                    height="noe"
                   />
                 )}
               </CustomOverFlowStack>
@@ -83,8 +83,8 @@ const WishLists = (props) => {
                   <CustomEmptyResult
                     label={t(empty_items_text)}
                     image={nodataimage}
-                    width="200px"
-                    height="200px"
+                    width="150px"
+                    height="none"
                   />
                 )}
               </CustomOverFlowStack>

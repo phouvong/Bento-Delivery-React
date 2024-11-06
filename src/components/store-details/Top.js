@@ -250,7 +250,9 @@ const Top = (props) => {
                     <Stack
                       key={banner?.id}
                       onClick={() => handleBannerClick(banner?.default_link)}
-                      sx={{ cursor: "pointer" }}
+                      sx={{
+                        cursor: "pointer",
+                      }}
                     >
                       <CustomImageContainer
                         src={banner?.image_full_url}

@@ -18,8 +18,10 @@ import CustomModal from "components/modal";
 import RestaurantReviewModal from "components/store-details/ReviewModal";
 import { Stack } from "@mui/system";
 import { getImageUrl } from "utils/CustomFunctions";
+import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 
 const StoreDetails = ({ storeDetails, configData }) => {
+  useScrollToTop();
   const dispatch = useDispatch();
   const [expanded, setExpanded] = useState(true);
   const [openReviewModal, setOpenReviewModal] = useState(false);
@@ -50,6 +52,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
 
   useEffect(() => {
     refetchModule();
+    refetch();
   }, []);
 
   useEffect(() => {

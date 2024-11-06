@@ -46,11 +46,11 @@ const CustomRatingBox = (props) => {
   };
   return (
     <Stack
-      width="52px"
+      width={{ xs: "40px", md: "52px" }}
       direction="row"
       alignItems="center"
       justifyContent="center"
-      spacing={0.6}
+      spacing={0.3}
       sx={{
         color: getModuleWise()?.color,
         backgroundColor: getModuleWise()?.background,

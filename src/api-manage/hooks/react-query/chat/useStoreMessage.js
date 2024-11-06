@@ -3,9 +3,10 @@ import { store_message_api } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
 
 const storeData = async (cData) => {
-  const { id, text, receiver_type, receiverId, file } = cData;
+  const { id, text, receiver_type, receiverId, file, order_id } = cData;
 
   let formData = new FormData();
+
   formData.append(
     receiverId ? "receiver_id" : "conversation_id",
     id === "admin" ? 0 : id
@@ -20,7 +21,9 @@ const storeData = async (cData) => {
       formData.append("image[]", file);
     });
   }
-
+  if (order_id) {
+    formData.append("order_id", order_id);
+  }
   formData.append("receiver_type", receiver_type);
   const { data } = await MainApi.post(`${store_message_api}`, formData, {
     headers: { "Content-Type": "multipart/form-data" },

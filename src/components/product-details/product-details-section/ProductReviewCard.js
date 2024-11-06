@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
 import { Avatar, Typography, useTheme } from "@mui/material";
-import { Stack } from "@mui/system";
+import { Box, Stack } from "@mui/system";
 import CustomImageContainer from "../../CustomImageContainer";
 import CustomRatings from "../../search/CustomRatings";
 import { useSelector } from "react-redux";
@@ -10,13 +10,15 @@ import { Scrollbar } from "../../srollbar";
 import CloseIcon from "@mui/icons-material/Close";
 import IconButton from "@mui/material/IconButton";
 import StarIcon from "@mui/icons-material/Star";
-import { getImageUrl } from "utils/CustomFunctions";
+import { getDateFormat, getImageUrl } from "utils/CustomFunctions";
+import { ReadMore } from "components/store-details/ReadMore";
 
-const ProductReviewCard = ({ review }) => {
+const ProductReviewCard = ({ review, storename }) => {
   const { configData } = useSelector((state) => state.configData);
   const [openModal, setOpenModal] = useState(false);
   const theme = useTheme();
   const userImageUrl = configData?.base_urls?.customer_image_url;
+
   return (
     <>
       <CustomStackFullWidth
@@ -59,6 +61,46 @@ const ProductReviewCard = ({ review }) => {
         </Stack>
         <Stack spacing={2}>
           <Typography fontSize="12px">{review?.comment}</Typography>
+          {review.reply && (
+            <Box
+              sx={{
+                background: theme.palette.neutral[300],
+                padding: "13px",
+                borderRadius: "9px",
+              }}
+            >
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Typography
+                  fontSize="12px"
+                  fontWeight="500"
+                  color={theme.palette.text.primary}
+                >
+                  {storename}
+                </Typography>
+                <Typography
+                  fontSize="10px"
+                  fontWeight="400"
+                  color="text.secondary"
+                >
+                  {getDateFormat(review.updated_at)}
+                </Typography>
+              </Stack>
+              <Stack mt="5px">
+                <ReadMore
+                  font="12px"
+                  color={theme.palette.text.secondary}
+                  limits="130"
+                >
+                  {review.reply}
+                </ReadMore>
+              </Stack>
+            </Box>
+          )}
+
           {review?.attachment?.length > 0 && (
             <Stack direction="row" spacing={1}>
               {JSON.parse(review?.attachment)?.map((item, index) => {

@@ -37,14 +37,10 @@ const CollapsableMenu = ({
         },
       });
     } else {
-      router.push(
-        {
-          pathname: `/${value?.path}/[id]`,
-          query: { id: `${id}`, module_id: `${getModuleId()}` },
-        },
-        undefined,
-        { shallow: true }
-      );
+      router.push({
+        pathname: `/${value?.path}/[id]`,
+        query: { id: `${id}`, module_id: `${getModuleId()}` },
+      });
     }
 
     setOpen(false);

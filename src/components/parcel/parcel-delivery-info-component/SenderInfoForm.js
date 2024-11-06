@@ -64,13 +64,19 @@ const SenderInfoForm = ({
 
   useEffect(() => {
     senderRoadHandler(
-      senderOptionalAddress?.road ? senderOptionalAddress?.road : ""
+      senderOptionalAddress?.road
+        ? senderOptionalAddress?.road
+        : addAddressFormik.values.senderRoad
     );
     senderFloorHandler(
-      senderOptionalAddress?.floor ? senderOptionalAddress?.floor : ""
+      senderOptionalAddress?.floor
+        ? senderOptionalAddress?.floor
+        : addAddressFormik.values.senderFloor
     );
     senderHouseHandler(
-      senderOptionalAddress?.house ? senderOptionalAddress?.house : ""
+      senderOptionalAddress?.house
+        ? senderOptionalAddress?.house
+        : addAddressFormik.values.senderHouse
     );
   }, [senderOptionalAddress]);
   const lanDirection = getLanguage() ? getLanguage() : "ltr";

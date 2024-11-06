@@ -335,7 +335,7 @@ const FeaturedCategories = ({ configData }) => {
       {
         breakpoint: 1650,
         settings: {
-          slidesToShow: 7,
+          slidesToShow: 8,
           //slidesToScroll: 3,
           infinite: false,
         },

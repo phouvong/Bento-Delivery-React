@@ -75,8 +75,8 @@ const ParcelCheckout = () => {
   const [customerInstruction, setCustomerInstruction] = useState(null);
   const [check, setCheck] = React.useState(null);
   const receiverLoacation = {
-    lat: parcelInfo?.receiverLocations?.lat,
-    lng: parcelInfo?.receiverLocations?.lng,
+    lat: parcelInfo?.senderLocations?.lat,
+    lng: parcelInfo?.senderLocations?.lng,
   };
   const [guestUserEmail, setGuestUserEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -85,7 +85,7 @@ const ParcelCheckout = () => {
     parcelInfo?.senderLocations,
     parcelInfo?.receiverLocations
   );
-  console.log({ parcelInfo });
+
   const token = getToken();
   const guest_id = getGuestId();
   const formik = useFormik({
@@ -278,7 +278,6 @@ const ParcelCheckout = () => {
     if (paidBy === "sender") {
       const handleSuccess = (res) => {
         if (res) {
-          console.log({ res });
           if (token) {
             dispatch(setOrderDetailsModal(true));
           } else {
@@ -510,6 +509,17 @@ const ParcelCheckout = () => {
     : parcelDeliveryFree() +
       Number(deliveryTip) +
       (configData?.additional_charge ? configData?.additional_charge : 0);
+
+  const getParcelPayment = () => {
+    // Check if zoneData and zone_data are available
+    if (!zoneData?.zone_data) return [];
+
+    // Filter the items where module_type is "parcel"
+    return zoneData.zone_data.filter((item) =>
+      item?.modules?.find((module) => module?.module_type === "parcel")
+    );
+  };
+
   return (
     <>
       {method === "offline" ? (
@@ -653,6 +663,7 @@ const ParcelCheckout = () => {
                       storeZoneId={currentZoneId}
                       parcel="true"
                       offlinePaymentOptions={offlinePaymentOptions}
+                      getParcelPayment={getParcelPayment}
                     />
                   </CustomPaperBigCard>
                 )}
