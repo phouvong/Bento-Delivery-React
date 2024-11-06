@@ -249,8 +249,8 @@ const MapModal = ({
           }}
         >
           <IconButton
-            onClick={() => handleClose()}
-            sx={{ position: "absolute", top: 5, right: 8 }}
+            onClick={handleClose}
+            sx={{ position: "absolute", top: 5, right: 8, zIndex: 999 }}
           >
             <CloseIcon sx={{ fontSize: { xs: "18px", md: "24px" } }} />
           </IconButton>

@@ -9,10 +9,10 @@ const FormSubmitButton = ({ handleReset, isLoading, reset, submit }) => {
         {reset}
       </ResetButton>
       <SaveButton
-        // Fixing the syntax for applying marginTop on xs breakpoint
         variant="contained"
         type="submit"
         loading={isLoading}
+        sx={{ minWidth: "100px" }}
       >
         {submit}
       </SaveButton>

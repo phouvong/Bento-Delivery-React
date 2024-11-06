@@ -23,6 +23,7 @@ import SpecialFoodOffers from "../special-food-offers";
 import Stores from "../stores";
 import VisitAgain from "../visit-again";
 import PharmacyStaticBanners from "./pharmacy/pharmacy-banners/PharmacyStaticBanners";
+import TopOffersNearMe from "../top-offers-nearme";
 
 const menus = ["All", "Beauty", "Bread & Juice", "Drinks", "Milks"];
 const Grocery = (props) => {
@@ -120,6 +121,11 @@ const Grocery = (props) => {
 			</Grid>
 			<Grid item xs={12}>
 				<CustomContainer>
+					<TopOffersNearMe title="Top offers near me" />
+				</CustomContainer>
+			</Grid>
+			<Grid item xs={12}>
+				<CustomContainer>
 					<Banners />
 				</CustomContainer>
 			</Grid>
@@ -133,11 +139,7 @@ const Grocery = (props) => {
 					/>
 				</CustomContainer>
 			</Grid>
-			{/*<Grid item xs={12}>*/}
-			{/*  <CustomContainer>*/}
-			{/*    <DiscountedProductRedirectBanner />*/}
-			{/*  </CustomContainer>*/}
-			{/*</Grid>*/}
+
 			<Grid item xs={12} mt="10px">
 				<CustomContainer>
 					<RunningCampaigns />

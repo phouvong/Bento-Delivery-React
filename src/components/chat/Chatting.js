@@ -48,6 +48,8 @@ const Chatting = ({ configData }) => {
     chatFrom,
     deliveryman_name,
     deliveryManData_image,
+    text,
+    orderId,
   } = router.query;
   const [deliveryInfo, setDeliveryInfo] = useState({});
   //const { configData } = useSelector((state) => state.configDataSettings);
@@ -129,7 +131,9 @@ const Chatting = ({ configData }) => {
       setReceiverType(type);
       setApiFor(routeName);
       setIsSidebarOpen(false);
-      setUserType(type);
+      if (type !== "admin") {
+        setUserType(type);
+      }
       setResetState(true);
     }
   }, [id, type, routeName, chatFrom, channelList, deliveryManData_image]);
@@ -193,6 +197,19 @@ const Chatting = ({ configData }) => {
       onError: onErrorResponse,
     });
   };
+
+  useEffect(() => {
+    if (type === "admin" && text && channelId && orderId) {
+      handleChatMessageSend({ text: text, file: [], order_id: orderId });
+      const { pathname, query } = router;
+
+      const updatedQuery = { ...query, text: "" };
+      router.replace({ pathname, query: updatedQuery }, undefined, {
+        shallow: true,
+      });
+    }
+  }, [type, text, channelId, orderId]);
+
   const handleSearchFetchOnSuccess = (res) => {
     if (res) {
       setChannelList(res.conversations);
@@ -223,7 +240,7 @@ const Chatting = ({ configData }) => {
     if (e.currentTarget.scrollTop === 0) {
       if (hasNextPage) {
         fetchNextPage().then();
-        e.currentTarget.scrollTop = 300;
+        e.currentTarget.scrollTop = 400;
         setScrollBottom(false);
       }
     }
@@ -349,6 +366,10 @@ const Chatting = ({ configData }) => {
                   handleScroll={handleScroll}
                   scrollBottom={scrollBottom}
                   receiverType={receiverType}
+                  isLoadingMessageSend={isLoadingMessageSend}
+                  userType={userType}
+                  channelId={channelId}
+                  orderId={orderId}
                 />
               )}
             {isFetchingNextPage && <LoadingBox />}

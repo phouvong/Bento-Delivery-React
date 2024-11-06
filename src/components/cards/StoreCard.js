@@ -1,30 +1,34 @@
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { alpha, Grid, styled, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useTranslation } from "react-i18next";
-import { useDispatch, useSelector } from "react-redux";
 import { useAddStoreToWishlist } from "api-manage/hooks/react-query/wish-list/useAddStoreToWishLists";
 import { useWishListStoreDelete } from "api-manage/hooks/react-query/wish-list/useWishListStoreDelete";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
-import {
-  addWishListStore,
-  removeWishListStore,
-} from "../../redux/slices/wishList";
+import { t } from "i18next";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import { useDispatch, useSelector } from "react-redux";
+import { textWithEllipsis } from "styled-components/TextWithEllipsis";
+import { not_logged_in_message } from "utils/toasterMessages";
+import { addWishListStore, removeWishListStore } from "redux/slices/wishList";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
-} from "../../styled-components/CustomStyles.style";
-import { not_logged_in_message } from "utils/toasterMessages";
+} from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
 import CustomRatingBox from "../CustomRatingBox";
 import Body2 from "../typographies/Body2";
 import { CustomOverLay } from "./Card.style";
 import QuickView, { PrimaryToolTip } from "./QuickView";
-import { textWithEllipsis } from "styled-components/TextWithEllipsis";
-import { t } from "i18next";
+import GradeRoundedIcon from "@mui/icons-material/GradeRounded";
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
+import ClosedNow from "components/closed-now";
+const ContentSection = styled(Box)(({ theme }) => ({
+  background: "",
+  marginTop: "10px",
+}));
 
 const FavoriteWrapper = styled(Box)(({ theme }) => ({
   color: theme.palette.primary.main,
@@ -74,7 +78,7 @@ const timeAndDeliveryTypeHandler = (item) => {
 };
 const StoreCard = (props) => {
   const classes = textWithEllipsis();
-  const { item, imageUrl } = props;
+  const { item, imageUrl, topoffer } = props;
   const [isHover, setIsHover] = useState(false);
   const { wishLists } = useSelector((state) => state.wishList);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -169,7 +173,11 @@ const StoreCard = (props) => {
             </FavoriteWrapper>
           </Box>
         )}
-
+        <ClosedNow
+          active={item?.active}
+          open={item?.open}
+          borderRadius="10px"
+        />
         <CustomOverLay hover={isHover}>
           <QuickView
             quickViewHandleClick={quickViewHandleClick}
@@ -181,34 +189,144 @@ const StoreCard = (props) => {
           />
         </CustomOverLay>
       </ImageWrapper>
-
-      <CustomBoxFullWidth>
-        <Grid container>
-          <Grid item xs={9.5}>
+      {topoffer ? (
+        <ContentSection>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "8px",
+            }}
+          >
             <PrimaryToolTip text={item?.name} placement="bottom" arrow="false">
               <Typography
-                className={classes.singleLineEllipsis}
-                fontSize={{ xs: "12px", md: "14px" }}
-                fontWeight="500"
+                sx={{
+                  fontWeight: "600",
+
+                  color: (theme) => theme.palette.text.custom,
+                  fontSize: { xs: "13px", sm: "16px" },
+                }}
+                component="h3"
               >
                 {item?.name}
               </Typography>
             </PrimaryToolTip>
-            {/*<H4 text={item?.name} />*/}
+
+            <Typography
+              sx={{
+                fontSize: "13px",
+                fontWeight: "400",
+                display: "flex",
+                justifyContent: "start",
+                alignItems: "center",
+                gap: "3px",
+                color: (theme) => theme.palette.primary.main,
+              }}
+            >
+              <GradeRoundedIcon
+                sx={{
+                  fontSize: "15px",
+                  color: (theme) => theme.palette.primary.main,
+                }}
+              />
+              {item?.avg_rating}
+            </Typography>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <Typography
+                color="text.secondary"
+                sx={{ fontSize: "12px", fontWeight: "400" }}
+              >
+                {item?.delivery_time}
+              </Typography>
+              {item?.free_delivery && (
+                <>
+                  <FiberManualRecordIcon
+                    color="text.secondary"
+                    sx={{
+                      fontSize: "5px",
+                      mt: 0.2,
+                      color: "text.secondary",
+                    }}
+                  />
+                  <Typography
+                    color="text.secondary"
+                    sx={{
+                      fontSize: "12px",
+                      fontWeight: "400",
+                    }}
+                  >
+                    {t("Free Delivery")}
+                  </Typography>
+                </>
+              )}
+            </Box>
+            <Box>
+              <Typography
+                sx={{
+                  fontSize: "12px",
+                  fontWeight: "500",
+                  color: (theme) => theme.palette.background.default,
+                  background: (theme) => theme.palette.primary.main,
+                  px: "5px",
+                  py: "3px",
+                  borderRadius: "10px",
+                }}
+              >
+                {item?.discount?.discount}
+                {item?.discount?.discount_type && "%"} {t("off")}
+              </Typography>
+            </Box>
+          </Box>
+        </ContentSection>
+      ) : (
+        <CustomBoxFullWidth>
+          <Grid container>
+            <Grid item xs={9.5}>
+              <PrimaryToolTip
+                text={item?.name}
+                placement="bottom"
+                arrow="false"
+              >
+                <Typography
+                  className={classes.singleLineEllipsis}
+                  fontSize={{ xs: "12px", md: "14px" }}
+                  fontWeight="500"
+                  component="h3"
+                >
+                  {item?.name}
+                </Typography>
+              </PrimaryToolTip>
+              {/*<H4 text={item?.name} />*/}
+            </Grid>
+            <Grid item xs={2.5}>
+              {item?.avg_rating > 0 && (
+                <CustomRatingBox rating={item?.avg_rating} />
+              )}
+            </Grid>
+            <Grid item xs={12} sx={{ mt: "10px" }}>
+              <Body2 text={item?.address} />
+            </Grid>
+            <Grid item xs={12} sx={{ mt: "7px" }}>
+              <Body2 text={timeAndDeliveryTypeHandler(item)} />
+            </Grid>
           </Grid>
-          <Grid item xs={2.5}>
-            {item?.avg_rating > 0 && (
-              <CustomRatingBox rating={item?.avg_rating} />
-            )}
-          </Grid>
-          <Grid item xs={12} sx={{ mt: "10px" }}>
-            <Body2 text={item?.address} />
-          </Grid>
-          <Grid item xs={12} sx={{ mt: "7px" }}>
-            <Body2 text={timeAndDeliveryTypeHandler(item)} />
-          </Grid>
-        </Grid>
-      </CustomBoxFullWidth>
+        </CustomBoxFullWidth>
+      )}
     </Wrapper>
   );
 };

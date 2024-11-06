@@ -67,6 +67,7 @@ const BodySection = ({
             page={page}
             menuData={menuData}
             handlePage={handleActivePage}
+            setEditProfile={setEditProfile}
           />
         )}
         {!isSmall && <Divider />}

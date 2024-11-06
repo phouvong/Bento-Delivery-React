@@ -12,12 +12,19 @@ import { useSelector } from "react-redux";
 
 const CustomPhoneNumberInputStyled = styled(PhoneInput)(
   ({ theme, languageDirection, borderRadius }) => ({
+    "&.react-tel-input .special-label": {
+      fontSize: "12px !important",
+      fontWeight: "400 !important",
+      color: theme.palette.neutral[1000],
+      left: languageDirection === "rtl" ? "80%" : "10px",
+      backgroundColor: theme.palette.background.paper,
+      zIndex: "999",
+      display: "inline-block",
+    },
     "&.react-tel-input .flag-dropdown": {
       backgroundColor: theme.palette.background.custom2,
       border: `1px solid ${theme.palette.neutral[200]}`,
-      borderRadius: borderRadius
-        ? `${borderRadius}0px 0px ${borderRadius}`
-        : "3px 0px 0px 5px",
+      borderRadius: borderRadius,
     },
     "&.react-tel-input .selected-flag .flag": {
       right: languageDirection === "rtl" && "11px",
@@ -29,16 +36,25 @@ const CustomPhoneNumberInputStyled = styled(PhoneInput)(
       backgroundColor: theme.palette.background.custom2,
       color: theme.palette.neutral[600],
     },
-    "&.react-tel-input .country-list .search": {
+    "&.react-tel-input .country-list .search ": {
       backgroundColor: theme.palette.background.custom2,
+    },
+    "&.react-tel-input .country-list .search .search-box": {
+      height: "36px !important",
+    },
+    "&.react-tel-input .country-list .search .search-emoji": {
+      display: "none",
     },
     "&.react-tel-input .selected-flag": {
       backgroundColor: theme.palette.neutral[300],
+      borderRadius: "10px 0px 0px 10px !important",
       "&:hover": {
         backgroundColor: theme.palette.background.custom2,
       },
     },
     "&.react-tel-input .country-list .country": {
+      textAlign: "start",
+      padding: "7px 18px",
       "&:hover": {
         backgroundColor: theme.palette.background.custom2,
       },
@@ -48,7 +64,8 @@ const CustomPhoneNumberInputStyled = styled(PhoneInput)(
     },
     "&.react-tel-input .country-list": {
       backgroundColor: theme.palette.background.custom2,
-      width: "440px",
+      width: "300px",
+
       [theme.breakpoints.down("sm")]: {
         width: "300px",
       },

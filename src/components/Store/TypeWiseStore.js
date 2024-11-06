@@ -9,10 +9,18 @@ import useGetPopularStore, {
 } from "../../api-manage/hooks/react-query/store/useGetPopularStore";
 import { Box } from "@mui/system";
 import Shimmer from "../home/stores-with-filter/Shimmer";
+import useGetTopOffers from "api-manage/hooks/react-query/product-details/useGetTopOffers";
+import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 
 const TypeWiseStore = ({ storeType, title }) => {
+  useScrollToTop();
   const [type, setType] = useState("all");
   const { data, refetch, isLoading } = useGetTypeWiseStore(storeType, type);
+  const {
+    data: nearByData,
+    refetch: nearbyRefetch,
+    isLoading: nearMeLoading,
+  } = useGetTopOffers();
   const queryKey = "navbar-stores";
   const router = useRouter();
   const {
@@ -23,6 +31,8 @@ const TypeWiseStore = ({ storeType, title }) => {
   useEffect(() => {
     if (storeType === "latest") {
       refetch();
+    } else if (storeType === "top_offer_near_me") {
+      nearbyRefetch();
     } else {
       popularRefetch();
     }
@@ -51,6 +61,14 @@ const TypeWiseStore = ({ storeType, title }) => {
           return <>{renderStoreList(data?.stores)}</>;
         }
       }
+    } else if (storeType === "top_offer_near_me") {
+      if (nearMeLoading) {
+        return <>{renderShimmer()}</>;
+      } else {
+        if (nearByData?.stores?.length > 0) {
+          return <>{renderStoreList(nearByData?.stores)}</>;
+        }
+      }
     } else {
       if (popularIsLoading) {
         return <>{renderShimmer()}</>;
@@ -64,7 +82,7 @@ const TypeWiseStore = ({ storeType, title }) => {
 
   return (
     <>
-      <CustomPaperBigCard>
+      <CustomPaperBigCard minHeight="35vh">
         <H1 text={title} textAlign="left" />
         {handleStoreList()}
       </CustomPaperBigCard>

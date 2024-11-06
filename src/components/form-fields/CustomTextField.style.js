@@ -1,10 +1,26 @@
-import { styled, TextField } from "@mui/material";
+import { alpha, styled, TextField } from "@mui/material";
 
 export const CustomTextFieldStyle = styled(TextField)(
-  ({ theme, borderColor, language_direction, height, multiline }) => ({
+  ({
+    theme,
+    borderColor,
+    language_direction,
+    height,
+    multiline,
+    fontSize,
+    backgroundColor,
+  }) => ({
     border: borderColor && `1px solid ${borderColor}`,
     borderRadius: borderColor && "10px",
-
+    backgroundColor: backgroundColor ? theme.palette.neutral[100] : "none",
+    "& .MuiInputLabel-root": {
+      color: theme.palette.neutral[400], // Default or custom label color
+      fontWeight: "500",
+    },
+    "& .MuiInputBase-input::placeholder": {
+      fontSize: fontSize, // Customizing the font size for the placeholder
+      color: alpha(theme.palette.neutral[500], 0.5),
+    },
     "& .MuiOutlinedInput-root": {
       height: height ? height : "100%",
       flexDirection:

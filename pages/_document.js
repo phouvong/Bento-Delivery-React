@@ -27,11 +27,34 @@ class CustomDocument extends Document {
             src="https://accounts.google.com/gsi/client"
             async
           />
+          <script
+            type="text/javascript"
+            src="https://appleid.cdn-apple.com/appleauth/static/jsapi/appleid/1/en_US/appleid.auth.js"
+            async
+          />
           <meta name="theme-color" content="#111827" />
-          {/*<meta*/}
-          {/*  name="robots"*/}
-          {/*  content="nofollow, noindex, max-snippet:1, max-video-preview:1, max-image-preview:standard"*/}
-          {/*/>*/}
+          <meta
+            name="robots"
+            content="nofollow, noindex, max-snippet:1, max-video-preview:1, max-image-preview:standard"
+          />
+          {process.env.NODE_ENV === "production" && (
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+                new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+                j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+                'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+                })(window,document,'script','dataLayer','GTM-563VD5K3');`,
+              }}
+            ></script>
+          )}
+          {process.env.NODE_ENV === "production" && (
+            <noscript
+              dangerouslySetInnerHTML={{
+                __html: `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-563VD5K3" height="0" width="0" style="display:none;visibility:hidden"></iframe>`,
+              }}
+            ></noscript>
+          )}
         </Head>
         <body>
           <Main />

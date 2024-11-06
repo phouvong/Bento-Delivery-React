@@ -1,5 +1,5 @@
 import { Box, Stack } from "@mui/system";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
@@ -21,15 +21,12 @@ import {
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import { useTheme } from "@mui/material/styles";
+import { t } from "i18next";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import CustomPopover from "../../CustomPopover";
 import AllStores from "./AllStores";
 import MobileMenus from "./MobileMenus";
-import NewlyJoined from "./NewlyJoined";
-import PopularStores from "./PopularStores";
-import TopRatedStores from "./TopRatedStores";
-import { t } from "i18next";
 
 const menus = [
   { label: "All", value: "all" },
@@ -122,9 +119,7 @@ const Stores = (props) => {
   const stores = t("Stores");
   const handleSelectedMenuIndex = (value) => {
     setSelectedMenuIndex(value);
-    //setSelectedFilterValue("all");
   };
-
   const desktopScreenHandler = () => {
     return (
       <Stack
@@ -158,45 +153,6 @@ const Stores = (props) => {
     );
   };
 
-  // const handleStoresLayout = useCallback(() => {
-  //   if (selectedMenuIndex === 0) {
-  //     return (
-  //       <AllStores
-  //         selectedFilterValue={selectedFilterValue}
-  //         configData={configData}
-  //         totalDataCount={totalDataCount}
-  //         setTotalDataCount={setTotalDataCount}
-  //       />
-  //     );
-  //   } else if (selectedMenuIndex === 1) {
-  //     return (
-  //       <NewlyJoined
-  //         selectedFilterValue={selectedFilterValue}
-  //         configData={configData}
-  //         totalDataCount={totalDataCount}
-  //         setTotalDataCount={setTotalDataCount}
-  //       />
-  //     );
-  //   } else if (selectedMenuIndex === 2) {
-  //     return (
-  //       <PopularStores
-  //         selectedFilterValue={selectedFilterValue}
-  //         configData={configData}
-  //         totalDataCount={totalDataCount}
-  //         setTotalDataCount={setTotalDataCount}
-  //       />
-  //     );
-  //   } else {
-  //     return (
-  //       <TopRatedStores
-  //         selectedFilterValue={selectedFilterValue}
-  //         configData={configData}
-  //         totalDataCount={totalDataCount}
-  //         setTotalDataCount={setTotalDataCount}
-  //       />
-  //     );
-  //   }
-  // }, [selectedMenuIndex, selectedFilterValue]);
   return (
     <HomeComponentsWrapper sx={{ paddingTop: "1rem" }}>
       <CustomStackFullWidth
@@ -213,7 +169,7 @@ const Stores = (props) => {
         }}
       >
         {totalDataCount ? (
-          <H2 text={`${totalDataCount} ${stores}`} />
+          <H2 text={`${totalDataCount} ${stores}`} component="h2" />
         ) : (
           <Skeleton variant="text" width="80px" />
         )}

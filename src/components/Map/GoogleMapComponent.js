@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, Polygon, useJsApiLoader } from "@react-google-maps/api";
 import {
   alpha,
   CircularProgress,
@@ -33,6 +33,8 @@ const GoogleMapComponent = ({
   isModalExpand,
   left,
   bottom,
+  polygonPaths,
+  inZoom,
 }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
@@ -66,22 +68,25 @@ const GoogleMapComponent = ({
     }),
     []
   );
+
   const { isLoaded } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAP_KEY,
   });
+
   const [isMounted, setIsMounted] = useState(false);
-  const [openInfoWindow, setOpenInfoWindow] = useState(false);
   const [mapSetup, setMapSetup] = useState(false);
-  useEffect(() => setIsMounted(true), []);
   const [map, setMap] = useState(null);
-  const [zoom, setZoom] = useState(17);
+  const [zoom, setZoom] = useState(polygonPaths ? 9 : 17);
   const [centerPosition, setCenterPosition] = useState(center);
+  const [polygonInstance, setPolygonInstance] = useState(null);
 
   const onLoad = useCallback(function callback(map) {
-    // setZoom(17);
     setMap(map);
   }, []);
+
+  useEffect(() => setIsMounted(true), []);
+
   useEffect(() => {
     if (location && placeDetailsEnabled) {
       setCenterPosition(location);
@@ -92,14 +97,13 @@ const GoogleMapComponent = ({
         lng: map.center?.lng(),
       });
     }
-
     setIsMounted(true);
   }, [map, mapSetup, placeDetailsEnabled, location]);
 
   const onUnmount = useCallback(function callback(map) {
     setMap(null);
-    // setMapSetup(false)
   }, []);
+
   const handleZoomIn = () => {
     if (zoom <= 21) {
       setZoom((prevZoom) => Math.min(prevZoom + 1));
@@ -111,6 +115,35 @@ const GoogleMapComponent = ({
       setZoom((prevZoom) => Math.max(prevZoom - 1));
     }
   };
+
+  // Effect to update polygon instance and adjust map bounds when polygonPaths change
+  useEffect(() => {
+    if (polygonInstance) {
+      polygonInstance.setMap(null); // Remove the old polygon
+    }
+    if (polygonPaths?.length > 0 && map) {
+      const newPolygon = new window.google.maps.Polygon({
+        paths: polygonPaths,
+        fillColor: "blue",
+        fillOpacity: 0.3,
+        strokeColor: theme.palette.error.main,
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        map,
+      });
+      setPolygonInstance(newPolygon);
+
+      // Create a LatLngBounds object to fit the polygon
+      const bounds = new window.google.maps.LatLngBounds();
+      polygonPaths.forEach((path) => {
+        bounds.extend(new window.google.maps.LatLng(path.lat, path.lng));
+      });
+
+      // Fit the map to the new polygon bounds
+      map.fitBounds(bounds);
+    }
+  }, [polygonPaths, map]);
+
   return isLoaded ? (
     <Stack
       padding="0px"
@@ -162,31 +195,29 @@ const GoogleMapComponent = ({
         onLoad={onLoad}
         zoom={zoom}
         onUnmount={onUnmount}
-        onMouseDown={(e) => {
-          setMapSetup?.(true);
+        onMouseDown={() => {
+          setMapSetup(true);
           setDisablePickButton?.(true);
         }}
-        onMouseUp={(e) => {
-          setMapSetup?.(false);
+        onMouseUp={() => {
+          setMapSetup(false);
           setDisablePickButton?.(false);
-          setLocationEnabled?.(true);
-          setLocation?.({
+          setLocationEnabled(true);
+          setLocation({
             lat: map.center?.lat(),
             lng: map.center?.lng(),
           });
-          setCenterPosition?.({
+          setCenterPosition({
             lat: map.center?.lat(),
             lng: map.center?.lng(),
           });
-          setPlaceDetailsEnabled?.(false);
-          setPlaceDescription?.(undefined);
+          setPlaceDetailsEnabled(false);
+          setPlaceDescription(undefined);
         }}
-        //  yesIWantToUseGoogleMapApiInternals
         onZoomChanged={() => {
-          // setMapSetup(true)
           if (map) {
-            setLocationEnabled?.(true);
-            setLocation?.({
+            setLocationEnabled(true);
+            setLocation({
               lat: map.center?.lat(),
               lng: map.center?.lng(),
             });
@@ -194,7 +225,6 @@ const GoogleMapComponent = ({
               lat: map.center?.lat(),
               lng: map.center?.lng(),
             });
-            // setPlaceDetailsEnabled(false)
           }
         }}
         options={options}

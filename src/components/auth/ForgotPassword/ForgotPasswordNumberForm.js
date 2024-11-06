@@ -41,7 +41,6 @@ const ForgotPasswordNumberForm = ({
       } catch (err) {}
     },
   });
-  console.log({ configData });
   const onSuccessHandler = (res) => {
     if (res) {
       if (res?.errors?.length > 0) {
@@ -75,7 +74,7 @@ const ForgotPasswordNumberForm = ({
   const handleOnChange = (value) => {
     phoneFormik.setFieldValue("phone", `+${value}`);
   };
-  console.log({ configData });
+
   return (
     <CustomStackFullWidth>
       <Stack>
@@ -90,6 +89,8 @@ const ForgotPasswordNumberForm = ({
             touched={phoneFormik.touched.phone}
             errors={phoneFormik.errors.phone}
             lanDirection={lanDirection}
+            height="45px"
+            borderRadius="10px"
           />
           <LoadingButton
             type="submit"

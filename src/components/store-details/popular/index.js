@@ -25,7 +25,7 @@ const PopularInTheStore = ({ id, storeShare }) => {
         case ModuleTypes.GROCERY:
           return {
             bgColor: alpha(theme.palette.primary.main, 0.2),
-            title: "Popular in this store!",
+            title: "Recommended for you",
           };
         case ModuleTypes.PHARMACY:
           return {
@@ -35,12 +35,12 @@ const PopularInTheStore = ({ id, storeShare }) => {
         case ModuleTypes.ECOMMERCE:
           return {
             bgColor: alpha(theme.palette.info.blue, 0.1),
-            title: "Popular in this store!",
+            title: "Recommended for you",
           };
         case ModuleTypes.FOOD:
           return {
             bgColor: alpha(theme.palette.moduleTheme.food, 0.1),
-            title: "Popular in this Restaurant!",
+            title: "Recommended for you",
           };
       }
     } else {
@@ -86,9 +86,6 @@ const PopularInTheStore = ({ id, storeShare }) => {
 
   useEffect(() => {
     refetchCommonCondition();
-  }, []);
-
-  useEffect(() => {
     refetch();
   }, []);
 

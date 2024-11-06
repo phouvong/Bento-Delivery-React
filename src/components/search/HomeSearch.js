@@ -55,8 +55,6 @@ const HomeSearch = () => {
   const handleKeyPress = (value) => {
     // if (e.key === 'Enter') {
     setOpenSearchSuggestions(false);
-    // Do code here
-    // router.push('/search')
     let getItem = JSON.parse(localStorage.getItem("searchedValues"));
     if (getItem && getItem.length > 0) {
       if (value !== "") {

@@ -7,8 +7,11 @@ import { useTranslation } from "react-i18next";
 import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
 import { RouteLinksData } from "../demoLinks";
 import { getModule } from "../../../helper-functions/getLanguage";
+import { setAllData } from "redux/slices/storeRegistrationData";
+import { useDispatch } from "react-redux";
 
 const RouteLinks = (props) => {
+  const dispatch = useDispatch();
   const { token, configData } = props;
   const { t } = useTranslation();
   const router = useRouter();
@@ -27,9 +30,17 @@ const RouteLinks = (props) => {
         toast.error(t("You must pick a zone to access this page."));
       }
     } else if (value === "restaurant_owner") {
-      window.open(href);
+      dispatch(setAllData(null));
+      router.push(
+        {
+          pathname: href,
+          query: { active: "active" }, // Add your query parameter here
+        },
+        undefined,
+        { shallow: true }
+      );
     } else if (value === "delivery_man") {
-      window.open(href);
+      router.push(href, undefined, { shallow: true });
     } else if (value === "help-and-support") {
       router.push(href, undefined, { shallow: true });
     }
@@ -81,7 +92,6 @@ const RouteLinks = (props) => {
       >
         {t("Track Order")}
       </Typography>
-
     </CustomStackFullWidth>
   );
 };

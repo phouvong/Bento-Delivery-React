@@ -35,6 +35,9 @@ const CustomMapSearch = ({
   placeId,
   handleCloseLocation1,
   isRefetching,
+  newMap,
+
+  width,
 }) => {
   const theme = useTheme();
   const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
@@ -82,7 +85,7 @@ const CustomMapSearch = ({
                         borderRadius: borderRadius ? borderRadius : "0px",
                         padding: "7px 10px",
                       }}
-                    // onClick={() => handleAgreeLocation()}
+                      // onClick={() => handleAgreeLocation()}
                     >
                       <SearchIcon />
                     </IconButton>
@@ -104,22 +107,6 @@ const CustomMapSearch = ({
                   ) : (
                     <>
                       {toReceiver === "true" ? null : (
-                        // <>{(isLanding && placeId) ? (
-                        //   <IconButton
-                        //     sx={{
-                        //       mr: isXSmall ? "30pxpx" : "80px",
-                        //       padding: "5px",
-                        //     }}
-                        //   >
-                        //     <CloseIcon
-                        //       style={{
-                        //         cursor: "pointer",
-                        //         height: "20px",
-                        //       }}
-                        //       onClick={() => handleCloseLocation()}
-                        //     />
-                        //   </IconButton>
-                        // ) : (
                         <IconButton
                           sx={{
                             mr: fromparcel === "true" ? "-61px" : "-31px",

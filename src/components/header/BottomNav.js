@@ -16,6 +16,7 @@ import { useSelector } from "react-redux";
 import { getCartListModuleWise } from "../../helper-functions/getCartListModuleWise";
 import WishListCardView from "../wishlist";
 import { getToken } from "../../helper-functions/getToken";
+import { toast } from "react-hot-toast";
 
 const styles = {
   maxWidth: 2000,
@@ -41,7 +42,7 @@ const BottomNav = () => {
     if (getToken()) {
       setWishListSideDrawerOpen(true);
     } else {
-      router.push("/auth/sign-in");
+      toast.error(t("Please login"));
     }
   };
   // const handleChange = () => {};
@@ -76,7 +77,7 @@ const BottomNav = () => {
                       }
                     );
                   } else {
-                    router.push("/auth/sign-in");
+                    toast.error(t("Please login"));
                   }
                 } else {
                   router.push(`/${newValue}`);

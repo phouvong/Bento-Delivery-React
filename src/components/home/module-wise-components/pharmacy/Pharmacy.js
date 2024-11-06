@@ -18,6 +18,7 @@ import VisitAgain from "../../visit-again";
 import CommonConditions from "./common-conditions";
 import FeaturedStores from "./featured-stores";
 import PharmacyStaticBanners from "./pharmacy-banners/PharmacyStaticBanners";
+import TopOffersNearMe from "components/home/top-offers-nearme";
 
 const menus = ["All", "New", "Baby Care", "Womans Care", "Mens"];
 
@@ -71,6 +72,7 @@ const Pharmacy = ({ configData }) => {
 					<FeaturedCategories configData={configData} />
 				</CustomContainer>
 			</Grid>
+
 			<Grid item xs={12}>
 				<CustomContainer>
 					<PharmacyStaticBanners />
@@ -102,12 +104,20 @@ const Pharmacy = ({ configData }) => {
 			</Grid>
 			<Grid item xs={12}>
 				<CustomContainer>
+					<TopOffersNearMe title="Top offers near me" />
+				</CustomContainer>
+			</Grid>
+			<Grid item xs={12}>
+				<CustomContainer>
 					<Banners />
 				</CustomContainer>
 			</Grid>
 			<Grid item xs={12}>
 				<CustomContainer>
-					<FeaturedStores title="Featured Store" configData={configData} />
+					<FeaturedStores
+						title="Featured Store"
+						configData={configData}
+					/>
 				</CustomContainer>
 			</Grid>
 			<Grid item xs={12}>
@@ -139,7 +149,9 @@ const Pharmacy = ({ configData }) => {
 				</CustomContainer>
 			</Grid>
 			{orderDetailsModalOpen && !token && (
-				<OrderDetailsModal orderDetailsModalOpen={orderDetailsModalOpen} />
+				<OrderDetailsModal
+					orderDetailsModalOpen={orderDetailsModalOpen}
+				/>
 			)}
 		</Grid>
 	);

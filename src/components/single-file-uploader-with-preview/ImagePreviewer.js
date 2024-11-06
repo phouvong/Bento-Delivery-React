@@ -20,6 +20,8 @@ const ImagePreviewer = ({
   error,
   objectFit,
   height,
+  hintText,
+  marginLeft,
 }) => {
   let previewImage;
 
@@ -34,6 +36,7 @@ const ImagePreviewer = ({
       <CustomBoxForFilePreviewer>
         {previewImage ? (
           <FilePreviewerWrapper
+            marginLeft={marginLeft}
             onClick={() => anchor.current.click()}
             width={width}
             objectFit={objectFit}
@@ -62,6 +65,7 @@ const ImagePreviewer = ({
           </FilePreviewerWrapper>
         ) : (
           <FilePreviewerWrapper
+            marginLeft={marginLeft}
             onClick={() => anchor.current.click()}
             width={width}
             height={height}

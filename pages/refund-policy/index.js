@@ -10,7 +10,9 @@ import { getImageUrl } from "utils/CustomFunctions";
 
 const Index = ({ configData, landingPageData }) => {
   const { t } = useTranslation();
-  const { data, refetch, isFetching } = useGetPolicyPage("/refund");
+  const { data, refetch, isFetching } = useGetPolicyPage(
+    "/api/v1/refund-policy"
+  );
   useEffect(() => {
     refetch();
   }, []);

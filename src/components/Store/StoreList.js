@@ -19,7 +19,7 @@ const StoreList = ({ storeType, type, setType, data }) => {
   const { configData } = useSelector((state) => state.configData);
   const store_image_url = `${configData?.base_urls?.store_image_url}`;
   return (
-    <Box marginTop="20px" minHeight="60vh">
+    <Box marginTop="20px" minHeight="36vh">
       <Grid
         container
         spacing={{ xs: 2, md: 3 }}

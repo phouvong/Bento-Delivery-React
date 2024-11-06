@@ -11,7 +11,7 @@ import { getImageUrl } from "utils/CustomFunctions";
 const Index = ({ configData, landingPageData }) => {
   const { t } = useTranslation();
   const { data, refetch, isFetching } = useGetPolicyPage(
-    "/terms-and-conditions"
+    "/api/v1/terms-and-conditions"
   );
   useEffect(() => {
     refetch();

@@ -7,7 +7,6 @@ import {
 } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import { useRouter } from "next/router";
-import React from "react";
 import { useTranslation } from "react-i18next";
 import { CustomButtonPrimary } from "../../styled-components/CustomButtons.style";
 import {
@@ -18,9 +17,10 @@ import { IsSmallScreen } from "../../utils/CommonValues";
 import CustomImageContainer from "../CustomImageContainer";
 import DollarSignHighlighter from "../DollarSignHighlighter";
 import CustomContainer from "../container";
-import Subtitle1 from "../typographies/Subtitle1";
 import deliveryMan from "./assets/delivery-man.svg";
 import seller from "./assets/seller.svg";
+import { useDispatch } from "react-redux";
+import { setAllData } from "redux/slices/storeRegistrationData";
 
 const ImageContainer = styled(Box)(({ theme }) => ({
   position: "relative",
@@ -52,6 +52,7 @@ const TopText = ({ data }) => {
         textAlign="center"
         variant={isSmall ? "h7" : "h4"}
         lineHeight={{ xs: "31px", sm: "45px", md: "57px" }}
+        component="h2"
       >
         <DollarSignHighlighter theme={theme} text={data?.earning_title} />
       </Typography>
@@ -75,11 +76,16 @@ const Card = ({
   image,
   isSmall,
 }) => {
+  const dispatch = useDispatch();
   const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
   const redirectHandler = () => {
-    router.push(redirectLink, undefined, { shallow: true });
+    dispatch(setAllData(null));
+    router.push({
+      pathname: redirectLink,
+      query: { active: "active" }, // Add your query parameter here
+    });
   };
   return (
     <CustomBoxFullWidth
@@ -120,6 +126,7 @@ const Card = ({
               fontWeight="700"
               lineHeight={{ xs: "18px", sm: "24px", md: "33px" }}
               fontSize={{ xs: "14px", sm: "18px", md: "26px" }}
+              component="h3"
             >
               <DollarSignHighlighter
                 theme={theme}
@@ -165,31 +172,31 @@ const CenterCards = ({ data, isSmall }) => {
       justifyContent="space-between"
       alignItems="stretch"
     >
-      {data?.earning_seller_title && (
+      {data?.earning_seller_status ? (
         <Card
           image={seller}
           headingText={data?.earning_seller_title}
           subtitleText={data?.earning_seller_sub_title}
           buttonText={data?.earning_seller_button_name}
-          redirectLink={data?.earning_seller_button_url}
+          redirectLink="store-registration"
           isSmall={isSmall}
         />
-      )}
+      ) : null}
 
-      {data?.earning_dm_title && (
+      {data?.earning_dm_status ? (
         <Card
           image={deliveryMan}
           headingText={data?.earning_dm_title}
           subtitleText={data?.earning_dm_sub_title}
           buttonText={data?.earning_dm_button_name}
-          redirectLink={data?.earning_dm_button_url}
+          redirectLink="deliveryman-registration"
           isSmall={isSmall}
         />
-      )}
+      ) : null}
     </CustomStackFullWidth>
   );
 };
-const Registration = ({ data, isSmall }) => {
+const Registration = ({ data, isSmall, configData }) => {
   return (
     <CustomContainer>
       <CustomStackFullWidth

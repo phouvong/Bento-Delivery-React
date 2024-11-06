@@ -18,6 +18,7 @@ export const filterTypeItems = [
     value: "popular",
     checked: false,
   },
+
   // {
   //   label: "Price",
   //   value: "price",
@@ -34,7 +35,7 @@ export const filterTypeItems = [
 
 export const filterTypeStores = [
   // { label: "On Sale", value: "on_sale", checked: false },
-  { label: "Nearby", value: "nearby", checked: false },
+
   {
     label: "Currently Open",
     value: "currently_open",
@@ -52,6 +53,12 @@ export const filterTypeStores = [
     value: "popular",
     checked: false,
   },
+  {
+    label: "Free delivery",
+    value: "free_delivery",
+    checked: false,
+  },
+  { label: "Coupon Applicable Restaurants", value: "coupon", checked: false },
   // {
   //   label: "Best Seller",
   //   value: "best_seller",

@@ -18,26 +18,28 @@ import storedDataSliceReducer from "../slices/storedData";
 import themeSettingsReducer from "../slices/themeSettings";
 import utilsReducers from "../slices/utils";
 import wishListReducer from "../slices/wishList";
+import storeResDataReducer from "../slices/storeRegistrationData";
 
 //register all reducers here
 export const rootReducer = combineReducers({
-	example: exampleReducer,
-	themeSettings: themeSettingsReducer,
-	configData: configDataReducer,
-	parcelInfoData: parcelInfoDataReducer,
-	utilsData: utilsReducers,
-	profileInfo: profileInfoReducers,
-	parcelCategories: parcelCategoriesReducers,
-	cart: cartReducer,
-	wishList: wishListReducer,
-	searchFilterStore: searchFilterReducer,
-	fbCredentialsStore: fbCredentialSliceReducer,
-	storedData: storedDataSliceReducer,
-	languageChange: languageChangeReducer,
-	addressModel: AddAddressModalReducer,
-	guestUserInfo: guestUserReducer,
-	offlinePayment: offlinePaymentInfoReducer,
-	categoryIds: categoryIdsReducer,
-	cashbackList: cashbackReducer,
-	brands: brandsReducer,
+  example: exampleReducer,
+  themeSettings: themeSettingsReducer,
+  configData: configDataReducer,
+  parcelInfoData: parcelInfoDataReducer,
+  utilsData: utilsReducers,
+  profileInfo: profileInfoReducers,
+  parcelCategories: parcelCategoriesReducers,
+  cart: cartReducer,
+  wishList: wishListReducer,
+  searchFilterStore: searchFilterReducer,
+  fbCredentialsStore: fbCredentialSliceReducer,
+  storedData: storedDataSliceReducer,
+  languageChange: languageChangeReducer,
+  addressModel: AddAddressModalReducer,
+  guestUserInfo: guestUserReducer,
+  offlinePayment: offlinePaymentInfoReducer,
+  categoryIds: categoryIdsReducer,
+  cashbackList: cashbackReducer,
+  brands: brandsReducer,
+  storeRegData: storeResDataReducer,
 });

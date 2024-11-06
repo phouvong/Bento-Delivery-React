@@ -1,18 +1,19 @@
-import React, { useEffect, useState } from "react";
-import ComponentOne from "./ComponentOne";
-import Registration from "./Registration";
-import ComponentTwo from "./ComponentTwo";
-import HeroSection from "./hero-section/HeroSection";
+import { NoSsr, useMediaQuery, useTheme } from "@mui/material";
+import AvailableZoneSection from "components/landing-page/AvailableZoneSection";
 import dynamic from "next/dynamic";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
+import { useGeolocated } from "react-geolocated";
+import CookiesConsent from "../CookiesConsent";
+import MapModal from "../Map/MapModal";
 import PushNotificationLayout from "../PushNotificationLayout";
 import AppDownloadSection from "./app-download-section/index";
-import { useGeolocated } from "react-geolocated";
-import { useRouter } from "next/router";
-import MapModal from "../Map/MapModal";
 import Banners from "./Banners";
-import { NoSsr, useMediaQuery, useTheme } from "@mui/material";
+import ComponentOne from "./ComponentOne";
+import ComponentTwo from "./ComponentTwo";
 import DiscountBanner from "./DiscountBanner";
-import CookiesConsent from "../CookiesConsent";
+import HeroSection from "./hero-section/HeroSection";
+import Registration from "./Registration";
 
 const LandingPage = ({ configData, landingPageData }) => {
   const Testimonials = dynamic(() => import("./Testimonials"), {
@@ -38,7 +39,6 @@ const LandingPage = ({ configData, landingPageData }) => {
     if (location) {
       isModuleExist && setOpen(false);
     } else {
-      setOpen(false);
     }
   };
   const router = useRouter();
@@ -74,17 +74,22 @@ const LandingPage = ({ configData, landingPageData }) => {
           configData={configData}
           landingPageData={landingPageData}
         />
-        {(landingPageData?.earning_title ||
-          landingPageData?.earning_sub_title ||
-          landingPageData?.earning_seller_title ||
-          landingPageData?.earning_seller_sub_title ||
-          landingPageData?.earning_dm_title ||
-          landingPageData?.earning_dm_sub_title) && (
-          <Registration data={landingPageData} isSmall={isSmall} />
+        {landingPageData?.available_zone_status === 1 &&
+          landingPageData?.available_zone_list?.length > 0 && (
+            <AvailableZoneSection landingPageData={landingPageData} />
+          )}
+
+        {(landingPageData?.earning_seller_status ||
+          landingPageData?.earning_dm_status) && (
+          <Registration
+            configData={configData}
+            data={landingPageData}
+            isSmall={isSmall}
+          />
         )}
-        {landingPageData?.fixed_promotional_banner && (
+        {landingPageData?.fixed_promotional_banner_full_url && (
           <DiscountBanner
-            bannerImage={landingPageData?.fixed_promotional_banner_storage}
+            bannerImage={landingPageData?.fixed_promotional_banner_full_url}
             isSmall={isSmall}
           />
         )}

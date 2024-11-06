@@ -20,6 +20,7 @@ import SpecialFoodOffers from "../../special-food-offers";
 import Stores from "../../stores";
 import VisitAgain from "../../visit-again";
 import FeaturedCategoriesWithFilter from "../ecommerce/FeaturedCategoriesWithFilter";
+import TopOffersNearMe from "components/home/top-offers-nearme";
 
 const FoodModule = (props) => {
 	const { configData } = props;
@@ -101,12 +102,21 @@ const FoodModule = (props) => {
 			</Grid>
 			<Grid item xs={12}>
 				<CustomContainer>
+					<TopOffersNearMe title="Top offers near me" />
+				</CustomContainer>
+			</Grid>
+
+			<Grid item xs={12}>
+				<CustomContainer>
 					<Banners />
 				</CustomContainer>
 			</Grid>
 			<Grid item xs={12}>
 				<CustomContainer>
-					<BestReviewedItems title="Best Reviewed Items" info={data} />
+					<BestReviewedItems
+						title="Best Reviewed Items"
+						info={data}
+					/>
 				</CustomContainer>
 			</Grid>
 			<Grid item xs={12}>
@@ -146,7 +156,9 @@ const FoodModule = (props) => {
        </CustomContainer>
       </Grid> */}
 			{orderDetailsModalOpen && !token && (
-				<OrderDetailsModal orderDetailsModalOpen={orderDetailsModalOpen} />
+				<OrderDetailsModal
+					orderDetailsModalOpen={orderDetailsModalOpen}
+				/>
 			)}
 		</Grid>
 	);

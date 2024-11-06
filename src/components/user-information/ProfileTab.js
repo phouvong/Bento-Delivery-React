@@ -25,6 +25,7 @@ const ProfileTab = ({
   isLoadingDelete,
   accountDeleteStatus,
   setAccountDeleteStatus,
+  setEditProfile,
 }) => {
   const theme = useTheme();
   const tabMenu = menuData?.filter((item) => item?.id !== 10);
@@ -33,6 +34,7 @@ const ProfileTab = ({
   const { configData } = useSelector((state) => state.configData);
   const handleClick = (item) => {
     handlePage(item);
+    setEditProfile(false);
   };
 
   const [anchorEl, setAnchorEl] = useState(null);

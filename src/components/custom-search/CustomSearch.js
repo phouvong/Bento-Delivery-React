@@ -24,6 +24,7 @@ const CustomSearch = ({
   if (typeof window !== "undefined") {
     language_direction = localStorage.getItem("direction");
   }
+
   useEffect(() => {
     if (selectedValue) {
       setValue(selectedValue);
@@ -38,9 +39,10 @@ const CustomSearch = ({
       e.preventDefault();
     }
   };
+  const remove = "true";
   const handleReset = () => {
     setValue("");
-    handleSearchResult?.("");
+    handleSearchResult?.("", remove);
     setIsEmpty?.(true);
   };
   const handleChange = (value) => {

@@ -372,7 +372,7 @@ export const CustomOtp = styled(OutlinedInput)(({ theme }) => ({
 export const CustomTextFieldContainer = styled(Box)(
   ({ theme, background, noheight }) => ({
     width: "100%",
-    height: !noheight && "5.5rem",
+    height: !noheight && "5rem",
     color: theme.palette.neutral[1000],
   })
 );
@@ -580,8 +580,8 @@ export const customScrollBar = styled(Stack)(({ theme, height }) => ({
 export const CustomTypographyGray = styled(Typography)(
   ({ theme, nodefaultfont, textdecoration }) => ({
     color: theme.palette.neutral[400],
-    fontWeight: "bold",
-    fontSize: nodefaultfont !== "true" && "1rem",
+    fontWeight: "normal",
+    fontSize: nodefaultfont !== "true" && "14px",
     textDecoration: textdecoration,
   })
 );

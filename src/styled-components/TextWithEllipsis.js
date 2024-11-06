@@ -12,6 +12,7 @@ export const textWithEllipsis = makeStyles({
   },
   singleLineEllipsis: {
     overflow: "hidden",
+    WebkitBoxOrient: "vertical",
     textOverflow: "ellipsis",
     display: "-webkit-box",
     "-webkit-line-clamp": 1,

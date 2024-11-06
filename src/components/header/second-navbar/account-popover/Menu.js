@@ -27,7 +27,6 @@ const Menu = ({ onClose, cartListRefetch }) => {
   const { configData } = useSelector((state) => state.configData);
   const dispatch = useDispatch();
   const router = useRouter();
-
   const handleLogout = async () => {
     setIsLogoutLoading(true);
     dispatch(setWelcomeModal(false));
@@ -115,14 +114,17 @@ const Menu = ({ onClose, cartListRefetch }) => {
         })}
         <Divider />
         <MenuItem
-          onClick={() => setOpenModal(true)}
+          onClick={() => {
+            setOpenModal(true);
+            setIsLogoutLoading(false);
+          }}
           sx={{
             "&:hover": {
               backgroundColor: (theme) => theme.palette.primary.semiLight,
             },
           }}
         >
-          <ListItemIcon>
+          <ListItemIcon sx={{ minWidth: "25px !important" }}>
             <LogoutIcon fontSize="small" />
           </ListItemIcon>
           <ListItemText

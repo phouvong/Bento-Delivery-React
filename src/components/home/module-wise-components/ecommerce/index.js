@@ -25,6 +25,7 @@ import CampaignBanners from "./CampaignBanners";
 import FeaturedCategoriesWithFilter from "./FeaturedCategoriesWithFilter";
 import NewArrivals from "./NewArrivals";
 import SinglePoster from "./SinglePoster";
+import TopOffersNearMe from "components/home/top-offers-nearme";
 
 const Shop = (props) => {
 	const { configData } = props;
@@ -115,6 +116,11 @@ const Shop = (props) => {
 			</Grid>
 			<Grid item xs={12}>
 				<CustomContainer>
+					<TopOffersNearMe title="Top offers near me" />
+				</CustomContainer>
+			</Grid>
+			<Grid item xs={12}>
+				<CustomContainer>
 					<CampaignBanners />
 				</CustomContainer>
 			</Grid>
@@ -125,7 +131,10 @@ const Shop = (props) => {
 			</Grid>
 			<Grid item xs={12}>
 				<CustomContainer>
-					<FeaturedStores title="Popular Store" configData={configData} />
+					<FeaturedStores
+						title="Popular Store"
+						configData={configData}
+					/>
 				</CustomContainer>
 			</Grid>{" "}
 			<Grid item xs={12}>
@@ -197,7 +206,9 @@ const Shop = (props) => {
 				</CustomContainer>
 			</Grid>
 			{orderDetailsModalOpen && !token && (
-				<OrderDetailsModal orderDetailsModalOpen={orderDetailsModalOpen} />
+				<OrderDetailsModal
+					orderDetailsModalOpen={orderDetailsModalOpen}
+				/>
 			)}
 		</Grid>
 	);

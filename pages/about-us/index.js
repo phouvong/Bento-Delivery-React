@@ -11,7 +11,7 @@ import { getImageUrl } from "utils/CustomFunctions";
 
 const Index = ({ configData, landingPageData }) => {
   const { t } = useTranslation();
-  const { data, refetch, isFetching } = useGetPolicyPage("/about-us");
+  const { data, refetch, isFetching } = useGetPolicyPage("/api/v1/about-us");
   useEffect(() => {
     refetch();
   }, []);

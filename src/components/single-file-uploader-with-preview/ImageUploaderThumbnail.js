@@ -21,7 +21,7 @@ const ImageUploaderThumbnail = ({
         objectfit="cover"
         borderRadius="0px"
       />
-      <Stack width="77px" fontSize="12px" marginTop="10px">
+      <Stack fontSize="12px" marginTop="10px">
         {label}
       </Stack>
     </CustomDotBox>

@@ -87,7 +87,7 @@ const NewArrivals = ({ bannerData }) => {
 								) : (
 									<>
 										{data?.products ? (
-											<H2 text="New Arrivals" />
+											<H2 text="New Arrivals" component="h2" />
 										) : null}
 									</>
 								)}
@@ -132,7 +132,11 @@ const NewArrivals = ({ bannerData }) => {
 					{isLoading ? (
 						<Skeleton varient="text" width="110px" />
 					) : (
-						<>{data?.products ? <H2 text="New Arrivals" /> : null}</>
+						<>
+							{data?.products ? (
+								<H2 text="New Arrivals" component="h2" />
+							) : null}
+						</>
 					)}
 					<CustomStackFullWidth
 						justifyContent="center"

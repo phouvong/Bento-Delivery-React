@@ -1,14 +1,17 @@
+import { Grid, useMediaQuery, useTheme } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
-import useGetStoresByFiltering from "../../../api-manage/hooks/react-query/store/useGetStoresByFiltering";
+import { useInView } from "react-intersection-observer";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
-import { Grid, useMediaQuery, useTheme } from "@mui/material";
-import StoreCard from "../../cards/StoreCard";
 import { removeDuplicates } from "utils/CustomFunctions";
-import { useInView } from "react-intersection-observer";
+import useGetStoresByFiltering from "../../../api-manage/hooks/react-query/store/useGetStoresByFiltering";
+import StoreCard from "../../cards/StoreCard";
 import DotSpin from "../../DotSpin";
+import CustomEmptyResult from "components/custom-empty-result";
+import noData from "../../../../public/static/newnoitem.png";
+import EmptySearchResults from "components/EmptySearchResults";
 
 const AllStores = (props) => {
   const theme = useTheme();
@@ -22,12 +25,10 @@ const AllStores = (props) => {
   const [offset, setOffSet] = useState(1);
   const [page_limit, setPage_Limit] = useState(12);
   const [storeData, setStoreData] = useState([]);
-  const [convertFilterText, setConvertText] = useState("all");
   const { ref, inView } = useInView();
   const prevSelectedFilter = useRef();
   const preFilterData = useRef();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
-
   const pageParams = {
     type: selectedFilterValue,
     offset,
@@ -78,22 +79,18 @@ const AllStores = (props) => {
   useEffect(() => {
     if (inView) {
       fetchNextPage();
-      // if (!isLoading) {
-      //   setOffSet((prevState) => prevState + 1);
-      // }
     }
   }, [inView, selectedFilterValue, filteredData]);
-  // useEffect(() => {
-  //   if (offset === 1) {
-  //     refetch();
-  //   } else {
-  //     fetchNextPage();
-  //   }
-  // }, [offset]);
-
+  console.log({ storeData });
+  useEffect(() => {
+    refetch();
+  }, [filteredData]);
   return (
     <CustomBoxFullWidth>
       <Grid container spacing={2}>
+        {storeData?.length === 0 && !isLoading && (
+          <EmptySearchResults text="Stores not found!" />
+        )}
         {storeData?.length > 0 &&
           !isLoading &&
           storeData?.map((item, index) => {

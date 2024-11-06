@@ -10,7 +10,9 @@ import { getImageUrl } from "utils/CustomFunctions";
 
 const Index = ({ configData, landingPageData }) => {
   const { t } = useTranslation();
-  const { data, refetch, isFetching } = useGetPolicyPage("/shipping-policy");
+  const { data, refetch, isFetching } = useGetPolicyPage(
+    "/api/v1/shipping-policy"
+  );
   useEffect(() => {
     refetch();
   }, []);

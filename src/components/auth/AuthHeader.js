@@ -26,14 +26,19 @@ const AuthHeader = ({ title, configData }) => {
     >
       <Box onClick={handleLogoClick}>
         <CustomImageContainer
-          width="150px"
+          maxWidth="300px"
           height="50px"
           objectfit="cover"
           src={configData?.logo_full_url}
         />
       </Box>
 
-      <Typography variant="h4" textTransform="uppercase">
+      <Typography
+        fontSize="18px"
+        fontWeight="600"
+        textAlign="left"
+        textTransform="uppercase"
+      >
         {title}
       </Typography>
     </CustomStackFullWidth>

@@ -216,12 +216,14 @@ const PaidAds = () => {
 										fontSize={{ xs: "16px", md: "20px" }}
 										fontWeight={{ xs: "500", md: "700" }}
 										mb="5px"
+										component="h2"
 									>
 										{t("Highlights for you")}
 									</Typography>
 									<Subtitle1
 										textAlign="left"
 										text="See our most popular restaurant and foods"
+										component="p"
 									/>
 									{/*<Typography*/}
 									{/*  fontSize={{ xs: "12px", md: "14px" }}*/}

@@ -7,7 +7,7 @@ export const handleTokenExpire = (item, status) => {
     if (window.localStorage.getItem("token")) {
       toast.error(t("Your account is inactive or Your token has been expired"));
       window?.localStorage.removeItem("token");
-      Router.push("/auth/sign-in", undefined, { shallow: true });
+      Router.push("/home", undefined, { shallow: true });
     }
   } else {
     toast.error(item?.message, {

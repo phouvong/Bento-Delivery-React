@@ -1,40 +1,40 @@
-import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { useRouter } from "next/router";
+/* eslint-disable @next/next/no-img-element */
 import { styled, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
-import { useWishListGet } from "api-manage/hooks/react-query/wish-list/useWishListGet";
 import useGetLastOrderWithoutReview from "api-manage/hooks/react-query/review/useGetLastOrderWithoutReview";
 import useReviewReminderCancel from "api-manage/hooks/react-query/review/useReviewReminderCancel";
+import { useWishListGet } from "api-manage/hooks/react-query/wish-list/useWishListGet";
 
-import { setWishList } from "redux/slices/wishList";
 import {
   setFilterData,
   setStoreSelectedItems,
   setStoreSelectedItems2,
 } from "redux/slices/categoryIds";
+import { setWishList } from "redux/slices/wishList";
 
-import PushNotificationLayout from "../PushNotificationLayout";
-import CustomModal from "../modal";
 import CashBackPopup from "components/cash-back-popup/CashBackPopup";
-import LastOrderReview from "./LastOrderReview";
-import TopBanner from "./top-banner";
-import SearchWithTitle from "./SearchWithTitle";
-import SearchResult from "./search";
-import Grocery from "./module-wise-components/Grocery";
-import Pharmacy from "./module-wise-components/pharmacy/Pharmacy";
-import Shop from "./module-wise-components/ecommerce";
-import FoodModule from "./module-wise-components/food";
-import Parcel from "./module-wise-components/parcel/Index";
-import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import { getToken } from "helper-functions/getToken";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { getToken } from "helper-functions/getToken";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import { t } from "i18next";
 import { setWelcomeModal } from "redux/slices/utils";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { removeSpecialCharacters } from "utils/CustomFunctions";
-import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
+import PushNotificationLayout from "../PushNotificationLayout";
+import CustomModal from "../modal";
+import LastOrderReview from "./LastOrderReview";
+import SearchWithTitle from "./SearchWithTitle";
+import Grocery from "./module-wise-components/Grocery";
+import Shop from "./module-wise-components/ecommerce";
+import FoodModule from "./module-wise-components/food";
+import Parcel from "./module-wise-components/parcel/Index";
+import Pharmacy from "./module-wise-components/pharmacy/Pharmacy";
+import SearchResult from "./search";
+import TopBanner from "./top-banner";
 
 export const HomeComponentsWrapper = styled(Box)(({ theme }) => ({
   width: "100%",
@@ -45,6 +45,7 @@ const HomePageComponents = ({ configData }) => {
   const [wishListsData, setWishListsData] = useState();
   const [orderId, setOrderId] = useState(null);
   const [open, setOpen] = useState(false);
+  const [currentTab, setCurrentTab] = useState(0);
   const { profileInfo } = useSelector((state) => state.profileInfo);
   const router = useRouter();
   const dispatch = useDispatch();
@@ -125,7 +126,6 @@ const HomePageComponents = ({ configData }) => {
   const handleCloseWelcomeModal = () => {
     dispatch(setWelcomeModal(false));
   };
-
   return (
     <PushNotificationLayout>
       <CustomStackFullWidth>
@@ -137,10 +137,16 @@ const HomePageComponents = ({ configData }) => {
             sx={{ position: "absolute", top: 0, height: "100%" }}
           >
             <SearchWithTitle
+              currentTab={currentTab}
               zoneid={zoneid}
               token={token}
-              query={removeSpecialCharacters(router.query.search)}
+              searchQuery={
+                router.query?.data_type === "searched"
+                  ? router.query.search
+                  : ""
+              }
               name={router.query.name}
+              query={router.query}
             />
           </CustomStackFullWidth>
         </CustomStackFullWidth>
@@ -152,6 +158,8 @@ const HomePageComponents = ({ configData }) => {
             isSearch={router.query.fromSearch}
             routeTo={router.query.from}
             configData={configData}
+            currentTab={currentTab}
+            setCurrentTab={setCurrentTab}
           />
         ) : (
           <Box width="100%">{getModuleWiseComponents()}</Box>

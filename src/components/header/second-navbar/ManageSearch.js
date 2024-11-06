@@ -15,54 +15,81 @@ import { debounce } from "lodash";
 import jwt from "base-64";
 import { removeSpecialCharacters } from "utils/CustomFunctions";
 
-const ManageSearch = ({ zoneid, token, maxwidth, fullWidth, query, name }) => {
+const ManageSearch = ({
+  zoneid,
+  token,
+  maxwidth,
+  fullWidth,
+  searchQuery,
+  name,
+  query,
+  currentTab,
+}) => {
   const router = useRouter();
+
   const [openSearchSuggestions, setOpenSearchSuggestions] = useState(false);
   const [selectedValue, setSelectedValue] = useState("");
   const [onSearchdiv, setOnSearchdiv] = useState(false);
+  const [d_type, setD_type] = useState(null);
   const [isEmpty, setIsEmpty] = useState(true);
   const [searchValue, setSearchValue] = useState("");
   const decodedName = name && jwt.decode(name);
-
   useEffect(() => {
-    if (query === undefined) {
+    if (searchQuery === undefined) {
       setSearchValue("");
     }
-  }, [query]);
-  const handleKeyPress = (value) => {
+  }, [searchQuery]);
+  useEffect(() => {
+    if (currentTab === 0) {
+      setD_type("category");
+    } else {
+      setD_type("all");
+    }
+  }, [currentTab]);
+
+  const handleKeyPress = (value, remove) => {
     if (value !== "") {
       setOpenSearchSuggestions(false);
-      let getItem = JSON.parse(localStorage.getItem("searchedValues"));
-      if (getItem && getItem.length > 0) {
-        if (value !== "") {
-          getItem.push(value);
-        }
-        localStorage.setItem("searchedValues", JSON.stringify(getItem));
-      } else {
-        if (value !== "") {
-          let newData = [];
+      let getItem = JSON.parse(localStorage.getItem("searchedValues")) || [];
 
-          newData.push(value);
-          localStorage.setItem("searchedValues", JSON.stringify(newData));
-        }
+      if (value && !getItem.includes(value)) {
+        getItem.push(value);
+        localStorage.setItem("searchedValues", JSON.stringify(getItem));
       }
-      if (value !== "") {
-        router.push(
+
+      const newQuery = {
+        ...query, // Retain existing query parameters
+        search: value,
+        data_type: "searched",
+      };
+
+      router.replace(
+        {
+          pathname: router.pathname,
+          query: newQuery,
+        },
+        undefined,
+        { shallow: true }
+      );
+    } else {
+      if (remove === "true" && searchQuery) {
+        const newQuery = {
+          ...query, // Retain existing query parameters
+          search: value,
+          data_type: d_type,
+        };
+
+        router.replace(
           {
-            pathname: "/home",
-            query: {
-              search: value,
-              data_type: "searched",
-            },
+            pathname: router.pathname,
+            query: newQuery,
           },
           undefined,
-          {
-            shallow: true,
-          }
+          { shallow: true }
         );
+      } else {
+        setSearchValue("");
       }
-    } else {
-      setSearchValue("");
     }
   };
 
@@ -146,7 +173,7 @@ const ManageSearch = ({ zoneid, token, maxwidth, fullWidth, query, name }) => {
           <CustomSearch
             label={t("Search foods and restaurants...")}
             handleSearchResult={handleKeyPress}
-            selectedValue={decodedName ?? query}
+            selectedValue={searchQuery}
             setIsEmpty={setIsEmpty}
             handleOnFocus={handleOnFocus}
             setSearchValue={setSearchValue}
@@ -158,7 +185,7 @@ const ManageSearch = ({ zoneid, token, maxwidth, fullWidth, query, name }) => {
         <CustomSearch
           label={t(dynamicLabel())}
           handleSearchResult={handleKeyPress}
-          selectedValue={decodedName ?? query}
+          selectedValue={searchQuery}
           setIsEmpty={setIsEmpty}
           handleOnFocus={handleOnFocus}
           setSearchValue={setSearchValue}

@@ -1,15 +1,14 @@
-import React from "react";
-import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import { Typography, useMediaQuery, useTheme } from "@mui/material";
-import ManageSearch from "../header/second-navbar/ManageSearch";
-import { getCurrentModuleType } from "../../helper-functions/getCurrentModuleType";
 import { useTranslation } from "react-i18next";
+import { getCurrentModuleType } from "../../helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "../../helper-functions/moduleTypes";
+import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
+import ManageSearch from "../header/second-navbar/ManageSearch";
 import TrackParcelFromHomePage from "../parcel/TrackParcelFromHomePage";
 
 const SearchWithTitle = (props) => {
   const moduleType = getCurrentModuleType();
-  const { zoneid, token, query, name } = props;
+  const { zoneid, token, searchQuery, name, query, currentTab } = props;
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const { t } = useTranslation();
@@ -65,6 +64,7 @@ const SearchWithTitle = (props) => {
           textAlign="center"
           fontWeight="600"
           lineHeight="33.18px"
+          component="h1"
         >
           {t(getBannerTexts().title)}
         </Typography>
@@ -74,6 +74,7 @@ const SearchWithTitle = (props) => {
           sx={{ color: (theme) => theme.palette.neutral[400] }}
           fontWeight="400"
           lineHeight="18.75px"
+          component="p"
         >
           {t(getBannerTexts().subTitle)}
         </Typography>
@@ -84,8 +85,10 @@ const SearchWithTitle = (props) => {
           token={token}
           maxwidth="false"
           fullWidth
-          query={query}
+          searchQuery={searchQuery}
           name={name}
+          query={query}
+          currentTab={currentTab}
         />
       ) : (
         <TrackParcelFromHomePage />

@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import CssBaseline from "@mui/material/CssBaseline";
 import Router from "next/router";
 import React, { useEffect } from "react";
@@ -8,8 +9,6 @@ import ModuleWiseLayout from "../../src/components/module-wise-layout";
 import ZoneGuard from "../../src/components/route-guard/ZoneGuard";
 // import { getServerSideProps } from "../index";
 import SEO from "../../src/components/seo";
-import { getImageUrl } from "utils/CustomFunctions";
-import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 
 const Home = ({ configData, landingPageData }) => {
   const dispatch = useDispatch();
@@ -22,14 +21,12 @@ const Home = ({ configData, landingPageData }) => {
       } else {
         dispatch(setConfigData(configData));
       }
-    } else {
     }
   }, [configData]);
-  let language_direction = undefined;
-  if (typeof window !== "undefined") {
-    language_direction = localStorage.getItem("language-setting");
-  }
 
+  useEffect(() => {
+    dispatch(setConfigData(configData));
+  }, [configData]);
   return (
     <>
       <CssBaseline />

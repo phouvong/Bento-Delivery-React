@@ -31,6 +31,8 @@ const SearchResult = (props) => {
     fromAllCategories,
     fromNav,
     routeTo,
+    currentTab,
+    setCurrentTab,
   } = props;
   const router = useRouter();
   const dispatch = useDispatch();
@@ -39,31 +41,31 @@ const SearchResult = (props) => {
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const id = router.query.id;
   const brand_id = router.query.brand_id;
-  const [currentTab, setCurrentTab] = useState(0);
+
   const [currentView, setCurrentView] = useState(0);
   //const [filterData, setFilterData] = useState([]);
   const [offset, setOffset] = useState(0);
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
   const [filterValue, setFilterValue] = useState([]);
   //const [rating_count, setRatingCount] = useState(0);
-  const [minMax, setMinMax] = useState([0, 2000000]);
+  const [minMax, setMinMax] = useState([0, 20000]);
   const [type, setType] = useState("all");
   const [category_id, setCategoryId] = useState(id);
-  const [sortBy, setSortBy] = useState("high2Low");
+  const [sortBy, setSortBy] = useState("");
+  const [newSort, setNewSort] = useState("");
   const [isEmpty, setIsEmpty] = useState(false);
   const [linkRouteTo, setLinkRouteTo] = useState(routeTo);
   const { ref, inView } = useInView({
     rootMargin: "0px 0px 38% 0px",
   });
+
   const { selectedBrands, selectedCategories, filterData, rating_count } =
     useSelector((state) => state.categoryIds);
-
   useEffect(() => {
     dispatch(setSelectedBrands(data_type === "brand" ? [brand_id] : []));
     dispatch(setSelectedCategories(data_type === "category" ? [id] : []));
     ///dispatch(setStoreSelectedItems(data_type === "category" ? [id] : []));
   }, []);
-  useEffect(() => {}, []);
 
   const page_limit = 12;
 
@@ -227,6 +229,26 @@ const SearchResult = (props) => {
       return [...newFilterValues];
     });
   };
+  const handleSortByNew = (value) => {
+    setNewSort(value);
+    setFilterValue((prevValues) => {
+      let newFilterValues = new Set([...prevValues]);
+
+      // Clear "default," "nearby," and "distance" if already present
+      ["default", "fast_delivery", "nearby"].forEach((item) => {
+        if (newFilterValues.has(item)) {
+          newFilterValues.delete(item);
+        }
+      });
+
+      // Add the new value from "default", "nearby", or "distance"
+      if (["default", "fast_delivery", "nearby"].includes(value)) {
+        newFilterValues.add(value);
+      }
+
+      return [...newFilterValues];
+    });
+  };
 
   const handleCheckbox = (value, e) => {
     let newData = filterData?.map((item) =>
@@ -238,20 +260,26 @@ const SearchResult = (props) => {
   };
 
   useEffect(() => {
+    const defaultValues = ["default", "fast_delivery", "nearby", "high", "low"];
     const currentlyCheckedValues = filterData
       .filter((item) => item.checked)
       .map((item) => item.value);
-    const filterValueSet = new Set(filterValue);
-    const updatedFilterValue = Array.from(filterValueSet).filter((value) =>
-      currentlyCheckedValues.includes(value)
-    );
-    currentlyCheckedValues.forEach((value) => {
-      if (!filterValueSet.has(value)) {
-        updatedFilterValue.push(value);
-      }
-    });
 
-    setFilterValue(updatedFilterValue);
+    // Include default values if they exist in the current filterValue
+    const updatedFilterValue = [
+      ...new Set([
+        ...currentlyCheckedValues,
+        ...filterValue.filter((val) => defaultValues.includes(val)),
+      ]),
+    ];
+
+    // Update filterValue only if there is a change
+    if (
+      updatedFilterValue.length !== filterValue.length ||
+      !updatedFilterValue.every((val, index) => val === filterValue[index])
+    ) {
+      setFilterValue(updatedFilterValue);
+    }
   }, [filterData]);
 
   const handleChangeRatings = (value) => {
@@ -287,7 +315,14 @@ const SearchResult = (props) => {
 
   const handleCurrentTab = (value) => {
     setCurrentTab(value);
+    setFilterValue([]);
+
+    // Uncheck all filters and dispatch the updated data
+    dispatch(
+      setFilterData(filterData.map((item) => ({ ...item, checked: false })))
+    );
   };
+
   const getRefBox = () => (
     <CustomBoxFullWidth ref={ref} sx={{ height: "10px" }}></CustomBoxFullWidth>
   );
@@ -326,6 +361,8 @@ const SearchResult = (props) => {
           isFetchingNextPage={isFetchingNextPage || isLoadingSearch}
           minMax={minMax}
           setMinMax={setMinMax}
+          handleSortByNew={handleSortByNew}
+          newSort={newSort}
         />
         <CustomBoxFullWidth
           sx={{
@@ -370,6 +407,8 @@ const SearchResult = (props) => {
             filterData={filterData}
             handleCheckbox={handleCheckbox}
             ratingValue={rating_count}
+            handleSortByNew={handleSortByNew}
+            newSort={newSort}
           />
         )}
       </CustomStackFullWidth>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { CustomBoxFullWidth } from "../../styled-components/CustomStyles.style";
+import { CustomBoxFullWidth } from "styled-components/CustomStyles.style";
 import { Grid, Skeleton, styled, useMediaQuery, useTheme } from "@mui/material";
 import H1 from "../typographies/H1";
 import HighToLow from "../../sort/HighToLow";
@@ -10,6 +10,7 @@ import ViewListIcon from "@mui/icons-material/ViewList";
 import Filter from "../home/stores/Filter";
 import Funnel from "../svg-components/Funnel";
 import { t } from "i18next";
+import NewSortBy from "components/search/NewSortBy";
 
 const ViewWrapper = styled(Box)(({ theme, active }) => ({
   display: "flex",
@@ -42,6 +43,8 @@ const SearchMenu = (props) => {
     isFetchingNextPage,
     minMax,
     setMinMax,
+    handleSortByNew,
+    newSort,
   } = props;
   const total = 1000;
   const [showView, setShowView] = useState(true);
@@ -103,6 +106,16 @@ const SearchMenu = (props) => {
               ) : null}
             </Grid>
           )}
+          {isSmallSize ? null : (
+            <>
+              {currentTab === 1 && (
+                <Grid item xs={0} md={9.5} align="right">
+                  <NewSortBy handleSortBy={handleSortByNew} newSort={newSort} />
+                </Grid>
+              )}
+            </>
+          )}
+
           <Grid item xs={5} md={2.5}>
             {isSmallSize ? (
               <Box

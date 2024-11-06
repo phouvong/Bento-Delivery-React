@@ -60,10 +60,10 @@ const UserDetails = ({
             height="100%"
           />
         </Stack>
-        <Stack justifyContent="start">
+        <Stack justifyContent="start" width="150px">
           <CustomTypographyEllipsis fontWeight="600" fontSize="18px">
             {data ? (
-              `${data?.f_name} ${data?.l_name}`
+              `${data?.f_name} ${data?.l_name ? data?.l_name : ""}`
             ) : (
               <Skeleton variant="text" width="200px" height="30px" />
             )}

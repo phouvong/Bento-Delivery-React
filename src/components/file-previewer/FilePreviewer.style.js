@@ -5,14 +5,14 @@ import IconButton from "@mui/material/IconButton";
 import React from "react";
 
 export const FilePreviewerWrapper = styled(ImageContainer)(
-  ({ theme, width, objectFit, height, borderRadius }) => ({
+  ({ theme, width, objectFit, height, borderRadius, marginLeft }) => ({
     cursor: "pointer",
     height: height ? height : "8.75rem",
     maxWidth: width,
     width: "100%",
     borderRadius: "50%",
     marginRight: "auto",
-    marginLeft: "auto",
+    marginLeft: marginLeft ?? "auto",
     "& img": {
       borderRadius: borderRadius ? borderRadius : "12px",
       height: "100%",

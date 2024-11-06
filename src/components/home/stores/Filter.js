@@ -57,11 +57,22 @@ const Filter = (props) => {
 
   // Split the array into two halves.
   const dataWithoutPrice = filterData?.filter(
-    (item) => item?.value !== "price" && item?.value !== "ratings"
+    (item) =>
+      item?.value !== "price" &&
+      item?.value !== "ratings" &&
+      item?.value !== "coupon" &&
+      item?.value !== "free_delivery"
   );
   const midpoint = Math.ceil(dataWithoutPrice.length / 2);
   const firstHalf = dataWithoutPrice.slice(0, midpoint + 1);
   const secondHalf = dataWithoutPrice.slice(midpoint + 1);
+  const offerFilterData = filterData?.filter(
+    (item) =>
+      item?.value === "coupon" ||
+      item?.value === "free_delivery" ||
+      (item?.value === "fast_delivery" && currentTab === 1)
+  );
+
   return (
     <div>
       <Button
@@ -136,8 +147,11 @@ const Filter = (props) => {
                   {filterData?.length > 0 &&
                     secondHalf?.map((item, index) => {
                       if (
-                        currentTab === 0 &&
-                        item?.value === "currently_open"
+                        (currentTab === 0 &&
+                          item?.value === "currently_open") ||
+                        item?.value === "coupon" ||
+                        item?.value === "free_delivery" ||
+                        item?.value === "fast_delivery"
                       ) {
                         return null;
                       } else {
@@ -163,6 +177,79 @@ const Filter = (props) => {
                       }
                     })}
                 </Grid>
+                {currentTab !== 0 && (
+                  <>
+                    <Grid item xs={12}>
+                      <Typography fontWeight="bold">{t("Offers")}</Typography>
+                    </Grid>
+                    <Grid item xs={12}>
+                      {filterData?.length > 0 &&
+                        offerFilterData?.map((item, index) => {
+                          if (
+                            (currentTab === 0 &&
+                              item?.value === "currently_open") ||
+                            (currentTab === 0 && item?.value === "nearby") ||
+                            (currentTab === 0 && item?.value === "coupon") ||
+                            (currentTab === 0 &&
+                              item?.value === "free_delivery")
+                          ) {
+                            return null;
+                          } else {
+                            return (
+                              <FormControlLabel
+                                sx={{
+                                  "& .MuiFormControlLabel-label": {
+                                    fontSize: "13px",
+                                    fontWeight: item?.checked && "450",
+                                  },
+                                }}
+                                key={index}
+                                control={
+                                  <Checkbox
+                                    checked={item?.checked}
+                                    onChange={(e) => handleCheckbox(item, e)}
+                                    name={item?.label}
+                                  />
+                                }
+                                label={item?.label}
+                              />
+                            );
+                          }
+                        })}
+                    </Grid>
+                    {/*<Grid item xs={6}>*/}
+                    {/*  {filterData?.length > 0 &&*/}
+                    {/*    secondHalf?.map((item, index) => {*/}
+                    {/*      if (*/}
+                    {/*        currentTab === 0 &&*/}
+                    {/*        item?.value === "currently_open"*/}
+                    {/*      ) {*/}
+                    {/*        return null;*/}
+                    {/*      } else {*/}
+                    {/*        return (*/}
+                    {/*          <FormControlLabel*/}
+                    {/*            sx={{*/}
+                    {/*              "& .MuiFormControlLabel-label": {*/}
+                    {/*                fontSize: "13px",*/}
+                    {/*                fontWeight: item?.checked && "420",*/}
+                    {/*              },*/}
+                    {/*            }}*/}
+                    {/*            key={index}*/}
+                    {/*            control={*/}
+                    {/*              <Checkbox*/}
+                    {/*                checked={item?.checked}*/}
+                    {/*                onChange={(e) => handleCheckbox(item, e)}*/}
+                    {/*                name={item?.label}*/}
+                    {/*              />*/}
+                    {/*            }*/}
+                    {/*            label={item?.label}*/}
+                    {/*          />*/}
+                    {/*        );*/}
+                    {/*      }*/}
+                    {/*    })}*/}
+                    {/*</Grid>*/}
+                  </>
+                )}
                 {currentTab === 0 ? (
                   <Grid item xs={12}>
                     <CustomStackFullWidth spacing={1}>

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Button,
   Grid,
@@ -11,12 +11,15 @@ import { useFormik } from "formik";
 import ValidationSechemaProfile from "./Validation";
 import IconButton from "@mui/material/IconButton";
 import toast from "react-hot-toast";
-import { useDeleteProfile } from "../../../api-manage/hooks/react-query/profile/useDeleteProfile";
+import { useDeleteProfile } from "api-manage/hooks/react-query/profile/useDeleteProfile";
 import { useRouter } from "next/router";
 import ImageUploaderWithPreview from "../../single-file-uploader-with-preview/ImageUploaderWithPreview";
 import useUpdateProfile from "../../../api-manage/hooks/react-query/profile/useUpdateProfile";
-import { onSingleErrorResponse } from "../../../api-manage/api-error-response/ErrorResponses";
-import { setUser } from "../../../redux/slices/profileInfo";
+import {
+  onErrorResponse,
+  onSingleErrorResponse,
+} from "api-manage/api-error-response/ErrorResponses";
+import { setUser } from "redux/slices/profileInfo";
 import { useDispatch } from "react-redux";
 import ImageAddIcon from "../../single-file-uploader-with-preview/ImageAddIcon";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
@@ -25,6 +28,13 @@ import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import CustomAlert from "../../alert/CustomAlert";
 import FormSubmitButton from "../FormSubmitButton";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import VerifiedIcon from "components/profile/VerifiedIcon";
+import CustomModal from "components/modal";
+import OtpForm from "components/auth/sign-up/OtpForm";
+import { auth } from "firebase";
+import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
+import { useFireBaseOtpVerify } from "api-manage/hooks/react-query/forgot-password/useFIreBaseOtpVerify";
 
 export const BackIconButton = styled(IconButton)(({ theme }) => ({
   padding: "10px",
@@ -41,15 +51,44 @@ export const ResetButton = styled(Button)(({ theme }) => ({
   paddingInline: "30px",
 }));
 
-export const convertValuesToFormData = (values) => {
+export const convertValuesToFormData = (values, resData, verificationId) => {
+  const { name, phone, email, image, button_type, reset_token, password } =
+    values;
   let formData = new FormData();
-  formData.append("f_name", values?.f_name);
-  formData.append("l_name", values?.l_name);
-  formData.append("phone", values?.phone);
-  formData.append("email", values?.email);
-  formData.append("image", values?.image);
-  if (values?.password) {
-    formData.append("password", values?.password);
+  if (values?.reset_token) {
+    formData.append("name", name ?? resData?.name);
+    // formData.append('l_name', l_name ?? resData?.l_name)
+    formData.append(
+      "phone",
+      resData?.verification_on === "email"
+        ? resData?.phone
+        : phone ?? resData?.phone
+    );
+    formData.append("email", email ?? resData?.email);
+    formData.append("image", image ?? resData?.image ?? resData?.image);
+    formData.append("button_type", button_type ?? resData?.button_type);
+    formData.append("otp", reset_token ? reset_token : null);
+    formData.append(
+      "verification_medium",
+      reset_token ? resData?.verification_medium : null
+    );
+    formData.append(
+      "verification_on",
+      reset_token ? resData?.verification_on : null
+    );
+    formData.append("session_info", verificationId);
+  } else {
+    formData.append("name", name ?? resData?.name);
+    formData.append("phone", phone ?? resData?.phone);
+    formData.append("email", email ?? resData?.email);
+    formData.append("image", image ?? resData?.image ?? resData?.image);
+    if (button_type) {
+      formData.append("button_type", button_type);
+    } else if (resData?.button_type) {
+      formData.append("button_type", resData.button_type);
+    }
+
+    formData.append("password", password ?? resData?.password);
   }
   return formData;
 };
@@ -59,9 +98,18 @@ const BasicInformationForm = ({
   t,
   refetch,
   setEditProfile,
+  formSubmit,
+  handleCloseEmail,
+  handleClosePhone,
+  handleClick,
 }) => {
   const [openModal, setOpenModal] = useState(false);
-
+  const [open, setOpen] = React.useState(false);
+  const [openEmail, setOpenEmail] = React.useState(false);
+  const [verificationId, setVerificationId] = useState(null);
+  const [resData, setResData] = React.useState([]);
+  const [loginValue, setLoginValue] = useState(null);
+  const recaptchaWrapperRef = useRef(null);
   const imageContainerRef = useRef();
   const { f_name, l_name, phone, email, image_full_url } = data;
   const [showPassword, setShowPassword] = useState(false);
@@ -70,8 +118,7 @@ const BasicInformationForm = ({
   const dispatch = useDispatch();
   const profileFormik = useFormik({
     initialValues: {
-      f_name: f_name ? f_name : "",
-      l_name: l_name ? l_name : "",
+      name: f_name ? `${f_name} ${l_name ? l_name : ""}` : "",
       email: email ? email : "",
       phone: phone ? phone : "",
       image: image_full_url ? image_full_url : "",
@@ -85,18 +132,107 @@ const BasicInformationForm = ({
       } catch (err) {}
     },
   });
+  const { mutate: fireBaseOtpMutation, isLoading: fireIsLoading } =
+    useFireBaseOtpVerify();
+  const setUpRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        "recaptcha-update",
+        {
+          size: "invisible",
+          callback: (response) => {
+            console.log("Recaptcha verified", response);
+          },
+          "expired-callback": () => {
+            window.recaptchaVerifier?.reset();
+          },
+        },
+        auth
+      );
+    } else {
+      window.recaptchaVerifier.clear();
+      window.recaptchaVerifier = null;
+      // setUpRecaptcha()
+    }
+  };
+
+  useEffect(() => {
+    setUpRecaptcha();
+    return () => {
+      if (recaptchaWrapperRef.current) {
+        //recaptchaWrapperRef.current.clear(); // Clear Recaptcha when component unmounts
+        recaptchaWrapperRef.current = null;
+      }
+    };
+  }, []);
+  const sendOTP = (response, values) => {
+    const phoneNumber = values?.phone;
+    if (!phoneNumber) {
+      console.error("Invalid phone number");
+      return;
+    }
+
+    if (!window.recaptchaVerifier) {
+      setUpRecaptcha();
+    }
+    const appVerifier = window.recaptchaVerifier;
+
+    signInWithPhoneNumber(auth, phoneNumber, appVerifier)
+      .then((confirmationResult) => {
+        setVerificationId(confirmationResult.verificationId);
+        setOpen(true);
+      })
+      .catch((error) => {
+        toast.error(error.message);
+        console.log("Error in sending OTP", error);
+      });
+  };
   const { mutate: profileUpdateByMutate, isLoading } = useUpdateProfile();
   const formSubmitOnSuccess = (values) => {
     const onSuccessHandler = (response) => {
+      console.log("errroooorrrrr");
       if (response) {
-        toast.success(response?.message);
-        refetch();
+        setResData({
+          ...resData,
+          ...response,
+          name: values?.name,
+          // l_name: l_name,
+          phone: values?.phone,
+          email: values?.email,
+          image: values?.image,
+          button_type: values?.button_type,
+        });
+        if (response?.otp_send) {
+          if (response?.verification_on === "phone") {
+            if (configData?.firebase_otp_verification === 1) {
+              sendOTP(response, values);
+            } else {
+              setOpen(true);
+            }
+          } else {
+            setOpenEmail(true);
+          }
+        } else {
+          setOpenEmail(false);
+          setOpen(false);
+          toast.success(response?.message);
+          refetch();
+          handleClick();
+        }
       }
     };
-    const formData = convertValuesToFormData(values);
+
+    const formData = convertValuesToFormData(values, resData, verificationId);
     profileUpdateByMutate(formData, {
       onSuccess: onSuccessHandler,
-      onError: onSingleErrorResponse,
+      onError: (error) => {
+        console.log({ error });
+        if (Array.isArray(error?.response?.data?.errors)) {
+          return onErrorResponse(error);
+        } else {
+          toast.error(error?.response?.data?.message);
+        }
+      },
     });
   };
   const singleFileUploadHandlerForImage = (value) => {
@@ -124,14 +260,25 @@ const BasicInformationForm = ({
     mutate();
   };
   const handleReset = () => {
-    profileFormik.setFieldValue("f_name", "");
+    profileFormik.setFieldValue("name", "");
     profileFormik.setFieldValue("l_name", "");
     profileFormik.setFieldValue("email", "");
     profileFormik.setFieldValue("password", "");
   };
+  const handleVerified = (type) => {
+    if (type === "email") {
+      formSubmitOnSuccess({ ...profileFormik?.values, button_type: "email" });
+    } else {
+      formSubmitOnSuccess({ ...profileFormik?.values, button_type: "phone" });
+    }
+  };
   return (
     <>
       <Grid item md={12} xs={12} alignSelf="center">
+        <div ref={recaptchaWrapperRef}>
+          <div id="recaptcha-update"></div>
+        </div>
+
         <Stack
           direction="row"
           justifyContent="space-between"
@@ -203,7 +350,7 @@ const BasicInformationForm = ({
               )}
             </Stack>
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={12} xs={12}>
             <TextField
               sx={{ width: "100%" }}
               InputProps={{
@@ -213,118 +360,189 @@ const BasicInformationForm = ({
               }}
               id="outlined-basic"
               variant="outlined"
-              name="f_name"
-              value={profileFormik.values.f_name}
+              name="name"
+              value={profileFormik.values.name}
               onChange={profileFormik.handleChange}
-              label={t("Fast Name")}
+              label={t("User Name")}
               required
               error={
-                profileFormik.touched.f_name &&
-                Boolean(profileFormik.errors.f_name)
+                profileFormik.touched.name && Boolean(profileFormik.errors.name)
               }
               helperText={
-                profileFormik.touched.f_name && profileFormik.errors.f_name
+                profileFormik.touched.name && profileFormik.errors.name
               }
-              touched={profileFormik.touched.f_name && "true"}
+              touched={profileFormik.touched.name && "true"}
             />
           </Grid>
+          {/*<Grid item md={6} xs={12}>*/}
+          {/*  <TextField*/}
+          {/*    sx={{ width: "100%" }}*/}
+          {/*    InputProps={{*/}
+          {/*      style: {*/}
+          {/*        height: "45px", // Set your desired height value here*/}
+          {/*      },*/}
+          {/*    }}*/}
+          {/*    id="outlined-basic"*/}
+          {/*    // label="Enter Last Name"*/}
+          {/*    variant="outlined"*/}
+          {/*    name="l_name"*/}
+          {/*    value={profileFormik.values.l_name}*/}
+          {/*    onChange={profileFormik.handleChange}*/}
+          {/*    label={t("Last Name")}*/}
+          {/*    required*/}
+          {/*    error={*/}
+          {/*      profileFormik.touched.l_name &&*/}
+          {/*      Boolean(profileFormik.errors.l_name)*/}
+          {/*    }*/}
+          {/*    helperText={*/}
+          {/*      profileFormik.touched.l_name && profileFormik.errors.l_name*/}
+          {/*    }*/}
+          {/*    touched={profileFormik.touched.l_name && "true"}*/}
+          {/*  />*/}
+          {/*</Grid>*/}
           <Grid item md={6} xs={12}>
-            <TextField
-              sx={{ width: "100%" }}
-              InputProps={{
-                style: {
-                  height: "45px", // Set your desired height value here
-                },
-              }}
-              id="outlined-basic"
-              // label="Enter Last Name"
-              variant="outlined"
-              name="l_name"
-              value={profileFormik.values.l_name}
-              onChange={profileFormik.handleChange}
-              label={t("Last Name")}
-              required
-              error={
-                profileFormik.touched.l_name &&
-                Boolean(profileFormik.errors.l_name)
-              }
-              helperText={
-                profileFormik.touched.l_name && profileFormik.errors.l_name
-              }
-              touched={profileFormik.touched.l_name && "true"}
-            />
-          </Grid>
-          <Grid item md={6} xs={12}>
-            <TextField
-              sx={{ width: "100%" }}
-              InputProps={{
-                style: {
-                  height: "45px", // Set your desired height value here
-                },
-              }}
-              id="outlined-basic"
-              // label="Enter Email"
-              variant="outlined"
-              name="email"
-              value={profileFormik.values.email}
-              onChange={profileFormik.handleChange}
-              label={t("Email")}
-              required
-              error={
-                profileFormik.touched.email &&
-                Boolean(profileFormik.errors.email)
-              }
-              helperText={
-                profileFormik.touched.email && profileFormik.errors.email
-              }
-              touched={profileFormik.touched.email && "true"}
-            />
-          </Grid>
-          <Grid item md={6} xs={12}>
-            <TextField
-              disabled
-              label={
-                <span>
-                  {t("Phone")}{" "}
-                  <span style={{ color: "red" }}>({t("Not changeable")})</span>{" "}
-                </span>
-              }
-              variant="outlined"
-              sx={{ width: "100%" }}
-              InputProps={{
-                inputMode: "numeric",
-                pattern: "[0-9]*",
-                style: {
-                  height: "45px", // Set your desired height value here
-                },
-              }}
-              value={phone}
-            />
-          </Grid>
-
-          {data?.social_id ? (
-            <Stack ml="20px" mr="30px" mb="20px">
-              <CustomAlert
-                type="info"
-                text={t(
-                  "Password can not be updated while you are logged in by using social logins."
-                )}
+            <Stack position="relative">
+              <TextField
+                sx={{ width: "100%" }}
+                InputProps={{
+                  style: {
+                    height: "45px", // Set your desired height value here
+                  },
+                }}
+                id="outlined-basic"
+                // label="Enter Email"
+                variant="outlined"
+                name="email"
+                value={profileFormik.values.email}
+                onChange={profileFormik.handleChange}
+                label={t("Email")}
+                required
+                error={
+                  profileFormik.touched.email &&
+                  Boolean(profileFormik.errors.email)
+                }
+                helperText={
+                  profileFormik.touched.email && profileFormik.errors.email
+                }
+                touched={profileFormik.touched.email && "true"}
               />
+              <Stack
+                sx={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "12px",
+                }}
+              >
+                <>
+                  {" "}
+                  {email && (
+                    <>
+                      {data?.is_email_verified === 1 &&
+                      email === profileFormik?.values.email ? (
+                        <VerifiedIcon />
+                      ) : (
+                        <>
+                          {configData?.centralize_login
+                            ?.email_verification_status === 1 && (
+                            <ReportProblemIcon
+                              onClick={() => handleVerified("email")}
+                              sx={{
+                                color: (theme) => theme.palette.error.main,
+                                width: "1.2rem",
+                                cursor: "pointer",
+                              }}
+                            />
+                          )}
+                        </>
+                      )}
+                    </>
+                  )}
+                </>
+              </Stack>
             </Stack>
-          ) : (
+          </Grid>
+          <Grid item md={6} xs={12}>
+            <Stack position="relative">
+              <TextField
+                name="phone"
+                disabled={data?.is_phone_verified === 1}
+                label={
+                  <span>
+                    {t("Phone")}{" "}
+                    {data?.is_phone_verified === 1 && (
+                      <>
+                        <span style={{ color: "red" }}>
+                          ({t("Not Changeable")})
+                        </span>{" "}
+                      </>
+                    )}
+                  </span>
+                }
+                variant="outlined"
+                sx={{ width: "100%" }}
+                InputProps={{
+                  inputMode: "numeric",
+                  pattern: "[0-9]*",
+                  style: {
+                    height: "45px", // Set your desired height value here
+                  },
+                }}
+                value={profileFormik.values.phone}
+                onChange={(e) => {
+                  let inputValue = e.target.value;
+
+                  // Allow + at the beginning and remove all non-numeric characters after the first position
+                  if (inputValue[0] === "+") {
+                    inputValue = `+${inputValue.slice(1).replace(/\D/g, "")}`;
+                  } else {
+                    inputValue = inputValue.replace(/\D/g, ""); // Remove all non-numeric characters
+                  }
+
+                  profileFormik.setFieldValue("phone", inputValue);
+                }}
+              />
+              <Stack
+                sx={{
+                  position: "absolute",
+                  right: "10px",
+                  top: "12px",
+                }}
+              >
+                {data?.is_phone_verified === 1 ? (
+                  <VerifiedIcon />
+                ) : (
+                  <>
+                    {configData?.centralize_login?.phone_verification_status ===
+                      1 && (
+                      <ReportProblemIcon
+                        onClick={() => handleVerified("phone")}
+                        sx={{
+                          color: (theme) => theme.palette.error.main,
+                          width: "1.2rem",
+                          cursor: "pointer",
+                        }}
+                      />
+                    )}
+                  </>
+                )}
+              </Stack>
+            </Stack>
+          </Grid>
+          {configData?.centralize_login?.manual_login_status === 1 ? (
             <>
               <Grid item md={6} xs={12}>
                 <TextField
                   required
+                  InputLabelProps={{ shrink: true }}
                   sx={{ width: "100%" }}
                   id="password"
                   variant="outlined"
+                  placeholder={t("Password")}
                   value={profileFormik.values.password}
                   onChange={profileFormik.handleChange}
                   name="password"
                   label={t("Password")}
                   type={showPassword ? "text" : "password"}
-                  InputLabelProps={{ shrink: true }}
                   error={
                     profileFormik.touched.password &&
                     Boolean(profileFormik.errors.password)
@@ -355,16 +573,17 @@ const BasicInformationForm = ({
               </Grid>
               <Grid item md={6} xs={12}>
                 <TextField
+                  InputLabelProps={{ shrink: true }}
                   required
                   sx={{ width: "100%" }}
                   id="confirm_password"
                   label={t("Confirm Password")}
                   variant="outlined"
+                  placeholder={t("Confirm Password")}
                   name="confirm_password"
                   type={showConfirmPassword ? "text" : "password"}
                   value={profileFormik.values.confirm_password}
                   onChange={profileFormik.handleChange}
-                  InputLabelProps={{ shrink: true }}
                   error={
                     profileFormik.touched.confirm_password &&
                     Boolean(profileFormik.errors.confirm_password)
@@ -399,6 +618,8 @@ const BasicInformationForm = ({
                 />
               </Grid>
             </>
+          ) : (
+            ""
           )}
 
           <Grid item md={12} xs={12} align="end">
@@ -417,6 +638,36 @@ const BasicInformationForm = ({
           </Grid>
         </Grid>
       </form>
+      {open && (
+        <CustomModal
+          openModal={open}
+          handleClose={() => setOpen(false)}
+          setModalOpen={setOpen}
+        >
+          <OtpForm
+            data={data?.phone}
+            handleClose={() => setOpen(false)}
+            formSubmitHandler={formSubmitOnSuccess}
+            loginValue={resData}
+            reSendOtp={formSubmitOnSuccess}
+          />
+        </CustomModal>
+      )}
+      {openEmail && (
+        <CustomModal
+          handleClose={() => setOpenEmail(false)}
+          openModal={openEmail}
+          setModalOpen={setOpenEmail}
+        >
+          <OtpForm
+            data={profileFormik?.values.email}
+            handleClose={() => setOpenEmail(false)}
+            formSubmitHandler={formSubmitOnSuccess}
+            loginValue={resData}
+            reSendOtp={formSubmitOnSuccess}
+          />
+        </CustomModal>
+      )}
     </>
   );
 };

@@ -10,7 +10,7 @@ import { getImageUrl } from "utils/CustomFunctions";
 
 const Index = ({ configData, landingPageData }) => {
   const { t } = useTranslation();
-  const { data, refetch, isFetching } = useGetPolicyPage("/cancelation");
+  const { data, refetch, isFetching } = useGetPolicyPage("/api/v1/cancelation");
   useEffect(() => {
     refetch();
   }, []);

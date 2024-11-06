@@ -10,7 +10,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import BasicInformationForm from "./BasicInformationForm";
-import { Stack, styled } from "@mui/system";
+import { Box, Stack, styled } from "@mui/system";
 import CustomAlert from "../../alert/CustomAlert";
 import AccountInformation from "./AccountInformation";
 import EditIcon from "@mui/icons-material/Edit";
@@ -21,6 +21,8 @@ import editIcon from "../asset/editIcon.png";
 import CustomImageContainer from "../../CustomImageContainer";
 import { useTheme } from "@emotion/react";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
+import VerifiedIcon from "components/profile/VerifiedIcon";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
 
 export const SmallDeviceIconButton = styled(IconButton)(({ theme }) => ({
   border: "1px solid",
@@ -71,8 +73,12 @@ const BasicInformation = (props) => {
               <>
                 <Grid container item xs={12} md={12}>
                   <BasicInformationForm
-                    {...props}
+                    data={data}
+                    configData={configData}
                     setEditProfile={setEditProfile}
+                    handleClick={handleClick}
+                    t={t}
+                    refetch={refetch}
                   />
                 </Grid>
               </>
@@ -112,28 +118,51 @@ const BasicInformation = (props) => {
                           fontWeight="500"
                           fontSize={{ xs: "12px", md: "14px" }}
                         >
-                          {t("First Name")}
+                          {t("User Name")}
                           <Typography
                             component="span"
                             marginLeft={{ xs: "13px", md: "10px" }}
                             fontSize={{ xs: "12px", md: "14px" }}
                           >
-                            {data?.f_name}
+                            {`${data?.f_name ? data?.f_name : ""} ${
+                              data?.l_name ? data?.l_name : ""
+                            }`}
                           </Typography>
                         </Typography>
-                        <Typography
+                        <Box
+                          display="flex"
+                          alignItems="center"
                           fontWeight="500"
                           fontSize={{ xs: "12px", md: "14px" }}
                         >
-                          {t("Last Name")}
+                          <Typography
+                            component="span"
+                            fontSize={{ xs: "12px", md: "14px" }}
+                          >
+                            {t("Email")}
+                          </Typography>
                           <Typography
                             fontSize={{ xs: "12px", md: "14px" }}
                             component="span"
-                            marginLeft={{ xs: "13px", md: "10px" }}
+                            marginLeft={{ xs: "8px", md: "8px" }}
                           >
-                            {data?.l_name}
+                            {data?.email || ""}
                           </Typography>
-                        </Typography>
+                          {data?.is_email_verified === 1 ? (
+                            <VerifiedIcon style={{ marginLeft: "8px" }} />
+                          ) : (
+                            configData?.centralize_login
+                              ?.email_verification_status === 1 && (
+                              <ReportProblemIcon
+                                sx={{
+                                  color: (theme) => theme.palette.error.main,
+                                  width: "1.2rem",
+                                  marginLeft: "8px",
+                                }}
+                              />
+                            )
+                          )}
+                        </Box>
                       </>
                     ) : (
                       <Stack>
@@ -144,36 +173,48 @@ const BasicInformation = (props) => {
                   </Stack>
                 </Grid>
                 <Grid item xs={12} md={3}>
-                  <Stack spacing={{ xs: 1, sm: 1, md: 1 }}>
+                  <Stack
+                    spacing={{ xs: 1, sm: 1, md: 1 }}
+                    alignItems="center"
+                    width="100%"
+                    justifyContent="center"
+                  >
                     {data ? (
-                      <>
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                      >
                         <Typography
                           fontWeight="500"
                           fontSize={{ xs: "12px", md: "14px" }}
                         >
                           {t("Phone")}
-                          <Typography
-                            component="span"
-                            marginLeft={{ xs: "38px", md: "10px" }}
-                            fontSize={{ xs: "12px", md: "14px" }}
-                          >
-                            {data?.phone}
-                          </Typography>
                         </Typography>
                         <Typography
-                          fontWeight="500"
+                          component="span"
                           fontSize={{ xs: "12px", md: "14px" }}
+                          marginLeft={{ xs: "8px", md: "10px" }}
+                          display="flex"
+                          alignItems="center"
                         >
-                          {t("Email")}
-                          <Typography
-                            fontSize={{ xs: "12px", md: "14px" }}
-                            component="span"
-                            marginLeft={{ xs: "45px", md: "16px" }}
-                          >
-                            {data?.email}
-                          </Typography>
+                          {data?.phone}
+                          {data?.is_phone_verified === 1 ? (
+                            <VerifiedIcon style={{ marginLeft: "8px" }} />
+                          ) : (
+                            configData?.centralize_login
+                              ?.phone_verification_status === 1 && (
+                              <ReportProblemIcon
+                                sx={{
+                                  color: (theme) => theme.palette.error.main,
+                                  width: "1.2rem",
+                                  marginLeft: "8px",
+                                }}
+                              />
+                            )
+                          )}
                         </Typography>
-                      </>
+                      </Box>
                     ) : (
                       <Stack>
                         <Skeleton variant="text" width={170} height={20} />
@@ -182,6 +223,7 @@ const BasicInformation = (props) => {
                     )}
                   </Stack>
                 </Grid>
+
                 {!isSmall && (
                   <Grid
                     item

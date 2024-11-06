@@ -1,17 +1,18 @@
 import React from "react";
 import { Button, Popover, Stack, styled, Typography } from "@mui/material";
-import CustomImageContainer from "../components/CustomImageContainer";
 import sort from "./assets/sort.png";
 import { useTranslation } from "react-i18next";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import CustomImageContainer from "components/CustomImageContainer";
 
 const Wrapper = styled(Button)(({ theme, border }) => ({
   border: border === "true" && `1px solid ${theme.palette.neutral[400]}`,
   borderRadius: "5px",
   padding: "7px 16px",
-  // padding: "15px",
+  textTransform: "capitalize",
 }));
+
 const HighToLow = ({ handleSortBy, sortBy }) => {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const { t } = useTranslation();
@@ -23,6 +24,7 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
   const handleSelect = (value) => {
     handleSortBy?.(value);
     setAnchorEl(null);
@@ -30,7 +32,13 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
 
   const open = Boolean(anchorEl);
   const id = open ? "simple-popover" : undefined;
-  const getContent = (type, showArrow) => {
+
+  const sortOptions = [
+    { name: "High to Low", value: "high" },
+    { name: "Low to High", value: "low" },
+  ];
+
+  const getContent = (label, showArrow) => {
     return (
       <Stack
         direction="row"
@@ -40,33 +48,26 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
       >
         <CustomImageContainer
           src={sort.src}
-          // alt={item?.title}
           height="12px"
           width="12px"
-          obejctfit="contained"
+          objectFit="contain"
         />
         <Typography
           fontSize="13px"
           sx={{ color: (theme) => theme.palette.neutral[600] }}
         >
-          {type === "high"
-            ? t("Sort by : High to Low")
-            : t("Sort by : Low to High")}
-          {}
+          {t(`Sort by: ${label}`)}
         </Typography>
-        {showArrow === "true" && (
-          <>
-            {open ? (
-              <KeyboardArrowUpIcon
-                sx={{ color: (theme) => theme.palette.text.secondary }}
-              />
-            ) : (
-              <KeyboardArrowDownIcon
-                sx={{ color: (theme) => theme.palette.text.secondary }}
-              />
-            )}
-          </>
-        )}
+        {showArrow === "true" &&
+          (open ? (
+            <KeyboardArrowUpIcon
+              sx={{ color: (theme) => theme.palette.text.secondary }}
+            />
+          ) : (
+            <KeyboardArrowDownIcon
+              sx={{ color: (theme) => theme.palette.text.secondary }}
+            />
+          ))}
       </Stack>
     );
   };
@@ -74,10 +75,14 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
   return (
     <div>
       <Wrapper border="true" onClick={handleClick}>
-        {getContent(sortBy, "true")}
+        {getContent(
+          sortOptions.find((option) => option.value === sortBy)?.name ||
+            "Default",
+          "true"
+        )}
       </Wrapper>
+
       <Popover
-        fullWidth
         id={id}
         open={open}
         anchorEl={anchorEl}
@@ -92,18 +97,14 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
           },
         }}
       >
-        <Wrapper
-          onClick={() => handleSelect(sortBy === "high" ? "low" : "high")}
-        >
-          {getContent(sortBy === "high" ? "low" : "high", "false")}
-        </Wrapper>
-        {/*<Wrapper*/}
-        {/*  onClick={() =>*/}
-        {/*    handleSelect(sortBy === "high2Low" ? "low2High" : "high2Low")*/}
-        {/*  }*/}
-        {/*>*/}
-        {/*  {getContent(sortBy === "high2Low" ? "low2High" : "high2Low", "false")}*/}
-        {/*</Wrapper>*/}
+        {sortOptions.map((option) => (
+          <Wrapper
+            key={option.value}
+            onClick={() => handleSelect(option.value)}
+          >
+            {getContent(option.name, "false")}
+          </Wrapper>
+        ))}
       </Popover>
     </div>
   );

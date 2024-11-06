@@ -51,6 +51,7 @@ const DeliveryDetails = (props) => {
     check,
     setCheck,
   } = props;
+
   const { t } = useTranslation();
   const theme = useTheme();
   const isSmall = useMediaQuery("(max-width:490px)");
@@ -199,69 +200,70 @@ const DeliveryDetails = (props) => {
         storeZoneId={storeData?.zone_id}
         orderType={orderType}
       />
-      {!getToken() && (
-        <Stack>
+      {!getToken() &&
+        configData?.centralize_login?.manual_login_status === 1 && (
           <Stack>
-            <FormControlLabel
-              onChange={(e) => handleCheckbox(e)}
-              control={<Checkbox />}
-              label={
-                <Typography
-                  fontWeight="500"
-                  fontSize="16px"
-                  color={theme.palette.neutral[1000]}
-                >
-                  {t("Create account with exiting info.")}
-                </Typography>
-              }
-            />
+            <Stack>
+              <FormControlLabel
+                onChange={(e) => handleCheckbox(e)}
+                control={<Checkbox />}
+                label={
+                  <Typography
+                    fontWeight="500"
+                    fontSize="16px"
+                    color={theme.palette.neutral[1000]}
+                  >
+                    {t("Create account with exiting info.")}
+                  </Typography>
+                }
+              />
+            </Stack>
+            {check && (
+              <Grid container spacing={2} pt="10px">
+                <Grid item sm={12} md={6}>
+                  <CustomTextFieldWithFormik
+                    required="true"
+                    type="password"
+                    label={t("Password")}
+                    placeholder={t("Password")}
+                    touched={formik.touched.password}
+                    errors={formik.errors.password}
+                    fieldProps={formik.getFieldProps("password")}
+                    onChangeHandler={passwordHandler}
+                    value={formik.values.password}
+                    startIcon={
+                      <InputAdornment position="start">
+                        <LockIcon
+                          sx={{ color: (theme) => theme.palette.neutral[400] }}
+                        />
+                      </InputAdornment>
+                    }
+                  />
+                </Grid>
+                <Grid item sm={12} md={6}>
+                  <CustomTextFieldWithFormik
+                    label={t("Confirm Password")}
+                    required="true"
+                    type="password"
+                    placeholder={t("Confirm Password")}
+                    touched={formik.touched.confirm_password}
+                    errors={formik.errors.confirm_password}
+                    fieldProps={formik.getFieldProps("confirm_password")}
+                    onChangeHandler={confirmPasswordHandler}
+                    value={formik.values.confirm_password}
+                    startIcon={
+                      <InputAdornment position="start">
+                        <LockIcon
+                          sx={{ color: (theme) => theme.palette.neutral[400] }}
+                        />
+                      </InputAdornment>
+                    }
+                  />
+                </Grid>
+              </Grid>
+            )}
           </Stack>
-          {check && (
-            <Grid container spacing={2} pt="10px">
-              <Grid item sm={12} md={6}>
-                <CustomTextFieldWithFormik
-                  required="true"
-                  type="password"
-                  label={t("Password")}
-                  placeholder={t("Password")}
-                  touched={formik.touched.password}
-                  errors={formik.errors.password}
-                  fieldProps={formik.getFieldProps("password")}
-                  onChangeHandler={passwordHandler}
-                  value={formik.values.password}
-                  startIcon={
-                    <InputAdornment position="start">
-                      <LockIcon
-                        sx={{ color: (theme) => theme.palette.neutral[400] }}
-                      />
-                    </InputAdornment>
-                  }
-                />
-              </Grid>
-              <Grid item sm={12} md={6}>
-                <CustomTextFieldWithFormik
-                  label={t("Confirm Password")}
-                  required="true"
-                  type="password"
-                  placeholder={t("Confirm Password")}
-                  touched={formik.touched.confirm_password}
-                  errors={formik.errors.confirm_password}
-                  fieldProps={formik.getFieldProps("confirm_password")}
-                  onChangeHandler={confirmPasswordHandler}
-                  value={formik.values.confirm_password}
-                  startIcon={
-                    <InputAdornment position="start">
-                      <LockIcon
-                        sx={{ color: (theme) => theme.palette.neutral[400] }}
-                      />
-                    </InputAdornment>
-                  }
-                />
-              </Grid>
-            </Grid>
-          )}
-        </Stack>
-      )}
+        )}
     </CustomStackFullWidth>
   );
 };

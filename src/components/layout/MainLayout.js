@@ -33,7 +33,9 @@ const MainLayout = ({ children, configData, landingPageData }) => {
 			localStorage.removeItem("module");
 			router.push("/", undefined, { shallow: true });
 		} else {
-			if (!data?.find((item) => item.module_type === selectedModuleType)) {
+			if (
+				!data?.find((item) => item.module_type === selectedModuleType)
+			) {
 				const newModule = data[0];
 				localStorage.setItem("module", JSON.stringify(newModule));
 				dispatch(setSelectedModule(newModule));

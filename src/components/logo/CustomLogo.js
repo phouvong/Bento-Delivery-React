@@ -6,7 +6,6 @@ export const Logo = styled("div")(({ theme, height, width }) => ({
   width: width,
   height: height,
   justifyContent: "center",
-
   position: "relative",
   cursor: "pointer",
   "& img": {
