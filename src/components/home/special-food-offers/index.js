@@ -10,7 +10,7 @@ import { getModuleId } from "../../../helper-functions/getModuleId";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
-} from "../../../styled-components/CustomStyles.style";
+} from "styled-components/CustomStyles.style";
 import ProductCard from "../../cards/ProductCard";
 import { RTL } from "../../rtl";
 import SpecialOfferCardShimmer from "../../Shimmer/SpecialOfferCardSimmer";
@@ -24,7 +24,8 @@ const SpecialFoodOffers = ({ title }) => {
     offset: 1,
     limit: 15,
   };
-  const { data, refetch, isLoading } = useGetDiscountedItems(params);
+  const { data, refetch, isLoading, isFetching } =
+    useGetDiscountedItems(params);
   const [isHover, setIsHover] = useState(false);
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
   useEffect(() => {
@@ -122,12 +123,12 @@ const SpecialFoodOffers = ({ title }) => {
               justifyContent="space-between"
               direction="row"
             >
-              {isLoading ? (
+              {isFetching ? (
                 <Skeleton variant="text" width="110px" />
               ) : (
                 <H2 text={title ? title : t("Special Offer")} component="h2" />
               )}
-              {isLoading ? (
+              {isFetching ? (
                 <Skeleton width="100px" variant="80px" />
               ) : (
                 <Link
@@ -165,7 +166,7 @@ const SpecialFoodOffers = ({ title }) => {
                 }}
               >
                 <>
-                  {isLoading ? (
+                  {isFetching ? (
                     <Slider {...settings}>
                       {[...Array(5)].map((item, index) => {
                         return <SpecialOfferCardShimmer key={index} />;

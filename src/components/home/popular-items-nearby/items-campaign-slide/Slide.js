@@ -1,5 +1,4 @@
 import { alpha, Typography, useTheme } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { Stack } from "@mui/system";
 import React, { useReducer } from "react";
 
@@ -8,18 +7,17 @@ import {
   CustomBoxFullWidth,
   CustomSpan,
   CustomStackFullWidth,
-} from "../../../../styled-components/CustomStyles.style";
+} from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../../../CustomImageContainer";
 import CustomLinearProgressbar from "../../../linear-progressbar";
 import AmountWithDiscountedAmount from "../../../AmountWithDiscountedAmount";
-import { getCurrentModuleType } from "../../../../helper-functions/getCurrentModuleType";
-import { ModuleTypes } from "../../../../helper-functions/moduleTypes";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { ModuleTypes } from "helper-functions/moduleTypes";
 import H4 from "../../../typographies/H4";
 import { FoodVegNonVegFlag } from "../../../cards/SpecialCard";
 import { t } from "i18next";
 import CustomBadge from "../../../cards/CustomBadge";
-import { getAmountWithSign } from "../../../../helper-functions/CardHelpers";
-import { getImageUrl } from "utils/CustomFunctions";
+import { getAmountWithSign } from "helper-functions/CardHelpers";
 
 const Slide = ({ item }) => {
   const [dispatch] = useReducer();

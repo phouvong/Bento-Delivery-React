@@ -45,10 +45,6 @@ const AddNewAddress = (props) => {
     configData,
     refetch,
     t,
-    parcel,
-    align,
-    fromModal,
-    open,
     openAddressModal,
     editAddress,
     setEditAddress,
@@ -79,11 +75,6 @@ const AddNewAddress = (props) => {
       userDecisionTimeout: 5000,
       isGeolocationEnabled: true,
     });
-  //
-  // const editLocation = {
-  //   lat: editAddress?.latitude,
-  //   lng: editAddress?.longitude,
-  // };
 
   useEffect(() => {
     setEditAddressLocation(state?.location);
@@ -96,12 +87,6 @@ const AddNewAddress = (props) => {
     });
   }, []);
 
-  // useEffect(() => {
-  //   dispatch({
-  //     type: ACTIONS.setLocation,
-  //     payload: editLocation,
-  //   });
-  // }, [editAddress]);
   const { data: places, isLoading } = useGetAutocompletePlace(
     state.searchKey,
     state.enabled
@@ -127,7 +112,6 @@ const AddNewAddress = (props) => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (zoneData) {
-        // dispatch(setZoneData(zoneData?.data?.zone_data));
         localStorage.setItem("zoneid", zoneData?.zone_id);
       }
     }
@@ -215,8 +199,6 @@ const AddNewAddress = (props) => {
                     payload: values,
                   });
                 }}
-                // setCurrentLocation={setCurrentLocation}
-                // locationLoading={locationLoading}
                 location={
                   editAddress
                     ? editAddressLocation

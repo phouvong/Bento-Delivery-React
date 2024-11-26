@@ -34,7 +34,6 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
     (state) => state.guestUserInfo
   );
   const { orderInformation } = useSelector((state) => state.utilsData);
-  const { offlinePaymentInfo } = useSelector((state) => state.offlinePayment);
   const handleOrderDetailsClose = () => {
     dispatch(setOrderDetailsModalOpen(false));
   };
@@ -175,40 +174,6 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
                     :&nbsp;&nbsp;{orderInformation?.status}
                   </Typography>
                 </ItemWrapper>
-                {/*{orderInformation?.offline_payment && (*/}
-                {/*  <>*/}
-                {/*    {orderInformation?.offline_payment?.input?.map(*/}
-                {/*      (item, index) => {*/}
-                {/*        return (*/}
-                {/*          <ItemWrapper key={index}>*/}
-                {/*            <ModalCustomTypography*/}
-                {/*              sx={{ textTransform: "capitalize" }}*/}
-                {/*            >*/}
-                {/*              {item?.user_input.replaceAll("_", " ")}*/}
-                {/*            </ModalCustomTypography>*/}
-                {/*            <Typography sx={{ wordWrap: "break-word" }}>*/}
-                {/*              :&nbsp;&nbsp;{item?.user_data.replaceAll("_", " ")}*/}
-                {/*            </Typography>*/}
-                {/*          </ItemWrapper>*/}
-                {/*        );*/}
-                {/*      }*/}
-                {/*    )}*/}
-                {/*    <ItemWrapper>*/}
-                {/*      {data?.offline_payment?.data?.customer_note && (*/}
-                {/*        <>*/}
-                {/*          <ModalCustomTypography>{"Note"}</ModalCustomTypography>*/}
-                {/*          <Typography sx={{ wordWrap: "break-word" }}>*/}
-                {/*            :&nbsp;&nbsp;*/}
-                {/*            {*/}
-                {/*              orderInformation?.offline_payment?.data*/}
-                {/*                ?.customer_note*/}
-                {/*            }*/}
-                {/*          </Typography>*/}
-                {/*        </>*/}
-                {/*      )}*/}
-                {/*    </ItemWrapper>*/}
-                {/*  </>*/}
-                {/*)}*/}
               </Stack>
             </Stack>
           </CustomStackFullWidth>

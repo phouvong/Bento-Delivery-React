@@ -22,19 +22,18 @@ const GoogleMapComponent = ({
   setDisablePickButton,
   setLocationEnabled,
   setLocation,
-  setCurrentLocation,
+
   locationLoading,
   location,
   setPlaceDetailsEnabled,
   placeDetailsEnabled,
-  locationEnabled,
+
   setPlaceDescription,
   height,
   isModalExpand,
   left,
   bottom,
   polygonPaths,
-  inZoom,
 }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
@@ -202,7 +201,7 @@ const GoogleMapComponent = ({
         onMouseUp={() => {
           setMapSetup(false);
           setDisablePickButton?.(false);
-          setLocationEnabled(true);
+          setLocationEnabled?.(true);
           setLocation({
             lat: map.center?.lat(),
             lng: map.center?.lng(),
@@ -212,11 +211,11 @@ const GoogleMapComponent = ({
             lng: map.center?.lng(),
           });
           setPlaceDetailsEnabled(false);
-          setPlaceDescription(undefined);
+          setPlaceDescription?.(undefined);
         }}
         onZoomChanged={() => {
           if (map) {
-            setLocationEnabled(true);
+            setLocationEnabled?.(true);
             setLocation({
               lat: map.center?.lat(),
               lng: map.center?.lng(),
@@ -242,6 +241,7 @@ const GoogleMapComponent = ({
               height: "60px",
               width: "45px",
             }}
+            alt="map"
           />
         ) : (
           <Stack

@@ -1,10 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import _ from "lodash";
-import { getCurrentModuleType } from "../../helper-functions/getCurrentModuleType";
-import {
-  getConvertDiscount,
-  getTotalVariationsPrice,
-} from "../../utils/CustomFunctions";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
 const initialState = {
   cartItem: null,
@@ -16,7 +11,7 @@ const initialState = {
   totalAmount: null,
   walletAmount: null,
 };
-
+const isEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
@@ -51,7 +46,7 @@ export const cartSlice = createSlice({
         if (state.cartList?.length > 0) {
           for (let i = 0; i < state.cartList.length; i++) {
             if (
-              _.isEqual(
+              isEqual(
                 state.cartList[i].food_variations,
                 action.payload.food_variations
               ) &&
@@ -105,9 +100,6 @@ export const cartSlice = createSlice({
           JSON.stringify(item?.selectedOption) ===
             JSON.stringify(action.payload?.selectedOption)
       );
-      let newData = state.cartList.map((item, i) =>
-        i === index ? action.payload : item
-      );
       state.cartList = action.payload;
     },
     setUpdateVariationToCart: (state = initialState, action) => {
@@ -126,7 +118,7 @@ export const cartSlice = createSlice({
       if (getCurrentModuleType() === "food") {
         if (action.payload.food_variations.length > 0) {
           let index = state.cartList.findIndex((item) =>
-            _.isEqual(item.food_variations, action.payload.food_variations)
+            isEqual(item.food_variations, action.payload.food_variations)
           );
           newData = state.cartList.map((item, i) =>
             // action.payload.totalPrice * action.payload.quantity  +
@@ -144,7 +136,7 @@ export const cartSlice = createSlice({
             item.id === action.payload.id
               ? {
                   ...item,
-                  totalPrice:action.payload.totalPrice,
+                  totalPrice: action.payload.totalPrice,
                   quantity: action.payload.quantity,
                 }
               : item
@@ -160,8 +152,8 @@ export const cartSlice = createSlice({
             return {
               ...action.payload,
               price: action.payload.price,
-              quantity: action.payload.quantity ,
-              totalPrice:action.payload.totalPrice,
+              quantity: action.payload.quantity,
+              totalPrice: action.payload.totalPrice,
             };
           } else {
             return stateItem;
@@ -171,26 +163,12 @@ export const cartSlice = createSlice({
       state.cartList = newData;
     },
     setDecrementToCartItem: (state = initialState, action) => {
-      // const price =
-      //   action?.payload?.price +
-      //   getTotalVariationsPrice(action.payload.food_variations);
-      // //here quantity is decremented with number 1
-      // const productPrice = price * (action.payload.quantity);
-      // const discountedTotalPrice = getConvertDiscount(
-      //   action.payload.discount_type === "amount"
-      //     ? action.payload.discount * (action.payload.quantity )
-      //     : action.payload.discount,
-      //   action.payload.discount_type,
-      //   productPrice,
-      //   action.payload.store_discount
-      // );
-
       // without food module
       let newData;
       if (getCurrentModuleType() === "food") {
         if (action.payload.food_variations.length > 0) {
           let index = state.cartList.findIndex((item) =>
-            _.isEqual(item.food_variations, action.payload.food_variations)
+            isEqual(item.food_variations, action.payload.food_variations)
           );
 
           newData = state.cartList.map((item, i) =>
@@ -198,7 +176,7 @@ export const cartSlice = createSlice({
               ? {
                   ...item,
                   totalPrice: action.payload.totalPrice,
-                  quantity: action.payload.quantity ,
+                  quantity: action.payload.quantity,
                 }
               : item
           );
@@ -208,7 +186,7 @@ export const cartSlice = createSlice({
               ? {
                   ...item,
                   totalPrice: action.payload.totalPrice,
-                  quantity: action.payload.quantity ,
+                  quantity: action.payload.quantity,
                 }
               : item
           );
@@ -223,8 +201,8 @@ export const cartSlice = createSlice({
             return {
               ...action.payload,
               price: action.payload.price,
-              quantity: action.payload.quantity ,
-              totalPrice:action.payload.totalPrice,
+              quantity: action.payload.quantity,
+              totalPrice: action.payload.totalPrice,
             };
           } else {
             return stateItem;

@@ -1,10 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import PropTypes from "prop-types";
+
 import { ListItemIcon, MenuItem, Stack, Typography } from "@mui/material";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import eng from "../../../../public/landingpage/us.svg";
 import arabicImg from "../../../../public/landingpage/arabic-flag-svg.svg";
-//import { CustomColouredTypography } from "../styled-components/CustomStyles.style";
 
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";

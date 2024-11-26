@@ -78,10 +78,8 @@ const FoodDetailModal = ({
   const [otherSelectedOption, setOtherSelectedOption] = useState([]);
   const cartList = getCartListModuleWise(allCartList);
   const handleClearCartModalOpen = () => setClearCartModal(true);
-  // const { token } = useSelector((state) => state.configDataSettings);
   const { wishLists } = useSelector((state) => state.wishList);
   const [modalData, setModalData] = useState([]);
-  //const guestId = localStorage.getItem("guest_id");
   const { mutate: updateMutate, updateIsLoading } = useCartItemUpdate();
   const { mutate, isLoading } = useAddCartItem();
   const guestId = getGuestId();
@@ -259,31 +257,6 @@ const FoodDetailModal = ({
         onError: onErrorResponse,
       });
     } else {
-      //for adding;
-      // dispatch(
-      //   setCart({
-      //     ...modalData[0],
-      //     totalPrice: getDiscountedAmount(
-      //       totalPrice,
-      //       product?.discount,
-      //       product?.discount_type,
-      //       product?.store_discount,
-      //       quantity
-      //     ),
-      //     quantity: quantity,
-      //     food_variations: getNewVariationForDispatch(),
-      //     selectedAddons: selectedAddons,
-      //     selectedOption: otherSelectedOption,
-      //     itemBasePrice: getDiscountedAmount(
-      //       calculateItemBasePrice(modalData[0], selectedOptions),
-      //       product?.discount,
-      //       product?.discount_type,
-      //       product?.store_discount,
-      //       quantity
-      //     ),
-      //     // selectedVariations: selectedVariations,
-      //   })
-      // );
       let totalQty = 0;
       const itemObject = {
         guest_id: guestId,
@@ -801,8 +774,6 @@ const FoodDetailModal = ({
   const isInList = (id) => {
     return !!wishLists?.food?.find((wishFood) => wishFood.id === id);
   };
-  //auth modal
-  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const orderNow = () => {
     let checkingFor = "campaign";
@@ -812,37 +783,8 @@ const FoodDetailModal = ({
       toast.error(not_logged_in_message);
     }
   };
-  const handleSignInSuccess = () => {
-    dispatch(
-      setCampCart({
-        ...modalData[0],
-        totalPrice: totalPrice,
-        quantity: quantity,
-        selectedAddons: selectedAddons,
-      })
-    );
-    router.push(`/checkout?page=campaign`, undefined, { shallow: true });
-  };
-  const [selectedChoice, setChoices] = useState([]);
   const cartResetHandler = () => {
     setClearCartModal(false);
-  };
-
-  const handleChoices = (option, choice) => {
-    if (cartList.length > 0) {
-      const itemIsInCart = cartList.find(
-        (item) =>
-          item?.id === modalData?.[0]?.id &&
-          JSON.stringify(item?.selectedOption?.[0]) === JSON.stringify(option)
-      );
-      if (itemIsInCart) {
-        setOtherSelectedOption(modalData?.[0]?.selectedOption);
-      } else {
-        setOtherSelectedOption([option]);
-      }
-    } else {
-      setOtherSelectedOption([option]);
-    }
   };
 
   const handleRouteToStore = () => {
@@ -947,12 +889,6 @@ const FoodDetailModal = ({
                     changeChoices={changeChoices}
                   />
                 )}
-              {/*{modalData.length > 0 && modalData[0].variations?.length > 0 && (*/}
-              {/*  <OtherVariationManager*/}
-              {/*    modalData={modalData[0]}*/}
-              {/*    handleChoices={handleChoices}*/}
-              {/*  />*/}
-              {/*)}*/}
               {modalData.length > 0 && modalData[0].add_ons?.length > 0 && (
                 <AddOnsManager
                   t={t}

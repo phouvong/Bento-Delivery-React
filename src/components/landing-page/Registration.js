@@ -8,12 +8,12 @@ import {
 import { Box, Stack } from "@mui/system";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
-import { CustomButtonPrimary } from "../../styled-components/CustomButtons.style";
+import { CustomButtonPrimary } from "styled-components/CustomButtons.style";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
-} from "../../styled-components/CustomStyles.style";
-import { IsSmallScreen } from "../../utils/CommonValues";
+} from "styled-components/CustomStyles.style";
+import { IsSmallScreen } from "utils/CommonValues";
 import CustomImageContainer from "../CustomImageContainer";
 import DollarSignHighlighter from "../DollarSignHighlighter";
 import CustomContainer from "../container";
@@ -200,7 +200,7 @@ const Registration = ({ data, isSmall, configData }) => {
   return (
     <CustomContainer>
       <CustomStackFullWidth
-        py={{ xs: "1.125rem", md: "3.125rem" }}
+        py={{ xs: "1.125rem", md: "3rem" }}
         spacing={IsSmallScreen() ? 2.5 : 5}
         height="100%"
       >

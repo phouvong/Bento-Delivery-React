@@ -19,7 +19,6 @@ const SEO = ({
 
   // Concatenate the current page URL with the site URL
   const url = `${siteUrl}${asPath}`;
-  const businessLogo = configData?.base_urls?.business_logo_url;
   return (
     <>
       <DynamicFavicon configData={configData} />

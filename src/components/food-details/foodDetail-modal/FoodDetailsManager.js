@@ -24,7 +24,6 @@ const FoodDetailsManager = (props) => {
   const {
     configData,
     handleDiscountChip,
-    image,
     modalData,
     product,
     t,
@@ -33,7 +32,7 @@ const FoodDetailsManager = (props) => {
     removeFromWishlistHandler,
     isWishlisted,
     theme,
-    imageBaseUrl,
+
     handleRouteToStore,
   } = props;
 
@@ -125,7 +124,8 @@ const FoodDetailsManager = (props) => {
                 {modalData.length > 0 && modalData[0].name}
               </Typography>
               {modalData.length > 0 &&
-                modalData[0]?.module?.module_type === "food" && (
+                modalData[0]?.module?.module_type === "food" &&
+                configData?.toggle_veg_non_veg && (
                   <FoodVegNonVegFlag
                     veg={modalData[0]?.veg === 0 ? "false" : "true"}
                   />

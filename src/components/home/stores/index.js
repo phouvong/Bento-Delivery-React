@@ -180,6 +180,7 @@ const Stores = (props) => {
         key={`${filteredData}${selectedFilterValue}`}
         sx={{
           minHeight: "20vh",
+          marginTop: "1rem",
         }}
       >
         <AllStores

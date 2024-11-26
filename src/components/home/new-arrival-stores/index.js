@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import {
-	CustomBoxFullWidth,
-	CustomStackFullWidth,
+  CustomBoxFullWidth,
+  CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
 import H2 from "../../typographies/H2";
 
@@ -27,250 +27,240 @@ import Menus from "../best-reviewed-items/Menus";
 import { foodNewArrivalsettings, settings } from "./sliderSettings";
 
 const ImageWrapper = styled(Box)(({ theme }) => ({
-	position: "relative",
-	display: "flex",
-	alignItems: "center",
-	justifyContent: "center",
-	height: "100px",
-	width: "100px",
-	borderRadius: "50%",
-	boxShadow: "0px 4px 10px 0px rgba(0, 54, 85, 0.10)",
-	"&:hover": {
-		boxShadow: "5px 0px 20px rgba(0, 54, 85, 0.15)",
-		img: {
-			transform: "scale(1.04)",
-		},
-	},
-	[theme.breakpoints.down("md")]: {
-		height: "80px",
-		width: "80px",
-	},
-	[theme.breakpoints.down("sm")]: {
-		height: "57px",
-		width: "57px",
-	},
+  position: "relative",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  height: "100px",
+  width: "100px",
+  borderRadius: "50%",
+  boxShadow: "0px 4px 10px 0px rgba(0, 54, 85, 0.10)",
+  "&:hover": {
+    boxShadow: "5px 0px 20px rgba(0, 54, 85, 0.15)",
+    img: {
+      transform: "scale(1.04)",
+    },
+  },
+  [theme.breakpoints.down("md")]: {
+    height: "80px",
+    width: "80px",
+  },
+  [theme.breakpoints.down("sm")]: {
+    height: "57px",
+    width: "57px",
+  },
 }));
 
 const SliderWrapper = styled(CustomBoxFullWidth)(({ theme }) => ({
-	"& .slick-slide": {
-		padding: "0 10px", // Set the desired padding value
-	},
-	[theme.breakpoints.down("sm")]: {
-		"& .slick-slide": {
-			padding: "0px", // Set the desired padding value
-		},
-	},
+  "& .slick-slide": {
+    padding: "0 10px", // Set the desired padding value
+  },
+  [theme.breakpoints.down("sm")]: {
+    "& .slick-slide": {
+      padding: "0px", // Set the desired padding value
+    },
+  },
 }));
 
 const menus = ["Popular", "Top Rated", "New"];
 const NewArrivalStores = () => {
-	const { data, refetch, isFetching, isLoading } = useGetNewArrivalStores({
-		type: "all",
-	});
-	const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
-	const { configData } = useSelector((state) => state.configData);
-	const moduleId = JSON.parse(window.localStorage.getItem("module"))?.id;
-	const queryKey = "navbar-stores";
-	const slider = useRef(null);
-	const { newArrivalStores } = useSelector((state) => state.storedData);
-	const [storeData, setStoreData] = useState([]);
-	const {
-		data: popularData,
-		refetch: popularRefetch,
-		isLoading: popularIsLoading,
-	} = useGetPopularStoreWithoutInfiniteScroll({ queryKey, type: "all" });
-	const dispatch = useDispatch();
-	useEffect(() => {
-		if (newArrivalStores.length === 0) {
-			refetch();
-		}
-	}, [newArrivalStores]);
+  const { data, refetch, isFetching, isLoading } = useGetNewArrivalStores({
+    type: "all",
+  });
+  const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
+  const { configData } = useSelector((state) => state.configData);
+  const moduleId = JSON.parse(window.localStorage.getItem("module"))?.id;
+  const queryKey = "navbar-stores";
+  const slider = useRef(null);
+  const { newArrivalStores } = useSelector((state) => state.storedData);
+  const [storeData, setStoreData] = useState([]);
+  const {
+    data: popularData,
+    refetch: popularRefetch,
+    isLoading: popularIsLoading,
+  } = useGetPopularStoreWithoutInfiniteScroll({ queryKey, type: "all" });
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (newArrivalStores.length === 0) {
+      refetch();
+    }
+  }, [newArrivalStores]);
 
-	useEffect(() => {
-		if (data?.stores?.length > 0) {
-			dispatch(setNewArrivalStores(data?.stores));
-		}
-	}, [data]);
-	useEffect(() => {
-		popularRefetch();
-	}, []);
-	useEffect(() => {
-		if (popularData?.stores?.length > 0) {
-			setStoreData(popularData?.stores);
-		}
-	}, [popularData]);
-	const handleMenuClick = (index) => {
-		setSelectedMenuIndex(index);
+  useEffect(() => {
+    if (data?.stores?.length > 0) {
+      dispatch(setNewArrivalStores(data?.stores));
+    }
+  }, [data]);
+  useEffect(() => {
+    popularRefetch();
+  }, []);
+  useEffect(() => {
+    if (popularData?.stores?.length > 0) {
+      setStoreData(popularData?.stores);
+    }
+  }, [popularData]);
+  const handleMenuClick = (index) => {
+    setSelectedMenuIndex(index);
 
-		if (index === 0) {
-			//popular wise
-			setStoreData(popularData?.stores);
-		} else if (index === 1) {
-			//top-rated wise
-			const newStores = popularData?.stores.sort(
-				(a, b) => b.avg_rating - a.avg_rating
-			);
-			setStoreData(newStores);
-		} else {
-			//new wise
-			const newStores = popularData?.stores.sort(
-				(a, b) => new Date(b.created_at) - new Date(a.created_at)
-			);
-			setStoreData(newStores);
-		}
-	};
+    if (index === 0) {
+      //popular wise
+      setStoreData(popularData?.stores);
+    } else if (index === 1) {
+      //top-rated wise
+      const newStores = popularData?.stores.sort(
+        (a, b) => b.avg_rating - a.avg_rating
+      );
+      setStoreData(newStores);
+    } else {
+      //new wise
+      const newStores = popularData?.stores.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+      setStoreData(newStores);
+    }
+  };
 
-	const sliderItems = (
-		<SliderWrapper
-			sx={{
-				"& .slick-slide": {
-					paddingRight: { xs: "10px", sm: "20px" },
-					paddingY: "10px",
-				},
-			}}
-		>
-			{isLoading ? (
-				<Slider {...settings}>
-					{[...Array(6)].map((item, index) => {
-						return <SpecialOfferCardShimmer key={index} width={290} />;
-					})}
-				</Slider>
-			) : (
-				<Slider {...settings} ref={slider}>
-					{storeData?.map((item, index) => {
-						return (
-							<NearbyStoreCard
-								key={index}
-								configData={configData}
-								item={item}
-							/>
-						);
-					})}
-				</Slider>
-			)}
-		</SliderWrapper>
-	);
+  const sliderItems = (
+    <SliderWrapper
+      sx={{
+        "& .slick-slide": {
+          paddingRight: { xs: "10px", sm: "20px" },
+          paddingY: "10px",
+        },
+      }}
+    >
+      {isLoading ? (
+        <Slider {...settings}>
+          {[...Array(6)].map((item, index) => {
+            return <SpecialOfferCardShimmer key={index} width={290} />;
+          })}
+        </Slider>
+      ) : (
+        <Slider {...settings} ref={slider}>
+          {storeData?.map((item, index) => {
+            return (
+              <NearbyStoreCard
+                key={index}
+                configData={configData}
+                item={item}
+              />
+            );
+          })}
+        </Slider>
+      )}
+    </SliderWrapper>
+  );
 
-	const getLayout = () => {
-		if (getCurrentModuleType() === ModuleTypes.FOOD) {
-			return (
-				<>
-					{newArrivalStores && newArrivalStores.length > 0 && (
-						<>
-							<CustomStackFullWidth
-								direction="row"
-								alignItems="center"
-								justifyContent="space-between"
-							>
-								{isLoading ? (
-									<Skeleton variant="text" width="110px" />
-								) : (
-									<H2
-										text={t("New Arrival Restaurants")}
-										component="h2"
-									/>
-								)}
-							</CustomStackFullWidth>
-							<SliderWrapper
-								float="left"
-								sx={{
-									"& .slick-slide": {
-										paddingRight: { xs: "10px", sm: "20px" },
-										paddingY: "10px",
-									},
-								}}
-							>
-								<Slider {...foodNewArrivalsettings}>
-									{newArrivalStores?.map((item, index) => {
-										return (
-											<Box key={index}>
-												<Link
-													href={{
-														pathname: `/store/[id]`,
-														query: {
-															id: `${item?.id}`,
-															module_id: `${moduleId}`,
-															module_type:
-																getCurrentModuleType(),
-															store_zone_id: `${item?.zone_id}`,
-														},
-													}}
-												>
-													<ImageWrapper>
-														<Box
-															sx={{
-																borderRadius: "50%",
-																overflow: "hidden",
-																width: "100%",
-															}}
-														>
-															<CustomImageContainer
-																src={item?.logo_full_url}
-																alt={item?.title}
-																height="100%"
-																width="100%"
-																objectFit="cover"
-																borderRadius="50%"
-															/>
-															<ClosedNow
-																active={item?.active}
-																open={item?.open}
-																borderRadius="50%"
-															/>
-														</Box>
-													</ImageWrapper>
-												</Link>
-											</Box>
-										);
-									})}
-								</Slider>
-							</SliderWrapper>
-						</>
-					)}
-				</>
-			);
-		} else {
-			return (
-				<>
-					{popularData && popularData?.stores?.length > 0 && (
-						<>
-							<CustomStackFullWidth
-								direction="row"
-								alignItems="center"
-								justifyContent="space-between"
-							>
-								{isLoading ? (
-									<Skeleton variant="text" width="110px" />
-								) : (
-									<H2 text={t("Best Store Nearby")} component="h2" />
-								)}
-								<Menus
-									selectedMenuIndex={selectedMenuIndex}
-									setSelectedMenuIndex={handleMenuClick}
-									menus={menus}
-								/>
-							</CustomStackFullWidth>
-							{selectedMenuIndex === 0 && <>{sliderItems}</>}
-							{selectedMenuIndex === 1 && <>{sliderItems}</>}
-							{selectedMenuIndex === 2 && <>{sliderItems}</>}
-						</>
-					)}
-				</>
-			);
-		}
-	};
+  const getLayout = () => {
+    if (getCurrentModuleType() === ModuleTypes.FOOD) {
+      return (
+        <>
+          {newArrivalStores && newArrivalStores.length > 0 && (
+            <>
+              <CustomStackFullWidth
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                {isLoading ? (
+                  <Skeleton variant="text" width="110px" />
+                ) : (
+                  <H2 text={t("New Arrival Restaurants")} component="h2" />
+                )}
+              </CustomStackFullWidth>
+              <SliderWrapper
+                float="left"
+                sx={{
+                  "& .slick-slide": {
+                    paddingRight: { xs: "10px", sm: "20px" },
+                    paddingY: "10px",
+                  },
+                }}
+              >
+                <Slider {...foodNewArrivalsettings}>
+                  {newArrivalStores?.map((item, index) => {
+                    return (
+                      <Box key={index}>
+                        <Link
+                          href={{
+                            pathname: `/store/[id]`,
+                            query: {
+                              id: `${item?.id}`,
+                              module_id: `${moduleId}`,
+                              module_type: getCurrentModuleType(),
+                              store_zone_id: `${item?.zone_id}`,
+                            },
+                          }}
+                        >
+                          <ImageWrapper>
+                            <Box
+                              sx={{
+                                borderRadius: "50%",
+                                overflow: "hidden",
+                                width: "100%",
+                              }}
+                            >
+                              <CustomImageContainer
+                                src={item?.logo_full_url}
+                                alt={item?.title}
+                                height="100%"
+                                width="100%"
+                                objectFit="cover"
+                                borderRadius="50%"
+                              />
+                              <ClosedNow
+                                active={item?.active}
+                                open={item?.open}
+                                borderRadius="50%"
+                              />
+                            </Box>
+                          </ImageWrapper>
+                        </Link>
+                      </Box>
+                    );
+                  })}
+                </Slider>
+              </SliderWrapper>
+            </>
+          )}
+        </>
+      );
+    } else {
+      return (
+        <>
+          {popularData && popularData?.stores?.length > 0 && (
+            <>
+              <CustomStackFullWidth
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+              >
+                {isLoading ? (
+                  <Skeleton variant="text" width="110px" />
+                ) : (
+                  <H2 text={t("Best Store Nearby")} component="h2" />
+                )}
+                <Menus
+                  selectedMenuIndex={selectedMenuIndex}
+                  setSelectedMenuIndex={handleMenuClick}
+                  menus={menus}
+                />
+              </CustomStackFullWidth>
+              {selectedMenuIndex === 0 && <>{sliderItems}</>}
+              {selectedMenuIndex === 1 && <>{sliderItems}</>}
+              {selectedMenuIndex === 2 && <>{sliderItems}</>}
+            </>
+          )}
+        </>
+      );
+    }
+  };
 
-	return (
-		<HomeComponentsWrapper sx={{ paddingTop: "5px", gap: "1rem" }}>
-			{getLayout()}
-
-			{/* {true && (
-        <ImageWrapper>
-          <Skeleton variant="circular" height="100%" width="100%" />
-        </ImageWrapper>
-      )} */}
-		</HomeComponentsWrapper>
-	);
+  return (
+    <HomeComponentsWrapper sx={{ paddingTop: "5px", gap: "1rem" }}>
+      {getLayout()}
+    </HomeComponentsWrapper>
+  );
 };
 
 export default NewArrivalStores;

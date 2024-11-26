@@ -13,13 +13,6 @@ import {
 import { useTranslation } from "react-i18next";
 import CustomCheckbox from "../CustomCheckbox";
 
-// const StyleCheckBox = styled(Checkbox)(({ theme }) => ({
-//   "& .MuiCheckbox-root": {
-//     "& .Mui-checked": {
-//       color: "red",
-//     },
-//   },
-// }));
 export const StyleCheckBox = styled(({ checkedColor, ...other }) => (
   <Checkbox {...other} />
 ))(({ checkedColor, module, theme }) => ({

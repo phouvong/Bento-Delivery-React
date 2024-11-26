@@ -4,10 +4,6 @@ import CustomImageContainer from "../CustomImageContainer";
 import { Stack } from "@mui/system";
 import { IconButton, Typography } from "@mui/material";
 import deleteIcon from "../../assets/delete.png";
-import {
-  getAmountWithSign,
-  getDiscountedAmount,
-} from "../../helper-functions/CardHelpers";
 import CartIcon from "../added-cart-view/assets/CartIcon";
 import { useTheme } from "@emotion/react";
 import { CustomIconButton } from "../../styled-components/CustomButtons.style";
@@ -21,25 +17,24 @@ import {
   initialState,
   reducer,
 } from "../product-details/product-details-section/states";
-import { getModuleId } from "../../helper-functions/getModuleId";
+import { getModuleId } from "helper-functions/getModuleId";
 import { useRouter } from "next/router";
 import { t } from "i18next";
 import CustomDialogConfirm from "../custom-dialog/confirm/CustomDialogConfirm";
-import { getCurrentModuleType } from "../../helper-functions/getCurrentModuleType";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import FoodDetailModal from "../food-details/foodDetail-modal/FoodDetailModal";
 import ModuleModal from "../cards/ModuleModal";
-import { addWishList, removeWishListItem } from "../../redux/slices/wishList";
-import { not_logged_in_message } from "../../utils/toasterMessages";
-import { useAddToWishlist } from "../../api-manage/hooks/react-query/wish-list/useAddWishList";
-import { useWishListDelete } from "../../api-manage/hooks/react-query/wish-list/useWishListDelete";
+import { addWishList, removeWishListItem } from "redux/slices/wishList";
+import { not_logged_in_message } from "utils/toasterMessages";
+import { useAddToWishlist } from "api-manage/hooks/react-query/wish-list/useAddWishList";
+import { useWishListDelete } from "api-manage/hooks/react-query/wish-list/useWishListDelete";
 import AmountWithDiscountedAmount from "../AmountWithDiscountedAmount";
 import CartClearModal from "../product-details/product-details-section/CartClearModal";
 import CustomModal from "../modal";
-import { getGuestId } from "../../helper-functions/getToken";
-import { onErrorResponse } from "../../api-manage/api-error-response/ErrorResponses";
+import { getGuestId } from "helper-functions/getToken";
+import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import useAddCartItem from "../../api-manage/hooks/react-query/add-cart/useAddCartItem";
 import Loading from "../custom-loading/Loading";
-import { getImageUrl } from "utils/CustomFunctions";
 
 const WishListCard = ({ item }) => {
   const theme = useTheme();
@@ -116,13 +111,6 @@ const WishListCard = ({ item }) => {
         (item) => item?.store_id === state?.modalData[0]?.store_id
       );
 
-      // getDiscountedAmount(
-      //     state?.modalData[0]?.price,
-      //     state?.modalData[0]?.discount,
-      //     state?.modalData[0]?.discount_type,
-      //     state?.modalData[0]?.store_discount,
-      //     state?.modalData[0]?.quantity
-      // )
       if (isStoreExist) {
         const itemObject = {
           guest_id: getGuestId(),

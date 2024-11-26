@@ -66,8 +66,8 @@ const RestaurantDetailsForm = ({
                 backgroundColor
                 required="true"
                 type="text"
-                label={t("Restaurant Name")}
-                placeholder={t("Restaurant name")}
+                label={t("Store Name")}
+                placeholder={t("Store name")}
                 value={
                   RestaurantJoinFormik.values.restaurant_name[selectedLanguage]
                 }
@@ -94,10 +94,10 @@ const RestaurantDetailsForm = ({
             <Grid item xs={12} sm={12} md={12}>
               <CustomTextFieldWithFormik
                 backgroundColor
-                placeholder={t("Restaurant address")}
+                placeholder={t("Store address")}
                 required="true"
                 type="text"
-                label={t("Restaurant Address")}
+                label={t("Store Address")}
                 touched={RestaurantJoinFormik.touched.restaurant_address}
                 errors={RestaurantJoinFormik.errors.restaurant_address}
                 value={

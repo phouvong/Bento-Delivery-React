@@ -92,9 +92,11 @@ const ModuleWiseNav = (props) => {
       onClick={handleIconClick}
       sx={{
         height: "40px",
-        width: "40px",
         position: "relative",
         cursor: "pointer",
+        "& img": {
+          maxHeight: "100%",
+        },
       }}
     >
       <CustomImageContainer
@@ -127,9 +129,9 @@ const ModuleWiseNav = (props) => {
                 container
                 justifyContent="center"
                 alignItems="center"
-                spacing={2}
+                spacing={1}
               >
-                <Grid item xs={2} sm={1} align="left">
+                <Grid item xs={4} sm={4} align="left">
                   {router.pathname === "/home" && !router.query.search ? (
                     modules.length >= 2 ? (
                       <MobileModuleSelection />
@@ -141,7 +143,7 @@ const ModuleWiseNav = (props) => {
                   )}
                 </Grid>
                 {location ? (
-                  <Grid item xs={10} sm={11} align="left">
+                  <Grid item xs={8} sm={8} align="left">
                     <AddressReselect
                       setOpenDrawer={setOpenDrawer}
                       location={location}

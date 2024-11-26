@@ -86,7 +86,7 @@ const PharmacyStaticBanners = (props) => {
   const router = useRouter();
   const { configData } = useSelector((state) => state.configData);
 
-  const { data, refetch, isLoading } = useGetBasicCampaigns();
+  const { data, refetch, isLoading, isFetching } = useGetBasicCampaigns();
   useEffect(() => {
     refetch();
   }, []);
@@ -134,7 +134,7 @@ const PharmacyStaticBanners = (props) => {
             },
           }}
         >
-          {isLoading ? (
+          {isFetching ? (
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Slider {...settings}>

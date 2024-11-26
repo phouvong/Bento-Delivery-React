@@ -19,7 +19,6 @@ import {
 import LogoSide from "../../logo/LogoSide";
 import NavLinks from "./NavLinks";
 import { t } from "i18next";
-import CustomSignInButton from "./CustomSignInButton";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import { useRouter } from "next/router";
@@ -44,10 +43,9 @@ import CallToAdmin from "../../CallToAdmin";
 import CustomLanguage from "../top-navbar/language/CustomLanguage";
 import { SignInButton } from "components/header/NavBar.style";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-import SignIn from "components/auth/sign-in";
-import CustomModal from "components/modal";
-import AuthModal from "components/auth/AuthModal";
 
+import dynamic from "next/dynamic";
+const AuthModal = dynamic(() => import("components/auth/AuthModal"));
 const Cart = ({ isLoading }) => {
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
 
@@ -293,10 +291,7 @@ const SecondNavBar = ({ configData }) => {
       direction="row"
       alignItems="center"
       justifyContent="space-between"
-      //spacing={2}
       sx={{
-        // paddingBottom: isSmall && "10px",
-        // paddingTop: isSmall && "10px",
         marginLeft: "0 !important",
       }}
     >
@@ -431,7 +426,6 @@ const SecondNavBar = ({ configData }) => {
                   </CustomStackFullWidth>
                 </SignInButton>
               </Stack>
-              {/*<CustomSignInButton from={router.pathname.replace("/", "")} />*/}
             </Stack>
           )}
         </CustomStackFullWidth>

@@ -63,8 +63,6 @@ const LocationViewOnMap = (props) => {
         sx={{
           position: "relative",
           width: { xs: "300px", sm: "450px", md: "550px" },
-          // height:{md:"500px"},
-          // p: { xs: "10px", sm: "15px", md: "20px" },
           p: "15px",
         }}
       >
@@ -114,18 +112,18 @@ const LocationViewOnMap = (props) => {
               deliveryManLng={userLocation?.lng}
               isFooter={isFooter}
             />
-            <RoundedIconButton
-              sx={{
-                padding: "10px",
-                position: "absolute",
+            {/*<RoundedIconButton*/}
+            {/*  sx={{*/}
+            {/*    padding: "10px",*/}
+            {/*    position: "absolute",*/}
 
-                right: "10px",
-                bottom: "20px",
-              }}
-              onClick={handleCurrentLocation}
-            >
-              <GpsFixedIcon color="primary" />
-            </RoundedIconButton>
+            {/*    right: "10px",*/}
+            {/*    bottom: "20px",*/}
+            {/*  }}*/}
+            {/*  onClick={handleCurrentLocation}*/}
+            {/*>*/}
+            {/*  <GpsFixedIcon color="primary" />*/}
+            {/*</RoundedIconButton>*/}
           </Stack>
         </CustomStackFullWidth>
       </Paper>

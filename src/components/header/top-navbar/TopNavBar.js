@@ -18,10 +18,8 @@ const TopNavBar = () => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const theme = useTheme();
   let location = undefined;
-  let zoneid = undefined;
   if (typeof window !== "undefined") {
     location = localStorage.getItem("location");
-    zoneid = JSON.parse(localStorage.getItem("zoneid"));
   }
   const isSmall = useMediaQuery("(max-width:1180px)");
 
@@ -88,7 +86,6 @@ const TopNavBar = () => {
                     flexGrow: 1,
                   }}
                 >
-                  {/* <Logo src={logoSm.src} /> */}
                   <Stack alignItems="center" justifyContent="center">
                     <LogoSide width="126px" configData={configData} />
                   </Stack>

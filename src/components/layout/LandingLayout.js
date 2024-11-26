@@ -2,6 +2,8 @@ import { NoSsr, Stack, styled } from "@mui/material";
 import HeaderComponent from "../header";
 import FooterComponent from "../footer";
 import PropTypes from "prop-types";
+import useGetLandingPage from "api-manage/hooks/react-query/useGetLandingPage";
+import { useEffect } from "react";
 
 export const MainLayoutRoot = styled(Stack)(({ theme }) => ({
   backgroundColor: theme.palette.background.default,
@@ -9,6 +11,11 @@ export const MainLayoutRoot = styled(Stack)(({ theme }) => ({
 }));
 
 export const LandingLayout = ({ children, configData, landingPageData }) => {
+  const { data, refetch } = useGetLandingPage();
+  useEffect(() => {
+    refetch();
+  }, []);
+
   return (
     <MainLayoutRoot justifyContent="space-between">
       <header>
@@ -16,10 +23,7 @@ export const LandingLayout = ({ children, configData, landingPageData }) => {
       </header>
       {children}
       <footer>
-        <FooterComponent
-          configData={configData}
-          landingPageData={landingPageData}
-        />
+        <FooterComponent configData={configData} landingPageData={data} />
       </footer>
     </MainLayoutRoot>
   );

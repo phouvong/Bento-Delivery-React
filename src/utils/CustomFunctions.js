@@ -7,7 +7,6 @@ import {
 } from "helper-functions/getCurrentModuleType";
 import { store } from "redux/store";
 import { getDiscountedAmount } from "helper-functions/CardHelpers";
-import { values } from "lodash";
 
 export const getNumberWithConvertedDecimalPoint = (
   amount,
@@ -303,29 +302,6 @@ export const getTaxableTotalPrice = (
     return (total * tax) / 100;
   }
 };
-// export const getTaxableTotalPrice = (items, couponDiscount, storeData) => {
-//   const isTaxIncluded = store?.getState?.()?.configData?.tax_included === 1;
-//   let tax = storeData?.data?.tax;
-//   let total =
-//     items.reduce(
-//       (total, product) =>
-//         (product.variations.length > 0
-//           ? handleProductValueWithOutDiscount(product)
-//           : product.price) *
-//           product.quantity +
-//         selectedAddonsTotal(product.selectedAddons) +
-//         total,
-//       0
-//     ) -
-//     getProductDiscount(items, storeData) -
-//     (couponDiscount ? getCouponDiscount(couponDiscount, storeData, items) : 0);
-//
-//   if (isTaxIncluded) {
-//     return (total * tax) / (100 + tax);
-//   } else {
-//     return (total * tax) / 100;
-//   }
-// };
 const handleTotalDiscountBasedOnModules = (
   items,
   restaurentDiscount,
@@ -599,34 +575,6 @@ function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
   const c = 2 * Math.asin(Math.sqrt(a));
 
   return earthRadius * c;
-  // var startLongitudeRadians = radians(lon1);
-  // var startLatitudeRadians = radians(lat1);
-  // var endLongitudeRadians = radians(lon2);
-  // var endLatitudeRadians = radians(lat2);
-  //
-  // var y =
-  //   Math.sin(endLongitudeRadians - startLongitudeRadians) *
-  //   Math.cos(endLatitudeRadians);
-  // var x =
-  //   Math.cos(startLatitudeRadians) * Math.sin(endLatitudeRadians) -
-  //   Math.sin(startLatitudeRadians) *
-  //     Math.cos(endLatitudeRadians) *
-  //     Math.cos(endLongitudeRadians - startLongitudeRadians);
-  //
-  // return degrees(Math.atan2(y, x));
-
-  // const earthRadiusKm = 6371;
-  // let dLat = degreesToRadians(lat2 - lat1);
-  // let dLon = degreesToRadians(lon2 - lon1);
-  //
-  // lat1 = degreesToRadians(lat1);
-  // lat2 = degreesToRadians(lat2);
-  //
-  // let a =
-  //   Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-  //   Math.sin(dLon / 2) * Math.sin(dLon / 2) * Math.cos(lat1) * Math.cos(lat2);
-  // let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  // return earthRadiusKm * c;
 }
 
 export const handleDistance = (distance, origin, destination) => {
@@ -664,27 +612,6 @@ export const cartItemsTotalAmount = (cartList) => {
   return totalAmount;
 };
 
-const handleGlobalDeliveryFee = (
-  configData,
-  totalOrderAmount,
-  orderType,
-  deliveryFee
-) => {
-  if (
-    (configData?.free_delivery_over !== null &&
-      configData?.free_delivery_over > 0 &&
-      totalOrderAmount > configData?.free_delivery_over) ||
-    orderType === "take_away"
-  ) {
-    return 0;
-  } else {
-    if (configData?.minimum_shipping_charge >= deliveryFee) {
-      return configData?.minimum_shipping_charge;
-    } else {
-      return deliveryFee;
-    }
-  }
-};
 export const getInfoFromZoneData = (zoneData) => {
   let chargeInfo;
   if (zoneData?.data?.zone_data?.length > 0) {
@@ -779,7 +706,16 @@ export const getDeliveryFees = (
           deliveryFee =
             convertedDistance *
             (chargeInfo?.pivot?.per_km_shipping_charge || 0);
-          if (deliveryFee <= chargeInfo?.pivot?.minimum_shipping_charge) {
+          if (
+            (configData?.free_delivery_over !== null &&
+              configData?.free_delivery_over > 0 &&
+              totalOrderAmount >= configData?.free_delivery_over) ||
+            orderType === "take_away"
+          ) {
+            return 0;
+          } else if (
+            deliveryFee <= chargeInfo?.pivot?.minimum_shipping_charge
+          ) {
             return getDeliveryFeeByBadWeather(
               chargeInfo?.pivot?.minimum_shipping_charge + extraCharge,
               chargeInfo?.increased_delivery_fee,
@@ -795,20 +731,11 @@ export const getDeliveryFees = (
               chargeInfo?.increased_delivery_fee_status
             );
           } else {
-            if (
-              (configData?.free_delivery_over !== null &&
-                configData?.free_delivery_over > 0 &&
-                totalOrderAmount >= configData?.free_delivery_over) ||
-              orderType === "take_away"
-            ) {
-              return 0;
-            } else {
-              return getDeliveryFeeByBadWeather(
-                deliveryFee + extraCharge,
-                chargeInfo?.increased_delivery_fee,
-                chargeInfo?.increased_delivery_fee_status
-              );
-            }
+            return getDeliveryFeeByBadWeather(
+              deliveryFee + extraCharge,
+              chargeInfo?.increased_delivery_fee,
+              chargeInfo?.increased_delivery_fee_status
+            );
           }
         }
       }

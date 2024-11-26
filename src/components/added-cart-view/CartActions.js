@@ -6,10 +6,10 @@ import { useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
-import { setClearCart } from "../../redux/slices/cart";
+import { setClearCart } from "redux/slices/cart";
 import GuestCheckoutModal from "../cards/GuestCheckoutModal";
-import AuthModal from "components/auth/AuthModal";
-
+import dynamic from "next/dynamic";
+const AuthModal = dynamic(() => import("components/auth/AuthModal"));
 const CartActions = (props) => {
   const { setSideDrawerOpen, cartList } = props;
   const { configData } = useSelector((state) => state.configData);
@@ -40,8 +40,8 @@ const CartActions = (props) => {
         setSideDrawerOpen(false);
         router.push("/home", undefined, { shallow: true });
       } else {
-        setSideDrawerOpen(false);
         setOpenAuth(true);
+        // setSideDrawerOpen(false);
         //router.push('/auth/sign-in');
       }
     }

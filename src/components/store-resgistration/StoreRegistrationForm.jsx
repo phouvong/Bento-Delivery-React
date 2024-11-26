@@ -244,20 +244,29 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
   });
 
   let moduleOption = [];
-  if (
-    getZoneWiseModule(data, RestaurantJoinFormik?.values?.zoneId)?.length > 0
-  ) {
-    getZoneWiseModule(data, RestaurantJoinFormik?.values?.zoneId)?.forEach(
-      (module) => {
-        let obj = {
+  const zoneWiseModules = getZoneWiseModule(
+    data,
+    RestaurantJoinFormik?.values?.zoneId
+  );
+
+  if (zoneWiseModules?.length > 0) {
+    zoneWiseModules.forEach((module) => {
+      if (module.module_type !== "parcel") {
+        moduleOption.push({
           label: module.module_name,
           value: module.id,
-        };
-        moduleOption?.push(obj);
+        });
       }
-    );
+    });
+
+    // Check if moduleOption remains empty after filtering out "parcel"
+    if (moduleOption.length === 0) {
+      moduleOption.push({
+        label: "No result found",
+      });
+    }
   } else {
-    moduleOption?.push({
+    moduleOption.push({
       label: "No result found",
     });
   }

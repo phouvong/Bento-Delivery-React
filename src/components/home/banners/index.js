@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import { Grid, Skeleton, styled } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRouter } from "next/router";
@@ -18,7 +17,6 @@ import {
 } from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../../CustomImageContainer";
 import FoodDetailModal from "../../food-details/foodDetail-modal/FoodDetailModal";
-import { getImageUrl } from "utils/CustomFunctions";
 
 export const BannersWrapper = styled(Box)(({ theme }) => ({
   cursor: "pointer",
@@ -97,6 +95,8 @@ const Banners = (props) => {
         undefined,
         { shallow: true }
       );
+    } else if (banner?.type === "default") {
+      window.open(banner?.link, "_blank");
     } else {
       if (banner?.type === "store_wise") {
         router.push(
@@ -139,7 +139,6 @@ const Banners = (props) => {
   };
   const handleModalClose = () => {
     setOpenModal(false);
-    //setBannerData(null);
   };
 
   const getModuleWiseBanners = () => {

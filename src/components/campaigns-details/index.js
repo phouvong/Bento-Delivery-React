@@ -2,20 +2,14 @@ import React from "react";
 import {
   CustomPaperBigCard,
   CustomStackFullWidth,
-} from "../../styled-components/CustomStyles.style";
+} from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
 import { Stack } from "@mui/material";
 import MiddleSection from "./MiddleSection";
 import ItemSection from "./ItemSection";
 import { useTheme } from "@emotion/react";
-import { getImageUrl } from "utils/CustomFunctions";
 
-const CampaignsDetails = ({
-  campaignsDetails,
-  configData,
-  isRefetching,
-  isLoading,
-}) => {
+const CampaignsDetails = ({ campaignsDetails, isRefetching, isLoading }) => {
   const theme = useTheme();
   const camImage = campaignsDetails?.image_full_url;
   return (

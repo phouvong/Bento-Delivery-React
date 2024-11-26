@@ -19,7 +19,6 @@ import ShopCategoryCard from "../../cards/ShopCategoryCard";
 import { HomeComponentsWrapper } from "../HomePageComponents";
 import FeaturedItemCard from "./card";
 import { moduleWiseNext, moduleWisePrev } from "./sliderSettings";
-import { getImageUrl } from "utils/CustomFunctions";
 
 export const ButtonLeft = styled(CustomButtonPrimary)(
   ({ theme, language_direction }) => ({
@@ -49,9 +48,6 @@ const FeaturedCategories = ({ configData }) => {
     useGetFeaturedCategories();
   const dispatch = useDispatch();
   useEffect(() => {
-    // if (featuredCategories.length === 0) {
-    //   refetch();
-    // }
     refetch();
   }, []);
 
@@ -451,7 +447,6 @@ const FeaturedCategories = ({ configData }) => {
           slidesToShow: 5,
           slidesToScroll: 3,
           infinite: featuredCategories.length >= 5,
-          // dots: true
         },
       },
       {
@@ -487,7 +482,7 @@ const FeaturedCategories = ({ configData }) => {
     <CustomBoxFullWidth sx={{ mt: "20px" }}>
       {isFetching ? (
         <HomeComponentsWrapper>
-          <SliderCustom nopadding="true">
+          <SliderCustom nopadding="true" sx={{ paddingTop: "15px" }}>
             {moduleWiseCardShimmer()}
           </SliderCustom>
         </HomeComponentsWrapper>

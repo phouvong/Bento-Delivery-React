@@ -3,29 +3,35 @@ import LandingPage from "../src/components/landing-page";
 import CssBaseline from "@mui/material/CssBaseline";
 import React, { useEffect } from "react";
 import { useDispatch } from "react-redux";
-import { setConfigData } from "redux/slices/configData";
+import { setConfigData, setLandingPageData } from "redux/slices/configData";
 import Router from "next/router";
 import SEO from "../src/components/seo";
 import useGetLandingPage from "../src/api-manage/hooks/react-query/useGetLandingPage";
 import { getImageUrl } from "utils/CustomFunctions";
+import { useGetConfigData } from "../src/api-manage/hooks/useGetConfigData";
 
 const Root = (props) => {
   const { configData } = props;
   const { data, refetch } = useGetLandingPage();
   const dispatch = useDispatch();
+  const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
   useEffect(() => {
-    if (configData) {
-      refetch();
-      if (configData.length === 0) {
+    configRefetch();
+    refetch();
+  }, []);
+  useEffect(() => {
+    dispatch(setLandingPageData(data));
+    if (dataConfig) {
+      if (dataConfig.length === 0) {
         Router.push("/404");
-      } else if (configData?.maintenance_mode) {
+      } else if (dataConfig?.maintenance_mode) {
         Router.push("/maintainance");
       } else {
-        dispatch(setConfigData(configData));
+        dispatch(setConfigData(dataConfig));
       }
     } else {
     }
-  }, [configData]);
+  }, [dataConfig, data]);
 
   return (
     <>
@@ -37,8 +43,8 @@ const Root = (props) => {
         configData={configData}
       />
       {data && (
-        <LandingLayout configData={configData} landingPageData={data}>
-          <LandingPage configData={configData} landingPageData={data} />
+        <LandingLayout configData={dataConfig} landingPageData={data}>
+          <LandingPage configData={dataConfig} landingPageData={data} />
         </LandingLayout>
       )}
     </>
@@ -62,19 +68,6 @@ export const getServerSideProps = async (context) => {
     }
   );
   const config = await configRes.json();
-  const landingPageRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/react-landing-page`,
-    {
-      method: "GET",
-      headers: {
-        "X-software-id": 33571750,
-        "X-server": "server",
-        "X-localization": language,
-        origin: process.env.NEXT_CLIENT_HOST_URL,
-      },
-    }
-  );
-  const landingPageData = await landingPageRes.json();
   // Set cache control headers for 1 hour (3600 seconds)
   res.setHeader(
     "Cache-Control",
@@ -84,7 +77,6 @@ export const getServerSideProps = async (context) => {
   return {
     props: {
       configData: config,
-      landingPageData: landingPageData,
     },
   };
 };

@@ -4,14 +4,14 @@ import { Popover, Stack, Typography, useTheme } from "@mui/material";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 import CustomAlert from "../../../alert/CustomAlert";
-import MapModal from "../../../Map/MapModal";
 import { CustomButtonPrimary } from "styled-components/CustomButtons.style";
 import DeliveryAddress from "../../../checkout/delivery-address";
 import { useGeolocated } from "react-geolocated";
 import ControlPointOutlinedIcon from "@mui/icons-material/ControlPointOutlined";
 import useGetGeoCode from "../../../../api-manage/hooks/react-query/google-api/useGetGeoCode";
 import useGetZoneId from "../../../../api-manage/hooks/react-query/google-api/useGetZone";
-
+import dynamic from "next/dynamic";
+const MapModal = dynamic(() => import("../../../Map/MapModal"));
 const AddressReselectPopover = (props) => {
   const { anchorEl, onClose, open, t, address, setAddress, token, ...other } =
     props;
@@ -46,7 +46,6 @@ const AddressReselectPopover = (props) => {
       localStorage.setItem("location", currentLocation);
       localStorage.setItem("currentLatLng", JSON.stringify(location));
       window.location.reload();
-      // toast.success(t("New location has been set."));
     }
   };
   const { data: geoCodeResults, isLoading: isLoadingGeoCode } = useGetGeoCode(
@@ -68,7 +67,6 @@ const AddressReselectPopover = (props) => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (zoneData) {
-        // dispatch(setZoneData(zoneData?.data?.zone_data));
         localStorage.setItem("zoneid", zoneData?.zone_id);
       }
     }

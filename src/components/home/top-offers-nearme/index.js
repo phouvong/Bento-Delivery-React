@@ -19,13 +19,12 @@ import useGetTopOffers from "api-manage/hooks/react-query/product-details/useGet
 import CustomImageContainer from "components/CustomImageContainer";
 import fire_image from "../../../assets/fire.svg";
 import StoreCard from "components/cards/StoreCard";
-import { getModuleId } from "helper-functions/getModuleId";
 import Link from "next/link";
 
 const TopOffersNearMe = ({ title }) => {
   const { t } = useTranslation();
 
-  const { data, refetch, isLoading } = useGetTopOffers();
+  const { data, refetch, isLoading, isFetching } = useGetTopOffers();
 
   const [isHover, setIsHover] = useState(false);
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
@@ -148,7 +147,7 @@ const TopOffersNearMe = ({ title }) => {
                 direction="row"
                 marginTop={{ xs: "10px" }}
               >
-                {isLoading ? (
+                {isFetching ? (
                   <Skeleton variant="text" width="110px" />
                 ) : (
                   <Stack direction="row" spacing={1} alignItems="center">
@@ -160,7 +159,7 @@ const TopOffersNearMe = ({ title }) => {
                     <H2 text={title ? title : t("Special Offer")} />
                   </Stack>
                 )}
-                {isLoading ? (
+                {isFetching ? (
                   <Skeleton width="100px" variant="80px" />
                 ) : (
                   <Link
@@ -194,7 +193,7 @@ const TopOffersNearMe = ({ title }) => {
                 }}
               >
                 <>
-                  {isLoading ? (
+                  {isFetching ? (
                     <Slider {...settings}>
                       {[...Array(5)].map((item, index) => {
                         return <SpecialOfferCardShimmer key={index} />;

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import CustomSideDrawer from "../../../side-drawer/CustomSideDrawer";
-import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import {
   CustomPaperBigCard,
   CustomStackFullWidth,
@@ -8,7 +7,6 @@ import {
 import {
   alpha,
   Button,
-  IconButton,
   Skeleton,
   Typography,
   useMediaQuery,
@@ -24,9 +22,9 @@ import DeliveryManInfoCard from "../../../checkout/parcel/DeliveryManInfo";
 import ParcelTrackOderStepper from "../../../parcel/ParcelTrackOderStepper";
 import useGetTrackOrderData from "../../../../api-manage/hooks/react-query/order/useGetTrackOrderData";
 import CustomEmptyResult from "../../../custom-empty-result";
-import { getGuestId, getToken } from "../../../../helper-functions/getToken";
-import { getAmountWithSign } from "../../../../helper-functions/CardHelpers";
-import emptyImage from "../../../../assets/img/fi_10608837 (2).png";
+import { getGuestId, getToken } from "helper-functions/getToken";
+import { getAmountWithSign } from "helper-functions/CardHelpers";
+import emptyImage from "../../../../assets/empty.png";
 import { CustomCloseIconButton } from "../../../added-cart-view/Cart.style";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useRouter } from "next/router";
@@ -41,7 +39,7 @@ const CustomLine = styled(Box)(({ theme }) => ({
 const TrackParcelOrderDrawer = (props) => {
   const theme = useTheme();
   const router = useRouter();
-  //const [error, setError] = useState(true);
+
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const [orderData, setOrderData] = useState(null);
   const { sideDrawerOpen, orderId, setSideDrawerOpen, phoneOrEmail } = props;
@@ -93,22 +91,18 @@ const TrackParcelOrderDrawer = (props) => {
     {
       label: "Order Placed",
       time: trackOrderData?.pending,
-      // img: orderConfirmImage.src,
     },
     {
       label: "Order Confirmed",
       time: trackOrderData?.confirmed,
-      // img: shippedImage.src,
     },
     {
       label: "On the Way",
       time: trackOrderData?.picked_up,
-      // img: outForDelivery.src,
     },
     {
       label: "Delivered",
       time: trackOrderData?.delivered,
-      // img: delivered.src,
     },
   ];
   const closeHandler = () => {
@@ -161,13 +155,6 @@ const TrackParcelOrderDrawer = (props) => {
                   {trackOrderData?.id}
                 </Typography>
               </Typography>
-              {/* <IconButton
-                onClick={() => {
-                  setSideDrawerOpen(false);
-                }}
-              >
-                <CloseRoundedIcon fontSize="14px" />
-              </IconButton> */}
             </Stack>
 
             <CustomStackFullWidth sx={{ position: "relative" }}>

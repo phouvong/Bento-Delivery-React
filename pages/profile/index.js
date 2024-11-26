@@ -1,24 +1,37 @@
 import React, { useEffect, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import MainLayout from "../../src/components/layout/MainLayout";
-import Profile from "../../src/components/profile";
-import UserLayout from "../../src/components/layout/UserLayout";
 import { useTranslation } from "react-i18next";
 import { NoSsr } from "@mui/material";
 import AuthGuard from "../../src/components/route-guard/AuthGuard";
 import { useRouter } from "next/router";
-import { getServerSideProps } from "../index";
 import SEO from "../../src/components/seo";
 import UserInformation from "../../src/components/user-information/UserInformation";
 import jwt from "base-64";
-import { getImageUrl } from "utils/CustomFunctions";
+import { useDispatch, useSelector } from "react-redux";
+import { useGetConfigData } from "../../src/api-manage/hooks/useGetConfigData";
+import { setConfigData } from "../../src/redux/slices/configData";
 
-const Index = ({ configData, landingPageData }) => {
+const Index = () => {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const router = useRouter();
   const { page, orderId, token } = router.query;
   const [attributeId, setAttributeId] = useState("");
-
+  const { landingPageData, configData } = useSelector(
+    (state) => state.configData
+  );
+  const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
+  useEffect(() => {
+    if (!configData) {
+      configRefetch();
+    }
+  }, [configData]);
+  useEffect(() => {
+    if (dataConfig) {
+      dispatch(setConfigData(dataConfig));
+    }
+  }, [dataConfig]);
   useEffect(() => {
     if (token) {
       try {
@@ -73,4 +86,3 @@ const Index = ({ configData, landingPageData }) => {
 };
 
 export default Index;
-export { getServerSideProps };

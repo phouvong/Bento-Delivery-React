@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { CustomImageContainerStyled } from "../styled-components/CustomStyles.style";
+import React, { memo, useEffect, useState } from "react";
+import { CustomImageContainerStyled } from "styled-components/CustomStyles.style";
 import placeholder from "../../public/static/no-image-found.png";
 import { Box } from "@mui/system";
 
@@ -21,7 +21,7 @@ const CustomImageContainer = ({
   smWidth,
   aspectRatio,
   padding,
-  boxShadow,
+  loading,
 }) => {
   const [imageFile, setState] = useState(null);
   useEffect(() => {
@@ -57,15 +57,14 @@ const CustomImageContainer = ({
       ) : (
         <img
           src={imageFile}
-          alt={alt}
+          alt={alt || "image"}
           onError={() => {
-            // currentTarget.onerror = null; // prevents looping
             setState(placeholder.src);
           }}
-          loading="lazy"
+          loading={loading || "lazy"}
         />
       )}
     </CustomImageContainerStyled>
   );
 };
-export default CustomImageContainer;
+export default memo(CustomImageContainer);

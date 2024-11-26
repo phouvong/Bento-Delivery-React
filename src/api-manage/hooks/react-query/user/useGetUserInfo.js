@@ -5,7 +5,7 @@ import {
   onErrorResponse,
   onSingleErrorResponse,
 } from "../../../api-error-response/ErrorResponses";
-import { getToken } from "../../../../helper-functions/getToken";
+import { getToken } from "helper-functions/getToken";
 
 const getData = async () => {
   const userToken = getToken();

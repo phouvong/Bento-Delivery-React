@@ -1,8 +1,8 @@
 import { Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { getCurrentModuleType } from "../../helper-functions/getCurrentModuleType";
-import { ModuleTypes } from "../../helper-functions/moduleTypes";
-import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { ModuleTypes } from "helper-functions/moduleTypes";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import ManageSearch from "../header/second-navbar/ManageSearch";
 import TrackParcelFromHomePage from "../parcel/TrackParcelFromHomePage";
 

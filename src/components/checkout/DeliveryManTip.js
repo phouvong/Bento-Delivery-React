@@ -6,49 +6,49 @@ import {
   CustomStackFullWidth,
   CustomTextField,
 } from "../../styled-components/CustomStyles.style";
-import { alpha, Button, Grid, Typography } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { CouponTitle, DeliveryCaption, RoundButton } from "./CheckOut.style";
 import { useTheme } from "@emotion/react";
-import { getAmountWithSign } from "../../helper-functions/CardHelpers";
-import { debounce } from "lodash";
+import { getAmountWithSign } from "helper-functions/CardHelpers";
 const DeliveryManTip = ({
   deliveryTip,
   setDeliveryTip,
-  orderType,
   isSmall,
-  parcel,
   tripsData,
-  setUsePartialPayment,
 }) => {
   const [show, setShow] = useState(false);
   const theme = useTheme();
   const [fieldValue, setFieldValue] = useState(deliveryTip);
-  const [isCustom,setIsCustom]=useState(false)
+  const [isCustom, setIsCustom] = useState(false);
   const deliveryTips = [0, 10, 15, 20, 40];
   const { t } = useTranslation();
 
-  const debouncedSetInputValue = debounce((value) => {
-    setDeliveryTip(value);
+  let debounceTimeout;
 
-  }, 300);
+  const debouncedSetInputValue = (value) => {
+    if (debounceTimeout) {
+      clearTimeout(debounceTimeout); // Clear the previous timeout
+    }
+
+    debounceTimeout = setTimeout(() => {
+      setDeliveryTip(value); // Execute the function after 300ms
+    }, 300);
+  };
+
   const handleOnChange = (e) => {
-    // setFieldValue(e.target.value);
-    // debouncedSetInputValue(e.target.value);
-
     if (e.target.value > -1) {
       setFieldValue(e.target.value);
       debouncedSetInputValue(e.target.value);
-      setIsCustom(true)
-    }else{
-      setIsCustom(false)
+      setIsCustom(true);
+    } else {
+      setIsCustom(false);
     }
   };
 
   const handleClickOnTips = (tip) => {
     setFieldValue(tip);
-    setIsCustom(false)
+    setIsCustom(false);
   };
   useEffect(() => {
     debouncedSetInputValue(fieldValue);
@@ -126,7 +126,14 @@ const DeliveryManTip = ({
                 onClick={handleShow}
                 active={isCustom}
               >
-                <Typography color={isCustom?theme.palette.neutral[100]:theme.palette.primary.main} fontSize="12px">
+                <Typography
+                  color={
+                    isCustom
+                      ? theme.palette.neutral[100]
+                      : theme.palette.primary.main
+                  }
+                  fontSize="12px"
+                >
                   {t("Custom")}
                 </Typography>
               </CustomBoxForTips>
@@ -134,7 +141,7 @@ const DeliveryManTip = ({
           </Grid>
         )}
         {show && (
-          <Stack width="100%" direction="row" spacing={1.8} >
+          <Stack width="100%" direction="row" spacing={1.8}>
             <CustomTextField
               type="number"
               label={t("Amount")}

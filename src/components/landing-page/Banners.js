@@ -3,13 +3,11 @@ import { Box } from "@mui/system";
 import React from "react";
 import Slider from "react-slick";
 import {
-  CustomBoxFullWidth,
   CustomStackFullWidth,
   SliderCustom,
 } from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
 import CustomContainer from "../container";
-import { getHeaderImageUrl } from "utils/CustomFunctions";
 
 const Banners = ({ landingPageData, isSmall }) => {
   const infiniteManage = () => {
@@ -51,13 +49,6 @@ const Banners = ({ landingPageData, isSmall }) => {
         {/* <Grid container spacing={2}> */}
         {landingPageData?.promotion_banners_full_url?.map((item, index) => {
           return (
-            // <Grid
-            // 	key={index}
-            // 	item
-            // 	sm={6}
-            // 	md={6}
-            // 	// align={index === 0 ? "right" : "left"}
-            // >
             <Box
               key={index}
               sx={{
@@ -85,10 +76,8 @@ const Banners = ({ landingPageData, isSmall }) => {
                 borderRadius="5px"
               />
             </Box>
-            // </Grid>
           );
         })}
-        {/* </Grid> */}
       </CustomStackFullWidth>
     );
   };
@@ -182,7 +171,6 @@ const Banners = ({ landingPageData, isSmall }) => {
         sx={{
           display: "flex",
           alignItems: "center",
-          // justifyContent: "center",
         }}
       >
         <Box
@@ -191,8 +179,6 @@ const Banners = ({ landingPageData, isSmall }) => {
               `0.828571px solid ${alpha(theme.palette.primary.main, 0.15)}`,
             position: "relative",
             height: "175px",
-            // width: { xs: "100%", sm: "90%" },
-            // width: "100%",
             borderRadius: "5px",
           }}
         >

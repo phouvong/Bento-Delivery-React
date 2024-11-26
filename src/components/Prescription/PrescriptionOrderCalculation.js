@@ -3,14 +3,11 @@ import { CalculationGrid, TotalGrid } from "../checkout/CheckOut.style";
 import { Grid, Stack, Typography, useTheme } from "@mui/material";
 import CustomDivider from "../CustomDivider";
 import { t } from "i18next";
-import {
-  getInfoFromZoneData,
-  handleDistance,
-} from "../../utils/CustomFunctions";
+import { getInfoFromZoneData, handleDistance } from "utils/CustomFunctions";
 import {
   getAmountWithSign,
   getReferDiscount,
-} from "../../helper-functions/CardHelpers";
+} from "helper-functions/CardHelpers";
 import { useDispatch, useSelector } from "react-redux";
 import useGetVehicleCharge from "../../api-manage/hooks/react-query/order-place/useGetVehicleCharge";
 
@@ -26,10 +23,7 @@ const PrescriptionOrderCalculation = ({
   deliveryTip,
 }) => {
   const theme = useTheme();
-  const { profileInfo } = useSelector((state) => state.profileInfo);
-  const dispatch = useDispatch();
-  const tempDistance =
-    distanceData?.data?.rows?.[0]?.elements[0]?.distance?.value / 1000;
+  const tempDistance = handleDistance(distanceData?.data, origin, destination);
 
   const { data: extraCharge, refetch: extraChargeRefetch } =
     useGetVehicleCharge({ tempDistance });
@@ -50,11 +44,7 @@ const PrescriptionOrderCalculation = ({
       origin,
       destination
     );
-
     let deliveryFee = convertedDistance * configData?.per_km_shipping_charge;
-    //checking if latest codes are there at github
-
-    //restaurant self delivery system checking
     if (Number.parseInt(storeData?.self_delivery_system) === 1) {
       if (storeData?.free_delivery) {
         return 0;
@@ -63,7 +53,7 @@ const PrescriptionOrderCalculation = ({
           convertedDistance * storeData?.per_km_shipping_charge || 0;
         if (
           deliveryFee > storeData?.minimum_shipping_charge &&
-          deliveryFee < storeData.maximum_shipping_charge
+          deliveryFee < storeData?.maximum_shipping_charge
         ) {
           return deliveryFee;
         } else {
@@ -110,31 +100,22 @@ const PrescriptionOrderCalculation = ({
     }
   };
   const handleTotalAmount = () => {
+    const tempDeliveryFee = getPrescriptionDeliveryFees(
+      storeData,
+      configData,
+      distanceData?.data,
+      orderType,
+      zoneData,
+      origin,
+      destination
+    );
     const totalAmount =
-      getPrescriptionDeliveryFees(
-        storeData,
-        configData,
-        distanceData?.data,
-        orderType,
-        zoneData,
-        origin,
-        destination
-      ) +
+      (tempDeliveryFee ? tempDeliveryFee : 0) +
       Number(deliveryTip) +
       configData?.additional_charge;
     localStorage.setItem("totalAmount", totalAmount);
     return totalAmount;
   };
-  const totalAmountForRefer =
-    handleTotalAmount() - configData?.additional_charge - Number(deliveryTip);
-  const finalTotalAmount = profileInfo?.is_valid_for_discount
-    ? handleTotalAmount() -
-      getReferDiscount(
-        totalAmountForRefer,
-        profileInfo?.discount_amount,
-        profileInfo?.discount_amount_type
-      )
-    : handleTotalAmount();
   return (
     <CalculationGrid container item md={12} xs={12} spacing={1}>
       <Grid item md={8} xs={8}>
@@ -166,7 +147,6 @@ const PrescriptionOrderCalculation = ({
       <Grid item md={8} xs={8}>
         {t("Delivery fee")}
       </Grid>
-
       <Grid item md={4} xs={4} align="right">
         {storeData &&
           getAmountWithSign(
@@ -178,27 +158,9 @@ const PrescriptionOrderCalculation = ({
               zoneData,
               origin,
               destination
-            )
+            ) ?? 0
           )}
       </Grid>
-      {/*{profileInfo?.is_valid_for_discount ? (*/}
-      {/*  <>*/}
-      {/*    <Grid item md={8} xs={8}>*/}
-      {/*      {t("Referral Discount")}*/}
-      {/*    </Grid>*/}
-
-      {/*    <Grid item md={4} xs={4} align="right">*/}
-      {/*      {storeData &&*/}
-      {/*        getAmountWithSign(*/}
-      {/*          getReferDiscount(*/}
-      {/*            totalAmountForRefer,*/}
-      {/*            profileInfo?.discount_amount,*/}
-      {/*            profileInfo?.discount_amount_type*/}
-      {/*          )*/}
-      {/*        )}*/}
-      {/*    </Grid>*/}
-      {/*  </>*/}
-      {/*) : null}*/}
 
       <CustomDivider />
       <TotalGrid container md={12} xs={12} mt="1rem">
@@ -211,7 +173,6 @@ const PrescriptionOrderCalculation = ({
           <Typography color={theme.palette.primary.main}>
             {storeData && getAmountWithSign(handleTotalAmount())}
           </Typography>
-          {/*{handleTotalAmount()}*/}
         </Grid>
       </TotalGrid>
     </CalculationGrid>

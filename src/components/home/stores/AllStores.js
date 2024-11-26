@@ -81,7 +81,7 @@ const AllStores = (props) => {
       fetchNextPage();
     }
   }, [inView, selectedFilterValue, filteredData]);
-  console.log({ storeData });
+
   useEffect(() => {
     refetch();
   }, [filteredData]);

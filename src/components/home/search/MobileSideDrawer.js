@@ -40,25 +40,7 @@ const MobileSideDrawer = (props) => {
     handleSortByNew,
     newSort,
   } = props;
-  // const [filterData, setFilterData] = useState(filterTypes);
-  const [minMax, setMinMax] = useState([0, 0]);
-  //const priceFilterRange = [{ min_price: 0, max_price: 100 }];
   const { t } = useTranslation();
-  // const handleCheckbox = (value, e) => {
-  //   // setSelectedFilterValues((prev) => [...prev, value]);
-  //   let newData = filterData.map((item) =>
-  //     item?.value === value?.value
-  //       ? { ...item, checked: e.target.checked }
-  //       : item
-  //   );
-  //   setFilterData(newData);
-  // };
-  const handleMinMax = (value) => {
-    if (value[0] === 0) {
-      value[0] = priceFilterRange?.[0]?.min_price;
-    }
-    setMinMax(value);
-  };
   const content = (
     <CustomStackFullWidth sx={{ mt: "42px" }}>
       <Grid container>
@@ -164,18 +146,6 @@ const MobileSideDrawer = (props) => {
             </CustomBoxFullWidth>
           </CustomStackFullWidth>
         </Grid>
-        {/*<Grid item xs={12}>*/}
-        {/*  <CustomStackFullWidth spacing={1}>*/}
-        {/*    <Typography fontWeight="bold">{t("Price")}</Typography>*/}
-        {/*    <CustomSlider*/}
-        {/*      handleChangePrice={handleMinMax}*/}
-        {/*      minMax={minMax}*/}
-        {/*      priceFilterRange={*/}
-        {/*        priceFilterRange?.length > 0 && priceFilterRange[0]*/}
-        {/*      }*/}
-        {/*    />*/}
-        {/*  </CustomStackFullWidth>*/}
-        {/*</Grid>*/}
         <Grid item xs={12}>
           <CustomStackFullWidth
             spacing={1}

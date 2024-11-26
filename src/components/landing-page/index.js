@@ -5,7 +5,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useGeolocated } from "react-geolocated";
 import CookiesConsent from "../CookiesConsent";
-import MapModal from "../Map/MapModal";
 import PushNotificationLayout from "../PushNotificationLayout";
 import AppDownloadSection from "./app-download-section/index";
 import Banners from "./Banners";
@@ -14,7 +13,7 @@ import ComponentTwo from "./ComponentTwo";
 import DiscountBanner from "./DiscountBanner";
 import HeroSection from "./hero-section/HeroSection";
 import Registration from "./Registration";
-
+const MapModal = dynamic(() => import("../Map/MapModal"));
 const LandingPage = ({ configData, landingPageData }) => {
   const Testimonials = dynamic(() => import("./Testimonials"), {
     ssr: false,
@@ -67,43 +66,43 @@ const LandingPage = ({ configData, landingPageData }) => {
           configData={configData}
           handleOrderNow={handleOrderNow}
         />
-        {landingPageData?.promotion_banners?.length > 0 && (
+        {landingPageData?.promotion_banners?.length > 0 ? (
           <Banners landingPageData={landingPageData} isSmall={isSmall} />
-        )}
+        ) : null}
         <ComponentTwo
           configData={configData}
           landingPageData={landingPageData}
         />
         {landingPageData?.available_zone_status === 1 &&
-          landingPageData?.available_zone_list?.length > 0 && (
-            <AvailableZoneSection landingPageData={landingPageData} />
-          )}
+        landingPageData?.available_zone_list?.length > 0 ? (
+          <AvailableZoneSection landingPageData={landingPageData} />
+        ) : null}
 
-        {(landingPageData?.earning_seller_status ||
-          landingPageData?.earning_dm_status) && (
+        {landingPageData?.earning_seller_status ||
+        landingPageData?.earning_dm_status ? (
           <Registration
             configData={configData}
             data={landingPageData}
             isSmall={isSmall}
           />
-        )}
-        {landingPageData?.fixed_promotional_banner_full_url && (
+        ) : null}
+        {landingPageData?.fixed_promotional_banner_full_url ? (
           <DiscountBanner
             bannerImage={landingPageData?.fixed_promotional_banner_full_url}
             isSmall={isSmall}
           />
-        )}
-        {(landingPageData?.business_title ||
-          landingPageData?.business_sub_title ||
-          landingPageData?.business_image) && (
+        ) : null}
+        {landingPageData?.business_title ||
+        landingPageData?.business_sub_title ||
+        landingPageData?.business_image ? (
           <AppDownloadSection
             configData={configData}
             landingPageData={landingPageData}
           />
-        )}
-        {landingPageData?.testimonial_list?.length > 0 && (
+        ) : null}
+        {landingPageData?.testimonial_list?.length > 0 ? (
           <Testimonials landingPageData={landingPageData} isSmall={isSmall} />
-        )}
+        ) : null}
         {open && (
           <MapModal
             open={open}

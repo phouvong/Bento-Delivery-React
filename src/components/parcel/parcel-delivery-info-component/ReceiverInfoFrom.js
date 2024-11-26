@@ -6,10 +6,10 @@ import { useTranslation } from "react-i18next";
 import CustomTextFieldWithFormik from "../../form-fields/CustomTextFieldWithFormik";
 import PinDropIcon from "@mui/icons-material/PinDrop";
 import GetLocationFrom from "./GetLocationFrom";
-import MapModal from "../../Map/MapModal";
 import CustomPhoneInput from "../../custom-component/CustomPhoneInput";
 import { getLanguage } from "helper-functions/getLanguage";
-
+import dynamic from "next/dynamic";
+const MapModal = dynamic(() => import("../../Map/MapModal"));
 const ReceiverInfoFrom = ({
   addAddressFormik,
   receiverNameHandler,
@@ -19,11 +19,8 @@ const ReceiverInfoFrom = ({
   floorHandler,
   handleLocation,
   coords,
-  sender,
-  receiver,
+
   receiverFormattedAddress,
-  setReceiverFormattedAddress,
-  setReceiverLocation,
   receiverEmailHandler,
   configData,
 }) => {

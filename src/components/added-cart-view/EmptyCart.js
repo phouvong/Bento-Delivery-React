@@ -1,15 +1,12 @@
 import React from "react";
 import { Stack } from "@mui/system";
-import CustomImageContainer from "../CustomImageContainer";
-import emptycart from "./assets/emptycart.png";
+
 import { CustomTypographyBold } from "../../styled-components/CustomStyles.style";
 import { useTranslation } from "react-i18next";
-import EmptyCartSvg from "../svg-components/EmptyCartSvg";
 import CartIcon from "./assets/CartIcon";
 import { EmptyCartBox } from "./Cart.style";
 import { Typography } from "@mui/material";
 import { useTheme } from "@emotion/react";
-import { getCartListModuleWise } from "../../helper-functions/getCartListModuleWise";
 import CartActions from "./CartActions";
 
 const EmptyCart = ({ setSideDrawerOpen, cartList }) => {

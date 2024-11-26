@@ -63,7 +63,7 @@ import Cutlery from "./Cutlery";
 import DeliveryDetails from "./DeliveryDetails";
 import HaveCoupon from "./HaveCoupon";
 import OrderCalculation from "./OrderCalculation";
-import OrderCalculationShimmer from "./OrderCalculationShimmer";
+
 import OrderSummaryDetails from "./OrderSummaryDetails";
 import PartialPayment from "./PartialPayment";
 import PartialPaymentModal from "./PartialPaymentModal";
@@ -85,7 +85,7 @@ import {
 import CustomImageContainer from "../../CustomImageContainer";
 import thunderstorm from "../assets/thunderstorm.svg";
 import { useFormik } from "formik";
-import SignUpValidation from "components/auth/sign-in/SignInValidation";
+
 import * as Yup from "yup";
 
 const ItemCheckout = (props) => {
@@ -146,14 +146,6 @@ const ItemCheckout = (props) => {
         .required(t("Confirm Password"))
         .oneOf([Yup.ref("password"), null], t("Passwords must match")),
     }),
-    // onSubmit: async (values, helpers) => {
-    //   console.log({ values });
-    //   try {
-    //     //formSubmitHandler(values);
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // },
   });
 
   const currentModuleType = getCurrentModuleType();
@@ -246,10 +238,7 @@ const ItemCheckout = (props) => {
     "order-place",
     OrderApi.placeOrder
   );
-  const userOnSuccessHandler = (res) => {
-    // dispatch(setUser(res.data))
-    // dispatch(setWalletAmount(res?.data?.wallet_balance))
-  };
+  const userOnSuccessHandler = (res) => {};
   const { isLoading: customerLoading, data: customerData } = useQuery(
     ["profile-info"],
     ProfileApi.profileInfo,
@@ -725,20 +714,15 @@ const ItemCheckout = (props) => {
     localStorage.setItem("totalAmount", totalAmount);
     if (!token) {
       Router.push("/home");
-      // Router.push(
-      //   {
-      //     pathname: "/order",
-      //     query: { order_id: orderId },
-      //   },
-      //   undefined,
-      //   { shallow: true }
-      // );
     } else {
-      // dispatch(setOrderDetailsModal(true));
       Router.push(
         {
           pathname: "/profile",
-          query: { orderId: orderId, page: "my-orders", from: "checkout" },
+          query: {
+            orderId: orderId,
+            page: "my-orders",
+            from: "checkout",
+          },
         },
         undefined,
         { shallow: false }
@@ -940,23 +924,13 @@ const ItemCheckout = (props) => {
       setPaymentMethodImage(
         configData?.active_payment_method_list[0]?.gateway_image_full_url
       );
-      // setSelected({ name: configData?.active_payment_method_list[0]?.gateway });
-      // setPaymentMethodDetails({
-      //   name: configData?.active_payment_method_list[0]?.gateway,
-      //   image:
-      //     configData?.active_payment_method_list[0]?.gateway_image_full_url,
-      // });
     }
   };
 
   useEffect(() => {
     hasOnlyPaymentMethod();
   }, [configData, isZoneDigital]);
-  //  const [state:addState] = useReducer(reducer, initialState);
-  //
-  // useEffect(() => {
-  //   setAddress({...address,house:})
-  // }, []);
+
   return (
     <>
       {method === "offline" ? (
@@ -968,7 +942,9 @@ const ItemCheckout = (props) => {
               alignItems="center"
             >
               <CustomPaperBigCard
-                sx={{ width: { xs: "100%", sm: "90%", md: "80%" } }}
+                sx={{
+                  width: { xs: "100%", sm: "90%", md: "80%" },
+                }}
               >
                 <OfflineForm
                   offlinePaymentOptions={offlinePaymentOptions}
@@ -1075,7 +1051,12 @@ const ItemCheckout = (props) => {
                     {t("Order Summary")}
                   </CouponTitle>
                   {zoneData && handleBadWeatherUi(zoneData?.data?.zone_data)}
-                  <SimpleBar style={{ maxHeight: "500px", width: "100%" }}>
+                  <SimpleBar
+                    style={{
+                      maxHeight: "500px",
+                      width: "100%",
+                    }}
+                  >
                     <OrderSummaryDetails
                       page={page}
                       configData={configData}
@@ -1166,11 +1147,7 @@ const ItemCheckout = (props) => {
                     initVauleEx={storeData?.extra_packaging_amount}
                     isLoading={isLoading}
                   />
-                  {/*{distanceData && storeData ? (*/}
-                  {/*  */}
-                  {/*) : (*/}
-                  {/*  <OrderCalculationShimmer />*/}
-                  {/*)}*/}
+
                   <PlaceOrder
                     placeOrder={placeOrder}
                     orderLoading={orderLoading}

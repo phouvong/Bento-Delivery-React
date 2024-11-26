@@ -7,14 +7,12 @@ import { styled } from "@mui/material/styles";
 import { Box, Stack } from "@mui/system";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import SimpleBar from "simplebar-react";
 import "simplebar/dist/simplebar.min.css";
 import useGetStoreReviews from "api-manage/hooks/react-query/review/useGetStoreReviews";
 import {
   getDateFormat,
-  getImageUrl,
   getNumberWithConvertedDecimalPoint,
 } from "utils/CustomFunctions";
 import CustomRatings from "components/search/CustomRatings";
@@ -24,7 +22,6 @@ import DotSpin from "components/DotSpin";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { ReadMore } from "components/store-details/ReadMore";
 import { getModuleId } from "helper-functions/getModuleId";
-import { ACTION } from "components/product-details/product-details-section/states";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import FoodDetailModal from "components/food-details/foodDetail-modal/FoodDetailModal";
 import ModuleModal from "components/cards/ModuleModal";
@@ -32,7 +29,6 @@ import { useRouter } from "next/router";
 import { addWishList, removeWishListItem } from "redux/slices/wishList";
 import toast from "react-hot-toast";
 import { not_logged_in_message } from "utils/toasterMessages";
-import useAddCartItem from "api-manage/hooks/react-query/add-cart/useAddCartItem";
 import { useAddToWishlist } from "api-manage/hooks/react-query/wish-list/useAddWishList";
 import { useWishListDelete } from "api-manage/hooks/react-query/wish-list/useWishListDelete";
 
@@ -157,8 +153,6 @@ const RestaurantReviewModal = ({
       sx={{
         position: "relative",
         width: { xs: "350px", sm: "450px", md: "750px" },
-        // height:{md:"500px"},
-        // p: { xs: "10px", sm: "15px", md: "20px" },
         p: "15px",
       }}
     >
@@ -188,11 +182,7 @@ const RestaurantReviewModal = ({
                     color={theme.palette.primary.main}
                     fontWeight="500"
                   >
-                    {getNumberWithConvertedDecimalPoint(
-                      product_avg_rating,
-                      // digitAfterDecimalPoint
-                      1
-                    )}
+                    {getNumberWithConvertedDecimalPoint(product_avg_rating, 1)}
                     <Typography
                       component="span"
                       fontSize="35px"

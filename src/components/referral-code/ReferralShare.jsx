@@ -211,23 +211,6 @@ const ReferralShare = ({ referralCode, horizontal, size }) => {
                 <LineShareButton url={shareUrl} title={title}>
                   <LineIcon size={size ? size : 40} round />
                 </LineShareButton>
-                {/* <WeiboShareButton
-                            url={shareUrl}
-                            image={`${String(window.location)}/${pImg}`}
-                        >
-                            <WeiboIcon size={size ? size : 40} round />
-                        </WeiboShareButton> */}
-                {/* <InstapaperShareButton url={String(window.location.origin)} title={title} description={shareUrl}>
-                                <InstapaperIcon size={size ? size : 40} round />
-                            </InstapaperShareButton>
-                            <HatenaShareButton
-                                url={String(window.location.origin)}
-                                title={shareUrl}
-                                windowWidth={660}
-                                windowHeight={460}
-                            >
-                                <HatenaIcon size={size ? size : 40} round />
-                            </HatenaShareButton> */}
               </Slider>
             </SliderCustom>
             <CodePreviewWrapper

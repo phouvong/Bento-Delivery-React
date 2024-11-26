@@ -1,25 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
-import {
-  alpha,
-  Button,
-  Card,
-  InputAdornment,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
+import { Button, Card, Typography, useTheme } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import CustomTextFieldWithFormik from "../../form-fields/CustomTextFieldWithFormik";
 import PinDropIcon from "@mui/icons-material/PinDrop";
 import SaveAddress from "../../SaveAddress";
 import GetLocationFrom from "./GetLocationFrom";
-import MapModal from "../../Map/MapModal";
 import CustomPhoneInput from "../../custom-component/CustomPhoneInput";
 import { getLanguage } from "helper-functions/getLanguage";
 import { getToken } from "helper-functions/getToken";
-import { t } from "i18next";
-import MailIcon from "@mui/icons-material/Mail";
+import dynamic from "next/dynamic";
+const MapModal = dynamic(() => import("../../Map/MapModal"));
 
 const SenderInfoForm = ({
   addAddressFormik,

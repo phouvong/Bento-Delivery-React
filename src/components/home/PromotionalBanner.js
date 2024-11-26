@@ -5,10 +5,6 @@ import { useTranslation } from "react-i18next";
 import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
 import promotionalBanner from "./assets/promotional_banner.png";
-import {
-  getHeaderImageUrl,
-  getHomePageBannerImageUrl,
-} from "utils/CustomFunctions";
 
 export const BannerWrapper = styled(Box)(({ theme }) => ({
   width: "100%",
@@ -23,9 +19,6 @@ export const BannerWrapper = styled(Box)(({ theme }) => ({
   [theme.breakpoints.down("sm")]: {
     height: "120px",
   },
-  // "&:hover": {
-  //   img: { transform: "scale(1.03)" },
-  // },
 }));
 export const ContentWrapper = styled(CustomStackFullWidth)(({ theme }) => ({
   position: "absolute",
@@ -62,7 +55,6 @@ const PromotionalBanner = ({ bannerData }) => {
             src={bannerData?.bottom_section_banner_full_url}
             height="100%"
             width="100%"
-            // borderRadius={IsSmallScreen() ? "0px" : ".7rem"}
             objectFit="cover"
           />
         </BannerWrapper>

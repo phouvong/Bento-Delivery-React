@@ -1,24 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
-
-//import SearchSuggestionsBottom from "../../search/SearchSuggestionsBottom";
-//import Wishlist from "./Wishlist";
 import CustomSearch from "../../custom-search/CustomSearch";
 import { useRouter } from "next/navigation";
 import SearchSuggestionsBottom from "../../search/SearchSuggestionsBottom";
 import { t } from "i18next";
-import { getCurrentModuleType } from "../../../helper-functions/getCurrentModuleType";
-import { ModuleTypes } from "../../../helper-functions/moduleTypes";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { ModuleTypes } from "helper-functions/moduleTypes";
 import { alpha } from "@mui/material";
 import useGetItemOrStore from "../../../api-manage/hooks/react-query/search/useGetItemOrStore";
-import { debounce } from "lodash";
-import jwt from "base-64";
 import { removeSpecialCharacters } from "utils/CustomFunctions";
 
 const ManageSearch = ({
   zoneid,
-  token,
-  maxwidth,
   fullWidth,
   searchQuery,
   name,
@@ -33,7 +26,6 @@ const ManageSearch = ({
   const [d_type, setD_type] = useState(null);
   const [isEmpty, setIsEmpty] = useState(true);
   const [searchValue, setSearchValue] = useState("");
-  const decodedName = name && jwt.decode(name);
   useEffect(() => {
     if (searchQuery === undefined) {
       setSearchValue("");
@@ -101,9 +93,17 @@ const ManageSearch = ({
     isRefetching: isRefetchingItemOrStoreSuggestion,
   } = useGetItemOrStore(removeSpecialCharacters(searchValue));
 
-  const getSearchSuggestions = debounce(async () => {
-    await refetchItemOrStoreSuggestion();
-  }, 500);
+  let searchTimeout;
+
+  const getSearchSuggestions = async () => {
+    if (searchTimeout) {
+      clearTimeout(searchTimeout); // Clear the previous timeout
+    }
+
+    searchTimeout = setTimeout(async () => {
+      await refetchItemOrStoreSuggestion(); // Execute the function after 500ms
+    }, 500);
+  };
 
   useEffect(() => {
     getSearchSuggestions();

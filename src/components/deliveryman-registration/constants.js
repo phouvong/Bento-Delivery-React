@@ -1,5 +1,3 @@
-import { identity } from "lodash";
-
 export const IDENTITY_TYPE = [
   { label: "Passport", value: "passport" },
   { label: "Driving License", value: "driving_license" },

@@ -73,9 +73,7 @@ const Index = ({ configData, storeDetails, landingPageData }) => {
           description={storeDetails?.meta_description}
           configData={configData}
         />
-        {/*<Head>*/}
-        {/*  <meta name="description" content={storeDetails?.meta_description} />*/}
-        {/*</Head>*/}
+
         <MainLayout configData={configData} landingPageData={landingPageData}>
           <NoSsr>
             <StoreDetails storeDetails={storeDetails} configData={configData} />

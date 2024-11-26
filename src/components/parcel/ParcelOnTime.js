@@ -4,7 +4,6 @@ import { Box, Skeleton, Stack, styled } from "@mui/material";
 import CustomImageContainer from "../CustomImageContainer";
 import useGetOtherBanners from "../../api-manage/hooks/react-query/useGetOtherBanners";
 import Slider from "react-slick";
-import { getHomePageBannerImageUrl } from "utils/CustomFunctions";
 
 const BgBox = styled(Box)(({ theme }) => ({
   position: "relative",

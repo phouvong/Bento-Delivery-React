@@ -1,4 +1,4 @@
-import { Skeleton, styled, useMediaQuery } from "@mui/material";
+import { Skeleton, styled } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";

@@ -23,7 +23,6 @@ import { ModuleTypes } from "helper-functions/moduleTypes";
 import { t } from "i18next";
 import { setWelcomeModal } from "redux/slices/utils";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import { removeSpecialCharacters } from "utils/CustomFunctions";
 import PushNotificationLayout from "../PushNotificationLayout";
 import CustomModal from "../modal";
 import LastOrderReview from "./LastOrderReview";
@@ -49,9 +48,6 @@ const HomePageComponents = ({ configData }) => {
   const { profileInfo } = useSelector((state) => state.profileInfo);
   const router = useRouter();
   const dispatch = useDispatch();
-  const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-  const { modules } = useSelector((state) => state.storedData);
   const { welcomeModal } = useSelector((state) => state.utilsData);
   const zoneid =
     typeof window !== "undefined" ? localStorage.getItem("zoneid") : undefined;

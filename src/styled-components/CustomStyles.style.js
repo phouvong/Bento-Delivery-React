@@ -126,46 +126,7 @@ export const CustomButton = styled(Button)(({ theme }) => ({
 export const CustomFullDivider = styled(Divider)(({ theme }) => ({
   width: "100%",
 }));
-export const LayoutCenter = styled("div")(({ theme }) => ({
-  backgroundColor: theme.palette.background.default,
-  height: "100%",
-  paddingTop: "7.5rem",
-}));
-export const CustomAlert = styled(Alert)(({ theme }) => ({}));
-export const OutletWrapper = styled(Container)(({ theme, iconicSidebar }) => ({
-  display: "flex",
-  flex: "1 1 auto",
-  width: "100%",
-  paddingTop: "6.25rem",
-  paddingBottom: "10vh",
-  [theme.breakpoints.up("lg")]: {
-    paddingLeft: iconicSidebar ? 180 : 310,
-  },
-}));
 
-export const CustomImageContainer = styled(Box)(({ theme }) => ({
-  position: "relative",
-  width: "100%",
-  height: "100%",
-
-  "& img": {
-    width: "100%",
-    height: "100%",
-    borderRadius: "5px",
-    objectFit: "contained",
-  },
-}));
-export const CustomImageContainerWithBorderRadius = styled(Box)(
-  ({ theme }) => ({
-    borderRadius: "0.125rem",
-    position: "relative",
-    "& img": {
-      width: "100%",
-      height: "100%",
-      objectFit: "contained",
-    },
-  })
-);
 export const ImageContainer = styled(Box)(({ theme }) => ({
   borderRadius: "0.125rem",
   position: "relative",
@@ -196,16 +157,6 @@ export const CenteringSingleComponentOnLayout = styled(Box)({
   width: "100%",
 });
 
-export const CustomStack = styled(Stack)({
-  alignItems: "start",
-  width: "100%",
-  paddingLeft: "1rem",
-});
-export const CustomBoxTab = styled(Box)({
-  border: "1px solid #ff903f",
-  padding: "5px",
-  borderRadius: "15px",
-});
 export const CustomTabs = styled(Tabs)(({ theme }) => ({
   border: "1px solid",
   borderColor: theme.palette.primary.main,
@@ -218,8 +169,6 @@ export const CustomTabs = styled(Tabs)(({ theme }) => ({
 export const CloseIconWrapper = styled("div")(
   ({ theme, right, language_direction }) => ({
     top: 0,
-    // right: language_direction !== "rtl" ? (right ? right : 9) : null,
-    // left: language_direction === "rtl" ? (right ? right : 9) : null,
     right: right ? right : 0,
     height: "100%",
     position: "absolute",
@@ -278,10 +227,7 @@ export const CustomBoxWithSpacing = styled(Box)(
     marginBottom: marginTopBottom && `${marginTopBottom}rem`,
   })
 );
-// export const CustomLink = styled(Link)(({ theme, width }) => ({
-//     textDecoration: 'none',
-//     width: width ? '100%' : 'auto',
-// }))
+
 export const CustomSearch = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -300,18 +246,6 @@ export const CustomSearch = styled("div")(({ theme }) => ({
     width: "auto",
   },
 }));
-export const SearchIconWrapper = styled("div")(
-  ({ theme, language_direction }) => ({
-    padding: theme.spacing(0, 2),
-    height: "100%",
-    position: "absolute",
-    pointerEvents: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    left: language_direction === "rtl" ? "0px" : "",
-  })
-);
 export const StyledInputBase = styled(InputBase)(({ theme, width }) => ({
   color: "inherit",
   width: "120px",
@@ -324,21 +258,7 @@ export const StyledInputBase = styled(InputBase)(({ theme, width }) => ({
     textAlign: "center",
   },
 }));
-export const SearchInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
-    paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-    transition: theme.transitions.create("width"),
-    width: "100%",
-    [theme.breakpoints.up("sm")]: {
-      width: "40ch",
-      "&:focus": {
-        width: "50ch",
-      },
-    },
-  },
-}));
+
 export const Logo = styled("div")(({ theme, height, width }) => ({
   width: width,
   height: height,
@@ -352,10 +272,7 @@ export const Logo = styled("div")(({ theme, height, width }) => ({
     objectFit: "contained",
   },
 }));
-export const CustomBoxNav = styled(Box)(({ theme, isSmall }) => ({
-  // display: isSmall ? 'none' : 'inline',
-  flexGrow: 1,
-}));
+
 export const CustomLink = styled(Link)(({ theme, color }) => ({
   color: color ? color : "primary.main",
   cursor: "pointer",
@@ -366,9 +283,7 @@ export const CustomLink = styled(Link)(({ theme, color }) => ({
     textDecoration: "none",
   },
 }));
-export const CustomOtp = styled(OutlinedInput)(({ theme }) => ({
-  width: "60px",
-}));
+
 export const CustomTextFieldContainer = styled(Box)(
   ({ theme, background, noheight }) => ({
     width: "100%",
@@ -396,20 +311,7 @@ export const CustomOverlayBox = styled(Box)(({ theme, height, top }) => ({
   justifyContent: "center",
   zIndex: "999",
 }));
-export const EmptyMessageContainer = styled(CustomStackFullWidth)(
-  ({ theme }) => ({
-    height: "20vh",
-    width: "25vw",
-  })
-);
-export const CustomViewAll = styled(Stack)(({ theme }) => ({
-  justifyContent: "end",
-  color: theme.palette.primary.main,
-  paddingTop: "5px",
-  paddingBottom: "5px",
-  fontSize: "14px",
-  cursor: "pointer",
-}));
+
 export const CustomFab = styled(Fab)(({ theme, module_type }) => ({
   width: "30px",
   height: "30px",
@@ -479,19 +381,9 @@ export const CustomListItem = styled(ListItem)(
 
     paddingInline: "5px",
     justifyContent: "flex-start",
-    // "&:hover": {
-    //   boxShadow: `0px 4px 4px 0px ${alpha(theme.palette.neutral[1000], 0.05)}`,
-    //   border: `1px solid ${alpha(theme.palette.neutral[400], 0.5)}`,
-    // },
   })
 );
-export const CustomBoxRelative = styled(Box)(({ theme, maxWidth, height }) => ({
-  position: "relative",
-  textAlign: "center",
-  maxWidth: maxWidth,
-  width: "100%",
-  height: height,
-}));
+
 export const CustomBoxAbsoluteCenter = styled(Box)(({ theme }) => ({
   position: "absolute",
   top: "50%",
@@ -512,10 +404,6 @@ export const ccsSelect = styled(Select)(({ theme }) => ({
   },
 }));
 
-export const BackImage = styled(Stack)(({ theme }) => ({
-  backgroundImage:
-    "url('https://media.geeksforgeeks.org/wp-content/uploads/rk.png')",
-}));
 export const CustomList = styled(List)(({ theme, border }) => ({
   paddingTop: "0px",
 }));
@@ -548,35 +436,6 @@ export const SliderCustom = styled(Stack)(
   })
 );
 
-export const CustomHeroBackground = styled(Box)(({ theme, bgImg }) => ({
-  backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.15),
-  width: "100%",
-  height: "100%",
-  paddingTop: "8.25rem",
-  backgroundImage: `url(${bgImg})`,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-}));
-export const customScrollBar = styled(Stack)(({ theme, height }) => ({
-  overflowY: "auto",
-  height: height,
-  "&:hover::-webkit-scrollbar": {
-    display: "block",
-  },
-  "&::-webkit-scrollbar": {
-    display: "none",
-    width: "0.512rem",
-  },
-  "&::-webkit-scrollbar-track": {
-    boxShadow: "inset 0 0 6px rgba(0,0,0,0.00)",
-    webkitBoxShadow: "inset 0 0 6px rgba(0,0,0,0.00)",
-  },
-  "&::-webkit-scrollbar-thumb": {
-    backgroundColor: "#8d8e90",
-    height: "8px",
-    borderRadius: "8px",
-  },
-}));
 export const CustomTypographyGray = styled(Typography)(
   ({ theme, nodefaultfont, textdecoration }) => ({
     color: theme.palette.neutral[400],
@@ -604,7 +463,7 @@ export const CustomBoxForTips = styled(Box)(({ theme, active }) => ({
     paddingInline: "5px",
   },
 }));
-export const CustomZoom = styled(Stack)(({ theme }) => ({}));
+
 export const StoreDetailsNavButton = styled(Button)(
   ({
     theme,
@@ -638,41 +497,7 @@ export const CustomModalWrapper = styled(Box)(({ theme }) => ({
   p: 2,
   outline: "none",
 }));
-// export const phoneWrapper=styled((Stack)(({theme})=>({
-//
-// }))
-export const PhoneWrapper = styled(Stack)(({ theme, lanDirection }) => ({
-  "&.react-tel-input .special-label": {
-    color: focus ? theme.palette.primary.main : theme.palette.neutral[1000],
-    left: "10px",
-    background: theme.palette.neutral[100],
-  },
-  "&.react-tel-input .form-control": {
-    background: theme.palette.neutral[100],
-    color: theme.palette.neutral[1000],
-    padding: "1px 70px 0px 1px",
-    borderRadius: "8px",
-  },
-  "&.react-tel-input .form-control:focus": {
-    borderColor: theme.palette.primary.main,
-    borderWidth: "2px",
-    zIndex: 999,
-    boxShadow: "none",
-  },
-  "&.react-tel-input .country-list .country-name": {
-    color: "#000000",
-  },
-  "&.react-tel-input .flag-dropdown": {
-    borderRadius: "8px 0px 0px 8px",
-  },
-  "&.react-tel-input .selected-flag": {
-    marginRight: lanDirection === "rtl" ? "30px" : "0px",
-    padding: " 0 0px 0 11px",
-  },
-  "&.react-tel-input .selected-flag .arrow": {
-    left: "29px",
-  },
-}));
+
 export const StoreImageBox = styled(Box)(
   ({ theme, borderraduis, padding, border }) => ({
     padding: padding ? padding : "12px",
@@ -701,16 +526,7 @@ export const AddressTypeStack = styled(Stack)(
     cursor: "pointer",
   })
 );
-export const ScheduleTimeStack = styled(Stack)(({ theme }) => ({
-  padding: "14px",
-  background: alpha(theme.palette.neutral[400], 0.3),
-  maxWidth: "244px",
-  width: "100%",
-  border: `1px solid ${theme.palette.neutral[300]}`,
-  borderRadius: "5px",
-  justifyContent: "center",
-  alignItems: "center",
-}));
+
 export const UserInfoGrid = styled(Grid)(({ theme, page, userToken }) => ({
   position: "relative",
   zIndex: 99,
@@ -746,8 +562,6 @@ export const UserInfoGrid = styled(Grid)(({ theme, page, userToken }) => ({
   },
 }));
 export const UserProfileTabs = styled(Tabs)(({ theme, isActive }) => ({
-  // borderBottom: `1px solid ${alpha(theme.palette.neutral[400], 0.5)}`,
-  // paddingBottom: "20px",
   "& .MuiTabs-scroller": {
     "& .MuiTabs-flexContainer": {
       flexWrap: "nowrap",

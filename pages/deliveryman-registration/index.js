@@ -1,18 +1,32 @@
 import { NoSsr } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
-import { useRouter } from "next/router";
+
 import React, { useEffect, useState } from "react";
 import { getImageUrl } from "utils/CustomFunctions";
 
-import { getServerSideProps } from "../index";
 import MainLayout from "../../src/components/layout/MainLayout";
 import SEO from "../../src/components/seo";
 import CustomContainer from "../../src/components/container";
-import DeliveryComponent from "../../src/components/deliveryman-registration/ DeliveryManComponent";
 import DeliveryManComponent from "../../src/components/deliveryman-registration/ DeliveryManComponent";
-import useScrollToTop from "../../src/api-manage/hooks/custom-hooks/useScrollToTop";
-const Index = ({ configData, landingPageData }) => {
-  const router = useRouter();
+import { useDispatch, useSelector } from "react-redux";
+import { useGetConfigData } from "../../src/api-manage/hooks/useGetConfigData";
+import { setConfigData } from "../../src/redux/slices/configData";
+const Index = () => {
+  const dispatch = useDispatch();
+  const { landingPageData, configData } = useSelector(
+    (state) => state.configData
+  );
+  const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
+  useEffect(() => {
+    if (!configData) {
+      configRefetch();
+    }
+  }, [configData]);
+  useEffect(() => {
+    if (dataConfig) {
+      dispatch(setConfigData(dataConfig));
+    }
+  }, [dataConfig]);
 
   return (
     <>
@@ -42,5 +56,3 @@ const Index = ({ configData, landingPageData }) => {
 };
 
 export default Index;
-
-export { getServerSideProps };

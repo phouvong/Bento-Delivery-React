@@ -7,8 +7,6 @@ import { getServerSideProps } from "../index";
 import { getImageUrl } from "utils/CustomFunctions";
 
 const Index = ({ configData, landingPageData }) => {
-  // useEffect(() => {}, []);
-
   return (
     <>
       <CssBaseline />

@@ -109,7 +109,6 @@ const PrescriptionCheckout = ({ storeId }) => {
     };
     return {
       ...address,
-      // order_time: scheduleAt,
       payment_method: paymentMethod,
       order_type: orderType,
       store_id: storeData?.id,

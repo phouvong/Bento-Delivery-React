@@ -1,19 +1,9 @@
 import { Stack, Typography } from "@mui/material";
 import { memo } from "react";
 import GoogleLoginComp from "./GoogleLoginComp";
-// import FbLoginComp from "./FbLoginComp";
-import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import { useDispatch } from "react-redux";
-import useGetProfile from "../../../../api-manage/hooks/react-query/profile/useGetProfile";
-import { useWishListGet } from "api-manage/hooks/react-query/wish-list/useWishListGet";
-import { setUser } from "redux/slices/profileInfo";
-import { setWishList } from "redux/slices/wishList";
-import { loginSuccessFull } from "utils/toasterMessages";
 import FbLoginComp from "./FbLoginComp";
-
 import { useRouter } from "next/router";
-import App from "next/app";
 import AppleLoginComp from "components/auth/sign-in/social-login/AppleLoginComp";
 
 const SocialLogins = (props) => {
@@ -22,7 +12,7 @@ const SocialLogins = (props) => {
     socialLogin,
     configData,
     state,
-    socialLogins,
+
     setJwtToken,
     setUserInfo,
     handleSuccess,
@@ -32,9 +22,6 @@ const SocialLogins = (props) => {
     setLoginInfo,
   } = props;
   const { t } = useTranslation();
-  // const isAppleDevice = () => {
-  //   return /Mac|iPhone|iPod|iPad/.test(navigator.userAgent);
-  // };
 
   const combineLoginData = [...socialLogin, ...configData?.apple_login];
   const dataWithCentralize = combineLoginData.map((item) => ({
@@ -201,7 +188,6 @@ const SocialLogins = (props) => {
                 <AppleLoginComp
                   key={index}
                   handleSuccess={handleSuccess}
-                  //handleParentModalClose={handleParentModalClose}
                   configData={configData}
                   socialLength={dataWithCentralizeFiltered?.length}
                   state={state}

@@ -29,9 +29,6 @@ const TrackOrderInput = ({ configData }) => {
         dispatch(setGuestUserInfo(values));
         setShowOrderDetails(true);
         refetchTrackOrder();
-
-        //dispatch(setTrackContactNumber(values));
-        // handleClose();
       } catch (err) {}
     },
   });
@@ -52,11 +49,6 @@ const TrackOrderInput = ({ configData }) => {
     trackOrderFormik?.values?.contact_person_number,
     guestId
   );
-  // useEffect(() => {
-  //   if (trackOrderFormik?.values?.order_id) {
-  //     refetchTrackOrder();
-  //   }
-  // }, [trackOrderFormik?.values?.order_id]);
 
   return (
     <CustomStackFullWidth pt="40px" spacing={2}>

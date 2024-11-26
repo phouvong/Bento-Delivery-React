@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-
 import { useMediaQuery, useTheme } from "@mui/material";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
@@ -16,8 +15,6 @@ import { useDispatch } from "react-redux";
 import { setSelectedModule } from "redux/slices/utils";
 import CustomModal from "components/modal";
 import RestaurantReviewModal from "components/store-details/ReviewModal";
-import { Stack } from "@mui/system";
-import { getImageUrl } from "utils/CustomFunctions";
 import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 
 const StoreDetails = ({ storeDetails, configData }) => {
@@ -25,7 +22,6 @@ const StoreDetails = ({ storeDetails, configData }) => {
   const dispatch = useDispatch();
   const [expanded, setExpanded] = useState(true);
   const [openReviewModal, setOpenReviewModal] = useState(false);
-  const imageBaseUrl = configData?.base_urls?.store_cover_photo_url;
   const bannerCover = storeDetails?.cover_photo_full_url;
   const ownCategories = storeDetails?.category_ids;
   const logo = storeDetails?.logo_full_url;
@@ -33,7 +29,6 @@ const StoreDetails = ({ storeDetails, configData }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const router = useRouter();
-  let moduleDataInLocalStorage = null;
   const storeShare = {
     moduleId: router.query.module_id,
     moduleType: router.query.module_type,
@@ -44,11 +39,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
     refetch,
     isLoading,
   } = useGetStoreBanners(storeDetails?.id);
-  const {
-    data: moduleDataFromApi,
-    refetch: refetchModule,
-    isRefetching,
-  } = useGetModule();
+  const { data: moduleDataFromApi, refetch: refetchModule } = useGetModule();
 
   useEffect(() => {
     refetchModule();
@@ -161,8 +152,6 @@ const StoreDetails = ({ storeDetails, configData }) => {
         spacing={3}
       >
         {layoutHandler()}
-
-        {/*<RecommendItems store_id={storeDetails?.id} />*/}
       </CustomStackFullWidth>
       <CustomModal
         openModal={openReviewModal}

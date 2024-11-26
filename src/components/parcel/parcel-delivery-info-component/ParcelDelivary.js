@@ -16,8 +16,8 @@ import ParcelInfo from "./ParcelInfo";
 import ReceiverInfoFrom from "./ReceiverInfoFrom";
 import SenderInfoForm from "./SenderInfoForm";
 import ValidationSchema from "./ValidationSchema";
-import AuthModal from "components/auth/AuthModal";
-
+import dynamic from "next/dynamic";
+const AuthModal = dynamic(() => import("components/auth/AuthModal"));
 const PercelDelivery = ({ configData }) => {
   const router = useRouter();
 

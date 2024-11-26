@@ -88,14 +88,6 @@ const ModuleSelect = ({
     <Container p=".8rem" spacing={2}>
       {data ? (
         zoneWiseModule?.(data)?.map((item, index) => {
-          // console.log(
-          //   "url",
-          //   getImageUrl(
-          //     item?.storage,
-          //     configData?.base_urls?.module_image_url,
-          //     configData
-          //   )
-          // );
           return (
             <Tooltip
               title={item?.module_name}

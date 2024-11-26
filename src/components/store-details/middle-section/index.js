@@ -144,7 +144,6 @@ const MiddleSection = (props) => {
   const [open, setOpen] = useState(false);
   const { t } = useTranslation();
   const { configData } = useSelector((state) => state.configData);
-  const imageBaseUrl = configData?.base_urls?.item_image_url;
   const router = useRouter();
   const { id } = router.query;
   const storeId = storeDetails?.id;
@@ -282,13 +281,6 @@ const MiddleSection = (props) => {
         }
         dispatch({ type: ACTION.setIsSidebarOpen, payload: false });
       }
-      // dispatch({
-      //   type: ACTION.setData,
-      //   payload: {
-      //     ...res,
-      //     products: res?.products,
-      //   },
-      // });
     }
   };
   const {
@@ -474,12 +466,8 @@ const MiddleSection = (props) => {
       return minMaxWiseSorted(products);
     } else {
       const categoryToString = state.categoryId?.map(String);
-      const filteredData = products?.filter(
-        (item) =>
-          item?.category_ids.filter((item) =>
-            categoryToString?.includes(item.id)
-          )
-        //state.categoryId.some((catId) => catId === item.category_id)
+      const filteredData = products?.filter((item) =>
+        item?.category_ids.filter((item) => categoryToString?.includes(item.id))
       );
 
       return minMaxWiseSorted(filteredData);

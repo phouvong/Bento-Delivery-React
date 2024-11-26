@@ -15,11 +15,15 @@ import { getServerSideProps } from "../index";
 import { getImageUrl } from "utils/CustomFunctions";
 import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 import { setConfigData } from "redux/slices/configData";
+import { useGetConfigData } from "../../src/api-manage/hooks/useGetConfigData";
+import useGetLandingPage from "../../src/api-manage/hooks/react-query/useGetLandingPage";
 
-const CheckOutPage = ({ configData, landingPageData }) => {
+const CheckOutPage = () => {
   useScrollToTop();
   const dispatch = useDispatch();
-
+  const { landingPageData, configData } = useSelector(
+    (state) => state.configData
+  );
   const router = useRouter();
   const { page, store_id, id } = router.query;
   const {
@@ -29,11 +33,17 @@ const CheckOutPage = ({ configData, landingPageData }) => {
     totalAmount,
   } = useSelector((state) => state.cart);
   const cartList = getCartListModuleWise(aliasCartList);
+  const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
   useEffect(() => {
-    if (configData) {
-      dispatch(setConfigData(configData));
+    if (!configData) {
+      configRefetch();
     }
   }, [configData]);
+  useEffect(() => {
+    if (dataConfig) {
+      dispatch(setConfigData(dataConfig));
+    }
+  }, [dataConfig]);
   return (
     <>
       <CssBaseline />
@@ -102,4 +112,3 @@ const CheckOutPage = ({ configData, landingPageData }) => {
 };
 
 export default CheckOutPage;
-export { getServerSideProps };

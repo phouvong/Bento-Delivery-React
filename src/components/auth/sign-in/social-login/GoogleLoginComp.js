@@ -1,22 +1,13 @@
 import jwt_decode from "jwt-decode";
-import { useRouter } from "next/router";
 import { useEffect, useRef, useState } from "react";
-
-import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
-import { useFireBaseOtpVerify } from "api-manage/hooks/react-query/forgot-password/useFIreBaseOtpVerify";
-import { usePostEmail } from "api-manage/hooks/react-query/social-login/useEmailPost";
-import { getLanguage } from "helper-functions/getLanguage";
 import { toast } from "react-hot-toast";
 import { google_client_id } from "utils/staticCredential";
-import CustomModal from "../../../modal";
-import OtpForm from "../../sign-up/OtpForm";
 import { Stack, styled } from "@mui/system";
 import CustomImageContainer from "components/CustomImageContainer";
 import { alpha, Typography, useMediaQuery, useTheme } from "@mui/material";
 import googleLatest from "../../asset/Google_Logo.png";
 import { t } from "i18next";
 import { getGuestId } from "helper-functions/getToken";
-import { useVerifyPhone } from "api-manage/hooks/react-query/forgot-password/useVerifyPhone";
 
 export const CustomGoogleButton = styled(Stack)(({ theme, width, height }) => ({
   width: width,
@@ -35,7 +26,6 @@ export const CustomGoogleButton = styled(Stack)(({ theme, width, height }) => ({
 const GoogleLoginComp = (props) => {
   const {
     handleSuccess,
-    configData,
     socialLength,
     state,
     setJwtToken,
@@ -50,12 +40,9 @@ const GoogleLoginComp = (props) => {
   const [openModal, setOpenModal] = useState(false);
   const [openOtpModal, setOpenOtpModal] = useState(false);
   const [otpData, setOtpData] = useState({ phone: "" });
-  const [mainToken, setMainToken] = useState(null);
   const buttonDiv = useRef(null);
-  const router = useRouter();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const [buttonWidth, setButtonWidth] = useState(isSmall ? "300px" : "350px"); // Default width
-  const { mutate } = usePostEmail();
   const clientId = google_client_id;
 
   // Update button size based on socialLength
@@ -139,20 +126,6 @@ const GoogleLoginComp = (props) => {
       setOpenModal(false);
       handleSuccess(token);
     };
-
-    // const onSuccessHandlerOtp = async (res) => {
-    //   toast.success(res?.message);
-    //   setOpenOtpModal(false);
-    //   setOpenModal(false);
-    //   await handleSuccess(mainToken);
-    // };
-    // const { mutate: signInMutate, isLoading } = useVerifyPhone();
-    // const formSubmitHandler = (values) => {
-    //   signInMutate(values, {
-    //     onSuccess: onSuccessHandlerOtp,
-    //     onError: onErrorResponse,
-    //   });
-    // };
   };
   useEffect(() => {
     // Initialize Google button
@@ -284,16 +257,6 @@ const GoogleLoginComp = (props) => {
         </div>
         {handleView()}
       </div>
-      {/*<CustomModal*/}
-      {/*  openModal={openOtpModal}*/}
-      {/*  handleClose={() => setOpenOtpModal(false)}*/}
-      {/*>*/}
-      {/*  <OtpForm*/}
-      {/*    data={otpData}*/}
-      {/*    formSubmitHandler={formSubmitHandler}*/}
-      {/*    isLoading={isLoading}*/}
-      {/*  />*/}
-      {/*</CustomModal>*/}
     </Stack>
   );
 };

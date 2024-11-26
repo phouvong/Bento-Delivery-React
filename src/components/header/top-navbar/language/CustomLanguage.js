@@ -165,7 +165,8 @@ const CustomLanguage = ({
         startIcon={
           <Stack color={theme.palette.neutral[1000]}>
             <img
-              width="20px"
+              alt="start"
+              width="20"
               src={
                 languageList?.find((item) => item?.languageCode === language)
                   ?.countryFlag
@@ -210,7 +211,7 @@ const CustomLanguage = ({
             }}
           >
             <ListItemIcon>
-              <img width="20px" src={lan?.countryFlag} />
+              <img width="20" src={lan?.countryFlag} alt="flag" />
             </ListItemIcon>
             {lan.languageName}
           </MenuItem>

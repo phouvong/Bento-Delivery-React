@@ -20,11 +20,10 @@ import {
 } from "@mui/material";
 import CustomPhoneInputManual from "components/custom-component/CustomPhoneInputManual";
 import { checkInput } from "utils/CustomFunctions";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+
 import { CustomTypography } from "components/landing-page/hero-section/HeroSection.style";
 import LoadingButton from "@mui/lab/LoadingButton";
-import SocialLogins from "components/auth/sign-in/social-login/SocialLogins";
-import Link from "next/link";
+
 import PhoneOrEmailIcon from "components/auth/asset/PhoneOrEmailIcon";
 
 const SignInForm = ({
@@ -196,21 +195,7 @@ const SignInForm = ({
             >
               {t("Sign In")}
             </LoadingButton>
-            {/*{configData?.social_login?.length > 0 &&*/}
-            {/*  configData?.social_login?.some(*/}
-            {/*    (item) => item.status === true*/}
-            {/*  ) && (*/}
-            {/*    <CustomStackFullWidth*/}
-            {/*      alignItems="center"*/}
-            {/*      justifyContent="center"*/}
-            {/*      spacing={1}*/}
-            {/*    >*/}
-            {/*      <CustomTypographyGray nodefaultfont="true">*/}
-            {/*        {t("Or")}*/}
-            {/*      </CustomTypographyGray>*/}
-            {/*      <CustomTypography>{t("Login with")}</CustomTypography>*/}
-            {/*    </CustomStackFullWidth>*/}
-            {/*  )}*/}
+
             {only && (
               <CustomStackFullWidth alignItems="center" spacing={0.5}>
                 <CustomStackFullWidth
