@@ -44,7 +44,7 @@ const SearchResult = (props) => {
   const [offset, setOffset] = useState(0);
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
   const [filterValue, setFilterValue] = useState([]);
-  const [minMax, setMinMax] = useState([0, 20000]);
+  const [minMax, setMinMax] = useState([0, 20000000]);
   const [type, setType] = useState("all");
   const [category_id, setCategoryId] = useState(id);
   const [sortBy, setSortBy] = useState("");
@@ -54,14 +54,13 @@ const SearchResult = (props) => {
   const { ref, inView } = useInView({
     rootMargin: "0px 0px 38% 0px",
   });
-
   const { selectedBrands, selectedCategories, filterData, rating_count } =
     useSelector((state) => state.categoryIds);
   useEffect(() => {
     dispatch(setSelectedBrands(data_type === "brand" ? [brand_id] : []));
     dispatch(setSelectedCategories(data_type === "category" ? [id] : []));
   }, []);
-
+  console.log({ category_id });
   const page_limit = 12;
 
   const selectedCategoriesHandler = (dataArray) => {

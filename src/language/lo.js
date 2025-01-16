@@ -1,7 +1,7 @@
 export const english = {
-  "Valid till": "Valid till",
-  get: "get",
-  Sold: "Sold",
+  "Valid till": "ໃຊ້ໄດ້ເຖິງ",
+  get: "ເອົາ",
+  Sold: "ຂາຍ",
   "Allergic Ingredients": "Allergic Ingredients",
   "Nutrition Details": "Nutrition Details",
   "Create account with exiting info.": "Create account with exiting info.",
