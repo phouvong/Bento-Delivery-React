@@ -30,7 +30,7 @@ const LoveItem = (props) => {
     offset: 1,
     limit: 15,
   };
-  const { data, refetch, isLoading, isFetching } =
+  const { data, refetch, isLoading, isFetched } =
     useGetRecommendProductsForHome(params);
   useEffect(() => {
     refetch();
@@ -89,70 +89,72 @@ const LoveItem = (props) => {
   }, [selectedMenuIndex]);
 
   return (
-    <HomeComponentsWrapper>
-      <CustomStackFullWidth
-        alignItems="center"
-        justyfyContent="center"
-        mt="30px"
-        spacing={1}
-      >
+    <>
+      {!isFetched || data?.items?.length > 0 ? (<HomeComponentsWrapper>
         <CustomStackFullWidth
-          alignItems="center"
-          justifyContent="space-between"
-          direction="row"
+            alignItems="center"
+            justyfyContent="center"
+            mt="30px"
+            spacing={1}
         >
-          {isFetching ? (
-            <Skeleton variant="text" width="110px" />
-          ) : (
-            <>
-              {data?.items?.length > 0 && (
-                <H2 text="Item That You’ll Love" component="h2" />
-              )}
-            </>
-          )}
-          <Stack maxWidth="960px" width={isSmall ? "initial" : "100%"}>
-            {data?.items?.length ? (
-              <>
-                {menu?.length > 0 && (
-                  <Menus
-                    selectedMenuIndex={selectedMenuIndex}
-                    setSelectedMenuIndex={setSelectedMenuIndex}
-                    menus={menu}
-                  />
-                )}
-              </>
-            ) : null}
-          </Stack>
+          <CustomStackFullWidth
+              alignItems="center"
+              justifyContent="space-between"
+              direction="row"
+          >
+            {!isFetched ? (
+                <Skeleton variant="text" width="110px" />
+            ) : (
+                <>
+                  {data?.items?.length > 0 && (
+                      <H2 text="Item That You’ll Love" component="h2" />
+                  )}
+                </>
+            )}
+            <Stack maxWidth="960px" width={isSmall ? "initial" : "100%"}>
+              {data?.items?.length ? (
+                  <>
+                    {menu?.length > 0 && (
+                        <Menus
+                            selectedMenuIndex={selectedMenuIndex}
+                            setSelectedMenuIndex={setSelectedMenuIndex}
+                            menus={menu}
+                        />
+                    )}
+                  </>
+              ) : null}
+            </Stack>
+          </CustomStackFullWidth>
+          <CustomStackFullWidth>
+            {!isFetched ? (
+                <SliderCustom nopadding="true">
+                  <Slider {...loveItemSettings}>
+                    {[...Array(5)].map((_, index) => {
+                      return <ProductCardSimmer key={index} />;
+                    })}
+                  </Slider>
+                </SliderCustom>
+            ) : (
+                <SliderCustom nopadding="true">
+                  <Slider {...loveItemSettings}>
+                    {data?.items?.map((item, index) => {
+                      return (
+                          <ProductCard
+                              key={item?.id}
+                              cardType="vertical-type"
+                              loveItem="true"
+                              cardFor="vertical"
+                              item={item}
+                          />
+                      );
+                    })}
+                  </Slider>
+                </SliderCustom>
+            )}
+          </CustomStackFullWidth>
         </CustomStackFullWidth>
-        <CustomStackFullWidth>
-          {isFetching ? (
-            <SliderCustom nopadding="true">
-              <Slider {...loveItemSettings}>
-                {[...Array(5)].map((index) => {
-                  return <ProductCardSimmer key={index} />;
-                })}
-              </Slider>
-            </SliderCustom>
-          ) : (
-            <SliderCustom nopadding="true">
-              <Slider {...loveItemSettings}>
-                {data?.items?.map((item, index) => {
-                  return (
-                    <ProductCard
-                      key={item?.id}
-                      cardType="vertical-type"
-                      loveItem="true"
-                      cardFor="vertical"
-                      item={item}
-                    />
-                  );
-                })}
-              </Slider>
-            </SliderCustom>
-          )}
-        </CustomStackFullWidth>
-      </CustomStackFullWidth>
-    </HomeComponentsWrapper>
+      </HomeComponentsWrapper>) : null}
+    </>
   );
 };
 

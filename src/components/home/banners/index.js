@@ -39,11 +39,12 @@ export const BannersWrapper = styled(Box)(({ theme }) => ({
     height: "150px",
   },
 }));
-const Banners = (props) => {
+
+const Banners = () => {
   const router = useRouter();
   const { selectedModule } = useSelector((state) => state.utilsData);
   const { banners } = useSelector((state) => state.storedData);
-  const { data, refetch: refetchBannerData, isFetching } = useGetBanners();
+  const { data, refetch: refetchBannerData, isFetched } = useGetBanners();
   const [bannersData, setBannersData] = useState([]);
   const [foodBanner, setFoodBanner] = useState();
   const [openModal, setOpenModal] = useState(false);
@@ -196,59 +197,53 @@ const Banners = (props) => {
   return (
     <>
       <CustomStackFullWidth
-        sx={{
-          mt: "10px",
-          "& .slick-list": {
-            marginRight: { xs: "-10px", sm: "-20px" },
-          },
-          "& .slick-slide": {
-            paddingRight: { xs: "10px", sm: "20px" },
-          },
-        }}
+          sx={{
+            mt: "10px",
+            "& .slick-list": {
+              marginRight: { xs: "-10px", sm: "-20px" },
+            },
+            "& .slick-slide": {
+              paddingRight: { xs: "10px", sm: "20px" },
+            },
+          }}
       >
-        {isFetching ? (
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Slider {...settings}>
-                {[...Array(getModuleWiseBanners())].map((index) => {
-                  return (
-                    <BannersWrapper key={index}>
-                      <Skeleton
-                        variant="rectangle"
-                        // width="100%"
-                        height="100%"
-                      />
-                    </BannersWrapper>
-                  );
-                })}
-              </Slider>
-            </Grid>
-          </Grid>
-        ) : (
-          <SliderCustom>
+        {!isFetched ? (
             <Slider {...settings}>
-              {bannersData?.length > 0 &&
-                bannersData?.map((item, index) => {
-                  return (
-                    <BannersWrapper
-                      key={index}
-                      onClick={() => handleBannerClick(item)}
-                    >
-                      <CustomImageContainer
-                        src={item?.image_full_url}
-                        alt={item?.title}
+              {[...Array(2)].map((_, index) => (
+                  <BannersWrapper key={index}>
+                    <Skeleton
+                        variant="rectangular"
                         height="100%"
                         width="100%"
-                        objectfit="cover"
-                        borderRadius="10px"
-                      />
-                    </BannersWrapper>
-                  );
-                })}
+                    />
+                  </BannersWrapper>
+              ))}
             </Slider>
-          </SliderCustom>
+        ) : (
+            bannersData?.length > 0 && (
+                <SliderCustom>
+                  <Slider {...settings}>
+                    {bannersData.map((item, index) => (
+                        <BannersWrapper
+                            key={index}
+                            onClick={() => handleBannerClick(item)}
+                        >
+                          <CustomImageContainer
+                              src={item?.image_full_url}
+                              alt={item?.title}
+                              height="100%"
+                              width="100%"
+                              objectfit="cover"
+                              borderRadius="10px"
+                          />
+                        </BannersWrapper>
+                    ))}
+                  </Slider>
+                </SliderCustom>
+            )
         )}
       </CustomStackFullWidth>
+
       {openModal && foodBanner && (
         <FoodDetailModal
           product={foodBanner}

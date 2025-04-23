@@ -9,7 +9,7 @@ import {
 	useTheme,
 } from "@mui/material";
 import { useGetCommonConditions } from "api-manage/hooks/react-query/common-conditions/useGetCommonConditions";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Slider from "react-slick";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
@@ -26,6 +26,7 @@ import EmptySearchResults from "../../../../EmptySearchResults";
 import H2 from "../../../../typographies/H2";
 import { HomeComponentsWrapper } from "../../../HomePageComponents";
 import { Next, Prev } from "../../../popular-items-nearby/SliderSettings";
+import { useQueryClient } from "react-query";
 
 const StyledCustomSlider = styled(SliderCustom)(({ theme, active }) => ({
 	color: active === "true" ? theme.palette.primary.main : "inherit",
@@ -62,8 +63,15 @@ const CommonConditions = (props) => {
 	const isSmall = useMediaQuery(theme.breakpoints.down("md"));
 	const [selected, setSelected] = useState(0);
 	const [conditionId, setConditionId] = useState(null);
+	const [commonConditionData,setCommonConditionData] = useState([])
 	const page_limit = "20";
 	const offset = 1;
+
+   const queryClient = useQueryClient()
+  const handleSuccess = (res) => {
+    setCommonConditionData(res)
+  }
+
 	const {
 		data: conditions,
 		refetch: conditionRefetch,
@@ -76,7 +84,7 @@ const CommonConditions = (props) => {
 			conditionId,
 			page_limit,
 			offset,
-		});
+		},handleSuccess);
 
 	useEffect(() => {
 		setConditionId(conditions?.data[0]?.id);
@@ -86,16 +94,30 @@ const CommonConditions = (props) => {
 		conditionRefetch();
 	}, []);
 
-	useEffect(() => {
-		if (conditionId) {
-			refetch();
-		}
-	}, [conditionId]);
+	// useEffect(() => {
+	// 	if (conditionId) {
+	// 		refetch();
+	// 	}
+	// }, [conditionId]);
 
 	const handleClick = (id, index) => {
 		setSelected(index);
 		setConditionId(id);
 	};
+
+	const handleCheckData = useCallback(() => {
+		const queryState=queryClient.getQueryState(`[common-condition-products-${conditionId}]`)
+		
+		if(!queryState || queryState.isStale){
+			 refetch()
+		}else{
+			setCommonConditionData(queryState?.data)
+		}
+	 },[commonConditionData])
+   
+	useEffect(() => {
+	 handleCheckData()
+   }, [conditionId]);
 
 	const settings = {
 		dots: true,
@@ -174,11 +196,7 @@ const CommonConditions = (props) => {
 
 	return (
 		<HomeComponentsWrapper sx={{ marginBottom: "20px" }}>
-			{isLoading ? (
-				<Skeleton variant="text" width="110px" />
-			) : (
-				<H2 text={title} textAlign="flex-start" component="h2" />
-			)}
+			<H2 text={title} textAlign="flex-start" component="h2" />
 			<CustomFullDivider sx={{ marginY: "5px" }} />
 			<Grid container spacing={{ xs: 1, sm: 1, md: 3 }}>
 				<Grid item xs={12} sm={0} md={3}>
@@ -241,18 +259,36 @@ const CommonConditions = (props) => {
 						)}
 					</CustomStackFullWidth>
 				</Grid>
-				<Grid item xs={12} sm={12} md={9}>
-					{isRefetching ? (
+				<Grid item xs={12} sm={12} md={9}
+				 sx={{
+					//margin: { xs: "-4px", md: "-7.5px" },
+					opacity: isLoading ? ".5" : "",
+					transition: "all ease .3s",
+					position: "relative",
+					"&::before": {
+					  position: "absolute",
+					  inset: "0",
+					  content: '""',
+					  zIndex: "999",
+					  display: isLoading ? "block" : "none",
+					},
+				  }}
+				>
+					{isLoading ? (
 						<CustomStackFullWidth
-							sx={{ height: "100%" }}
+						sx={{ height: "100%" ,position:"absolute",
+							inset: "0",
+							zIndex: "9999",
+						   
+							}}
 							alignItems="center"
 							justifyContent="center"
 						>
 							<DotSpin />
 						</CustomStackFullWidth>
-					) : (
-						<>
-							{data?.products?.length === 0 ? (
+					) : null}
+					<>
+							{commonConditionData?.products?.length === 0 ? (
 								<CustomStackFullWidth
 									sx={{ height: "100%", padding: "2rem" }}
 									alignItems="center"
@@ -267,8 +303,8 @@ const CommonConditions = (props) => {
 								<CustomBoxFullWidth>
 									<StyledCustomSlider>
 										<Slider {...settings}>
-											{data?.products?.length > 0 &&
-												data?.products?.map((item) => (
+											{commonConditionData?.products?.length > 0 &&
+												commonConditionData?.products?.map((item) => (
 													<ProductCard
 														key={item?.id}
 														item={item}
@@ -284,7 +320,6 @@ const CommonConditions = (props) => {
 								</CustomBoxFullWidth>
 							)}
 						</>
-					)}
 				</Grid>
 			</Grid>
 		</HomeComponentsWrapper>

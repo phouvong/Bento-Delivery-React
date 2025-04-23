@@ -50,6 +50,7 @@ const AddAddressComponent = ({
   addressRefetch,
   setEditAddress,
 }) => {
+  const theme = useTheme();
   const [state, dispatch] = useReducer(reducer, initialState);
   const [addressType, setAddressType] = useState(
     editAddress ? editAddress?.address_type : ""
@@ -66,14 +67,6 @@ const AddAddressComponent = ({
   const [placeDescription, setPlaceDescription] = useState(undefined);
   const [predictions, setPredictions] = useState([]);
   const [placeId, setPlaceId] = useState("");
-
-  // useEffect(() => {
-  //   if (configData) {
-  //     setLocation(configData?.default_location);
-  //   }
-  // }, [configData]);
-
-  //useEffect calls for getting data
 
   //****getting current location/***/
   const { coords, isGeolocationAvailable, isGeolocationEnabled, getPosition } =
@@ -92,7 +85,11 @@ const AddAddressComponent = ({
 
   useEffect(() => {
     if (places) {
-      setPredictions(places?.predictions);
+      const tempData= places?.suggestions?.map((item) => ({
+        place_id: item?.placePrediction?.placeId,
+        description: `${item?.placePrediction?.structuredFormat?.mainText?.text}, ${item?.placePrediction?.structuredFormat?.secondaryText?.text}`,
+      }));
+      setPredictions(tempData);
     }
   }, [places]);
   const zoneIdEnabled = locationEnabled;
@@ -113,24 +110,20 @@ const AddAddressComponent = ({
 
   useEffect(() => {
     if (placeDetails) {
-      setLocation(placeDetails?.result?.geometry?.location);
+      setLocation({
+        lat: placeDetails?.location?.latitude,
+        lng: placeDetails?.location?.longitude,
+      });
       setLocationEnabled(true);
     }
   }, [placeDetails]);
   const { data: geoCodeResults, isFetching: isFetchingGeoCode } =
     useGetGeoCode(location);
 
-  const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const handleClick = (name) => {
     setAddressType(name);
     setEditAddress({ ...editAddress, address_type: null });
   };
-  const editLocation = {
-    lat: editAddress?.latitude,
-    lng: editAddress?.longitude,
-  };
-
   const handleChangeForSearchs = (event) => {
     if (event.target.value) {
       setSearchKey(event.target.value);
@@ -175,7 +168,6 @@ const AddAddressComponent = ({
       <Grid item xs={12} md={5} position="relative" align="center">
         <AddAddressSearchBox>
           <CustomMapSearch
-            // showCurrentLocation={state.showCurrentLocation}
             predictions={predictions}
             handleChange={(event, value) =>
               handleChangeS(event, value, dispatch)
@@ -186,8 +178,6 @@ const AddAddressComponent = ({
             handleAgreeLocation={() => handleAgreeLocation(coords, dispatch)}
             currentLocation={state.currentLocation}
             handleCloseLocation={() => handleCloseLocation(dispatch)}
-            // frommap="true"
-            // isLoading={isFetchingGeoCode}
           />
         </AddAddressSearchBox>
         <Stack>

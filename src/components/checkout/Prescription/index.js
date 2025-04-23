@@ -113,7 +113,7 @@ const PrescriptionCheckout = ({ storeId }) => {
       order_type: orderType,
       store_id: storeData?.id,
       distance: handleDistance(
-        distanceData?.data?.rows?.[0]?.elements,
+        distanceData?.data,
         originData,
         address
       ),

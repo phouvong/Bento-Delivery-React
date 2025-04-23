@@ -4,7 +4,7 @@ import { Skeleton, Stack } from '@mui/material'
 const MenuSimmer = ({ count }) => {
     return (
         <Stack display="flex" flexDirection="row" gap="10px">
-            {[...Array(count)].map((index) => {
+            {[...Array(count)].map((_, index) => {
                 return (
                     <Skeleton
                         key={index}
@@ -17,7 +17,7 @@ const MenuSimmer = ({ count }) => {
             })}
         </Stack>
         // <Stack>
-        //     {[...Array(10)].map((index) => (
+        //     {[...Array(10)].map((_, index) => (
         //         return (
         //     // <Stack key={index}>
         //     //     <h1>hi</h1>

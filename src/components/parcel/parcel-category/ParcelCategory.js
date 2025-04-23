@@ -12,10 +12,11 @@ import ParcelCategoryShimmer from "./ParcelCategoryShimmer";
 const ParcelCategory = () => {
   const theme = useTheme();
 
-  const { data, refetch, isLoading } = useGetParcelCategory();
+  const { data, refetch, isFetched } = useGetParcelCategory();
   useEffect(() => {
     refetch();
   }, []);
+
   return (
     <CustomStackFullWidth
       spacing={2.5}
@@ -36,7 +37,7 @@ const ParcelCategory = () => {
       </Stack>
       <CustomStackFullWidth>
         <Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
-          {!isLoading ? (
+          {isFetched ? (
             <>
               {data?.map((item) => {
                 return (
@@ -47,7 +48,7 @@ const ParcelCategory = () => {
               })}
             </>
           ) : (
-            <CustomStackFullWidth sx={{ marginTop: "50px" }}>
+            <CustomStackFullWidth sx={{ marginTop: "24px" }}>
               <ParcelCategoryShimmer />
             </CustomStackFullWidth>
           )}

@@ -37,6 +37,7 @@ const OwnerForm = ({
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <CustomTextFieldWithFormik
+          labelColor={alpha(theme.palette.neutral[1000],0.8)}
             placeholder={t("First name")}
             required="true"
             type="text"
@@ -65,6 +66,7 @@ const OwnerForm = ({
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <CustomTextFieldWithFormik
+          labelColor={alpha(theme.palette.neutral[1000],0.8)}
             required="true"
             type="text"
             placeholder={t("Last name")}

@@ -11,16 +11,19 @@ import { Box } from "@mui/system";
 import Shimmer from "../home/stores-with-filter/Shimmer";
 import useGetTopOffers from "api-manage/hooks/react-query/product-details/useGetTopOffers";
 import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
 const TypeWiseStore = ({ storeType, title }) => {
   useScrollToTop();
   const [type, setType] = useState("all");
   const { data, refetch, isLoading } = useGetTypeWiseStore(storeType, type);
+  const [sortby, setSortby] = useState('')
+  const [searchKey, setSearchKey] = useState('')
   const {
     data: nearByData,
     refetch: nearbyRefetch,
     isLoading: nearMeLoading,
-  } = useGetTopOffers();
+  } = useGetTopOffers(sortby,searchKey,type);
   const queryKey = "navbar-stores";
   const router = useRouter();
   const {
@@ -34,9 +37,13 @@ const TypeWiseStore = ({ storeType, title }) => {
     } else if (storeType === "top_offer_near_me") {
       nearbyRefetch();
     } else {
-      popularRefetch();
+      if(getCurrentModuleType() === "rental"){
+        refetch()
+      }else{
+        popularRefetch();
+      }
     }
-  }, [type]);
+  }, [type,sortby,searchKey]);
 
   const renderShimmer = () => (
     <Box marginTop="40px">
@@ -49,11 +56,15 @@ const TypeWiseStore = ({ storeType, title }) => {
       type={type}
       setType={setType}
       data={itemsData}
+      sortby={sortby}
+      setSortby={setSortby}
+      searchKey={searchKey}
+      setSearchKey={setSearchKey}
     />
   );
 
   const handleStoreList = () => {
-    if (storeType === "latest") {
+    if (storeType === "latest" || getCurrentModuleType() === "rental") {
       if (isLoading) {
         return <>{renderShimmer()}</>;
       } else {
@@ -65,9 +76,7 @@ const TypeWiseStore = ({ storeType, title }) => {
       if (nearMeLoading) {
         return <>{renderShimmer()}</>;
       } else {
-        if (nearByData?.stores?.length > 0) {
-          return <>{renderStoreList(nearByData?.stores)}</>;
-        }
+        return <>{renderStoreList(nearByData?.stores)}</>;
       }
     } else {
       if (popularIsLoading) {
@@ -82,7 +91,7 @@ const TypeWiseStore = ({ storeType, title }) => {
 
   return (
     <>
-      <CustomPaperBigCard minHeight="35vh">
+      <CustomPaperBigCard minHeight="50vh">
         <H1 text={title} textAlign="left" />
         {handleStoreList()}
       </CustomPaperBigCard>

@@ -114,10 +114,6 @@ export const CardWrapper = styled(Card)(
     borderRadius: "8px",
     height: cardheight ? cardheight : "220px",
     marginBottom: pharmaCommon && "20px !important",
-    // boxShadow:
-    //   theme.palette.mode !== "dark"
-    //     ? "0px 30px 20px 0px rgba(0, 0, 0, 0.10)"
-    //     : "0px 30px 20px 0px rgba(88, 110, 125, 0.10)",
     border:
       getCurrentModuleType() === ModuleTypes.FOOD &&
       `1px solid ${alpha(theme.palette.moduleTheme.food, 0.1)}`,
@@ -153,7 +149,6 @@ export const CardWrapper = styled(Card)(
     },
     [theme.breakpoints.up("sm")]: {
       height: cardheight ? cardheight : "330px",
-      //paddingBottom: horizontalcard === "true" && "10px",
     },
     [theme.breakpoints.up("md")]: {
       height: cardheight ? cardheight : "350px",
@@ -171,7 +166,6 @@ const CustomCardMedia = styled(CardMedia)(
         ? ".5rem"
         : "0rem",
     margin: "2px",
-    //borderRadius: horizontalcard === "true" ? "0x 10px" : "10px 10px 0 0",
     height: horizontalcard === "true" ? "100%" : "212px",
     width: horizontalcard === "true" && "215px",
     display: "flex",
@@ -877,7 +871,7 @@ const ProductCard = (props) => {
           {cardType === "vertical-type" ? (
             <Typography>{item?.unit_type}</Typography>
           ) : (
-            <CustomMultipleRatings rating={4.5} withCount />
+            <CustomMultipleRatings rating={item?.avg_rating} withCount />
           )}
 
           <AmountWithDiscountedAmount item={item} />
@@ -982,6 +976,7 @@ const ProductCard = (props) => {
       </CustomStackFullWidth>
     );
   };
+
   const addToWishlistHandler = (e) => {
     e.stopPropagation();
     let token = undefined;
@@ -1023,6 +1018,7 @@ const ProductCard = (props) => {
   const handleHoverOnCartIcon = (value) => {
     dispatch({ type: ACTION.setIsTransformed, payload: value });
   };
+
 
   return (
     <Stack sx={{ position: "relative" }}>

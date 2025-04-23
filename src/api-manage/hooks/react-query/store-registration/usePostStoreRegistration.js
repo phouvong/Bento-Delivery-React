@@ -8,6 +8,7 @@ import {
 import MainApi from "../../../MainApi";
 
 const postData = async (storeData) => {
+
   const translationsR = [];
   for (const [locale, name] of Object.entries(storeData.restaurant_name)) {
     translationsR.push({ id: null, locale, key: "name", value: name });
@@ -38,6 +39,7 @@ const postData = async (storeData) => {
     package_id: storeData?.value.package_id,
     logo: storeData?.logo,
     cover_photo: storeData?.cover_photo,
+    pickup_zone_id:storeData?.pickup_zone_id? JSON.stringify(storeData?.pickup_zone_id?.map(String)):[],
   };
   const formData = new FormData();
   const appendFormData = (formData, data, parentKey = "") => {

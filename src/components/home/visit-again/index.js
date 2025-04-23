@@ -1,4 +1,4 @@
-import { alpha, useTheme } from "@mui/material";
+import {alpha, useMediaQuery, useTheme} from "@mui/material";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { getToken } from "helper-functions/getToken";
 import { ModuleTypes } from "helper-functions/moduleTypes";
@@ -7,17 +7,17 @@ import {
   CustomStackFullWidth,
   SliderCustom,
 } from "styled-components/CustomStyles.style";
-import { IsSmallScreen } from "utils/CommonValues";
 import VisitAgainCard from "../../cards/VisitAgainCard";
 import CustomContainer from "../../container";
 import H1 from "../../typographies/H1";
 import Subtitle1 from "../../typographies/Subtitle1";
 import { settings } from "./SliderSettings";
 
-const VisitAgain = (props) => {
-  const { configData, visitedStores, isVisited, isFetching } = props;
+const VisitAgain = ({ configData, visitedStores, isVisited }) => {
   const theme = useTheme();
   const token = getToken();
+  const isSmallScreen = useMediaQuery('(min-width:600px)');
+
   const getModuleWiseData = () => {
     switch (getCurrentModuleType()) {
       case ModuleTypes.GROCERY:
@@ -72,10 +72,10 @@ const VisitAgain = (props) => {
         <CustomStackFullWidth
           alignItems={getModuleWiseData?.()?.mainPosition}
           justyfyContent={getModuleWiseData?.()?.mainPosition}
-          mt={IsSmallScreen() ? "2px" : "16px"}
+          mt={isSmallScreen ? "2px" : "16px"}
           spacing={{ xs: 2, md: 1 }}
         >
-          {IsSmallScreen() ? (
+          {isSmallScreen ? (
             <CustomContainer>
               <CustomStackFullWidth
                 alignItems={getModuleWiseData?.()?.mainPosition}

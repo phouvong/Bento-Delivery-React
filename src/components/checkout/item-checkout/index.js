@@ -63,7 +63,6 @@ import Cutlery from "./Cutlery";
 import DeliveryDetails from "./DeliveryDetails";
 import HaveCoupon from "./HaveCoupon";
 import OrderCalculation from "./OrderCalculation";
-
 import OrderSummaryDetails from "./OrderSummaryDetails";
 import PartialPayment from "./PartialPayment";
 import PartialPaymentModal from "./PartialPaymentModal";
@@ -71,7 +70,6 @@ import PlaceOrder from "./PlaceOrder";
 import { INITIAL_STATE, scheduleReducer } from "./ScheduleReducer";
 import { deliveryInstructions, productUnavailableData } from "./demoData";
 import OfflineForm from "./offline-payment/OfflineForm";
-
 import useGetCashBackAmount from "api-manage/hooks/react-query/cashback/useGetCashBackAmount";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import {
@@ -215,7 +213,7 @@ const ItemCheckout = (props) => {
     }
   );
   const tempDistance = handleDistance(
-    distanceData?.data?.rows?.[0]?.elements,
+    distanceData?.data,
     { latitude: storeData?.latitude, longitude: storeData?.longitude },
     address
   );
@@ -263,7 +261,7 @@ const ItemCheckout = (props) => {
   }, []);
   useEffect(() => {
     storeData && address && refetchDistance();
-  }, [storeData, address]);
+  }, [storeData, address?.lat, address?.lng]);
 
   useEffect(() => {
     const taxAmount = getTaxableTotalPrice(
@@ -394,7 +392,7 @@ const ItemCheckout = (props) => {
       formData.append(
         "distance",
         handleDistance(
-          distanceData?.data?.rows?.[0]?.elements,
+          distanceData?.data,
           originData,
           address
         )
@@ -461,7 +459,7 @@ const ItemCheckout = (props) => {
         coupon_discount_title: couponDiscount?.title,
         discount_amount: getProductDiscount(productList),
         distance: handleDistance(
-          distanceData?.data?.rows?.[0]?.elements,
+          distanceData?.data,
           originData,
           address
         ),
@@ -1007,6 +1005,7 @@ const ItemCheckout = (props) => {
                 confirmPasswordHandler={confirmPasswordHandler}
                 check={check}
                 setCheck={setCheck}
+                isHomeDelivery={configData?.home_delivery_status}
               />
 
               {Number.parseInt(configData?.dm_tips_status) === 1 &&

@@ -32,7 +32,6 @@ const BestReviewedItems = (props) => {
   const [reRender, setReRender] = useState(false);
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-  const isMedium = useMediaQuery(theme.breakpoints.down("lg"));
   const SliderRef = useRef(null);
   const {
     data,
@@ -341,7 +340,7 @@ const BestReviewedItems = (props) => {
 
               <SliderCustom nopadding="true">
                 <Slider {...loveItemSettings}>
-                  {[...Array(5)].map((index) => {
+                  {[...Array(5)].map((_, index) => {
                     return <ProductCardSimmer key={index} />;
                   })}
                 </Slider>

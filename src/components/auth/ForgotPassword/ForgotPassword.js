@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { useFireBaseOtpVerify } from "api-manage/hooks/react-query/forgot-password/useFIreBaseOtpVerify";
 import { useOtp } from "api-manage/hooks/react-query/forgot-password/useOtp";
@@ -6,31 +6,45 @@ import { auth } from "firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { useState } from "react";
 import {
-  CustomPaper,
+  CustomPaper, CustomStackFullWidth,
   FlexContainerCenter,
 } from "styled-components/CustomStyles.style";
 import ForgotPasswordNumberForm from "./ForgotPasswordNumberForm";
 import NewPassword from "./NewPassword";
 import OtpForm from "./OtpForm";
-
+import LogoSide from "components/logo/LogoSide";
+import { t } from "i18next";
+import { useDispatch } from "react-redux";
+import CustomImageContainer from "components/CustomImageContainer";
+import fImage from "../../../../public/static/Layer3.png"
+import {useFireBaseResetPass} from "api-manage/hooks/react-query/forgot-password/useFireBaseResetPass";
+import toast from "react-hot-toast";
 const ForgotPassword = ({ configData }) => {
   const [page, setPage] = useState(0);
-  const { mutate: fireBaseOtpMutation } = useFireBaseOtpVerify();
+  const [hasVerificationMethod, setHasVerificationMethod] = useState(false);
+  const [phoneOrEmail, setPhoneOrEmail] = useState('')
+  const { mutate: fireBaseOtpMutation } = useFireBaseResetPass();
   const [data, setData] = useState({
     phone: "",
+    email:"",
     otp: "",
   });
   const [verificationId, setVerificationId] = useState(null);
+  const dispatch=useDispatch()
   const goNext = () => {
     setPage((currPage) => currPage + 1);
   };
   const goBack = () => {
     setPage((currPage) => currPage - 1);
   };
+
+  console.log({data})
   const handleFirstForm = (values) => {
     setData({
       phone: values.phone,
+      email:values?.email,
       reset_token: values.reset_token,
+      verification_method:values?.verification_method
     });
   };
 
@@ -42,7 +56,7 @@ const ForgotPassword = ({ configData }) => {
         {
           size: "invisible",
           callback: (response) => {
-            console.log("Recaptcha verified", response);
+            // console.log("Recaptcha verified", response);
           },
           "expired-callback": () => {
             window.recaptchaVerifier?.reset();
@@ -68,9 +82,20 @@ const ForgotPassword = ({ configData }) => {
         goNext();
       })
       .catch((error) => {
-        console.log("Error in sending OTP", error);
+        toast.error(error.message)
+        // console.log({error})
       });
   };
+  const handleSubmitOtp= (values,onSuccessHandler,mutate) => {
+    handleFirstForm(values);
+    if (configData?.firebase_otp_verification === 1) {
+      sendOTP(values?.phone);
+    } else {
+      mutate(values, { onSuccess: onSuccessHandler, onError: onErrorResponse });
+    }
+  }
+
+
   const pageShow = () => {
     if (page === 0) {
       return (
@@ -80,6 +105,11 @@ const ForgotPassword = ({ configData }) => {
           data={data}
           id="recaptcha-container"
           sendOTP={sendOTP}
+          hasVerificationMethod={hasVerificationMethod}
+          setHasVerificationMethod={setHasVerificationMethod}
+          handleSubmitOtp={handleSubmitOtp}
+          setPhoneOrEmail={setPhoneOrEmail}
+          phoneOrEmail={phoneOrEmail}
         />
       );
     } else if (page === 1) {
@@ -89,6 +119,10 @@ const ForgotPassword = ({ configData }) => {
           goBack={goBack}
           formSubmitHandler={formSubmitHandler}
           isLoading={isLoading}
+          forgotPassword
+          reSendOtp={handleSubmitOtp}
+          phoneOrEmail={phoneOrEmail}
+          configData={configData}
         />
       );
     } else page === 2;
@@ -98,6 +132,7 @@ const ForgotPassword = ({ configData }) => {
           data={data}
           handleFirstForm={handleFirstForm}
           goBack={goBack}
+          phoneOrEmail={phoneOrEmail}
         />
       );
     }
@@ -117,6 +152,7 @@ const ForgotPassword = ({ configData }) => {
         sessionInfo: verificationId,
         code: values?.reset_token,
         is_reset_token: 1,
+
       };
       fireBaseOtpMutation(tempValues, {
         onSuccess: onSuccessHandler,
@@ -130,9 +166,22 @@ const ForgotPassword = ({ configData }) => {
     }
   };
   return (
-    <Box minHeight="50vh">
-      <FlexContainerCenter sx={{ marginTop: "1rem" }}>
-        <CustomPaper elevation={5}>{pageShow()}</CustomPaper>
+    <Box minHeight="50vh" sx={{display:"flex"}}>
+      <FlexContainerCenter >
+        <CustomStackFullWidth sx={{paddingX:"2rem",paddingY:"2rem", alignItems:"center",justifyContent:"center"}}>
+          <Stack justifyContent="center" alignItems="center">
+            { hasVerificationMethod && (page!==1 ) && <LogoSide configData={configData}/>}
+            {page===1 && <CustomImageContainer
+              src={fImage?.src}
+              alt="logo"
+              width="100px"
+              height="100px"
+              sx={{ borderRadius: "50%", marginBottom: "1rem" }}
+            />}
+            {(page===0  && hasVerificationMethod )&& <Typography variant="h6" mt="1rem" mb="1rem" fontWeight="bold">{t("Forgot your password")}</Typography>}
+          {pageShow()}
+          </Stack>
+          </CustomStackFullWidth>
       </FlexContainerCenter>
     </Box>
   );

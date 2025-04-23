@@ -1,6 +1,6 @@
 import { useTheme } from "@emotion/react";
 import { Grid, Tab, Tabs, useMediaQuery } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch } from "react-redux";
 import Slider from "react-slick";
@@ -18,6 +18,7 @@ import EmptySearchResults from "../../../EmptySearchResults";
 import H2 from "../../../typographies/H2";
 import { HomeComponentsWrapper } from "../../HomePageComponents";
 import { Next, Prev } from "../../popular-items-nearby/SliderSettings";
+import {useQueryClient} from "react-query";
 
 export const settings = {
   dots: false,
@@ -92,6 +93,7 @@ export const settings = {
 const FeaturedCategoriesWithFilter = (props) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
+  const queryClient = useQueryClient();
   const { title } = props;
   const [selected, setSelected] = useState(0);
   const [categoryId, setCategoryId] = useState(null);
@@ -99,17 +101,23 @@ const FeaturedCategoriesWithFilter = (props) => {
   const offset = 1;
   const type = "all";
   const { t } = useTranslation();
+  const[tempData,setTempData] = useState([])
 
+
+  const handleDataSuccess = (res) => {
+    setTempData(res)
+  }
   const {
     data,
     refetch,
-    isRefetching: itemIsLoading,
+    //isRefetching: itemIsLoading,
+    isLoading: itemIsLoading,
   } = useGetFeatureCategoriesProducts({
     categoryId,
     page_limit,
     offset,
     type,
-  });
+  },handleDataSuccess);
   const handleSuccess = (res) => {
     if (res) {
       setCategoryId(res?.data[0]?.id);
@@ -118,11 +126,11 @@ const FeaturedCategoriesWithFilter = (props) => {
   const { data: featureData, refetch: featureRefetch } =
     useGetFeaturedCategories(handleSuccess);
 
-  useEffect(() => {
-    if (categoryId) {
-      refetch();
-    }
-  }, [categoryId]);
+  // useEffect(() => {
+  //   if (categoryId) {
+  //     refetch();
+  //   }
+  // }, [categoryId]);
   const featureCategoryData = featureData?.data?.filter(
     (item) => item.featured === 1
   );
@@ -130,6 +138,21 @@ const FeaturedCategoriesWithFilter = (props) => {
     setSelected(index);
     setCategoryId(id);
   };
+
+
+  const handleCheckData = useCallback(() => {
+     const queryState=queryClient.getQueryState(`[categories-details-items-${categoryId}]`)
+     
+     if(!queryState || queryState.isStale){
+          refetch()
+     }else{
+      setTempData(queryState?.data)
+     }
+  },[tempData])
+
+ useEffect(() => {
+  handleCheckData()
+}, [categoryId]);
 
   return (
     <>
@@ -178,17 +201,37 @@ const FeaturedCategoriesWithFilter = (props) => {
                 })}
               </Tabs>
             </Grid>
-            <Grid item xs={12} sm={12} md={9}>
+            <Grid item xs={12} sm={12} md={9}
+            sx={{
+              margin: { xs: "-4px", md: "-7.5px" },
+              opacity: itemIsLoading ? ".5" : "",
+              transition: "all ease .3s",
+              position: "relative",
+              "&::before": {
+                position: "absolute",
+                inset: "0",
+                content: '""',
+                zIndex: "999",
+                display: itemIsLoading ? "block" : "none",
+              },
+            }}
+            >
+              
               {itemIsLoading ? (
                 <CustomStackFullWidth
-                  sx={{ height: "100%" }}
+                  sx={{ height: "100%" ,position:"absolute",
+                  inset: "0",
+                  zIndex: "9999",
+                 
+                  }}
                   alignItems="center"
                   justifyContent="center"
                 >
                   <DotSpin />
+                 
                 </CustomStackFullWidth>
-              ) : (
-                <CustomBoxFullWidth>
+              ) : null}
+               <CustomBoxFullWidth>
                   <SliderCustom
                     nopadding="true"
                     // sx={{
@@ -202,7 +245,7 @@ const FeaturedCategoriesWithFilter = (props) => {
                     // }}
                   >
                     <Slider {...settings}>
-                      {data?.products?.map((item, index) => {
+                      {tempData?.products?.map((item, index) => {
                         return (
                           <ProductCard
                             key={index}
@@ -216,7 +259,7 @@ const FeaturedCategoriesWithFilter = (props) => {
                       })}
                     </Slider>
                   </SliderCustom>
-                  {data?.products?.length === 0 && (
+                  {tempData?.products?.length === 0 && (
                     <CustomStackFullWidth
                       sx={{ height: "100%", padding: "2rem" }}
                       alignItems="center"
@@ -226,7 +269,6 @@ const FeaturedCategoriesWithFilter = (props) => {
                     </CustomStackFullWidth>
                   )}
                 </CustomBoxFullWidth>
-              )}
             </Grid>
           </Grid>
         </HomeComponentsWrapper>

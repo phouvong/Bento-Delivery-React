@@ -88,7 +88,11 @@ const GetLocationForm = ({
 
   useEffect(() => {
     if (places) {
-      setPredictions(places?.predictions);
+      const tempData = places?.suggestions?.map((item) => ({
+        place_id: item?.placePrediction?.placeId,
+        description: `${item?.placePrediction?.structuredFormat?.mainText?.text}, ${item?.placePrediction?.structuredFormat?.secondaryText?.text}`,
+      }));
+      setPredictions(tempData);
     }
   }, [places]);
 
@@ -118,7 +122,10 @@ const GetLocationForm = ({
   //
   useEffect(() => {
     if (placeDetails) {
-      setLocation(placeDetails?.result?.geometry?.location);
+      setLocation({
+        lat: placeDetails?.location?.latitude,
+        lng: placeDetails?.location?.longitude,
+      });
     }
   }, [placeDetails]);
 

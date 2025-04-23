@@ -37,6 +37,7 @@ const CustomLogo = ({ logoImg, atlText, height, width, objectFit }) => {
         src={logoImg}
         alt={atlText}
         objectfit={objectFit ? objectFit : "contain"}
+        loading="eager"
       />
     </Logo>
   );

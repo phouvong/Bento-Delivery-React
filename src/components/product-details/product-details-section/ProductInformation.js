@@ -333,22 +333,7 @@ const ProductInformation = ({
 								{state.modalData[0]?.store_name}
 							</Typography>
 						</Link>
-					) : (
-						<Typography
-							variant="body1"
-							fontWeight="400"
-							lineHeight="normal"
-							color="customColor.textGray"
-							sx={{
-								"&:hover": {
-									color: (theme) => theme.palette.primary.main,
-								},
-							}}
-							component="h2"
-						>
-							{state.modalData[0]?.store_name}
-						</Typography>
-					)
+					) : null
 				) : (
 					<Skeleton width={100} variant="text" />
 				)}

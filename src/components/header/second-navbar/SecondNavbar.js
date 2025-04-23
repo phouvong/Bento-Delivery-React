@@ -43,14 +43,21 @@ import CallToAdmin from "../../CallToAdmin";
 import CustomLanguage from "../top-navbar/language/CustomLanguage";
 import { SignInButton } from "components/header/NavBar.style";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-
+import DirectionsCarOutlinedIcon from "@mui/icons-material/DirectionsCarOutlined";
 import dynamic from "next/dynamic";
+import TaxiView from "components/home/module-wise-components/rental/components/home/TaxiView";
+import useGetBookingList from "api-manage/hooks/react-query/useGetBookingList";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import Box from "@mui/material/Box";
+import cookie from "js-cookie";
+import CustomModal from "components/modal";
+import ForgotPassword from "components/auth/ForgotPassword/ForgotPassword";
+import { setOpenForgotPasswordModal } from "redux/slices/utils";
 const AuthModal = dynamic(() => import("components/auth/AuthModal"));
+
 const Cart = ({ isLoading }) => {
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
-
   const { cartList } = useSelector((state) => state.cart);
-  const dispatch = useDispatch();
   const handleIconClick = () => {
     setSideDrawerOpen(true);
   };
@@ -78,6 +85,60 @@ const Cart = ({ isLoading }) => {
     </>
   );
 };
+
+export const Taxi = ({ isLoading, label, color }) => {
+  const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
+
+  const { cartList } = useSelector((state) => state.cart);
+  const handleIconClick = () => {
+    setSideDrawerOpen(true);
+  };
+
+  return (
+    <>
+      <NavBarIcon
+        icon={
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            <DirectionsCarOutlinedIcon sx={{ fontSize: "20px", color: color || "inherit" }} />
+            {label && (
+              <Typography
+                sx={{
+                  color: (theme) => theme.palette.neutral[1000],
+                }}
+                variant="caption"
+              >
+                {label}
+              </Typography>
+            )}
+          </Box>
+        }
+        user="false"
+        handleClick={handleIconClick}
+        badgeCount={
+          getCartListModuleWise(cartList?.carts)?.length > 0
+            ? getCartListModuleWise(cartList?.carts).length
+            : null // or use `0` if you want the badge to show as "0"
+        }
+      />
+
+      {!!sideDrawerOpen && (
+        <TaxiView
+          isLoading={isLoading}
+          sideDrawerOpen={sideDrawerOpen}
+          setSideDrawerOpen={setSideDrawerOpen}
+          cartList={cartList}
+        />
+      )}
+    </>
+  );
+};
+
 const WishListSideBar = ({ totalWishList }) => {
   const [wishListSideDrawerOpen, setWishListSideDrawerOpen] = useState(false);
   const handleIconClick = () => {
@@ -150,14 +211,22 @@ const SecondNavBar = ({ configData }) => {
   const [moduleType, SetModuleType] = useState("");
   const { wishLists } = useSelector((state) => state.wishList);
   const [toggled, setToggled] = useState(false);
-  const totalWishList = wishLists?.item?.length + wishLists?.store?.length;
   const [openSignIn, setOpenSignIn] = useState(false);
   const anchorRef = useRef(null);
   const [modalFor, setModalFor] = useState("sign-in");
+  const { openForgotPasswordModal } = useSelector((state) => state.utilsData);
   let token = undefined;
   let location = undefined;
   let zoneId = undefined;
   let guestId = undefined;
+  const currentModuleType = getCurrentModuleType();
+
+  let totalWishList = undefined;
+  if (currentModuleType === "rental") {
+    totalWishList = wishLists?.vehicles?.length + wishLists?.providers?.length;
+  } else {
+    totalWishList = wishLists?.item?.length + wishLists?.store?.length;
+  }
 
   if (typeof window !== "undefined") {
     token = localStorage.getItem("token");
@@ -205,8 +274,20 @@ const SecondNavBar = ({ configData }) => {
     isLoading,
   } = useGetAllCartList(guestId);
 
+  const {
+    data: bookingLists,
+    isLoading: bookingListsIsLoading,
+    refetch: bookingRefetch,
+  } = useGetBookingList(guestId);
+
   useEffect(() => {
-    cartListRefetch();
+    if (moduleType) {
+      if (moduleType === "rental") {
+        bookingRefetch();
+      } else {
+        cartListRefetch();
+      }
+    }
   }, [moduleType]);
 
   const setItemIntoCart = () => {
@@ -233,8 +314,15 @@ const SecondNavBar = ({ configData }) => {
   };
 
   useEffect(() => {
-    dispatch(setCartList(setItemIntoCart()));
-  }, [data]);
+    if (moduleType === "rental") {
+      dispatch(setCartList(bookingLists));
+      if (bookingLists?.carts?.length > 0) {
+        cookie.set("cart-list", bookingLists?.carts?.length);
+      }
+    } else {
+      dispatch(setCartList(setItemIntoCart()));
+    }
+  }, [data, moduleType, bookingLists,location]);
 
   useEffect(() => {
     if (offlineInfoStep !== 0) {
@@ -319,7 +407,7 @@ const SecondNavBar = ({ configData }) => {
           {!token && moduleType !== "parcel" && location && (
             <IconButton onClick={handleTrackOrder}>
               <Tooltip
-                title={t("Track order")}
+                title={moduleType !== "rental" ? t("Track order") : t("Track Trip")}
                 arrow
                 placement="top"
                 componentsProps={{
@@ -350,10 +438,12 @@ const SecondNavBar = ({ configData }) => {
           )}
 
           {moduleType !== "parcel" &&
-            !isLoading &&
-            (location || cartList?.length !== 0) && (
-              <Cart isLoading={isLoading} />
-            )}
+            moduleType !== "rental" &&
+            // !isLoading &&
+            (location || cartList?.length !== 0) &&
+            zoneId && <Cart isLoading={isLoading} />}
+
+          {moduleType === "rental" && <Taxi isLoading={isLoading} />}
 
           {token ? (
             <IconButton
@@ -418,7 +508,9 @@ const SecondNavBar = ({ configData }) => {
                   >
                     <LockOutlinedIcon
                       fontSize="small"
-                      style={{ color: theme.palette.whiteContainer.main }}
+                      style={{
+                        color: theme.palette.whiteContainer.main,
+                      }}
                     />
                     <Typography color={theme.palette.whiteContainer.main}>
                       {t("Sign In")}
@@ -462,6 +554,15 @@ const SecondNavBar = ({ configData }) => {
           open={openSignIn}
           handleClose={handleClose}
         />
+        {openForgotPasswordModal && 
+        <CustomModal
+        handleClose={() => dispatch(setOpenForgotPasswordModal(false))}
+        openModal={openForgotPasswordModal}
+      >
+        <ForgotPassword configData={configData}/>
+      </CustomModal>
+        }
+        
       </NoSsr>
     </CustomBoxFullWidth>
   );

@@ -69,7 +69,7 @@ const Pharmacy = ({ configData }) => {
   }, [visitedStores, newStore?.stores, getModuleId()]);
 
   return (
-    <Grid container spacing={1}>
+    <Grid container gap={1}>
       <Grid item xs={12} sx={{ marginTop: "10px" }}>
         <CustomContainer>
           <FeaturedCategories configData={configData} />

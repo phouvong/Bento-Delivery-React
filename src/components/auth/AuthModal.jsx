@@ -24,6 +24,9 @@ import { auth } from "firebase";
 import PhoneInputForm from "components/auth/sign-in/social-login/PhoneInputForm";
 import { toast } from "react-hot-toast";
 import { t } from "i18next";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { useGetWishList } from "api-manage/hooks/react-query/rental-wishlist/useGetWishlist";
+
 export const setUpRecaptcha = () => {
   if (document.getElementById("recaptcha-container")) {
     if (!window.recaptchaVerifier) {
@@ -32,7 +35,7 @@ export const setUpRecaptcha = () => {
         {
           size: "invisible",
           callback: (response) => {
-            console.log("Recaptcha verified", response);
+            // console.log("Recaptcha verified", response);
           },
           "expired-callback": () => {
             window.recaptchaVerifier?.reset();
@@ -78,6 +81,8 @@ const AuthModal = ({ modalFor, open, handleClose, setModalFor }) => {
     }
   );
   let zoneid = undefined;
+  const moduleType = getCurrentModuleType();
+
   if (typeof window !== "undefined") {
     zoneid = localStorage.getItem("zoneid");
   }
@@ -85,11 +90,17 @@ const AuthModal = ({ modalFor, open, handleClose, setModalFor }) => {
     dispatch(setWishList(res));
   };
   const { refetch } = useWishListGet(onSuccessHandler);
+  const { refetch: rentalWishlistRefetch } = useGetWishList(onSuccessHandler);
+
   const handleSuccess = async (value) => {
     localStorage.setItem("token", value);
     toast.success(t(loginSuccessFull));
     if (zoneid) {
-      await refetch();
+      if (moduleType === "rental") {
+        await rentalWishlistRefetch();
+      } else {
+        await refetch();
+      }
     }
     await profileRefatch();
     handleClose?.();
@@ -169,7 +180,7 @@ const AuthModal = ({ modalFor, open, handleClose, setModalFor }) => {
         setMainToken(response);
       })
       .catch((error) => {
-        console.log("Error in sending OTP", error);
+        // console.log("Error in sending OTP", error);
       });
   };
   const renderModalContent = () => {

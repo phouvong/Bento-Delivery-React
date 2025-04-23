@@ -14,7 +14,7 @@ const CloseIcon = () => (
 			rx="7.81373"
 			fill="#9DA7BC"
 			stroke="currentColor"
-			stroke-width="0.372549"
+			strokeWidth="0.372549"
 		/>
 		<rect
 			x="5.66211"

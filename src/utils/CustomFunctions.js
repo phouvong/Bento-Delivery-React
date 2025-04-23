@@ -20,12 +20,14 @@ export const getNumberWithConvertedDecimalPoint = (
     );
   }
 };
+
 export const isAvailable = (start, end) => {
   const startTime = moment(start, "HH:mm:ss");
   const endTime = moment(end, "HH:mm:ss");
   let currentTime = moment();
   return moment(currentTime).isBetween(startTime, endTime);
 };
+
 export const handleTotalAmountWithAddons = (
   mainTotalAmount,
   selectedAddOns
@@ -44,6 +46,7 @@ export const handleTotalAmountWithAddons = (
 export const getDateFormat = (date) => {
   return moment(date).format("LL");
 };
+
 export const getDateFormatAnotherWay = (date) => {
   return moment(date).format("ll");
 };
@@ -51,7 +54,7 @@ export const getDateFormatAnotherWay = (date) => {
 export const getIndexFromArrayByComparision = (arrayOfObjects, object) => {
   return arrayOfObjects.findIndex(
     (item) =>
-      _.isEqual(item.food_variations, object.food_variations) &&
+      JSON.stringify(item.food_variations) === JSON.stringify(object.food_variations) &&
       item.id === object.id
   );
 };
@@ -68,10 +71,12 @@ export const calculateItemBasePrice = (item, selectedOptions) => {
   return basePrice;
   // if(item)
 };
+
 export const FormatedDateWithTime = (date) => {
   let dateString = moment(date).format("YYYY-MM-DD hh:mm a");
   return dateString;
 };
+
 export const onlyTimeFormat = (date) => {
   let timeString = moment(date, "YYYY-MM-DD hh:mm a").format("hh:mm");
   return timeString;
@@ -102,6 +107,7 @@ export const getDayNumber = (day) => {
     }
   }
 };
+
 const handleVariationValuesSum = (productVariations) => {
   let sum = 0;
   if (productVariations.length > 0) {
@@ -115,6 +121,7 @@ const handleVariationValuesSum = (productVariations) => {
   }
   return sum;
 };
+
 const handleValuesSum = (productVariations) => {
   let sum = 0;
   if (productVariations.length > 0) {
@@ -147,6 +154,7 @@ export const handleProductValueWithOutDiscount = (product) => {
     }
   }
 };
+
 export const selectedAddonsTotal = (addOns) => {
   if (addOns?.length > 0) {
     let vv = addOns?.reduce(
@@ -159,6 +167,7 @@ export const selectedAddonsTotal = (addOns) => {
     return 0;
   }
 };
+
 const handleValueWithOutDiscount = (product) => {
   let productPrice = product.price;
   if (product.selectedOption.length > 0) {
@@ -168,6 +177,7 @@ const handleValueWithOutDiscount = (product) => {
     return productPrice;
   }
 };
+
 export const handlePurchasedAmount = (cartList) => {
   if (getCurrentModuleType() === "food") {
     return cartList.reduce(
@@ -192,6 +202,7 @@ export const handlePurchasedAmount = (cartList) => {
     );
   }
 };
+
 export const getCouponDiscount = (couponDiscount, storeData, cartList) => {
   if (couponDiscount) {
     let purchasedAmount = handlePurchasedAmount(cartList);
@@ -302,6 +313,7 @@ export const getTaxableTotalPrice = (
     return (total * tax) / 100;
   }
 };
+
 const handleTotalDiscountBasedOnModules = (
   items,
   restaurentDiscount,
@@ -378,6 +390,7 @@ const handleProductWiseDiscount = (items) => {
   });
   return totalDiscount;
 };
+
 export const getProductDiscount = (items, storeData) => {
   if (storeData?.discount) {
     let endDate = storeData?.discount?.end_date;
@@ -432,6 +445,7 @@ export const getProductDiscount = (items, storeData) => {
     return handleProductWiseDiscount(items);
   }
 };
+
 export const getConvertDiscount = (dis, disType, price, restaurantDiscount) => {
   if (restaurantDiscount === 0) {
     if (dis !== 0) {
@@ -446,6 +460,7 @@ export const getConvertDiscount = (dis, disType, price, restaurantDiscount) => {
     return price - (price * restaurantDiscount) / 100;
   }
 };
+
 export const getFinalTotalPrice = (
   items,
   couponDiscount,
@@ -466,6 +481,7 @@ export const getFinalTotalPrice = (
   }
   return totalPrice;
 };
+
 export const currentTime = moment(currentDate).format("HH:mm");
 
 function recursive(start, end, close, list, schedule_order_slot_duration, day) {
@@ -554,6 +570,7 @@ function radians(degrees) {
 const degrees = (doubleRadiance) => {
   return doubleRadiance * (180 / Math.PI);
 };
+
 const toRadians = (degree) => {
   return (degree * Math.PI) / 180;
 };
@@ -578,9 +595,9 @@ function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
 }
 
 export const handleDistance = (distance, origin, destination) => {
-  if (distance?.[0]?.distance?.value) {
-    return distance?.[0]?.distance?.value / 1000;
-  } else if (distance?.[0]?.status === "ZERO_RESULTS") {
+  if (distance?.distanceMeters) {
+    return distance?.distanceMeters / 1000;
+  } else if (distance?.status === "ZERO_RESULTS") {
     return (
       distanceInKmBetweenEarthCoordinates(
         origin?.latitude || origin?.lat,
@@ -593,6 +610,7 @@ export const handleDistance = (distance, origin, destination) => {
     return 0;
   }
 };
+
 export const cartItemsTotalAmount = (cartList) => {
   let totalAmount = 0;
   if (cartList?.length > 0) {
@@ -635,7 +653,9 @@ export const getInfoFromZoneData = (zoneData) => {
   }
   return chargeInfo;
 };
+
 export let bad_weather_fees = 0;
+
 const getDeliveryFeeByBadWeather = (
   charge,
   increasedDeliveryFee,
@@ -650,6 +670,7 @@ const getDeliveryFeeByBadWeather = (
     return totalCharge;
   }
 };
+
 export const getDeliveryFees = (
   storeData,
   configData,
@@ -666,7 +687,7 @@ export const getDeliveryFees = (
   if (orderType === "delivery" || orderType === "schedule_order") {
     //convert m to km
     let convertedDistance = handleDistance(
-      distance?.rows?.[0]?.elements,
+        distance,
       origin,
       destination
     );
@@ -697,6 +718,17 @@ export const getDeliveryFees = (
         }
       }
     } else {
+      const isAdminFreeDeliveryEnabled = configData?.admin_free_delivery?.status === true;
+      const freeDeliveryType = configData?.admin_free_delivery?.type;
+      const freeDeliveryThreshold = configData?.admin_free_delivery?.free_delivery_over;
+
+      const isFreeDeliveryByAmount =
+        freeDeliveryType === "free_delivery_by_order_amount" &&
+        freeDeliveryThreshold > 0 &&
+        totalOrderAmount >= freeDeliveryThreshold;
+
+      const isFreeDeliveryToAllStores = freeDeliveryType === "free_delivery_to_all_store";
+      
       if (zoneData?.data?.zone_data?.length > 0) {
         const chargeInfo = getInfoFromZoneData(zoneData);
         if (
@@ -706,12 +738,8 @@ export const getDeliveryFees = (
           deliveryFee =
             convertedDistance *
             (chargeInfo?.pivot?.per_km_shipping_charge || 0);
-          if (
-            (configData?.free_delivery_over !== null &&
-              configData?.free_delivery_over > 0 &&
-              totalOrderAmount >= configData?.free_delivery_over) ||
-            orderType === "take_away"
-          ) {
+          if((isAdminFreeDeliveryEnabled && (isFreeDeliveryByAmount || isFreeDeliveryToAllStores)) ||
+          orderType === "take_away") {
             return 0;
           } else if (
             deliveryFee <= chargeInfo?.pivot?.minimum_shipping_charge
@@ -744,6 +772,7 @@ export const getDeliveryFees = (
     return 0;
   }
 };
+
 export const getItemTotalWithoutDiscount = (item) => {
   return item?.price + handleVariationValuesSum(item.food_variations);
 };

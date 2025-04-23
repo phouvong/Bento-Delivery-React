@@ -20,7 +20,6 @@ import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
 
 import { ACTIONS, initialState, reducer } from "../states";
-import { handleClick, handleCloseModal } from "../HelperFunctions";
 import { useGeolocated } from "react-geolocated";
 import useGetAutocompletePlace from "../../../api-manage/hooks/react-query/google-api/usePlaceAutoComplete";
 import useGetGeoCode from "../../../api-manage/hooks/react-query/google-api/useGetGeoCode";
@@ -28,16 +27,12 @@ import useGetZoneId from "../../../api-manage/hooks/react-query/google-api/useGe
 import useGetPlaceDetails from "../../../api-manage/hooks/react-query/google-api/useGetPlaceDetails";
 import GoogleMapComponent from "../../Map/GoogleMapComponent";
 import AddressForm from "./AddressForm";
-import useGetAddressList from "../../../api-manage/hooks/react-query/address/useGetAddressList";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import CustomImageContainer from "../../CustomImageContainer";
 import home from "../../checkout/assets/image 1256.png";
 import office from "../assets/office.png";
 import plusIcon from "../assets/plus.png";
-import { CustomButtonPrimary } from "../../../styled-components/CustomButtons.style";
 import { useDispatch, useSelector } from "react-redux";
-import { setOpenAddressModal } from "../../../redux/slices/addAddress";
-import { setGuestUserInfo } from "../../../redux/slices/guestUserInfo";
+import { setOpenAddressModal } from "redux/slices/addAddress";
 import GpsFixedIcon from "@mui/icons-material/GpsFixed";
 
 const AddNewAddress = (props) => {
@@ -93,7 +88,11 @@ const AddNewAddress = (props) => {
   );
   useEffect(() => {
     if (places) {
-      dispatch({ type: ACTIONS.setPredictions, payload: places?.predictions });
+      const tempData = places?.data?.suggestions?.map((item) => ({  
+        place_id: item?.placePrediction?.placeId,
+        description: `${item?.placePrediction?.structuredFormat?.mainText?.text}, ${item?.placePrediction?.structuredFormat?.secondaryText?.text}`,
+      }));
+      dispatch({ type: ACTIONS.setPredictions, payload: tempData });
     }
   }, [places]);
   const { data: geoCodeResults, isFetching: isFetchingGeoCode } = useGetGeoCode(
@@ -124,15 +123,18 @@ const AddNewAddress = (props) => {
   //
   useEffect(() => {
     if (placeDetails) {
+      const locObj = {
+        lat: placeDetails?.data?.location?.latitude,
+        lng: placeDetails?.data?.location?.longitude,
+      };
       dispatch({
         type: ACTIONS.setLocation,
-        payload: placeDetails?.result?.geometry?.location,
+        payload: locObj,
       });
     }
   }, [placeDetails]);
 
   // const orangeColor = theme.palette.primary.main;
-  let data = {};
 
   useEffect(() => {
     if (state.placeDescription) {

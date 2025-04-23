@@ -78,8 +78,6 @@ const ParcelCheckout = () => {
     lat: parcelInfo?.senderLocations?.lat,
     lng: parcelInfo?.senderLocations?.lng,
   };
-  const [guestUserEmail, setGuestUserEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
   const { data: zoneData } = useGetZoneId(receiverLoacation, zoneIdEnabled);
   const { data, refetch } = useGetDistance(
     parcelInfo?.senderLocations,
@@ -101,14 +99,6 @@ const ParcelCheckout = () => {
         .required(t("Confirm Password"))
         .oneOf([Yup.ref("password"), null], t("Passwords must match")),
     }),
-    // onSubmit: async (values, helpers) => {
-    //   console.log({ values });
-    //   try {
-    //     //formSubmitHandler(values);
-    //   } catch (err) {
-    //     console.log(err);
-    //   }
-    // },
   });
   const passwordHandler = (value) => {
     formik.setFieldValue("password", value);
@@ -117,7 +107,7 @@ const ParcelCheckout = () => {
     formik.setFieldValue("confirm_password", value);
   };
   const tempDistance = handleDistance(
-    data?.rows?.[0]?.elements,
+    data?.data,
     {
       latitude: parcelInfo?.receiverLocations?.latitude,
       longitude: parcelInfo?.receiverLocations?.longitude,
@@ -191,7 +181,7 @@ const ParcelCheckout = () => {
   }, [orderId]);
   const parcelDeliveryFree = () => {
     let convertedDistance = handleDistance(
-      data?.rows[0]?.elements,
+      data,
       parcelInfo?.senderLocations,
       parcelInfo?.receiverLocations
     );
@@ -248,7 +238,7 @@ const ParcelCheckout = () => {
     order_type: "parcel",
     payment_method: isDigital,
     distance: handleDistance(
-      data?.rows[0]?.elements,
+      data?.data,
       parcelInfo?.senderLocations,
       parcelInfo?.receiverLocations
     ),
@@ -288,7 +278,7 @@ const ParcelCheckout = () => {
           if (
             paymentMethod !== "cash_on_delivery" &&
             paymentMethod !== "offline_payment" &&
-            paymentMethod !== ""
+            paymentMethod !== "" && paymentMethod !== "wallet"
           ) {
             const payment_platform = "web";
             const page = "my-orders";
@@ -296,7 +286,6 @@ const ParcelCheckout = () => {
             const callBackUrl = token
               ? `${window.location.origin}/profile?page=${page}`
               : `${window.location.origin}/home`;
-            //const callBackUrl = `${window.location.origin}/order?order_id=${res?.order_id}&total=${res?.total_ammount}`;
             const url = `${baseUrl}/payment-mobile?order_id=${
               res?.order_id
             }&customer_id=${

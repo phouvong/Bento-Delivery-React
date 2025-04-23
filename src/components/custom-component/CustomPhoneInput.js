@@ -5,19 +5,19 @@ import { useTranslation } from "react-i18next";
 
 import { CustomTypography } from "../landing-page/hero-section/HeroSection.style";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import { NoSsr } from "@mui/material";
+import {alpha, NoSsr} from "@mui/material";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { useSelector } from "react-redux";
 
 const CustomPhoneNumberInputStyled = styled(PhoneInput)(
-  ({ theme, languageDirection, borderRadius }) => ({
+  ({ theme, languageDirection, borderRadius,background }) => ({
     "&.react-tel-input .special-label": {
       fontSize: "12px !important",
-      fontWeight: "400 !important",
-      color: theme.palette.neutral[1000],
+      fontWeight: "500 !important",
+      color: alpha(theme.palette.neutral[1000],.7),
       left: languageDirection === "rtl" ? "80%" : "10px",
-      backgroundColor: theme.palette.background.paper,
+      backgroundColor:background|| theme.palette.background.paper,
       zIndex: "999",
       display: "inline-block",
     },
@@ -30,7 +30,7 @@ const CustomPhoneNumberInputStyled = styled(PhoneInput)(
       right: languageDirection === "rtl" && "11px",
     },
     "&.react-tel-input .flag-dropdown.open .selected-flag": {
-      backgroundColor: theme.palette.background.default,
+      backgroundColor: theme.palette.neutral[100],
     },
     "&.react-tel-input .country-list .search-box": {
       backgroundColor: theme.palette.background.custom2,
@@ -46,7 +46,7 @@ const CustomPhoneNumberInputStyled = styled(PhoneInput)(
       display: "none",
     },
     "&.react-tel-input .selected-flag": {
-      backgroundColor: theme.palette.neutral[300],
+      backgroundColor: theme.palette.neutral[100],
       borderRadius: "10px 0px 0px 10px !important",
       "&:hover": {
         backgroundColor: theme.palette.background.custom2,
@@ -123,6 +123,7 @@ const CustomPhoneInput = ({
   lanDirection,
   height,
   borderRadius,
+                            background
 }) => {
   const changeHandler = (e) => {
     onHandleChange(e);
@@ -135,6 +136,7 @@ const CustomPhoneInput = ({
       <CustomStackFullWidth alignItems="flex-start" spacing={0.8}>
         {lanDirection && (
           <CustomPhoneNumberInputStyled
+            background={background}
             borderRadius={borderRadius}
             autoFormat={false}
             placeholder={t("Enter phone number")}

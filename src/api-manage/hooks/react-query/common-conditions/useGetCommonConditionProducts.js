@@ -11,9 +11,12 @@ const getData = async (pageParams) =>{
     return data;
 }
 
-export default function useGetCommonConditionProducts(pageParams) {
-    return useQuery("common-condition-products", () =>getData(pageParams),{
-        enabled : false,
+export default function useGetCommonConditionProducts(pageParams,handleSuccess) {
+    return useQuery(["common-condition-products",pageParams?.conditionId], () =>getData(pageParams),{
+        enabled : !!pageParams?.conditionId,
         onError: onSingleErrorResponse,
+        staleTime: 60 * 1000,
+        cacheTime: 60 * 1000,
+        onSuccess: handleSuccess
     });
 }

@@ -141,7 +141,7 @@ const BasicInformationForm = ({
         {
           size: "invisible",
           callback: (response) => {
-            console.log("Recaptcha verified", response);
+            // console.log("Recaptcha verified", response);
           },
           "expired-callback": () => {
             window.recaptchaVerifier?.reset();
@@ -184,13 +184,11 @@ const BasicInformationForm = ({
       })
       .catch((error) => {
         toast.error(error.message);
-        console.log("Error in sending OTP", error);
       });
   };
   const { mutate: profileUpdateByMutate, isLoading } = useUpdateProfile();
   const formSubmitOnSuccess = (values) => {
     const onSuccessHandler = (response) => {
-      console.log("errroooorrrrr");
       if (response) {
         setResData({
           ...resData,
@@ -226,7 +224,6 @@ const BasicInformationForm = ({
     profileUpdateByMutate(formData, {
       onSuccess: onSuccessHandler,
       onError: (error) => {
-        console.log({ error });
         if (Array.isArray(error?.response?.data?.errors)) {
           return onErrorResponse(error);
         } else {

@@ -88,7 +88,7 @@ const OfflineForm = ({
           dispatch(setOrderInformation({ ...orderInformation, ...newData }));
         }
       } catch (err) {
-        console.log(error);
+        // console.log(error);
       }
     },
   });

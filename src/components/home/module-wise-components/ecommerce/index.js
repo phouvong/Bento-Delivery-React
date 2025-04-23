@@ -27,8 +27,7 @@ import NewArrivals from "./NewArrivals";
 import SinglePoster from "./SinglePoster";
 import TopOffersNearMe from "components/home/top-offers-nearme";
 
-const Shop = (props) => {
-  const { configData } = props;
+const Shop = ({ configData }) => {
   const menus = ["All", "Beauty", "Bread & Juice", "Drinks", "Milks"];
   const { orderDetailsModalOpen } = useSelector((state) => state.utilsData);
   const [storeData, setStoreData] = React.useState([]);
@@ -62,6 +61,7 @@ const Shop = (props) => {
 
     fetchData();
   }, [token]);
+
   useEffect(() => {
     if (visitedStores?.length > 0 || newStore?.stores?.length > 0) {
       if (visitedStores?.length > 0 && visitedStores) {
@@ -74,8 +74,9 @@ const Shop = (props) => {
       }
     }
   }, [visitedStores, newStore?.stores, getModuleId()]);
+
   return (
-    <Grid container spacing={1}>
+    <Grid container gap={1}>
       <Grid item xs={12} sx={{ marginTop: { xs: "-10px", sm: "10px" } }}>
         <CustomContainer>
           <FeaturedCategories configData={configData} />
@@ -137,15 +138,15 @@ const Shop = (props) => {
         <CustomContainer>
           <FeaturedStores title="Popular Store" configData={configData} />
         </CustomContainer>
-      </Grid>{" "}
+      </Grid>
       <Grid item xs={12}>
         <CustomContainer>
-          <BestReviewedItems
-            menus={menus}
-            title="Best Reviewed Items"
-            bannerIsLoading={isLoading}
-            url={`${data?.promotional_banner_url}/${data?.best_reviewed_section_banner}`}
-          />
+            <BestReviewedItems
+                menus={menus}
+                title="Best Reviewed Items"
+                bannerIsLoading={isLoading}
+                url={`${data?.promotional_banner_url}/${data?.best_reviewed_section_banner}`}
+            />
         </CustomContainer>
       </Grid>
       <Grid item xs={12}>

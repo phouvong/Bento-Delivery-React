@@ -28,7 +28,7 @@ const ContactLists = ({
 	if (channelLoading) {
 		return (
 			<>
-				{[...Array(1, 2, 3, 4)].map((index) => {
+				{[...Array(1, 2, 3, 4)].map((_, index) => {
 					return (
 						<Box padding=".5rem" key={index}>
 							<Stack direction="row" spacing={1}>

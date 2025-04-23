@@ -14,14 +14,14 @@ class CustomDocument extends Document {
             href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap"
             rel="stylesheet"
           />
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
-          />
-          <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto+Slab|Roboto:300,400,500,700&display=optional"
-          />
+          {/*<link*/}
+          {/*  rel="stylesheet"*/}
+          {/*  href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"*/}
+          {/*/>*/}
+          {/*<link*/}
+          {/*  rel="stylesheet"*/}
+          {/*  href="https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto+Slab|Roboto:300,400,500,700&display=optional"*/}
+          {/*/>*/}
           <script
             type="application/javascript"
             src="https://accounts.google.com/gsi/client"
@@ -33,6 +33,7 @@ class CustomDocument extends Document {
             async
           />
           <meta name="theme-color" content="#111827" />
+
         </Head>
         <body>
           <Main />

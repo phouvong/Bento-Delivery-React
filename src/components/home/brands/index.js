@@ -24,7 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setBrands } from "redux/slices/brands";
 import AtoZ from "sort/AtoZ";
 import BrandCard from "./BrandCard";
-
+import { getModuleId } from "helper-functions/getModuleId";
 export const CustomSkeleton = styled(Skeleton)(({ theme }) => ({
 	background: theme.palette.background.sklenton,
 	maxWidth: "100%",
@@ -45,10 +45,8 @@ const Brands = ({ viewAll }) => {
 	const { refetch, isLoading, isFetching } = useGetBrandsList(handleSuccess);
 
 	useEffect(() => {
-		if (!data) {
-			refetch();
-		}
-	}, [data]);
+		refetch();
+	}, [data,getModuleId()]);
 
 	const baseUrl = configData?.base_urls?.brand_image_url;
 
@@ -80,6 +78,7 @@ const Brands = ({ viewAll }) => {
 			}
 		}
 	}, [isLoading, isFetching]);
+
 
 	// Page View
 	if (viewAll)

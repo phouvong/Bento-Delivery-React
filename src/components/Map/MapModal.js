@@ -45,6 +45,9 @@ import { setWishList } from "src/redux/slices/wishList";
 import { useWishListGet } from "src/api-manage/hooks/react-query/wish-list/useWishListGet";
 import { getToken } from "src/helper-functions/getToken";
 import ModalExtendShrink from "./ModalExtendShrink";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { useGetWishList } from "api-manage/hooks/react-query/rental-wishlist/useGetWishlist";
+
 
 const MapModal = ({
   open,
@@ -73,6 +76,7 @@ const MapModal = ({
   const [location, setLocation] = useState(
     selectedLocation ? selectedLocation : configData?.default_location
   );
+  const { selectedModule } = useSelector((state) => state.utilsData);
   const [zoneId, setZoneId] = useState(undefined);
   const [isLoadingCurrentLocation, setLoadingCurrentLocation] = useState(false);
   const [currentLocation, setCurrentLocation] = useState({});
@@ -90,6 +94,7 @@ const MapModal = ({
     enabled
   );
   const dispatch = useDispatch();
+
   const { coords, isGeolocationAvailable, isGeolocationEnabled, getPosition } =
     useGeolocated({
       positionOptions: {
@@ -101,7 +106,11 @@ const MapModal = ({
 
   useEffect(() => {
     if (places) {
-      setPredictions(places?.predictions);
+      const tempData = places?.suggestions?.map((item) => ({
+        place_id: item?.placePrediction?.placeId,
+        description: `${item?.placePrediction?.structuredFormat?.mainText?.text}, ${item?.placePrediction?.structuredFormat?.secondaryText?.text}`,
+      }));
+      setPredictions(tempData);
     }
   }, [places]);
   const { data: geoCodeResults, refetch: refetchCurrentLocation } =
@@ -145,9 +154,13 @@ const MapModal = ({
     successHandler
   );
   //
+
   useEffect(() => {
     if (placeDetails) {
-      setLocation(placeDetails?.result?.geometry?.location);
+      setLocation({
+        lat: placeDetails?.location?.latitude,
+        lng: placeDetails?.location?.longitude,
+      });
     }
   }, [placeDetails]);
   useEffect(() => {
@@ -172,21 +185,23 @@ const MapModal = ({
     setLocation(values);
   };
 
+
   // get module from localstorage
-  let selectedModule = undefined;
-  if (typeof window !== "undefined") {
-    selectedModule = localStorage.getItem("module");
-  }
+  const moduleType = getCurrentModuleType();
   const onSuccessHandler = (response) => {
     dispatch(setWishList(response));
   };
-  const { refetch: wishlistRefetch, isLoading: isLoadingWishlist } =
-    useWishListGet(onSuccessHandler);
-
+  const { refetch: wishlistRefetch } = useWishListGet(onSuccessHandler);
+  const { refetch: rentalWishlistRefetch } = useGetWishList(onSuccessHandler);
   const handlePickLocationOnClick = () => {
+    
     if (zoneId && geoCodeResults && location) {
       if (getToken()) {
-        wishlistRefetch();
+        if (moduleType === "rental") {
+          rentalWishlistRefetch();
+        } else {
+          wishlistRefetch();
+        }
       }
       if (fromReceiver !== "1") {
         localStorage.setItem("zoneid", zoneId);
@@ -208,9 +223,11 @@ const MapModal = ({
         if (fromStore) {
           handleClose();
         } else {
+          
           setOpenModuleSelection(true);
         }
       }
+      
     }
   };
 
@@ -269,7 +286,6 @@ const MapModal = ({
                 fontWeight={400}
                 color={theme.palette.neutral[500]}
               >
-                {/* {t("Type your address here or pick from map")} */}
                 {t(
                   "Sharing your accurate location enhances precision in search results and delivery estimates, ensures effortless order delivery."
                 )}
@@ -288,7 +304,7 @@ const MapModal = ({
                       if (value) {
                         if (value !== "" && typeof value === "string") {
                           setLoadingAuto(true);
-                          const value = places?.predictions?.[0];
+                          const value = predictions[0];
                           handleLocationSelection(value);
                         } else {
                           handleLocationSelection(value);
@@ -395,6 +411,7 @@ const MapModal = ({
                     setRerenderMap={setRerenderMap}
                     isLoadingCurrentLocation={isLoadingCurrentLocation}
                     isGeolocationEnabled={isGeolocationEnabled}
+                    fromMapModal={true}
                   />
                 </WrapperCurrentLocationPick>
               </CustomBoxFullWidth>
@@ -441,6 +458,7 @@ const MapModal = ({
           location={currentLocation}
           closeModal={handleCloseModuleModal}
           disableAutoFocus={disableAutoFocus}
+          zoneId={zoneId}
         />
       )}
     </>

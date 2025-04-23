@@ -9,12 +9,13 @@ export const CustomTextFieldStyle = styled(TextField)(
     multiline,
     fontSize,
     backgroundColor,
+    labelColor
   }) => ({
     border: borderColor && `1px solid ${borderColor}`,
     borderRadius: borderColor && "10px",
     backgroundColor: backgroundColor ? theme.palette.neutral[100] : "none",
     "& .MuiInputLabel-root": {
-      color: theme.palette.neutral[400], // Default or custom label color
+      color: labelColor ? labelColor : theme.palette.neutral[400], // Default or custom label color
       fontWeight: "500",
     },
     "& .MuiInputBase-input::placeholder": {

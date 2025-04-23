@@ -39,6 +39,7 @@ import { getLanguage } from "helper-functions/getLanguage";
 import SearchIcon from "@mui/icons-material/Search";
 import MapMarkerIcon from "../assets/MapMarkerIcon";
 import dynamic from "next/dynamic";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 const MapModal = dynamic(() => import("../../Map/MapModal"));
 const HeroLocationForm = () => {
   const theme = useTheme();
@@ -143,7 +144,11 @@ const HeroLocationForm = () => {
 
   useEffect(() => {
     if (places) {
-      setPredictions(places?.predictions);
+      const tempData = places?.suggestions?.map((item) => ({
+        place_id: item.placePrediction.placeId,
+        description: `${item.placePrediction.structuredFormat.mainText.text}, ${item.placePrediction.structuredFormat.secondaryText.text}`,
+      }));
+      setPredictions(tempData);
     }
   }, [places]);
 
@@ -182,11 +187,12 @@ const HeroLocationForm = () => {
   //
   useEffect(() => {
     if (placeDetails) {
-      setLocation(placeDetails?.result?.geometry?.location);
+      setLocation({
+        lat: placeDetails?.location?.latitude,
+        lng: placeDetails?.location?.longitude,
+      });
     }
   }, [placeDetails]);
-
-  // const orangeColor = theme.palette.primary.main;
 
   useEffect(() => {
     if (placeDescription) {
@@ -194,17 +200,22 @@ const HeroLocationForm = () => {
     }
   }, [placeDescription]);
 
+  const moduleType = getCurrentModuleType();
+
   const onSuccessHandler = (response) => {
     dispatch(setWishList(response));
   };
-  const { refetch: wishlistRefetch, isLoading: isLoadingWishlist } =
-    useWishListGet(onSuccessHandler);
+  const { refetch: wishlistRefetch } = useWishListGet(onSuccessHandler);
   const setLocationEnable = async () => {
     setGeoLocationEnable(true);
     setZoneIdEnabled(true);
     if (currentLocation && location) {
       if (getToken()) {
-        wishlistRefetch();
+        if (moduleType === "rental") {
+          await rentalWishlistRefetch();
+        } else {
+          await wishlistRefetch();
+        }
       }
       localStorage.setItem("location", currentLocation);
       localStorage.setItem("currentLatLng", JSON.stringify(location));

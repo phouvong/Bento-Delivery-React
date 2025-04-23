@@ -1,12 +1,4 @@
-import {
-  Checkbox,
-  FormControlLabel,
-  IconButton,
-  NoSsr,
-  styled,
-  Typography,
-  useTheme,
-} from "@mui/material";
+import { IconButton, NoSsr, styled, Typography, useTheme } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import React, { useEffect, useReducer, useState } from "react";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
@@ -25,10 +17,9 @@ import { useWishListGet } from "api-manage/hooks/react-query/wish-list/useWishLi
 
 import { useFormik } from "formik";
 import { getGuestId } from "helper-functions/getToken";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setCartList } from "redux/slices/cart";
 import { setUser } from "redux/slices/profileInfo";
 import { setWishList } from "redux/slices/wishList";
@@ -63,12 +54,11 @@ import OtpLogin from "components/auth/sign-in/OtpLogin";
 import * as Yup from "yup";
 
 import CloseIcon from "@mui/icons-material/Close";
-
-const CustomLink = styled(Link)(({ theme }) => ({
-  "&:hover": {
-    color: theme.palette.primary.main,
-  },
-}));
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import useGetBookingList from "api-manage/hooks/react-query/useGetBookingList";
+import { useGetWishList } from "api-manage/hooks/react-query/rental-wishlist/useGetWishlist";
+import ForgotPassword from "../ForgotPassword/ForgotPassword";
+import { setOpenForgotPasswordModal } from "redux/slices/utils";
 
 const SignIn = ({
   modalFor,
@@ -88,6 +78,7 @@ const SignIn = ({
 }) => {
   const router = useRouter();
   const previousRouteName = router.query.from;
+  const { openForgotPasswordModal } = useSelector((state) => state.utilsData);
   const guestId = getGuestId();
   const dispatch = useDispatch();
   const [openModuleSelection, setOpenModuleSelection] = useState(false);
@@ -100,17 +91,15 @@ const SignIn = ({
   const theme = useTheme();
 
   const [state, loginDispatch] = useReducer(loginReducer, loginInitialState);
-  const textColor = theme.palette.whiteContainer.main;
   let userDatafor = undefined;
+  const moduleType = getCurrentModuleType();
   if (typeof window !== "undefined") {
     userDatafor = JSON.parse(localStorage.getItem("userDatafor"));
   }
-  const getModule = () => {
-    return JSON.parse(window.localStorage.getItem("module"));
-  };
+
   const loginFormik = useFormik({
     initialValues: {
-      email_or_phone: "",
+      email_or_phone: userDatafor?.email_or_phone || "",
       password: userDatafor ? userDatafor.password : "",
       tandc: false,
     },
@@ -155,7 +144,7 @@ const SignIn = ({
         food_variations: item?.item?.food_variations,
         itemBasePrice: item?.item?.price,
         selectedOption:
-          getModule()?.module_type !== "food"
+          moduleType !== "food"
             ? item?.variation
             : getSelectedVariations(item?.item?.food_variations),
       }));
@@ -168,9 +157,17 @@ const SignIn = ({
     refetch: cartListRefetch,
     isLoading,
   } = useGetAllCartList(cartListSuccessHandler);
+
+  const bookingSuccess = (res) => {
+    dispatch(setCartList(res));
+  };
+  const {
+    data: bookingLists,
+    isLoading: bookingListsIsLoading,
+    refetch: bookingRefetch,
+  } = useGetBookingList(getGuestId(), bookingSuccess);
   const userOnSuccessHandler = (res) => {
     dispatch(setUser(res));
-    //handleClose()
   };
 
   let location = undefined;
@@ -201,16 +198,22 @@ const SignIn = ({
     setIsApiCalling(false);
   };
 
-  const { data: userData, refetch: profileRefetch } =
-    useGetProfile(userOnSuccessHandler);
-  const { refetch: wishlistRefetch, isLoading: isLoadingWishlist } =
-    useWishListGet(onSuccessHandler);
+  const { refetch: profileRefetch } = useGetProfile(userOnSuccessHandler);
+  const { refetch: wishlistRefetch } = useWishListGet(onSuccessHandler);
+  const { refetch: rentalWishlistRefetch } = useGetWishList(onSuccessHandler);
+
   const handleTokenAfterSignIn = async (response) => {
     if (response) {
       localStorage.setItem("token", response?.token);
-      await wishlistRefetch();
+      if (moduleType === "rental") {
+        await bookingRefetch();
+        await rentalWishlistRefetch();
+      } else {
+        await cartListRefetch();
+        await wishlistRefetch();
+      }
       await profileRefetch();
-      await cartListRefetch();
+
       toast.success(t(loginSuccessFull));
 
       if (router.pathname === "/forgot-password") {
@@ -436,6 +439,7 @@ const SignIn = ({
               only
               handleSignUp={handleSignUp}
               handleClick={handleClick}
+              handleClose={handleClose }
             />
           </Stack>
         );
@@ -565,6 +569,7 @@ const SignIn = ({
               rememberMeHandleChange={rememberMeHandleChange}
               isLoading={loginIsLoading}
               handleClick={handleClick}
+              handleClose={handleClose}
             />
 
             <Typography fontSize="14px" textAlign="center">
@@ -625,6 +630,7 @@ const SignIn = ({
               rememberMeHandleChange={rememberMeHandleChange}
               isLoading={loginIsLoading}
               handleClick={handleClick}
+              handleClose={handleClose}
             />
             <Stack gap="10px">
               <Typography
@@ -764,6 +770,7 @@ const SignIn = ({
           handleClose={() => setOpenOtpModal(false)}
         />
       </CustomModal>
+      
     </>
   );
 };

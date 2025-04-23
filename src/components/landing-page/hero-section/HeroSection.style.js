@@ -16,10 +16,11 @@ export const SearchLocationTextField = styled(TextField)(
     margin_top,
     isLanding,
     isXSmall,
+    searchHeight
   }) => ({
     width: "100%",
     backgroundColor: theme.palette.neutral[100],
-    height: "56px",
+    height: searchHeight??"56px",
     borderRadius: isXSmall && isLanding ? "4px" : "0 0 4px 4px",
     border: "none",
     "& .MuiOutlinedInput-notchedOutline": {
@@ -60,7 +61,7 @@ export const SearchLocationTextField = styled(TextField)(
       //   paddingRight: isLanding && "110px"
       // },
       "& .MuiInputBase-input::placeholder": {
-        opacity: theme.palette.mode === "dark" ? ".8" : "10",
+        opacity: theme.palette.mode === "dark" ? ".8" : ".9",
       },
     },
   })

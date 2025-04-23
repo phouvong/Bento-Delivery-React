@@ -15,8 +15,8 @@ const CouponVector = () => {
         x2="2.49083"
         y2="110.491"
         stroke="#D4D7DB"
-        stroke-linecap="round"
-        stroke-dasharray="5 5"
+        strokeLinecap="round"
+        strokeDasharray="5 5"
       />
     </svg>
   );

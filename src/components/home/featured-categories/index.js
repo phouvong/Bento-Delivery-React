@@ -41,12 +41,11 @@ export const ButtonRight = styled(CustomButtonPrimary)(({ theme }) => ({
   },
 }));
 
-const FeaturedCategories = ({ configData }) => {
+const FeaturedCategories = () => {
+  const dispatch = useDispatch();
   const { featuredCategories } = useSelector((state) => state.storedData);
   const slider = useRef(null);
-  const { data, refetch, isFetched, isFetching, isLoading, isRefetching } =
-    useGetFeaturedCategories();
-  const dispatch = useDispatch();
+  const { data, refetch, isFetched } = useGetFeaturedCategories();
   useEffect(() => {
     refetch();
   }, []);
@@ -140,21 +139,37 @@ const FeaturedCategories = ({ configData }) => {
         );
     }
   };
+
   const moduleWiseCardShimmer = () => {
     switch (getCurrentModuleType()) {
       case ModuleTypes.GROCERY:
         return (
-          <Slider {...settings} ref={slider}>
-            {[...Array(8)]?.map((item, index) => {
-              return <FeaturedItemCard key={index} onlyshimmer />;
-            })}
-          </Slider>
+          <CustomBoxFullWidth
+              sx={{
+                "& .slick-slider": {
+                  paddingTop: {
+                    xs: "22px",
+                    md: "30px",
+                  },
+                  paddingBottom: {
+                    xs: "4px",
+                    md: "30px",
+                  },
+                },
+              }}
+          >
+            <Slider {...settings} ref={slider}>
+              {[...Array(10)]?.map((item, index) => {
+                return <FeaturedItemCard key={index} onlyshimmer />;
+              })}
+            </Slider>
+          </CustomBoxFullWidth>
         );
 
       case ModuleTypes.PHARMACY:
         return (
           <Slider {...settings} ref={slider}>
-            {[...Array(8)]?.map((item, index) => {
+            {[...Array(10)]?.map((_, index) => {
               return <PharmacyCategoryCard key={index} onlyshimmer />;
             })}
           </Slider>
@@ -162,7 +177,7 @@ const FeaturedCategories = ({ configData }) => {
       case ModuleTypes.ECOMMERCE:
         return (
           <Slider {...shopCategorySliderSettings} ref={slider}>
-            {[...Array(5)]?.map((item, index) => {
+            {[...Array(6)]?.map((_, index) => {
               return <ShopCategoryCard key={index} onlyshimmer />;
             })}
           </Slider>
@@ -170,7 +185,7 @@ const FeaturedCategories = ({ configData }) => {
       case ModuleTypes.FOOD:
         return (
           <Slider {...foodCategorySliderSettings} ref={slider}>
-            {[...Array(15)]?.map((item, index) => {
+            {[...Array(8)]?.map((item, index) => {
               return <FoodCategoryCard key={index} onlyshimmer />;
             })}
           </Slider>
@@ -480,9 +495,21 @@ const FeaturedCategories = ({ configData }) => {
 
   return (
     <CustomBoxFullWidth sx={{ mt: "20px" }}>
-      {isFetching ? (
+      {!isFetched ? (
         <HomeComponentsWrapper>
-          <SliderCustom nopadding="true" sx={{ paddingTop: "15px" }}>
+          <SliderCustom
+              sx={{
+                "& .slick-slider": {
+                  "& .slick-slide": {
+                    padding: { xs: "0px", md: "6px" },
+                    paddingBottom: {
+                      xs: "5px",
+                      sm: "10px",
+                      md: "20px !important",
+                    },
+                  },
+                },
+              }}>
             {moduleWiseCardShimmer()}
           </SliderCustom>
         </HomeComponentsWrapper>
@@ -506,6 +533,7 @@ const FeaturedCategories = ({ configData }) => {
                 }}
               >
                 {moduleWiseCard()}
+                {/*{moduleWiseCardShimmer()}*/}
               </SliderCustom>
             )}
           </HomeComponentsWrapper>

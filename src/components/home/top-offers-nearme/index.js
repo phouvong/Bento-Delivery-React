@@ -23,8 +23,12 @@ import Link from "next/link";
 
 const TopOffersNearMe = ({ title }) => {
   const { t } = useTranslation();
+  const type=""
+  const sortBy=""
+  const searchKey=""
 
-  const { data, refetch, isLoading, isFetching } = useGetTopOffers();
+
+  const { data, refetch, isLoading, isFetching } = useGetTopOffers(sortBy,searchKey,type);
 
   const [isHover, setIsHover] = useState(false);
   const lanDirection = getLanguage() ? getLanguage() : "ltr";

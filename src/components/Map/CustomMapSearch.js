@@ -32,12 +32,8 @@ const CustomMapSearch = ({
   borderRadius,
   toReceiver,
   isLanding = false,
-  placeId,
-  handleCloseLocation1,
   isRefetching,
-  newMap,
-
-  width,
+  searchHeight,
 }) => {
   const theme = useTheme();
   const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
@@ -56,16 +52,24 @@ const CustomMapSearch = ({
           loadingText={
             frommap === "true" ? t("Search suggestions are loading...") : ""
           }
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              padding:searchHeight? '0px': '9px', // Adjust these values as needed
+            },
+          }}
+         
           PaperComponent={(props) => (
             <Paper
               sx={{
                 borderRadius: "0 0 4px 4px",
+                
               }}
               {...props}
             />
           )}
           renderInput={(params) => (
             <SearchLocationTextField
+              searchHeight={searchHeight}
               noleftborder={noleftborder}
               frommap={frommap}
               fromparcel={fromparcel}

@@ -50,88 +50,76 @@ const TextWrapper = styled(Box)(({ theme }) => ({
   },
 }));
 
-const PharmacyCategoryCard = (props) => {
-  const { image, title, id, onlyshimmer, slug } = props;
-  const classes = textWithEllipsis();
+const PharmacyCategoryCard = ({ image, title, id, onlyshimmer }) => {
   const [hover, setHover] = useState(false);
 
   return (
-    <>
-      {onlyshimmer ? (
-        <Wrapper
-          onMouseEnter={() => setHover(true)}
-          onMouseLeave={() => setHover(false)}
-        >
-          <Skeleton
-            width="100%"
-            height="50%"
-            variant="rectangle"
-            sx={{ borderRadius: "60px 60px 0px 0px" }}
-          />
-          <TextWrapper>
-            <Skeleton width="70px" variant="text" />
-          </TextWrapper>
-        </Wrapper>
-      ) : (
-        <Link
-          href={{
-            pathname: "/home",
-            query: {
-              search: "category",
-              id: id,
-              module_id: `${getModuleId()}`,
-              name: btoa(title),
-              data_type: "category",
+    <Link
+      href={{
+        pathname: "/home",
+        query: {
+          search: "category",
+          id: id,
+          module_id: `${getModuleId()}`,
+          name: title && btoa(title),
+          data_type: "category",
+        },
+      }}
+    >
+      <Wrapper
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+      >
+        <ImageWrapper>
+          {onlyshimmer ? (
+            <Skeleton
+              width="100%"
+              height={122}
+              variant="rectangular"
+            />
+          ) : (
+              <CustomImageContainer
+                  src={image}
+                  alt={title}
+                  height={122}
+                  width="100%"
+                  borderRadius="60px 60px 0px 0px"
+                  objectFit="cover"
+                  loading="eager"
+                  bg="#ddd"
+              />
+          )}
+        </ImageWrapper>
+        <Tooltip
+          title={title}
+          placement="bottom"
+          arrow
+          componentsProps={{
+            tooltip: {
+              sx: {
+                bgcolor: (theme) => theme.palette.toolTipColor,
+                "& .MuiTooltip-arrow": {
+                  color: (theme) => theme.palette.toolTipColor,
+                },
+              },
             },
           }}
         >
-          <Wrapper
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
-          >
-            <ImageWrapper>
-              <CustomImageContainer
-                src={image}
-                alt={title}
-                height="100%"
-                width="100%"
-                borderRadius="60px 60px 0px 0px"
-                objectFit="cover"
-                loading="loading"
-              />
-            </ImageWrapper>
-            <Tooltip
-              title={title}
-              placement="bottom"
-              arrow
-              componentsProps={{
-                tooltip: {
-                  sx: {
-                    bgcolor: (theme) => theme.palette.toolTipColor,
-                    "& .MuiTooltip-arrow": {
-                      color: (theme) => theme.palette.toolTipColor,
-                    },
-                  },
-                },
-              }}
+          <TextWrapper>
+            <Typography
+              textAlign="center"
+              // className={classes.multiLineEllipsis}
+              maxHeight="20px"
+              color={hover && "primary.main"}
+              noWrap
+              component="h4"
             >
-              <TextWrapper>
-                <Typography
-                  textAlign="center"
-                  // className={classes.multiLineEllipsis}
-                  maxHeight="20px"
-                  color={hover && "primary.main"}
-                  noWrap
-                  component="h4"
-                >
-                  {title}
-                </Typography>
-              </TextWrapper>
-            </Tooltip>
-          </Wrapper>
-        </Link>
-      )}
-    </>
+              {onlyshimmer ? (<Skeleton width="70px" variant="text" />) : title}
+            </Typography>
+          </TextWrapper>
+        </Tooltip>
+      </Wrapper>
+    </Link>
   );
 };
 

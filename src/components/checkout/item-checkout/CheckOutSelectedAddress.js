@@ -53,15 +53,17 @@ const CheckOutSelectedAddress = ({
             }
             secondary={<>{address?.address}</>}
           />
-          <IconButton onClick={handleClick}>
-            <CreateIcon
-              sx={{
+          {address?.address_type !== "Selected Address" && (
+            <IconButton onClick={handleClick}>
+              <CreateIcon
+                sx={{
                 width: "16px",
                 height: "16px",
                 color: (theme) => theme.palette.neutral[400],
               }}
-            />
-          </IconButton>
+              />
+            </IconButton>
+          )}
         </CustomStackFullWidth>
       </CustomListItem>
       <AddNewAddress

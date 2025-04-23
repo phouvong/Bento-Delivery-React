@@ -17,19 +17,23 @@ import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import * as Yup from "yup";
 import { useResetPassword } from "../../../api-manage/hooks/react-query/forgot-password/useResetPassword";
+import { useDispatch } from "react-redux";
+import { setOpenForgotPasswordModal } from "redux/slices/utils";
 
-const NewPassword = ({ data, goBack }) => {
+const NewPassword = ({ data, goBack,phoneOrEmail }) => {
+  const dispatch=useDispatch()
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setConfirmShowPassword] = useState(false);
   const { t } = useTranslation();
   const router = useRouter();
-
   const newPassFormik = useFormik({
     initialValues: {
       reset_token: data.reset_token,
       phone: data.phone,
+      email:data?.email,
       password: "",
       confirm_password: "",
+      verification_method:phoneOrEmail
     },
     validationSchema: Yup.object({
       password: Yup.string()
@@ -50,7 +54,8 @@ const NewPassword = ({ data, goBack }) => {
       toast.success(res.message, {
         id: "success",
       });
-      router.push("/home", undefined, { shallow: true });
+     dispatch(setOpenForgotPasswordModal(false))
+      //router.push("/home", undefined, { shallow: true });
     }
   };
   const { mutate, isLoading } = useResetPassword(onSuccessHandler);
@@ -59,10 +64,8 @@ const NewPassword = ({ data, goBack }) => {
   };
   return (
     <Box>
-      <CustomStackFullWidth>
-        <Stack>
-          <Typography>{t("Enter your new password")}</Typography>
-        </Stack>
+      <CustomStackFullWidth sx={{maxWidth:"370px"}}>
+
         <Stack mt="2rem" padding="0 20px">
           <form noValidate onSubmit={newPassFormik.handleSubmit}>
             <FormControl sx={{ mt: 2 }} variant="outlined" fullWidth>

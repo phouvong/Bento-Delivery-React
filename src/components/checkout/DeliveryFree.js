@@ -43,7 +43,7 @@ const DeliveryFree = ({
 							fontWeight="600"
 						>
 							{handleDistance(
-								data?.rows[0]?.elements,
+								data,
 								senderLocation,
 								receiverLocation
 							)?.toFixed(

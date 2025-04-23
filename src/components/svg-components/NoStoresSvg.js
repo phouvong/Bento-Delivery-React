@@ -19,10 +19,10 @@ const NoStoresSvg = () => {
             rx="59.0548"
             ry="3.36255"
             fill={theme.palette.primary.main}
-            fill-opacity="0.3"
+            fillOpacity="0.3"
           />
         </g>
-        <g clip-path="url(#clip0_3356_19356)">
+        <g clipPath="url(#clip0_3356_19356)">
           <path
             d="M75.2314 128.281C74.3011 128.281 73.5469 129.035 73.5469 129.966V132.998C73.5469 133.928 74.3011 134.683 75.2314 134.683C76.1618 134.683 76.916 133.928 76.916 132.998V129.966C76.916 129.035 76.1618 128.281 75.2314 128.281Z"
             fill={theme.palette.primary.main}
@@ -37,8 +37,8 @@ const NoStoresSvg = () => {
           />
         </g>
         <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
+          fillRule="evenodd"
+          clipRule="evenodd"
           d="M172.003 146.009C175.714 146.009 179.162 144.885 182.029 142.964L193.754 154.156L198.006 149.224L186.693 138.423C188.782 135.482 190.012 131.886 190.012 128.006C190.012 118.061 181.951 110 172.006 110C162.061 110 154 118.061 154 128.006C154 137.951 162.061 146.012 172.006 146.012L172.003 146.009ZM187.361 128.003C187.361 136.421 180.536 143.246 172.118 143.246C163.7 143.246 156.875 136.421 156.875 128.003C156.875 119.585 163.7 112.76 172.118 112.76C180.536 112.76 187.361 119.585 187.361 128.003Z"
           fill={theme.palette.primary.main}
         />
@@ -58,9 +58,9 @@ const NoStoresSvg = () => {
             width="134.922"
             height="23.5393"
             filterUnits="userSpaceOnUse"
-            color-interpolation-filters="sRGB"
+            colorInterpolationFilters="sRGB"
           >
-            <feFlood flood-opacity="0" result="BackgroundImageFix" />
+            <feFlood floodOpacity="0" result="BackgroundImageFix" />
             <feBlend
               mode="normal"
               in="SourceGraphic"

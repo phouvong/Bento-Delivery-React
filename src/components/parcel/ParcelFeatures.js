@@ -152,7 +152,7 @@ const ParcelFeatures = () => {
 				<CustomStackFullWidth>
 					<SliderCustomStyle>
 						<Slider {...settings}>
-							{[...Array(4)].map((index) => {
+							{[...Array(4)].map((_, index) => {
 								return <WhyChooseSimmer key={index} />;
 							})}
 						</Slider>

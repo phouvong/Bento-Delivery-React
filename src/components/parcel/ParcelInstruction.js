@@ -20,7 +20,7 @@ const ParcelInstruction = ({ steps, theme, isLoading }) => {
 					connectorHeight="80px"
 					parcel="true"
 				>
-					{[...Array(3)].map((index) => {
+					{[...Array(3)].map((_, index) => {
 						return (
 							<Step key={index}>
 								<StepLabel>

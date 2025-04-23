@@ -1,5 +1,5 @@
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import { alpha, Grid, styled, Typography } from "@mui/material";
+import { alpha, Grid, Stack, styled, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useAddStoreToWishlist } from "api-manage/hooks/react-query/wish-list/useAddStoreToWishLists";
 import { useWishListStoreDelete } from "api-manage/hooks/react-query/wish-list/useWishListStoreDelete";
@@ -97,6 +97,7 @@ const StoreCard = (props) => {
       setIsWishlisted(false);
     }
   };
+
   const quickViewHandleClick = (e) => {
     // e.stopPropagation();
     // dispatch({ type: ACTION.setOpenModal, payload: true });
@@ -140,7 +141,9 @@ const StoreCard = (props) => {
   };
   const handleClick = () => {
     router.push({
-      pathname: `/store/[id]`,
+      pathname: getCurrentModuleType() === "rental"
+        ? `/rental/provider-details/${item?.id}`
+        : `/store/[id]`,
       query: {
         id: `${item?.slug ? item?.slug : item?.id}`,
         module_id: `${item?.module_id}`,
@@ -166,6 +169,19 @@ const StoreCard = (props) => {
           borderRadius="10px"
           objectFit="cover"
         />
+        {getCurrentModuleType() === "rental" && (
+           <Box sx={{ position: "absolute", bottom: 0, left: 10 }}>
+           <CustomImageContainer
+           src={item?.logo_full_url}
+            alt={t("Background")}
+           height="60px"
+           width="60px"
+           borderRadius="10px"
+           objectFit="cover"/>
+          </Box>
+        )}
+        
+        
         {isWishlisted && (
           <Box sx={{ position: "absolute", top: 10, right: 10 }}>
             <FavoriteWrapper>

@@ -22,10 +22,12 @@ const CustomImageContainer = ({
   aspectRatio,
   padding,
   loading,
+    bg,
+  ...rest
 }) => {
   const [imageFile, setState] = useState(null);
   useEffect(() => {
-    setState(src ? src : placeholder.src);
+    setState(src ? src : placeholder?.src);
   }, [src]);
 
   return (
@@ -45,6 +47,8 @@ const CustomImageContainer = ({
       cursor={cursor}
       aspect_ratio={aspectRatio}
       padding={padding}
+      bg={bg}
+      {...rest}
     >
       {!imageFile ? (
         <Box
@@ -59,7 +63,7 @@ const CustomImageContainer = ({
           src={imageFile}
           alt={alt || "image"}
           onError={() => {
-            setState(placeholder.src);
+            setState(placeholder?.src);
           }}
           loading={loading || "lazy"}
         />

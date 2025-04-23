@@ -33,7 +33,6 @@ const ParcelCard = styled(Card)(({ theme }) => ({
 const ParcelCategoryCard = (props) => {
 	const theme = useTheme();
 	const { data } = props;
-	const { configData } = useSelector((state) => state.configData);
 	const dispatch = useDispatch();
 	const router = useRouter();
 

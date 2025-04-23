@@ -39,6 +39,7 @@ const AccountInfo = ({
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <CustomTextFieldWithFormik
+          labelColor={alpha(theme.palette.neutral[1000],0.8)}
             required="true"
             type="text"
             label={t("Email")}
@@ -66,6 +67,7 @@ const AccountInfo = ({
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <CustomTextFieldWithFormik
+          labelColor={alpha(theme.palette.neutral[1000],0.8)}
             placeholder={t("Password")}
             required="true"
             type="password"
@@ -94,6 +96,7 @@ const AccountInfo = ({
         </Grid>
         <Grid item xs={12} sm={6} md={4}>
           <CustomTextFieldWithFormik
+          labelColor={alpha(theme.palette.neutral[1000],0.8)}
             placeholder={t("Confirm Password")}
             required="true"
             type="password"

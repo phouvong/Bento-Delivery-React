@@ -31,8 +31,6 @@ const getZoneWiseAddresses = (addresses, restaurantId) => {
 const DeliveryAddress = ({
   setAddress,
   address,
-  hideAddressSelectionField,
-  handleSize,
   renderOnNavbar,
   configData,
   storeZoneId,
@@ -79,7 +77,13 @@ const DeliveryAddress = ({
   }, [data]);
 
   const handleLatLng = (values) => {
-    setAddress({ ...values, lat: values.latitude, lng: values.longitude });
+    if(renderOnNavbar === "true"){
+      setAddress({ ...values, lat: values.latitude, lng: values.longitude });
+      window.location.reload();
+    }else{
+      setAddress({ ...values, lat: values.latitude, lng: values.longitude });
+    }
+   
   };
 
   const { mutate } = usePostAddress();
@@ -202,6 +206,7 @@ const DeliveryAddress = ({
           saveAddress={saveAddress}
           address={address}
           setAddress={setAddress}
+          orderType={orderType}
         />
       )}
 

@@ -40,7 +40,7 @@ const PrescriptionOrderCalculation = ({
     destination
   ) => {
     let convertedDistance = handleDistance(
-      distance?.rows?.[0]?.elements,
+      distanceData?.data,
       origin,
       destination
     );

@@ -3,7 +3,7 @@ import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlin
 import StarIcon from "@mui/icons-material/Star";
 import {
   alpha,
-  IconButton,
+  IconButton, Skeleton,
   Typography,
   useMediaQuery,
   useTheme,
@@ -28,7 +28,7 @@ const AdsCard = (props) => {
     item,
     itemLength,
     activeSlideData,
-
+    onlyShimmer,
     index,
     sliderRef,
     data,
@@ -182,83 +182,98 @@ const AdsCard = (props) => {
 
   return (
     <Box sx={{ maxWidth: "450px", cursor: "pointer" }}>
-      {item?.add_type === "store_promotion" ? (
-        <Stack
-          onClick={(e) => handleClick(e)}
-          sx={{
-            position: "relative",
-            margin: "0px 20px -110px",
-            //boxShadow: "0px 15px 30px rgba(150, 150, 154, 0.40)",
-            borderRadius: "10px",
-          }}
-        >
-          <Stack position="relative">
-            {(item?.is_rating_active === 1 || item.is_review_active === 1) && (
-              <Stack
-                maxWidth="90px"
-                width="100%"
-                position="absolute"
-                bottom="10px"
-                right="10px"
-                alignItems="center"
-                zIndex="1"
-                flexDirection="row"
-                backgroundColor={theme.palette.primary.main}
-                borderRadius="6px"
-                padding="5px"
-                gap="5px"
-              >
-                {item.is_review_active === 1 && (
-                  <>
-                    <StarIcon
-                      sx={{
-                        fontSize: "18px",
-                        color: (theme) => theme.palette.neutral[100],
-                      }}
-                    />
-                    <Typography
-                      color={theme.palette.neutral[100]}
-                      fontSize="14px"
-                      fontWeight="600"
-                    >
-                      {item?.average_rating.toFixed(1)}
-                    </Typography>
-                  </>
-                )}
-                {item.is_review_active === 1 && (
-                  <Typography
-                    color={theme.palette.neutral[100]}
-                    fontSize="14px"
-                  >
-                    ({item?.reviews_comments_count})
-                  </Typography>
-                )}
-              </Stack>
-            )}
-
-            <CustomImageContainer
-              boxShadow={
-                theme.palette.mode === "dark"
-                  ? "0px 15px 30px rgba(0, 0, 0, 0.8)"
-                  : "0px 15px 30px rgba(150, 150, 154, 0.40)"
-              }
-              src={item?.cover_image_full_url}
-              width="100%"
-              height="200px"
-              objectFit="cover"
-              borderRadius="10px"
-            />
+      {onlyShimmer ? (
+          <Stack
+              onClick={(e) => handleClick(e)}
+              sx={{
+                position: "relative",
+                margin: "0px 20px -110px",
+                borderRadius: "10px",
+              }}
+          >
+            <Skeleton variant="rounded" width="100%" height={200}  />
           </Stack>
-        </Stack>
       ) : (
-        <VideoPlayerWithCenteredControl
-          ended={ended}
-          setEnded={setEnded}
-          playing={playing}
-          setPlaying={setPlaying}
-          video={item?.video_attachment_full_url}
-          isMargin={true}
-        />
+          <>
+            {item?.add_type === "store_promotion" ? (
+                <Stack
+                    onClick={(e) => handleClick(e)}
+                    sx={{
+                      position: "relative",
+                      margin: "0px 20px -110px",
+                      borderRadius: "10px",
+                    }}
+                >
+                  <Stack position="relative">
+                    {(item?.is_rating_active === 1 || item.is_review_active === 1) && (
+                        <Stack
+                            maxWidth="90px"
+                            width="100%"
+                            position="absolute"
+                            bottom="10px"
+                            right="10px"
+                            alignItems="center"
+                            zIndex="1"
+                            flexDirection="row"
+                            backgroundColor={theme.palette.primary.main}
+                            borderRadius="6px"
+                            padding="5px"
+                            gap="5px"
+                        >
+                          {item.is_review_active === 1 && (
+                              <>
+                                <StarIcon
+                                    sx={{
+                                      fontSize: "18px",
+                                      color: (theme) => theme.palette.neutral[100],
+                                    }}
+                                />
+                                <Typography
+                                    color={theme.palette.neutral[100]}
+                                    fontSize="14px"
+                                    fontWeight="600"
+                                >
+                                  {item?.average_rating.toFixed(1)}
+                                </Typography>
+                              </>
+                          )}
+                          {item.is_review_active === 1 && (
+                              <Typography
+                                  color={theme.palette.neutral[100]}
+                                  fontSize="14px"
+                              >
+                                ({item?.reviews_comments_count})
+                              </Typography>
+                          )}
+                        </Stack>
+                    )}
+
+                    <CustomImageContainer
+                        boxShadow={
+                          theme.palette.mode === "dark"
+                              ? "0px 15px 30px rgba(0, 0, 0, 0.8)"
+                              : "0px 15px 30px rgba(150, 150, 154, 0.40)"
+                        }
+                        src={item?.cover_image_full_url}
+                        width="100%"
+                        height="200px"
+                        objectFit="cover"
+                        borderRadius="10px"
+                        bg="#ddd"
+                    />
+                  </Stack>
+                </Stack>
+            ) : (
+                <VideoPlayerWithCenteredControl
+                    ended={ended}
+                    setEnded={setEnded}
+                    playing={playing}
+                    setPlaying={setPlaying}
+                    video={item?.video_attachment_full_url}
+                    isMargin={true}
+                />
+            )}
+          </>
       )}
 
       <Stack
@@ -267,7 +282,6 @@ const AdsCard = (props) => {
         paddingBottom="20px"
         paddingInline="25px"
         sx={{
-          // transform: "perspective(500px) rotateX(5deg)",
           boxShadow: "0px -4.412px 29.412px rgba(150, 150, 154, 0.20)",
           width: "100%",
           height: "100%",
@@ -283,13 +297,13 @@ const AdsCard = (props) => {
                 borderRadius: "50%",
               }}
             >
-              <CustomImageContainer
-                src={item?.profile_image_full_url}
-                width="70px"
-                height="70px"
-                objectFit="cover"
-                borderRadius="50%"
-              />
+              {onlyShimmer ? (<Skeleton variant="circular" width={70} height={70} />) : (<CustomImageContainer
+                  src={item?.profile_image_full_url}
+                  width="70px"
+                  height="70px"
+                  objectFit="cover"
+                  borderRadius="50%"
+              />)}
             </Stack>
             <Stack width={0} flexGrow={1}>
               <Stack
@@ -315,7 +329,7 @@ const AdsCard = (props) => {
                   fontWeight="600"
                   component="h3"
                 >
-                  {item?.title}
+                  {onlyShimmer ? <Skeleton width="70%" variant="text" /> : item?.title}
                 </Typography>
                 {!isWishlisted ? (
                   <FavoriteBorderOutlinedIcon
@@ -337,21 +351,31 @@ const AdsCard = (props) => {
                   />
                 )}
               </Stack>
-              <Typography
-                sx={{
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "-webkit-box",
-                  WebkitLineClamp: "2",
-                  WebkitBoxOrient: "vertical",
-                  wordWrap: "break-word",
-                  color: theme.palette.neutral[1000],
-                }}
-                color={theme.palette.neutral[500]}
-                fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
-              >
-                {item?.description}
-              </Typography>
+              {onlyShimmer ? (
+                  <Typography
+                      fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
+                      width="50%"
+                  >
+                    <Stack>
+                      <Skeleton width="100%" variant="text" />
+                      <Skeleton width="100%" variant="text" />
+                    </Stack>
+                  </Typography>
+              ) : (
+                  <Typography
+                      sx={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "-webkit-box",
+                        WebkitLineClamp: "2",
+                        WebkitBoxOrient: "vertical",
+                      }}
+                      fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
+                      color={theme.palette.neutral[500]}
+                  >
+                    {item?.description}
+                  </Typography>
+              )}
             </Stack>
           </Stack>
         ) : (
@@ -368,26 +392,39 @@ const AdsCard = (props) => {
               fontSize={{ xs: "16px", sm: "18px", md: "20px" }}
               fontWeight="600"
             >
-              {item?.title}
+              {onlyShimmer ? <Skeleton width="70%" variant="text" /> : item?.title}
             </Typography>
             <Stack
               flexDirection="row"
               gap="20px"
               justifyContent="space-between"
             >
-              <Typography
-                sx={{
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "-webkit-box",
-                  WebkitLineClamp: "2",
-                  WebkitBoxOrient: "vertical",
-                }}
-                fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
-                color={theme.palette.neutral[500]}
-              >
-                {item?.description}
-              </Typography>
+              {onlyShimmer ? (
+                <Typography
+                    fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
+                    width="50%"
+                >
+                  <Stack>
+                    <Skeleton width="100%" variant="text" />
+                    <Skeleton width="100%" variant="text" />
+                  </Stack>
+                </Typography>
+              ) : (
+                  <Typography
+                      sx={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        display: "-webkit-box",
+                        WebkitLineClamp: "2",
+                        WebkitBoxOrient: "vertical",
+                      }}
+                      fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
+                      color={theme.palette.neutral[500]}
+                  >
+                    {item?.description}
+                  </Typography>
+              )}
+
               <IconButton
                 onClick={(e) => handleClick(e)}
                 padding="10px"

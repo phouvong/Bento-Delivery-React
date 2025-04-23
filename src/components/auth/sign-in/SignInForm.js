@@ -25,6 +25,8 @@ import { CustomTypography } from "components/landing-page/hero-section/HeroSecti
 import LoadingButton from "@mui/lab/LoadingButton";
 
 import PhoneOrEmailIcon from "components/auth/asset/PhoneOrEmailIcon";
+import { useDispatch } from "react-redux";
+import { setOpenForgotPasswordModal } from "redux/slices/utils";
 
 const SignInForm = ({
   loginFormik,
@@ -37,11 +39,13 @@ const SignInForm = ({
   handleSignUp,
   only,
   handleClick,
+  handleClose
 }) => {
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
   const theme = useTheme();
   const textColor = theme.palette.whiteContainer.main;
   const [isPhone, setIsPhone] = useState("");
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const value = loginFormik.values.email_or_phone;
@@ -146,7 +150,10 @@ const SignInForm = ({
               }
             />
             <CustomLink
-              href="/forgot-password"
+             onClick={()=>{
+              dispatch(setOpenForgotPasswordModal(true))
+              handleClose()
+             }}
               sx={{ fontWeight: "400", fontSize: "14px" }}
             >
               {t("Forgot password?")}

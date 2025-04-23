@@ -94,10 +94,7 @@ const ComponentOne = ({ landingPageData, configData, handleOrderNow }) => {
                     color: (theme) => alpha(theme.palette.neutral[500], 0.8),
                   }}
                 >
-                  <DollarSignHighlighter
-                    theme={theme}
-                    text={landingPageData?.company_description}
-                  />
+                  {landingPageData?.company_description}
                 </Typography>
                 {landingPageData?.company_button_name && (
                   <CustomStackFullWidth

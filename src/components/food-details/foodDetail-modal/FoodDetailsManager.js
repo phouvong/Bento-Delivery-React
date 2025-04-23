@@ -81,15 +81,7 @@ const FoodDetailsManager = (props) => {
               >
                 {product?.store_name}
               </Typography>
-            ) : (
-              <Typography
-                fontSize="14px"
-                fontWeight="400"
-                color={theme.palette.whiteContainer.main}
-              >
-                {product?.store_name}
-              </Typography>
-            )}
+            ) : null}
           </Stack>
           {!product?.available_date_ends && (
             <>
