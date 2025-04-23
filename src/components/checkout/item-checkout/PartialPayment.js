@@ -18,6 +18,7 @@ const PartialPayment = ({
   switchToWallet,
   remainingBalance,
   payableAmount,
+  margin,
 }) => {
   const theme = useTheme();
   return (
@@ -31,8 +32,8 @@ const PartialPayment = ({
         borderRadius: "10px",
         border: "1px solid",
         borderColor: (theme) => alpha(theme.palette.primary.main, 0.4),
-        marginTop: "20px",
-        marginBottom: "20px",
+        marginTop: margin ? margin : "20px",
+        marginBottom: margin ? margin : "20px",
       }}
     >
       <CustomStackFullWidth direction="row" spacing={1}>

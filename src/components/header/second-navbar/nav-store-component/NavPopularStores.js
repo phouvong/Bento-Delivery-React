@@ -2,21 +2,19 @@ import React, { useEffect } from "react";
 import {
   CustomStackFullWidth,
   CustomTypographyGray,
-} from "../../../../styled-components/CustomStyles.style";
-//import Subtitle1 from "../../../typographies/Subtitle1";
+} from "styled-components/CustomStyles.style";
 import { Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import useGetPopularStore from "../../../../api-manage/hooks/react-query/store/useGetPopularStore";
 import ViewMore from "../ViewMore";
 import NavStoreShimmer from "./NavStoreShimmer";
-
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
-import { getModuleId } from "../../../../helper-functions/getModuleId";
-import { getStoresOrRestaurants } from "../../../../helper-functions/getStoresOrRestaurants";
-import { setPopularStores } from "../../../../redux/slices/storedData";
-import { getCurrentModuleType } from "../../../../helper-functions/getCurrentModuleType";
+import { getModuleId } from "helper-functions/getModuleId";
+import { getStoresOrRestaurants } from "helper-functions/getStoresOrRestaurants";
+import { setPopularStores } from "redux/slices/storedData";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
 const NavPopularStore = () => {
   const { t } = useTranslation();
@@ -47,18 +45,25 @@ const NavPopularStore = () => {
   }, [data]);
 
   const handleClick = (item) => {
-    router.push({
-      pathname: "/store/[id]",
-      query: {
-        id: `${item?.slug ? item?.slug : item?.id}`,
-        module_id: `${getModuleId()}`,
-        module_type: getCurrentModuleType(),
-        store_zone_id: `${item?.zone_id}`,
-        distance: item?.distance,
-      },
-    });
+    if (getCurrentModuleType() === "rental") {
+      router.push({
+        pathname: `/rental/provider-details/${item?.id}`,
+      });
+    } else {
+      router.push({
+        pathname: "/store/[id]",
+        query: {
+          id: `${item?.slug ? item?.slug : item?.id}`,
+          module_id: `${getModuleId()}`,
+          module_type: getCurrentModuleType(),
+          store_zone_id: `${item?.zone_id}`,
+          distance: item?.distance,
+        },
+      });
+    }
   };
   const popular = t("Popular");
+
   return (
     <CustomStackFullWidth spacing={4}>
       <Typography variant="h7" fontWeight="500">
@@ -104,7 +109,7 @@ const NavPopularStore = () => {
           </Stack>
         )}
         <Stack width="70%" justifyContent="flex-start" alignItems="center">
-          <ViewMore redirect="/store/popular" />
+          <ViewMore redirect={getCurrentModuleType() === "rental" ? "/rental/provider/popular":  "/store/popular"} />
         </Stack>
       </Stack>
     </CustomStackFullWidth>

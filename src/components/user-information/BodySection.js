@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import {
-  CustomPaperBigCard,
-  CustomStackFullWidth,
+	CustomPaperBigCard,
+	CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
 import ProfileTab from "./ProfileTab";
 import Divider from "@mui/material/Divider";
@@ -16,91 +16,96 @@ import useGetAddressList from "../../api-manage/hooks/react-query/address/useGet
 const ProfileCard = styled(CustomPaperBigCard)(({ theme }) => ({}));
 
 const BodySection = ({
-  page,
-  configData,
-  orderId,
-  userToken,
-  deleteUserHandler,
-  isLoadingDelete,
-  accountDeleteStatus,
-  setAccountDeleteStatus,
+	page,
+	configData,
+	orderId,
+	userToken,
+	deleteUserHandler,
+	isLoadingDelete,
+	accountDeleteStatus,
+	setAccountDeleteStatus,
 }) => {
-  const [editProfile, setEditProfile] = useState(false);
-  const [addAddress, setAddAddress] = useState(false);
-  const [editAddress, setEditAddress] = useState(null);
-  const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-  const { data, isLoading, refetch } = useGetAddressList();
-  const handleActivePage = (item) => {
-    Router.push(
-      {
-        pathname: "/profile",
-        query: { page: item?.name },
-      },
-      undefined,
-      { shallow: true }
-    );
-  };
-  return (
-    <CustomStackFullWidth spacing={4}>
-      <CustomPaperBigCard
-        padding={page === "my-orders" || page === "inbox" ? "0px" : "10px"}
-        noboxshadow={
-          isSmall
-            ? page === "my-orders" || page === "inbox"
-              ? "true"
-              : ""
-            : "true"
-        }
-        backgroundcolor={
-          isSmall &&
-          (page === "my-orders" || page === "inbox") &&
-          theme.palette.background.default
-        }
-      >
-        {!isSmall && userToken && (
-          <ProfileTab
-            deleteUserHandler={deleteUserHandler}
-            isLoadingDelete={isLoadingDelete}
-            accountDeleteStatus={accountDeleteStatus}
-            setAccountDeleteStatus={setAccountDeleteStatus}
-            page={page}
-            menuData={menuData}
-            handlePage={handleActivePage}
-            setEditProfile={setEditProfile}
-          />
-        )}
-        {!isSmall && <Divider />}
+	const [editProfile, setEditProfile] = useState(false);
+	const [addAddress, setAddAddress] = useState(false);
+	const [editAddress, setEditAddress] = useState(null);
+	const theme = useTheme();
+	const isSmall = useMediaQuery(theme.breakpoints.down("md"));
+	const { data, isLoading, refetch } = useGetAddressList();
+	const handleActivePage = (item) => {
+		Router.push(
+			{
+				pathname: "/profile",
+				query: { page: item?.name },
+			},
+			undefined,
+			{ shallow: true }
+		);
+	};
+	return (
+		<CustomStackFullWidth spacing={4}>
+			<CustomPaperBigCard
+				padding={
+					page === "my-orders" || page === "inbox" ? "0px" : "10px"
+				}
+				noboxshadow={
+					isSmall
+						? page === "my-orders" || page === "inbox"
+							? "true"
+							: ""
+						: "true"
+				}
+				backgroundcolor={
+					isSmall &&
+					(page === "my-orders" || page === "inbox") &&
+					theme.palette.background.default
+				}
+			>
+				{!isSmall && userToken && (
+					<ProfileTab
+						deleteUserHandler={deleteUserHandler}
+						isLoadingDelete={isLoadingDelete}
+						accountDeleteStatus={accountDeleteStatus}
+						setAccountDeleteStatus={setAccountDeleteStatus}
+						page={page}
+						menuData={menuData}
+						handlePage={handleActivePage}
+						setEditProfile={setEditProfile}
+					/>
+				)}
+				{!isSmall && <Divider />}
 
-        <ProfileBody
-          page={page}
-          configData={configData}
-          orderId={orderId}
-          editProfile={editProfile}
-          setEditProfile={setEditProfile}
-          addAddress={addAddress}
-          setAddAddress={setAddAddress}
-          editAddress={editAddress}
-          refetch={refetch}
-          setEditAddress={setEditAddress}
-        />
-      </CustomPaperBigCard>
+				<ProfileBody
+					page={page}
+					configData={configData}
+					orderId={orderId}
+					editProfile={editProfile}
+					setEditProfile={setEditProfile}
+					addAddress={addAddress}
+					setAddAddress={setAddAddress}
+					editAddress={editAddress}
+					refetch={refetch}
+					setEditAddress={setEditAddress}
+				/>
+			</CustomPaperBigCard>
 
-      {page === "profile-settings" && !editProfile && !addAddress && (
-        <CustomPaperBigCard padding="10px" noboxshadow={isSmall ? "" : "true"}>
-          <Address
-            configData={configData}
-            addAddress={addAddress}
-            setAddAddress={setAddAddress}
-            setEditAddress={setEditAddress}
-            data={data}
-            refetch={refetch}
-            isLoading={isLoading}
-          />
-        </CustomPaperBigCard>
-      )}
-    </CustomStackFullWidth>
-  );
+			{page === "profile-settings" && !editProfile && !addAddress && (
+				<CustomPaperBigCard
+					padding="10px"
+					noboxshadow={isSmall ? "" : "true"}
+				>
+					<Address
+						configData={configData}
+						addAddress={addAddress}
+						setAddAddress={setAddAddress}
+						setEditAddress={setEditAddress}
+						data={data}
+						refetch={refetch}
+						isLoading={isLoading}
+					/>
+				</CustomPaperBigCard>
+			)}
+		</CustomStackFullWidth>
+	);
 };
 
 export default BodySection;

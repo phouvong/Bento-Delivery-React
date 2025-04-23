@@ -4,4 +4,5 @@ export const ModuleTypes = {
   ECOMMERCE: "ecommerce",
   FOOD: "food",
   PARCEL: "parcel",
+  RENTAL: "rental",
 };

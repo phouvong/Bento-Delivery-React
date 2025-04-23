@@ -6,7 +6,8 @@ import LoyaltyIcon from "@mui/icons-material/Loyalty";
 import SendToMobileIcon from "@mui/icons-material/SendToMobile";
 import ImportContactsIcon from "@mui/icons-material/ImportContacts";
 import SettingsIcon from "@mui/icons-material/Settings";
-import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
+import LocalShippingOutlinedIcon from "@mui/icons-material/LocalShippingOutlined";
+import LocalTaxiIcon from "@mui/icons-material/LocalTaxi";
 export const menuData = [
   {
     id: 1,
@@ -21,26 +22,32 @@ export const menuData = [
     path: "/my-orders",
   },
   {
+    id: 3,
+    name: "my-trips",
+    icon: <LocalTaxiIcon />,
+    path: "/my-trips",
+  },
+  {
     id: 4,
     name: "wallet",
     icon: <WalletIcon />,
     path: "/wallet",
   },
   {
-    id: 4,
+    id: 5,
     name: "coupons",
     icon: <ConfirmationNumberIcon />,
     path: "/coupons",
   },
 
   {
-    id: 5,
+    id: 6,
     name: "loyalty-points",
     icon: <LoyaltyIcon />,
     path: "/loyalty-points",
   },
   {
-    id: 6,
+    id: 7,
     name: "referral-code",
     icon: <SendToMobileIcon />,
     path: "/referral-code",
@@ -58,9 +65,9 @@ export const menuData = [
     path: "/settings",
   },
   {
-    id:10,
-    name:"track-order",
-    icon:<LocalShippingOutlinedIcon />,
-    path:"/track-order"
-  }
+    id: 10,
+    name: "track-order",
+    icon: <LocalShippingOutlinedIcon />,
+    path: "/track-order",
+  },
 ];

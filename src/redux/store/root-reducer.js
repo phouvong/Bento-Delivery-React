@@ -19,6 +19,8 @@ import themeSettingsReducer from "../slices/themeSettings";
 import utilsReducers from "../slices/utils";
 import wishListReducer from "../slices/wishList";
 import storeResDataReducer from "../slices/storeRegistrationData";
+import rentalCategoriesLists from "../slices/rentalCategories";
+import rentalSearch from "../slices/rentalSearch";
 
 //register all reducers here
 export const rootReducer = combineReducers({
@@ -42,4 +44,6 @@ export const rootReducer = combineReducers({
   cashbackList: cashbackReducer,
   brands: brandsReducer,
   storeRegData: storeResDataReducer,
+  rentalCategoriesLists: rentalCategoriesLists,
+  rentalSearch: rentalSearch,
 });

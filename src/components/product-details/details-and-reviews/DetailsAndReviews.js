@@ -1,5 +1,5 @@
 import { Button, Collapse, Paper, Typography } from "@mui/material";
-import { Stack, styled } from "@mui/system";
+import { alpha, Stack, styled } from "@mui/system";
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
@@ -7,7 +7,9 @@ import Details from "./Details";
 
 import useGetProductReviews from "../../../api-manage/hooks/react-query/product-details/useProductReviews";
 import ProductReviews from "../ProductReviews";
-
+import { getModule } from "helper-functions/getLanguage";
+import { t } from "i18next";
+import useGetVehicleReview from "../../../api-manage/hooks/react-query/useGetVehicleReview";
 const Wrapper = styled(Paper)(({ theme }) => ({
 	padding: "16px",
 	borderRadius: "5px",
@@ -18,22 +20,38 @@ const Wrapper = styled(Paper)(({ theme }) => ({
 
 const tabsData = ["Product Details", "Reviews"];
 
-const Tab = ({ item, selected, handleClick }) => {
+const Tab = ({ item, selected, showBackground, handleClick }) => {
 	return (
 		<Stack
 			alignItems="center"
 			justifyContent="center"
 			sx={{
 				backgroundColor: (theme) =>
-					selected === "true" && theme.palette.primary.main,
+					showBackground
+						? selected === "true" && theme.palette.primary.main
+						: selected === "true" && "transparent",
 				padding: "10px 15px",
-				borderRadius: "5px",
-				color: (theme) => selected === "true" && theme.palette.neutral[100],
+				fontWeight: showBackground
+					? selected === "true" && "400"
+					: selected === "true" && "600",
+				borderRadius: showBackground ? "5px" : "none",
+				borderBottom: showBackground
+					? "none"
+					: (theme) =>
+							`2px solid ${
+								selected === "true"
+									? theme.palette.primary.main
+									: alpha(theme.palette.neutral[400], 0.2)
+							}`,
+				color: (theme) =>
+					showBackground
+						? selected === "true" && theme.palette.neutral[100]
+						: selected === "true" && theme.palette.primary.main,
 				cursor: "pointer",
 			}}
 			onClick={handleClick}
 		>
-			{item}
+			{t(item)}
 		</Stack>
 	);
 };
@@ -47,6 +65,7 @@ const CustomHeader = ({ info }) => {
 			sx={{
 				padding: "11px 30px",
 				backgroundColor: (theme) => theme.palette.neutral[300],
+				borderRadius: "10px",
 			}}
 		>
 			<Typography fontWeight="bold" component="h2">
@@ -56,7 +75,15 @@ const CustomHeader = ({ info }) => {
 	);
 };
 const DetailsAndReviews = (props) => {
-	const { description, reviews, configData, productId, storename } = props;
+	const {
+		description,
+		reviews,
+		configData,
+		productId,
+		storename,
+		tabsData = ["Product Details", "Reviews"],
+		showBackground = true,
+	} = props;
 	const { t } = useTranslation();
 	const [tabs, setTabs] = useState(0);
 	const [expanded, setExpanded] = useState(false);
@@ -70,6 +97,14 @@ const DetailsAndReviews = (props) => {
 		offSet,
 		page_limits,
 	});
+
+	const { refetch: rentalReview, data: vehicleReview } = useGetVehicleReview({
+		productId,
+		offSet,
+		page_limits,
+	});
+
+
 	useEffect(() => {
 		if (
 			contentRef.current &&
@@ -86,7 +121,11 @@ const DetailsAndReviews = (props) => {
 	};
 
 	useEffect(() => {
-		refetch();
+		if (getModule()?.module_type === "rental") {
+			rentalReview();
+		} else {
+			refetch();
+		}
 	}, [productId, offSet]);
 
 	return (
@@ -100,7 +139,7 @@ const DetailsAndReviews = (props) => {
 					alignItems="center"
 					justifyContent="center"
 					direction="row"
-					spacing={0.5}
+					spacing={showBackground ? 0.5 : 0}
 				>
 					{tabsData.map((item, index) => {
 						return (
@@ -108,16 +147,21 @@ const DetailsAndReviews = (props) => {
 								item={item}
 								key={index}
 								handleClick={() => setTabs(index)}
+								showBackground={showBackground}
 								selected={tabs === index ? "true" : "false"}
 							/>
 						);
 					})}
 				</CustomStackFullWidth>
-				<CustomHeader info={tabs === 0 ? "Description" : " Reviews"} />
+				<CustomHeader info={tabs === 0 ? "Details Description " : "Reviews"} />
 				<CustomStackFullWidth p="0px 30px">
 					{tabs !== 0 && (
 						<ProductReviews
-							reviews={data?.reviews?.slice(0, 1)}
+							reviews={
+								vehicleReview
+									? vehicleReview?.reviews.slice(0, 1)
+									: data?.reviews?.slice(0, 1)
+							}
 							configData={configData}
 							total_size={data?.total_size}
 							offSet={offSet}
@@ -127,14 +171,18 @@ const DetailsAndReviews = (props) => {
 						/>
 					)}
 					{tabs === 0 && (
-						<Details description={description?.slice(0, 210)} />
+						<Details description={description?.slice(0, 208)} />
 					)}
 					<Collapse in={expanded}>
 						{tabs === 0 ? (
-							<Details description={description?.slice(210)} />
+							<Details description={description?.slice(208)} />
 						) : (
 							<ProductReviews
-								reviews={data?.reviews?.slice(1)}
+								reviews={
+									vehicleReview
+										? vehicleReview?.reviews?.slice(1)
+										: data?.reviews?.slice(1)
+								}
 								configData={configData}
 								total_size={data?.total_size}
 								offSet={offSet}
@@ -166,22 +214,26 @@ const DetailsAndReviews = (props) => {
 						</>
 					) : (
 						<>
-							{!expanded && data?.reviews?.length > 1 && (
-								<Button
-									sx={{ textDecoration: "underline" }}
-									onClick={handleSeeMore}
-								>
-									{t("View More")}
-								</Button>
-							)}
-							{expanded && data?.reviews?.length > 1 && (
-								<Button
-									sx={{ textDecoration: "underline" }}
-									onClick={handleSeeLess}
-								>
-									{t("View Less")}
-								</Button>
-							)}
+							{!expanded &&
+								(data?.reviews?.length > 1 ||
+									vehicleReview?.reviews?.length > 1) && (
+									<Button
+										sx={{ textDecoration: "underline" }}
+										onClick={handleSeeMore}
+									>
+										{t("View More")}
+									</Button>
+								)}
+							{expanded &&
+								(data?.reviews?.length > 1 ||
+									vehicleReview?.reviews?.length > 1) && (
+									<Button
+										sx={{ textDecoration: "underline" }}
+										onClick={handleSeeLess}
+									>
+										{t("View Less")}
+									</Button>
+								)}
 						</>
 					)}
 				</CustomStackFullWidth>

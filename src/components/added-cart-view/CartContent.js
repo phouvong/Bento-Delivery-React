@@ -100,15 +100,6 @@ const CartContent = (props) => {
       cartItem?.price + getTotalVariationsPrice(cartItem?.food_variations);
     //here quantity is incremented with number 1
     const productPrice = price * updateQuantity;
-
-    const discountedTotalPrice = getConvertDiscount(
-      cartItem?.discount_type === "amount"
-        ? cartItem?.discount * updateQuantity
-        : cartItem?.discount,
-      cartItem?.discount_type,
-      productPrice,
-      cartItem?.store_discount
-    );
     const mainPrice =
       getCurrentModuleType() === "food"
         ? productPrice
@@ -163,14 +154,6 @@ const CartContent = (props) => {
       cartItem?.price + getTotalVariationsPrice(cartItem?.food_variations);
     //here quantity is decremented with number 1
     const productPrice = price * updateQuantity;
-    const discountedTotalPrice = getConvertDiscount(
-      cartItem?.discount_type === "amount"
-        ? cartItem?.discount * updateQuantity
-        : cartItem?.discount,
-      cartItem?.discount_type,
-      productPrice,
-      cartItem?.store_discount
-    );
     const mainPrice =
       getCurrentModuleType() === "food"
         ? productPrice

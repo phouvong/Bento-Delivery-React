@@ -3,21 +3,20 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { IconButton, Slide } from "@mui/material";
 import { useDispatch } from "react-redux";
 import { useRouter } from "next/router";
-// import { removeToken } from "../../redux/slices/configData";
+
 import { useTranslation } from "react-i18next";
 import MobileTopMenu from "./MobileTopMenu";
 import { CustomDrawer } from "../../NavBar.style";
-import { setLogoutUser } from "../../../../redux/slices/profileInfo";
+import { setLogoutUser } from "redux/slices/profileInfo";
 import toast from "react-hot-toast";
-import { logoutSuccessFull } from "../../../../utils/toasterMessages";
-import { clearWishList } from "../../../../redux/slices/wishList";
-import { setClearCart } from "../../../../redux/slices/cart";
+import { logoutSuccessFull } from "utils/toasterMessages";
+import { clearWishList } from "redux/slices/wishList";
+import { setClearCart } from "redux/slices/cart";
 
 const DrawerMenu = ({ setToggled, openDrawer, setOpenDrawer }) => {
   const { t } = useTranslation();
   const router = useRouter();
   const dispatch = useDispatch();
-  //const [openDrawer, setOpenDrawer] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
   const toggleDrawer = (openDrawer) => (event) => {
@@ -73,7 +72,6 @@ const DrawerMenu = ({ setToggled, openDrawer, setOpenDrawer }) => {
           onClose={toggleDrawer(false)}
           router={router}
           TransitionComponent={Slide}
-          // Use TransitionProps to customize the transition properties
           TransitionProps={{
             direction: "right", // Customize the direction ('left', 'right', 'up', or 'down')
             timeout: 300, // Transition duration in milliseconds

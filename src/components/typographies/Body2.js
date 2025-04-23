@@ -10,6 +10,13 @@ const Body2 = (props) => {
 			color="text.secondary"
 			fontWeight={fontWeight}
 			{...rest}
+			sx={{
+				display: "-webkit-box",
+				WebkitLineClamp: 2, // Limits to 2 lines
+				WebkitBoxOrient: "vertical",
+				overflow: "hidden",
+				textOverflow: "ellipsis",
+			}}
 		>
 			{t(text)}
 		</Typography>

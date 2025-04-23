@@ -1,12 +1,11 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { alpha, Button, Skeleton } from "@mui/material";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Slider from "react-slick";
 import useGetDiscountedItems from "../../../api-manage/hooks/react-query/product-details/useGetDiscountedItems";
-import { getLanguage } from "../../../helper-functions/getLanguage";
-import { getModuleId } from "../../../helper-functions/getModuleId";
+import { getLanguage } from "helper-functions/getLanguage";
+import { getModuleId } from "helper-functions/getModuleId";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
@@ -24,18 +23,20 @@ const SpecialFoodOffers = ({ title }) => {
     offset: 1,
     limit: 15,
   };
+
   const { data, refetch, isLoading, isFetching } =
     useGetDiscountedItems(params);
   const [isHover, setIsHover] = useState(false);
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
+
   useEffect(() => {
     refetch();
   }, []);
+
   const settings = {
     dots: false,
-    infinite: data?.products?.length > 5 ? true : false,
+    infinite: data?.products?.length > 5,
     slidesToShow: isLoading ? 1 : 5,
-    // slidesToScroll: 1,
     cssEase: "ease-in-out",
     autoplay: true,
     speed: 800,
@@ -49,49 +50,49 @@ const SpecialFoodOffers = ({ title }) => {
         settings: {
           slidesToShow: 4,
           slidesToScroll: 1,
-          infinite: data?.products?.length > 4 ? true : false,
+          infinite: data?.products?.length > 4,
         },
       },
       {
         breakpoint: 992,
         settings: {
           slidesToShow: 3.5,
-          infinite: data?.products?.length > 3 ? true : false,
+          infinite: data?.products?.length > 3,
         },
       },
       {
         breakpoint: 821,
         settings: {
           slidesToShow: 3.2,
-          infinite: data?.products?.length > 3 ? true : false,
+          infinite: data?.products?.length > 3,
         },
       },
       {
         breakpoint: 768,
         settings: {
           slidesToShow: 3,
-          infinite: data?.products?.length > 3 ? true : false,
+          infinite: data?.products?.length > 3,
         },
       },
       {
         breakpoint: 576,
         settings: {
           slidesToShow: 2,
-          infinite: data?.products?.length > 2 ? true : false,
+          infinite: data?.products?.length > 2,
         },
       },
       {
         breakpoint: 480,
         settings: {
           slidesToShow: 1.8,
-          infinite: data?.products?.length > 1 ? true : false,
+          infinite: data?.products?.length > 1,
         },
       },
       {
-        breakpoint: 360, // Add a new breakpoint for smaller devices
+        breakpoint: 360,
         settings: {
           slidesToShow: 1.5,
-          infinite: data?.products?.length > 1 ? true : false,
+          infinite: data?.products?.length > 1,
         },
       },
     ],

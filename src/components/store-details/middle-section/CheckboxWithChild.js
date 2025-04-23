@@ -1,10 +1,9 @@
 import React, { useRef, useState } from "react";
-import { Checkbox, FormControlLabel } from "@mui/material";
 import { Stack } from "@mui/system";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
-} from "../../../styled-components/CustomStyles.style";
+} from "styled-components/CustomStyles.style";
 import CustomCheckbox from "../../CustomCheckbox";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";

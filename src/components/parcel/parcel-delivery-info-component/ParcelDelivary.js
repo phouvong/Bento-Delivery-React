@@ -97,10 +97,6 @@ const PercelDelivery = ({ configData }) => {
       profileInfo?.phone ? profileInfo?.phone : parcelInfo?.senderPhone
     );
   }, [profileInfo?.phone]);
-  // useEffect(() => {
-  //   setReceiverLocation(parcelInfo ? parcelInfo?.receiverLocations : {});
-  //   setSenderLocation(parcelInfo ? parcelInfo?.senderLocations : {});
-  // }, [parcelInfo?.senderLocations, parcelInfo?.receiverLocations]);
 
   const senderNameHandler = (value) => {
     addAddressFormik.setFieldValue("senderName", value);

@@ -1,10 +1,10 @@
 import MainApi from "../../../MainApi";
-import { typewise_store_api } from "../../../ApiRoutes";
+import { popular_provider, typewise_store_api } from "../../../ApiRoutes";
 import { useQuery } from "react-query";
-
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 const getData = async (storeType, type) => {
   const { data } = await MainApi.get(
-    `${typewise_store_api}/${storeType}?type=${type}`
+    `${getCurrentModuleType() === "rental" ? "api/v1/rental/provider" : typewise_store_api}/${storeType}?type=${type}`
   );
   return data;
 };

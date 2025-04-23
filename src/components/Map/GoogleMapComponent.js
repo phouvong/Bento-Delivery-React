@@ -5,7 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { GoogleMap, Polygon, useJsApiLoader } from "@react-google-maps/api";
+import { GoogleMap, useJsApiLoader } from "@react-google-maps/api";
 import {
   alpha,
   CircularProgress,
@@ -17,17 +17,16 @@ import { useTheme } from "@mui/material/styles";
 import pickMarker from "./assets/pick_marker.png";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import { darkStyles, grayMapStyle } from "../mapColor.js";
 
 const GoogleMapComponent = ({
   setDisablePickButton,
   setLocationEnabled,
   setLocation,
-
   locationLoading,
   location,
   setPlaceDetailsEnabled,
   placeDetailsEnabled,
-
   setPlaceDescription,
   height,
   isModalExpand,
@@ -64,6 +63,7 @@ const GoogleMapComponent = ({
       streetViewControl: false,
       mapTypeControl: false,
       fullscreenControl: false,
+      styles:theme.palette.mode === "dark" ? darkStyles : grayMapStyle,
     }),
     []
   );

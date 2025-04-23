@@ -26,7 +26,7 @@ const CouponButtonComponent = ({ couponTitle, value, copy, setCopy }) => {
 
   return (
     <CouponButtonStyle onClick={() => handleCopy(value)}>
-      {copy === value ? t("Copied!") : couponTitle}
+      {copy === value ? t("Copied!") : value}
     </CouponButtonStyle>
   );
 };

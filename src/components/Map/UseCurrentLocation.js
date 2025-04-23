@@ -14,6 +14,7 @@ const UseCurrentLocation = ({
   setRerenderMap,
   isGeolocationEnabled,
   coords,
+  fromMapModal
 }) => {
   const [openLocation, setOpenLocation] = useState(false);
   const handleCloseLocation = () => {
@@ -43,10 +44,12 @@ const UseCurrentLocation = ({
               lng: coords?.longitude,
             });
             setLoadingCurrentLocation(false);
-            if (zoneId) {
-              localStorage.setItem("zoneid", zoneId);
-              // router.push('/home')
-              // handleClose()
+            if(!fromMapModal){
+              if (zoneId) {
+                localStorage.setItem("zoneid", zoneId);
+                // router.push('/home')
+                // handleClose()
+              }
             }
             await refetchCurrentLocation();
             setRerenderMap((prevState) => !prevState);

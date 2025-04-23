@@ -1,19 +1,18 @@
 import React, { useEffect } from "react";
 import { Stack } from "@mui/system";
-import { alpha, Grid, Typography, useTheme } from "@mui/material";
-import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
+import { alpha, Grid, useTheme } from "@mui/material";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import NavPopularStore from "./nav-store-component/NavPopularStores";
 import NavNewStore from "./nav-store-component/NavNewStore";
 import NavFoodCampaigns from "./nav-store-component/NavFoodCampaigns";
-import useGetItemCampaigns from "../../../api-manage/hooks/react-query/useGetItemCampaigns";
 import useGetBasicCampaigns from "../../../api-manage/hooks/react-query/useGetBasicCampaigns";
 import { useDispatch, useSelector } from "react-redux";
-import { setBasicCampaigns } from "../../../redux/slices/storedData";
+import { setBasicCampaigns } from "redux/slices/storedData";
 
 const NavStorePopover = () => {
   const theme = useTheme();
   const bgColor = alpha(theme.palette.primary.main, 0.2);
-  const { data, refetch, isLoading, isFetching } = useGetBasicCampaigns();
+  const { data, refetch, isLoading } = useGetBasicCampaigns();
   const { basicCampaigns } = useSelector((state) => state.storedData);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -26,6 +25,7 @@ const NavStorePopover = () => {
       dispatch(setBasicCampaigns(data));
     }
   }, [data]);
+
   return (
     <Stack
       width={basicCampaigns?.length > 0 ? "843px" : "500px"}

@@ -2,15 +2,17 @@ import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponse
 import { latest_store_api } from "../../../ApiRoutes";
 import { useInfiniteQuery, useQuery } from "react-query";
 import MainApi from "../../../MainApi";
+import {getCurrentModuleType} from "helper-functions/getCurrentModuleType";
 
 const getLatestStore = async () => {
   const { data } = await MainApi.get(latest_store_api);
   return data;
 };
+
 const getLatestStoreWithParams = async (pageParams) => {
   const { type, offset, limit, pageParam } = pageParams;
   const { data } = await MainApi.get(
-    `${latest_store_api}?limit=${limit}&offset=${pageParam}&type=${type}`
+    `${getCurrentModuleType() === "rental"?latest_provider:latest_store_api}?limit=${limit}&offset=${pageParam}&type=${type}`
   );
   return data;
 };

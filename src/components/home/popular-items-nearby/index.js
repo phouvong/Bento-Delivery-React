@@ -72,7 +72,6 @@ const PopularItemsNearby = ({ title, subTitle }) => {
       return true;
     }
   };
-
   const settings = {
     dots: false,
     infinite: false,

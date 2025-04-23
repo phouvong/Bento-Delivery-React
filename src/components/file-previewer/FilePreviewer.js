@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
   CustomBoxForFilePreviewer,
+  CustomBoxImageText,
   FilePreviewerWrapper,
   IconButtonImagePreviewer,
 } from "./FilePreviewer.style";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Typography from "@mui/material/Typography";
-import { CustomBoxImageText } from "../form-fields/FileInputField";
+// import { CustomBoxImageText } from "../form-fields/FileInputField";
 import { Grid, Stack, useMediaQuery, useTheme } from "@mui/material";
 import FileInputField from "../form-fields/FileInputField";
 import pdfIcon from "./assets/pdf.png";
@@ -64,7 +65,13 @@ const FilePreviewer = (props) => {
                 <CustomBoxForFilePreviewer width={width}>
                   {previewBasedOnType(image, index)}
                   <IconButtonImagePreviewer onClick={() => onDelete(index)}>
-                    <DeleteIcon sx={{ width: "15px", height: "15px",color: theme.palette.error.light }} />
+                    <DeleteIcon
+                      sx={{
+                        width: "15px",
+                        height: "15px",
+                        color: theme.palette.error.light,
+                      }}
+                    />
                   </IconButtonImagePreviewer>
                 </CustomBoxForFilePreviewer>
               </Grid>
@@ -99,7 +106,13 @@ const FilePreviewer = (props) => {
         <CustomBoxForFilePreviewer>
           {previewBasedOnType(previewImage)}
           <IconButtonImagePreviewer onClick={() => deleteImage()}>
-            <DeleteIcon sx={{ width: "15px", height: "15px", color: theme.palette.error.light }} />
+            <DeleteIcon
+              sx={{
+                width: "15px",
+                height: "15px",
+                color: theme.palette.error.light,
+              }}
+            />
           </IconButtonImagePreviewer>
         </CustomBoxForFilePreviewer>
       );
@@ -126,7 +139,7 @@ const FilePreviewer = (props) => {
         <FilePreviewerWrapper
           // onClick={() => anchor.current.click()}
           objectFit
-        // width={width}
+          // width={width}
         >
           <CustomImageContainer src={pdfIcon} alt="pdf" height="7.75rem" />
         </FilePreviewerWrapper>
@@ -136,7 +149,7 @@ const FilePreviewer = (props) => {
         <FilePreviewerWrapper
           // onClick={() => anchor.current.click()}
           objectFit
-        // width={width}
+          // width={width}
         >
           <CustomImageContainer src={docIcon} alt="doc" height="7.75rem" />
         </FilePreviewerWrapper>
@@ -146,7 +159,7 @@ const FilePreviewer = (props) => {
         <FilePreviewerWrapper
           // onClick={() => anchor.current.click()}
           objectFit
-        // width={width}
+          // width={width}
         >
           <CustomImageContainer src={txtIcon} alt="text" height="7.75rem" />
         </FilePreviewerWrapper>
@@ -156,7 +169,7 @@ const FilePreviewer = (props) => {
         <FilePreviewerWrapper
           // onClick={() => anchor.current.click()}
           objectFit
-        // width={width}
+          // width={width}
         >
           <CustomImageContainer src={folderIcon} alt="text" />
         </FilePreviewerWrapper>

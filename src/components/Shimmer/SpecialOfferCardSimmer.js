@@ -1,6 +1,6 @@
 import { Card, Skeleton, Stack } from "@mui/material";
 import React from "react";
-import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 
 const SpecialOfferCardSimmer = ({ width }) => {
   return (

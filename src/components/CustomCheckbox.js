@@ -1,36 +1,43 @@
 import { useTheme } from "@emotion/react";
 import { FormControlLabel, Typography } from "@mui/material";
-import React, { useEffect, useRef } from "react";
-import { getModule } from "../helper-functions/getLanguage";
+import React, { useEffect, useRef, useState } from "react";
 import { StyleCheckBox } from "./group-buttons/OutlinedGroupButtons";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { t } from "i18next";
 
-const CustomCheckbox = (props) => {
-  const { item, checkHandler, isChecked, selectedId } = props;
-  const [checked, setChecked] = React.useState(false);
+const CustomCheckbox = ({ item, checkHandler, isChecked, seats }) => {
   const theme = useTheme();
+  const [checked, setChecked] = useState(false);
   const checkboxRef = useRef(null);
+
   useEffect(() => {
     setChecked(isChecked);
+    // checkHandler?.({
+    //   checked: isChecked,
+    //   id: item?.id,
+    // });
   }, [isChecked]);
-  useEffect(() => {
-    checkboxRef.current.focus();
-  }, [checked]);
+
+  // useEffect(() => {
+  //   checkboxRef.current.focus();
+  // }, [checked]);
+
   const handleChange = (event) => {
     setChecked(event.target.checked);
     checkHandler?.({
       checked: event.target.checked,
       id: item?.id,
-      value: event.target.value,
+      value: item?.value,
     });
   };
 
   return (
     <FormControlLabel
-      ref={checkboxRef}
+      // ref={checkboxRef}
       control={
         <StyleCheckBox
-          ref={checkboxRef}
-          module={getModule()?.module_type}
+          // ref={checkboxRef}
+          module={getCurrentModuleType()}
           value={item?.value}
           checked={checked}
           onChange={handleChange}
@@ -38,8 +45,8 @@ const CustomCheckbox = (props) => {
         />
       }
       label={
-        <Typography color={theme.palette.text.primary} fontSize="13px">
-          {item?.name}
+        <Typography color={theme.palette.text.primary} fontSize="13px" noWrap>
+          {seats ? `${t(item?.name)} ${t("Seats")}` : t(item?.name)}
         </Typography>
       }
     />

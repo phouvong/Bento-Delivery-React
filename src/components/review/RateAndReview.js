@@ -2,12 +2,9 @@ import React, { useEffect, useState } from "react";
 import {
   CustomPaperBigCard,
   CustomStackFullWidth,
-} from "../../styled-components/CustomStyles.style";
-
+} from "styled-components/CustomStyles.style";
 import { useRouter } from "next/router";
-
 import { useSelector } from "react-redux";
-//import DeliverymanForm from "./DeliverymanForm";
 import useGetOrderDetails from "../../api-manage/hooks/react-query/order/useGetOrderDetails";
 import GroupButtonsRateAndReview from "./GroupButtonsRateAndReview";
 import ItemForm from "./ItemsFrom";
@@ -19,6 +16,7 @@ import { useTranslation } from "react-i18next";
 import CustomEmptyResult from "../custom-empty-result";
 import nodata from "../../../public/static/nodata.png";
 import { Stack } from "@mui/system";
+
 
 const RateAndReview = () => {
   const { deliveryManInfo } = useSelector((state) => state.searchFilterStore);
@@ -35,7 +33,6 @@ const RateAndReview = () => {
   useEffect(() => {
     id && refetch() && refetchTrackOrder();
   }, [id]);
-
   return (
     <CustomStackFullWidth
       alignItems="center"
@@ -43,60 +40,66 @@ const RateAndReview = () => {
       spacing={2}
       mt="1rem"
     >
-      {isRefetching ? (
-        <Skeleton variant="ractangle" width="100px" height="100%" />
-      ) : (
-        deliveryManInfo &&
-        data?.module_type !== "parcel" && (
-          <GroupButtonsRateAndReview
-            setType={setType}
-            type={type}
-            moduleType={data?.module_type}
-          />
-        )
-      )}
-      <CustomStackFullWidth
-        alignItems="center"
-        justifyContent="center"
-        spacing={3}
-      >
-        {type === "items" && data?.module_type !== "parcel" ? (
-          data ? (
-            data?.map((item, index) => {
-              return (
-                <CustomPaperBigCard key={index}>
-                  <ItemForm data={item} />
-                </CustomPaperBigCard>
-              );
-            })
-          ) : (
-            <Shimmer />
-          )
+      <>
+        {isRefetching ? (
+          <Skeleton variant="ractangle" width="100px" height="100%" />
         ) : (
-          <CustomPaperBigCard>
-            {trackOrderData?.delivery_man ? (
-              <DeliverymanForm
-                data={trackOrderData?.delivery_man}
-                orderId={id}
-              />
-            ) : (
-              <CustomStackFullWidth justifyContent="center" alignItems="center">
-                <Stack
-                  width="100%"
-                  alignItems="center"
-                  justifyContent="center"
-                  height="100%"
-                >
-                  <CustomEmptyResult
-                    label="No delivery man assigned for the delivery."
-                    image={nodata}
-                  />
-                </Stack>
-              </CustomStackFullWidth>
-            )}
-          </CustomPaperBigCard>
+          deliveryManInfo &&
+          data?.module_type !== "parcel" && (
+            <GroupButtonsRateAndReview
+              setType={setType}
+              type={type}
+              moduleType={data?.module_type}
+            />
+          )
         )}
-      </CustomStackFullWidth>
+
+        <CustomStackFullWidth
+          alignItems="center"
+          justifyContent="center"
+          spacing={3}
+        >
+          {type === "items" && data?.module_type !== "parcel" ? (
+            data ? (
+              data?.map((item, index) => {
+                return (
+                  <CustomPaperBigCard key={index}>
+                    <ItemForm data={item} />
+                  </CustomPaperBigCard>
+                );
+              })
+            ) : (
+              <Shimmer />
+            )
+          ) : (
+            <CustomPaperBigCard>
+              {trackOrderData?.delivery_man ? (
+                <DeliverymanForm
+                  data={trackOrderData?.delivery_man}
+                  orderId={id}
+                />
+              ) : (
+                <CustomStackFullWidth
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <Stack
+                    width="100%"
+                    alignItems="center"
+                    justifyContent="center"
+                    height="100%"
+                  >
+                    <CustomEmptyResult
+                      label="No delivery man assigned for the delivery."
+                      image={nodata}
+                    />
+                  </Stack>
+                </CustomStackFullWidth>
+              )}
+            </CustomPaperBigCard>
+          )}
+        </CustomStackFullWidth>
+      </>
     </CustomStackFullWidth>
   );
 };

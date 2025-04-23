@@ -1,12 +1,11 @@
 import { useInfiniteQuery, useQuery } from "react-query";
-
-import { popular_store_api } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
 import {
   onErrorResponse,
   onSingleErrorResponse,
 } from "../../../api-error-response/ErrorResponses";
-
+import {getCurrentModuleType} from "helper-functions/getCurrentModuleType";
+import {popular_provider, popular_store_api} from "../../../ApiRoutes";
 const getPopularStore = async (type) => {
   const { data } = await MainApi.get(`${popular_store_api}?type=${type}`);
   return data;
@@ -14,7 +13,7 @@ const getPopularStore = async (type) => {
 const getPopularStoreInfiniteScroll = async (pageParams) => {
   const { type, limit, offset, pageParam } = pageParams;
   const { data } = await MainApi.get(
-    `${popular_store_api}?type=${type}&offset=${pageParam}&limit=${limit}`
+    `${getCurrentModuleType() === "rental"?popular_provider:popular_store_api}?type=${type}&offset=${pageParam}&limit=${limit}`
   );
   return data;
 };

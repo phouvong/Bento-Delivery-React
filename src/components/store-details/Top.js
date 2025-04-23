@@ -429,9 +429,7 @@ const Top = (props) => {
                         },
                       }}
                     >
-                      {storeDetails?.positive_rating.toFixed(
-                        configData?.digit_after_decimal_point
-                      )}
+                     {storeDetails?.positive_rating.toFixed(0)}%
                     </Typography>
                     <Stack direction="row" alignItems="center" spacing={0.3}>
                       <Typography

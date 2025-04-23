@@ -53,7 +53,7 @@ const SuccessStoreRegistration = ({ flag }) => {
             </Typography>
             <Typography fontSize="13px" textAlign="center">
               {t(
-                "Admin will confirm your registration request  within 48 hour"
+                "Admin will confirm your registration after review"
               )}
             </Typography>
           </Stack>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import { useFormik } from "formik";
 import { Grid } from "@mui/material";
@@ -16,6 +16,7 @@ const GuestUserInforForm = ({
   editAddress,
   setEditAddress,
   handleClose,
+  rental,
 }) => {
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
   const dispatch = useDispatch();
@@ -42,13 +43,56 @@ const GuestUserInforForm = ({
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
   const nameHandler = (value) => {
     addAddressFormik.setFieldValue("contact_person_name", value);
+    if (rental) {
+      dispatch(
+        setGuestUserInfo({
+          ...addAddressFormik.values,
+          contact_person_name: value,
+        })
+      );
+    }
   };
   const numberHandler = (value) => {
     addAddressFormik.setFieldValue("contact_person_number", value);
+    if (rental) {
+      dispatch(
+        setGuestUserInfo({
+          ...addAddressFormik.values,
+          contact_person_number: value,
+        })
+      );
+    }
   };
   const emailHandler = (value) => {
+
     addAddressFormik.setFieldValue("contact_person_email", value);
+    if (rental) {
+      dispatch(
+        setGuestUserInfo({
+          ...addAddressFormik.values,
+          contact_person_email: value,
+        })
+      );
+    }
   };
+
+  useEffect(() => {
+    if (rental) {
+      dispatch(
+        setGuestUserInfo({
+          ...addAddressFormik.values,
+          contact_person_number:
+            addAddressFormik?.values?.contact_person_number,
+        })
+      );
+      dispatch(
+        setGuestUserInfo({
+          ...addAddressFormik.values,
+          contact_person_name: addAddressFormik?.values?.contact_person_name,
+        })
+      );
+    }
+  }, [addAddressFormik?.values]);
   const handleReset = () => {
     addAddressFormik.setFieldValue("contact_person_name", "");
     addAddressFormik.setFieldValue("contact_person_number", "");
@@ -56,12 +100,16 @@ const GuestUserInforForm = ({
   };
   return (
     <CustomStackFullWidth
-      p="2rem"
-      minHeight="300px"
-      alignItems="center"
-      justifyContent="center"
+      p={rental ? "1rem" : "2rem"}
+      minHeight={rental ? "100%" : "300px"}
+      alignItems={rental ? "start" : "center"}
+      justifyContent={rental ? "start" : "center"}
     >
-      <form noValidate onSubmit={addAddressFormik.handleSubmit}>
+      <form
+        noValidate
+        onSubmit={addAddressFormik.handleSubmit}
+        style={{ width: "100%" }}
+      >
         <Grid container spacing={2}>
           <Grid item xs={12} md={12}>
             <CustomTextFieldWithFormik
@@ -85,27 +133,34 @@ const GuestUserInforForm = ({
               rtlChange="true"
               lanDirection={lanDirection}
               height="45px"
+              borderRadius="10px"
             />
           </Grid>
-          <Grid item xs={12} md={12}>
+      
+          <Grid item xs={12} md={12} sx={{ marginTop: "8px" }}>
             <CustomTextFieldWithFormik
               required="true"
               type="text"
               label={t("Contact Person Email")}
-              value={addAddressFormik.values.contact_person_email}
-              onChangeHandler={emailHandler}
               touched={addAddressFormik.touched.contact_person_email}
               errors={addAddressFormik.errors.contact_person_email}
+              fieldProps={addAddressFormik.getFieldProps(
+                "contact_person_email"
+              )}
+              onChangeHandler={emailHandler}
+              value={addAddressFormik.values.contact_person_email}
             />
           </Grid>
-          <Grid item xs={12} md={12} align="end">
-            <FormSubmitButton
-              handleReset={handleReset}
-              //isLoading={editAddress ? isUpdateLoading : isLoading}
-              reset={t("Reset")}
-              submit={editAddress ? t("Save") : t("Save")}
-            />
-          </Grid>
+          {!rental && (
+            <Grid item xs={12} md={12} align="end">
+              <FormSubmitButton
+                handleReset={handleReset}
+                //isLoading={editAddress ? isUpdateLoading : isLoading}
+                reset={t("Reset")}
+                submit={editAddress ? t("Save") : t("Save")}
+              />
+            </Grid>
+          )}
         </Grid>
       </form>
     </CustomStackFullWidth>

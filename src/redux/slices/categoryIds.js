@@ -12,7 +12,7 @@ const initialState = {
 };
 
 export const categoryIdsSlice = createSlice({
-  name: "categoryid",
+  name: "categoryids",
   initialState,
   reducers: {
     setSelectedCategories: (state, action) => {

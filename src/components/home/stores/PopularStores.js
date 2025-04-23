@@ -1,7 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import PropTypes from "prop-types";
 import { useInView } from "react-intersection-observer";
-import { useGetLatestStoreByInfiniteStore } from "../../../api-manage/hooks/react-query/store/useGetLatestStore";
 import { removeDuplicates } from "utils/CustomFunctions";
 import {
   CustomBoxFullWidth,

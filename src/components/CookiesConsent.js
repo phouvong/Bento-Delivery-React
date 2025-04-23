@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Typography } from "@mui/material";
 import { Stack, styled } from "@mui/system";
 import CustomContainer from "./container";
-import { CustomStackFullWidth } from "../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { useTranslation } from "react-i18next";
 
 const Wrapper = styled("div")(({ theme }) => ({

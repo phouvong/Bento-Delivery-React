@@ -1,14 +1,31 @@
-import React from 'react'
-import { Button, Grid, Skeleton, Stack, Typography, alpha, useTheme } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { t } from 'i18next';
+import React from "react";
+import {
+  Button,
+  Grid,
+  Skeleton,
+  Stack,
+  Typography,
+  alpha,
+  useTheme,
+} from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { t } from "i18next";
 
-import { CustomStackFullWidth } from '../../../../styled-components/CustomStyles.style';
-import DotSpin from '../../../DotSpin';
-import CheckCircleOutlineOutlinedIcon from '@mui/icons-material/CheckCircleOutlineOutlined';
-import { ItemWrapper, ModalCustomTypography } from '../../../order-details-modal/OrderDetailsModal.style';
+import { CustomStackFullWidth } from "../../../../styled-components/CustomStyles.style";
+import DotSpin from "../../../DotSpin";
+import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
+import {
+  ItemWrapper,
+  ModalCustomTypography,
+} from "../../../order-details-modal/OrderDetailsModal.style";
 
-const OfflineOrderDetailsModal = ({ trackData, handleOfflineClose, trackDataIsLoading, trackDataIsFetching }) => {
+const OfflineOrderDetailsModal = ({
+  trackData,
+  handleOfflineClose,
+  trackDataIsLoading,
+  trackDataIsFetching,
+  page,
+}) => {
   const theme = useTheme();
   return (
     <CustomStackFullWidth
@@ -18,35 +35,57 @@ const OfflineOrderDetailsModal = ({ trackData, handleOfflineClose, trackDataIsLo
     >
       <CheckCircleIcon
         sx={{
-          height: "45px", width: "45px", color:
-            theme.palette.primary.main
+          height: "45px",
+          width: "45px",
+          color: theme.palette.primary.main,
         }}
       />
-      <Typography
-        fontSize="16px"
-        fontWeight="700"
-        textAlign="center"
-      >
+      <Typography fontSize="16px" fontWeight="700" textAlign="center">
         {`${t("Order Placed Successfully")} !`}
       </Typography>
-      <CustomStackFullWidth padding={{ xs: "0px 20px", md: "0px 145px" }} textAlign="center">
+      <CustomStackFullWidth
+        padding={{ xs: "0px 20px", md: "0px 145px" }}
+        textAlign="center"
+      >
         {trackDataIsLoading ? (
-          <Stack minWidth={{ xs: "270px", sm: "370px" }} width="100%" padding="15px 0px">
+          <Stack
+            minWidth={{ xs: "270px", sm: "370px" }}
+            width="100%"
+            padding="15px 0px"
+          >
             <DotSpin />
           </Stack>
         ) : (
-          <Typography
-            fontSize="14px"
-            fontWeight="400"
-          >
-            {`${t("Your payment has been successfully processed, and your order ")} !`}
-            <Typography component="span" fontWeight="600" sx={{ color: theme.palette.primary.main }}> #{trackData?.id} </Typography>
-            <Typography component="span" fontWeight="400">{`${t("has been placed.")} !`}</Typography>
+          <Typography fontSize="14px" fontWeight="400">
+            {page === "my-orders?flag=cancel" ? (
+              <Typography color={theme.palette.error.main}>
+                {t("Your payment has been cancel, and your order ")}
+              </Typography>
+            ) : page === "my-orders?flag=fail" ? (
+              <Typography color={theme.palette.error.main}>
+                {t("Your payment has failed, and your order ")}
+              </Typography>
+            ) : (
+              `${t(
+                "Your payment has been successfully processed, and your order "
+              )} !`
+            )}
+
+            <Typography
+              component="span"
+              fontWeight="600"
+              sx={{ color: theme.palette.primary.main }}
+            >
+              {" "}
+              #{trackData?.id}{" "}
+            </Typography>
+            <Typography component="span" fontWeight="400">{`${t(
+              "has been placed."
+            )} !`}</Typography>
           </Typography>
         )}
       </CustomStackFullWidth>
-      {
-        trackData?.offline_payment &&
+      {trackData?.offline_payment && (
         <>
           <CustomStackFullWidth
             padding="40px 10px 20px 20px"
@@ -66,7 +105,6 @@ const OfflineOrderDetailsModal = ({ trackData, handleOfflineClose, trackDataIsLo
                   <DotSpin />
                 </Grid>
               ) : (
-
                 <Stack width="max-content">
                   <ItemWrapper container>
                     <ModalCustomTypography>
@@ -77,7 +115,7 @@ const OfflineOrderDetailsModal = ({ trackData, handleOfflineClose, trackDataIsLo
                     </Typography>
                   </ItemWrapper>
                   <ItemWrapper>
-                    <ModalCustomTypography >
+                    <ModalCustomTypography>
                       {`${t("Order Time")}`}
                     </ModalCustomTypography>
                     <Typography sx={{ wordWrap: "break-word" }}>
@@ -92,36 +130,38 @@ const OfflineOrderDetailsModal = ({ trackData, handleOfflineClose, trackDataIsLo
                       :&nbsp;&nbsp;{trackData?.order_status}
                     </Typography>
                   </ItemWrapper>
-                  {trackData?.offline_payment &&
-
+                  {trackData?.offline_payment && (
                     <>
                       {trackData?.offline_payment?.input?.map((item, index) => {
                         return (
                           <ItemWrapper key={index}>
-                            <ModalCustomTypography sx={{ textTransform: "capitalize" }}>
+                            <ModalCustomTypography
+                              sx={{ textTransform: "capitalize" }}
+                            >
                               {item?.user_input.replaceAll("_", " ")}
                             </ModalCustomTypography>
                             <Typography sx={{ wordWrap: "break-word" }}>
-                              :&nbsp;&nbsp;{item?.user_data.replaceAll("_", " ")}
+                              :&nbsp;&nbsp;
+                              {item?.user_data.replaceAll("_", " ")}
                             </Typography>
                           </ItemWrapper>
-                        )
-                      })
-                      }
+                        );
+                      })}
                       <ItemWrapper>
-                        {trackData?.offline_payment?.data?.customer_note &&
+                        {trackData?.offline_payment?.data?.customer_note && (
                           <>
                             <ModalCustomTypography>
                               {"Note"}
                             </ModalCustomTypography>
                             <Typography sx={{ wordWrap: "break-word" }}>
-                              :&nbsp;&nbsp;{trackData?.offline_payment?.data?.customer_note}
+                              :&nbsp;&nbsp;
+                              {trackData?.offline_payment?.data?.customer_note}
                             </Typography>
                           </>
-                        }
+                        )}
                       </ItemWrapper>
                     </>
-                  }
+                  )}
                 </Stack>
               )}
             </CustomStackFullWidth>
@@ -131,21 +171,26 @@ const OfflineOrderDetailsModal = ({ trackData, handleOfflineClose, trackDataIsLo
               component="span"
               color={theme.palette.error.main}
               fontSize="18px"
-            > * </Typography>
-            {t("If you accidentally provided incorrect payment information, you can edit the details in the order details section while the order is still pending.")}
+            >
+              {" "}
+              *{" "}
+            </Typography>
+            {t(
+              "If you accidentally provided incorrect payment information, you can edit the details in the order details section while the order is still pending."
+            )}
           </Typography>
         </>
-      }
+      )}
       <Button
         onClick={handleOfflineClose}
         variant="contained"
-      // maxWidth="150px"
-      // fullWidth
+        // maxWidth="150px"
+        // fullWidth
       >
         {t("Ok")}
       </Button>
-    </CustomStackFullWidth >
-  )
-}
+    </CustomStackFullWidth>
+  );
+};
 
 export default OfflineOrderDetailsModal;

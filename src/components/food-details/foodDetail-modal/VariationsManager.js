@@ -1,5 +1,4 @@
 import React from "react";
-import { FoodTitleTypography } from "../food-card/FoodCard.style";
 import VariationButtons from "./VariationButtons";
 import { ChoiceValues } from "./ChoiceValues";
 

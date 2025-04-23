@@ -34,17 +34,24 @@ const NavNewStore = () => {
     }
   }, [data]);
   const handleClick = (item) => {
-    router.push({
-      pathname: "/store/[id]",
-      query: {
-        id: `${item?.slug ? item?.slug : item?.id}`,
-        module_id: `${getModuleId()}`,
-        module_type: getCurrentModuleType(),
-        store_zone_id: `${item?.zone_id}`,
-        distance: item?.distance,
-      },
-    });
+    if (getCurrentModuleType() === "rental") {
+      router.push({
+        pathname: `/rental/provider-details/${item?.id}`,
+      });
+    } else {
+      router.push({
+        pathname: "/store/[id]",
+        query: {
+          id: `${item?.slug ? item?.slug : item?.id}`,
+          module_id: `${getModuleId()}`,
+          module_type: getCurrentModuleType(),
+          store_zone_id: `${item?.zone_id}`,
+          distance: item?.distance,
+        },
+      });
+    }
   };
+
   return (
     <CustomStackFullWidth spacing={4}>
       <Typography variant="h7" fontWeight="500">
@@ -85,7 +92,7 @@ const NavNewStore = () => {
           </Stack>
         )}
         <Stack width="70%" justifyContent="flex-start" alignItems="center">
-          <ViewMore redirect="/store/latest" />
+          <ViewMore redirect={getCurrentModuleType() === "rental"? "/rental/provider/latest": "/store/latest"} />
         </Stack>
       </Stack>
     </CustomStackFullWidth>

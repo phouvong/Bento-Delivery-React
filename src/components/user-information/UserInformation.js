@@ -19,9 +19,11 @@ import CustomContainer from "../container";
 import BodySection from "./BodySection";
 import UserDashBoard from "./UserDashBoard";
 import UserDetails from "./UserDetails";
+import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 
 const UserInformation = ({ page, configData, orderId }) => {
 	const theme = useTheme();
+	useScrollToTop()
 	const [accountDeleteStatus, setAccountDeleteStatus] = useState(true);
 	const isSmall = useMediaQuery(theme.breakpoints.down("md"));
 	const dispatch = useDispatch();
@@ -78,7 +80,11 @@ const UserInformation = ({ page, configData, orderId }) => {
 						)}
 						<CustomContainer>
 							<Stack
-								direction={{ xs: "column", sm: "column", md: "row" }}
+								direction={{
+									xs: "column",
+									sm: "column",
+									md: "row",
+								}}
 								gap="1rem"
 							>
 								{userToken && (
@@ -93,15 +99,24 @@ const UserInformation = ({ page, configData, orderId }) => {
 											md: "18px",
 										}}
 										paddingBottom={{
-											xs: page === "inbox" ? "10px" : "0px",
+											xs:
+												page === "inbox"
+													? "10px"
+													: "0px",
 										}}
 									>
 										<UserDetails
 											data={data}
 											page={page}
-											deleteUserHandler={deleteUserHandler}
-											setAccountDeleteStatus={setAccountDeleteStatus}
-											accountDeleteStatus={accountDeleteStatus}
+											deleteUserHandler={
+												deleteUserHandler
+											}
+											setAccountDeleteStatus={
+												setAccountDeleteStatus
+											}
+											accountDeleteStatus={
+												accountDeleteStatus
+											}
 											isLoadingDelete={isLoadingDelete}
 										/>
 									</Grid>

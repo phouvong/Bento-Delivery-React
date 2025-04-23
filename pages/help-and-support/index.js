@@ -9,12 +9,18 @@ import { getImageUrl } from "utils/CustomFunctions";
 
 const Index = ({ configData, landingPageData }) => {
   const { t } = useTranslation();
+
+  // Handle cases where `configData` is missing
+  if (!configData) {
+    return <div>{t("Configuration data is not available")}</div>;
+  }
+
   return (
     <>
       <CssBaseline />
       <SEO
         configData={configData}
-        title={configData ? `Help and support` : "Loading..."}
+        title="Help and Support"
         image={`${getImageUrl(
           { value: configData?.logo_storage },
           "business_logo_url",
@@ -32,25 +38,44 @@ const Index = ({ configData, landingPageData }) => {
 };
 
 export default Index;
-export const getStaticProps = async () => {
-  // Fetch configuration data
-  const configRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/config`,
-    {
-      method: "GET",
-      headers: {
-        "X-software-id": 33571750,
-        "X-server": "server",
-        origin: process.env.NEXT_CLIENT_HOST_URL,
-      },
-    }
-  );
-  const config = await configRes.json();
 
-  return {
-    props: {
-      configData: config, // Pass configuration data as props
-    },
-    revalidate: 3600, // Revalidate every 1 hour (3600 seconds)
-  };
+export const getStaticProps = async () => {
+  try {
+    // Fetch configuration data
+    const configRes = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/config`,
+      {
+        method: "GET",
+        headers: {
+          "X-software-id": 33571750,
+          "X-server": "server",
+          origin: process.env.NEXT_CLIENT_HOST_URL,
+        },
+      }
+    );
+
+    if (!configRes.ok) {
+      throw new Error(`Failed to fetch config: ${configRes.statusText}`);
+    }
+
+    const config = await configRes.json();
+
+    return {
+      props: {
+        configData: config, // Pass configuration data as props
+        landingPageData: {}, // Provide a default or fetch landing page data if needed
+      },
+      revalidate: 3600, // Revalidate every 1 hour (3600 seconds)
+    };
+  } catch (error) {
+    console.error("Error fetching config data:", error);
+
+    return {
+      props: {
+        configData: null, // Return null configData on error
+        landingPageData: {}, // Provide fallback data
+      },
+      revalidate: 3600,
+    };
+  }
 };

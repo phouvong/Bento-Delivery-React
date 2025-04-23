@@ -1,16 +1,16 @@
 import React, { useEffect, useReducer, useState } from "react";
-import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
 import { Stack } from "@mui/system";
 import { IconButton, Typography } from "@mui/material";
 import deleteIcon from "../../assets/delete.png";
 import CartIcon from "../added-cart-view/assets/CartIcon";
 import { useTheme } from "@emotion/react";
-import { CustomIconButton } from "../../styled-components/CustomButtons.style";
+import { CustomIconButton } from "styled-components/CustomButtons.style";
 import CustomDivider from "../CustomDivider";
 import { useDispatch, useSelector } from "react-redux";
-import { getCartListModuleWise } from "../../helper-functions/getCartListModuleWise";
-import { setCart } from "../../redux/slices/cart";
+import { getCartListModuleWise } from "helper-functions/getCartListModuleWise";
+import { setCart } from "redux/slices/cart";
 import toast from "react-hot-toast";
 import {
   ACTION,
@@ -51,7 +51,6 @@ const WishListCard = ({ item }) => {
   const { wishLists } = useSelector((state) => state.wishList);
   const { mutate } = useWishListDelete();
   const router = useRouter();
-  const isInCart = cartList?.find((things) => things.id === item?.id);
   const { mutate: addToMutate, isLoading } = useAddCartItem();
   const handleClose = () => {
     setOpenItemModal(false);

@@ -19,13 +19,6 @@ import InputLabel from "@mui/material/InputLabel";
 
 const UserInfo = ({
   deliveryManFormik,
-  firstNameHandler,
-  lastNameHandler,
-  deliveryHandler,
-  emailHandler,
-  zoneHandler,
-  vehicleHandler,
-  handleImageUpload,
   image,
   setImage,
   handleFieldChange,

@@ -175,7 +175,7 @@ const BasicInformation = (props) => {
                 <Grid item xs={12} md={3}>
                   <Stack
                     spacing={{ xs: 1, sm: 1, md: 1 }}
-                    alignItems="center"
+                    alignItems={{ xs: "flex-start", md: "center" }}
                     width="100%"
                     justifyContent="center"
                   >

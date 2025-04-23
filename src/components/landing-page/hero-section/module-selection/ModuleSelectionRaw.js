@@ -17,6 +17,8 @@ import CustomImageContainer from "../../../CustomImageContainer";
 import { settings } from "./sliderSettings";
 import useGetModule from "api-manage/hooks/react-query/useGetModule";
 import { setModules } from "redux/slices/configData";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 const CardWrapper = styled(Stack)(({ theme, bg_change }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -46,6 +48,7 @@ const ImageWrapper = styled(Box)(({ theme }) => ({
 const Card = ({ item, configData, isSelected, handleClick }) => {
   const theme = useTheme();
   const { t } = useTranslation();
+
   return (
     <CardWrapper
       onClick={() => handleClick(item)}
@@ -100,7 +103,7 @@ const Card = ({ item, configData, isSelected, handleClick }) => {
                   ? item?.stores_count - 1
                   : item?.stores_count}
                 {item?.stores_count > 2 && "+"}{" "}
-                {item?.module_type === "food" ? t("Restaurants") : t("Store")}
+                {item?.module_type === "food" ? t("Restaurants") : item?.module_type === "rental" ? t("Providers") : t("Store")}
               </Typography>
             )}
           </Stack>
@@ -149,20 +152,20 @@ const ModuleSelectionRaw = (props) => {
       {isSmall ? (
         <CustomBoxFullWidth sx={{ mt: "15px" }}>
           <SliderCustom>
-            <Slider {...settings}>
-              {modules?.length > 0 &&
-                modules.map((item, index) => {
-                  return (
+            {modules?.length > 0 && (
+              <Slider {...settings}>
+                {modules.map((item, index) => (
+                  <div key={index}>
                     <Card
-                      key={index}
                       item={item}
                       configData={configData}
                       isSelected={isSelected}
                       handleClick={handleClick}
                     />
-                  );
-                })}
-            </Slider>
+                  </div>
+                ))}
+              </Slider>
+            )}
           </SliderCustom>
         </CustomBoxFullWidth>
       ) : (
@@ -172,6 +175,10 @@ const ModuleSelectionRaw = (props) => {
           flexWrap="wrap"
           gap="15px"
           mt="30px"
+          sx={{
+            maxHeight: "200px",
+            overflowY: "auto",
+          }}
         >
           {modules?.length > 0 &&
             modules.map((item, index) => {

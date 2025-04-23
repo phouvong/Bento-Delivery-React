@@ -11,6 +11,7 @@ import { getModuleId } from "../../../../helper-functions/getModuleId";
 import { useTranslation } from "react-i18next";
 import { CustomStackFullWidth } from "../../../../styled-components/CustomStyles.style";
 import { VIEW_ALL_TEXT } from "../../../../utils/staticTexts";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
 const CollapsableMenu = ({
   value,
@@ -26,16 +27,23 @@ const CollapsableMenu = ({
   const handleClick = () => setOpen((prevState) => !prevState);
   const handleRoute = (id) => {
     if (forcategory === "true") {
-      router.push({
-        pathname: "/home",
-        query: {
-          search: "category",
-          id: id,
-          module_id: `${getModuleId()}`,
-          name: btoa(name),
-          data_type: "category",
-        },
-      });
+      if (getCurrentModuleType() === "rental") {
+        router.push({
+          pathname: "/rental/vehicle-search",
+          query: { categoryId: id },
+        });
+      } else {
+        router.push({
+          pathname: "/home",
+          query: {
+            search: "category",
+            id: id,
+            module_id: `${getModuleId()}`,
+            name: btoa(name),
+            data_type: "category",
+          },
+        });
+      }
     } else {
       router.push({
         pathname: `/${value?.path}/[id]`,
@@ -43,15 +51,19 @@ const CollapsableMenu = ({
       });
     }
 
+    // Ensure these states are updated regardless of the route logic
     setOpen(false);
     setOpenDrawer(false);
   };
 
   const handleView = () => {
     if (pathName === "/categories") {
-      router.push(
-        {
-          pathname: "/home",
+      if (getCurrentModuleType() === "rental"){
+        router.push({ pathname: "/rental/vehicle-search", query: { all_category: 1 } }, undefined, { shallow: false });
+      } else {
+        router.push(
+          {
+            pathname: "/home",
           query: {
             search: VIEW_ALL_TEXT.allCategories,
             from: "allCategories",
@@ -59,8 +71,9 @@ const CollapsableMenu = ({
           },
         },
         undefined,
-        { shallow: true }
-      );
+          { shallow: true }
+        );
+      }
     } else {
       router.push(pathName, undefined, { shallow: true });
     }

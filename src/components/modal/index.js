@@ -3,12 +3,19 @@ import { Clear } from "@mui/icons-material";
 import { Box, Dialog, Stack } from "@mui/material";
 import PropTypes from "prop-types";
 const CustomModal = (props) => {
-  const { openModal, handleClose, disableAutoFocus, closeButton, children } =
-    props;
+  const {
+    openModal,
+    handleClose,
+    disableAutoFocus,
+    closeButton,
+    children,
+    maxWidth,
+    
+  } = props;
   const handleCloseModal = (event, reason) => {
-    if (reason && reason == "backdropClick") {
+    if (reason && reason === "backdropClick") {
       if (disableAutoFocus) {
-        return;
+        return true;
       } else {
         handleClose?.();
       }
@@ -24,11 +31,12 @@ const CustomModal = (props) => {
       sx={{
         ".MuiDialog-paper": {
           margin: "16px",
+          maxWidth: maxWidth,
         },
       }}
     >
       {closeButton && (
-        <Stack direction={"row"} justifyContent={"flex-end"}>
+        <Stack direction="row" justifyContent="flex-end">
           <Box
             onClick={handleCloseModal}
             sx={{

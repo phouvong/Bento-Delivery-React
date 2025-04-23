@@ -10,6 +10,7 @@ import ReferralCode from "../referral-code";
 import Coupons from "../coupons";
 import Chatting from "../chat/Chatting";
 import Settings from "../settings";
+import MyTrips from "components/home/module-wise-components/rental/components/my-trips/MyTrips";
 
 const ProfileBody = ({
   page,
@@ -41,13 +42,21 @@ const ProfileBody = ({
     if (page === "my-orders" && !orderId) {
       return <MyOrders configData={configData} />;
     }
+    if (page === "my-trips") {
+      return (
+        <>
+          <MyTrips configData={configData} />
+        </>
+      );
+    }
     if (
       (page === "my-orders?flag=success" ||
         page === "my-orders" ||
-        page === "my-orders?flag=cancel") &&
+        page === "my-orders?flag=cancel" ||
+        page === "my-orders?flag=fail") &&
       orderId
     ) {
-      return <OrderDetails configData={configData} id={orderId} />;
+      return <OrderDetails configData={configData} id={orderId} page={page} />;
     }
     if (
       page === "wallet" ||

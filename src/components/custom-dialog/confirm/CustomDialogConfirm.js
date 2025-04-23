@@ -8,7 +8,7 @@ import DialogActions from "@mui/material/DialogActions";
 import {
   CustomButtonCancel,
   CustomButtonSuccess,
-} from "../../../styled-components/CustomButtons.style";
+} from "styled-components/CustomButtons.style";
 import { WrapperForCustomDialogConfirm } from "./CustomDialogConfirm.style";
 
 const CustomDialogConfirmStyle = (props) => {

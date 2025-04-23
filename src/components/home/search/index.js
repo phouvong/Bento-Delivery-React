@@ -60,7 +60,6 @@ const SearchResult = (props) => {
     dispatch(setSelectedBrands(data_type === "brand" ? [brand_id] : []));
     dispatch(setSelectedCategories(data_type === "category" ? [id] : []));
   }, []);
-  console.log({ category_id });
   const page_limit = 12;
 
   const selectedCategoriesHandler = (dataArray) => {

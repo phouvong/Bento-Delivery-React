@@ -13,64 +13,66 @@ import { MainLayoutRoot } from "./LandingLayout";
 import useGetLandingPage from "api-manage/hooks/react-query/useGetLandingPage";
 
 const MainLayout = ({ children, configData }) => {
-  const [rerenderUi, setRerenderUi] = useState(false);
-  const { data, refetch } = useGetModule();
-  const theme = useTheme();
-  const isSmall = useMediaQuery("(max-width:1180px)");
-  const router = useRouter();
-  const { page } = router.query;
-  const dispatch = useDispatch();
-  useEffect(() => {
-    if (router.pathname === "/home") {
-      refetch();
-    }
-  }, []);
-  if (data) {
-    const selectedModuleType = JSON.parse(
-      localStorage.getItem("module")
-    )?.module_type;
-    if (data.length === 0) {
-      localStorage.removeItem("module");
-      router.push("/", undefined, { shallow: true });
-    } else {
-      if (!data?.find((item) => item.module_type === selectedModuleType)) {
-        const newModule = data[0];
-        localStorage.setItem("module", JSON.stringify(newModule));
-        dispatch(setSelectedModule(newModule));
-      }
-    }
-  }
-  const { landingPageData } = useSelector((state) => state.configData);
-  const { data: landing, refetch: landingRefetch } = useGetLandingPage();
-  useEffect(() => {
-    if (!landingPageData) {
-      landingRefetch();
-    }
-  }, []);
+	const [rerenderUi, setRerenderUi] = useState(false);
+	const { data, refetch } = useGetModule();
+	const theme = useTheme();
+	const isSmall = useMediaQuery("(max-width:1180px)");
+	const router = useRouter();
+	const { page } = router.query;
+	const dispatch = useDispatch();
+	useEffect(() => {
+		if (router.pathname === "/home") {
+			refetch();
+		}
+	}, []);
+	if (data) {
+		const selectedModuleType = JSON.parse(
+			localStorage.getItem("module")
+		)?.module_type;
+		if (data.length === 0) {
+			localStorage.removeItem("module");
+			router.push("/", undefined, { shallow: true });
+		} else {
+			if (
+				!data?.find((item) => item.module_type === selectedModuleType)
+			) {
+				const newModule = data[0];
+				localStorage.setItem("module", JSON.stringify(newModule));
+				dispatch(setSelectedModule(newModule));
+			}
+		}
+	}
+	const { landingPageData } = useSelector((state) => state.configData);
+	const { data: landing, refetch: landingRefetch } = useGetLandingPage();
+	useEffect(() => {
+		if (!landingPageData) {
+			landingRefetch();
+		}
+	}, []);
 
-  return (
-    <MainLayoutRoot justifyContent="space-between" key={rerenderUi}>
-      <header>
-        <HeaderComponent configData={configData} />
-      </header>
-      <CustomStackFullWidth mt={isSmall ? "3.5rem" : "5.9rem"}>
-        <CustomStackFullWidth sx={{ minHeight: "70vh" }}>
-          {children}
-        </CustomStackFullWidth>
-      </CustomStackFullWidth>
-      <footer>
-        <FooterComponent
-          configData={configData}
-          landingPageData={landingPageData ?? landing}
-        />
-      </footer>
-      {isSmall && page !== "parcel" && <BottomNav />}
-    </MainLayoutRoot>
-  );
+	return (
+		<MainLayoutRoot justifyContent="space-between" key={rerenderUi}>
+			<header>
+				<HeaderComponent />
+			</header>
+			<CustomStackFullWidth mt={isSmall ? "3.5rem" : "5.9rem"}>
+				<CustomStackFullWidth sx={{ minHeight: "70vh" }}>
+					{children}
+				</CustomStackFullWidth>
+			</CustomStackFullWidth>
+			<footer>
+				<FooterComponent
+					configData={configData}
+					landingPageData={landingPageData ?? landing}
+				/>
+			</footer>
+			{isSmall && page !== "parcel" && <BottomNav />}
+		</MainLayoutRoot>
+	);
 };
 
 MainLayout.propTypes = {
-  children: PropTypes.node,
+	children: PropTypes.node,
 };
 
 export default React.memo(MainLayout);

@@ -4,14 +4,15 @@ import { Router, useRouter } from "next/router";
 import React from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { RouteLinksData } from "../demoLinks";
-import { getModule } from "../../../helper-functions/getLanguage";
 import { setAllData } from "redux/slices/storeRegistrationData";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 const RouteLinks = (props) => {
   const dispatch = useDispatch();
+  const { selectedModule } = useSelector((state) => state.utilsData);
+
   const { token, configData } = props;
   const { t } = useTranslation();
   const router = useRouter();
@@ -90,7 +91,7 @@ const RouteLinks = (props) => {
           },
         }}
       >
-        {t("Track Order")}
+        {selectedModule?.module_type==="rental" ? t("Track Trip"):t("Track Order")}
       </Typography>
     </CustomStackFullWidth>
   );

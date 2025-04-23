@@ -1,29 +1,9 @@
-import React, { useState } from "react";
 import { styled } from "@mui/material/styles";
-import {
-  alpha,
-  Button,
-  Card,
-  Grid,
-  Paper,
-  Skeleton,
-  Tooltip,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
-import { Box, Stack } from "@mui/system";
-import sideImage from "./assets/coupon.png";
-import { getAmountWithSign } from "../../helper-functions/CardHelpers";
+import { alpha, Button, Card, Typography, useTheme } from "@mui/material";
+import { Stack } from "@mui/system";
+import { getAmountWithSign } from "helper-functions/CardHelpers";
 import { useTranslation } from "react-i18next";
-import IconButton from "@mui/material/IconButton";
-import toast from "react-hot-toast";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import {
-  CouponStyle,
-  CustomStackFullWidth,
-} from "../../styled-components/CustomStyles.style";
-import CustomCopyWithTooltip from "../custom-copy-with-tooltip";
+import { CouponStyle } from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
 import amountDiscount from "./assets/amountDiscount.png";
 import freeDelivery from "./assets/freeDelivery.png";
@@ -46,28 +26,12 @@ export const CouponButtonStyle = styled(Button)(({ theme }) => ({
     padding: "2px 5px",
   },
 }));
-const ImageWrapper = styled(Box)(({ theme }) => ({
-  background: alpha(theme.palette.primary.main, 0.2),
-  display: "flex",
-  flexDirection: "column",
-  justifyContent: "center",
-  alignItems: "center",
-  padding: "1rem",
-  height: "100%",
-  position: "relative",
-  minHeight: "170px",
-  [theme.breakpoints.down("sm")]: {
-    height: "150px",
-  },
-}));
 
 const Coupon = (props) => {
   const { coupon, isLoading, setCopy, copy } = props;
 
   const { t } = useTranslation();
-  // const [copy, setCopy] = useState(null);
   const theme = useTheme();
-  const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
 
   const couponType = (coupon) => {
     if (coupon?.coupon_type === "store_wise") {

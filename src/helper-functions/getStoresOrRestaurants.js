@@ -1,13 +1,14 @@
-import {t} from "i18next";
+import { t } from "i18next";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
 export const getStoresOrRestaurants = () => {
-  if (typeof window !== "undefined") {
-    if (
-      JSON.parse(window.localStorage.getItem("module"))?.module_type === "food"
-    ) {
-      return t("Restaurants");
-    } else {
-      return t("Stores");
-    }
+  const moduleType = getCurrentModuleType();
+
+  if (moduleType === "food") {
+    return t("Restaurants");
+  } else if (moduleType === "rental") {
+    return t("Providers");
+  } else {
+    return t("Stores");
   }
 };

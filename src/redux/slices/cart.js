@@ -233,10 +233,16 @@ export const cartSlice = createSlice({
     },
     setClearCart: (state = initialState, action) => {
       const currentModule = getCurrentModuleType();
-      state.cartList = state?.cartList?.filter(
-        (item) => item?.module_type !== currentModule
-      );
+      if (Array.isArray(state.cartList)) {
+        state.cartList = state.cartList.filter(
+          (item) => item?.module_type !== currentModule
+        );
+      } else {
+        console.error("cartList is not an array", state.cartList);
+        state.cartList = []; // Reset to an empty array if invalid
+      }
     },
+
     setTotalAmount: (state, action) => {
       state.totalAmount = action.payload;
     },

@@ -1,24 +1,12 @@
 import { Grid, Typography, useTheme } from "@mui/material";
 import React from "react";
-
-import { makeStyles } from "@mui/styles";
 import { Box, Stack } from "@mui/system";
 import { useRouter } from "next/router";
-import { getModuleId } from "../../../helper-functions/getModuleId";
-import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
+import { getModuleId } from "helper-functions/getModuleId";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import ViewMore from "./ViewMore";
 import CustomDivider from "../../CustomDivider";
-import { useDispatch } from "react-redux";
-
-const useStyles = makeStyles((theme) => ({
-  popover: {
-    pointerEvents: "none",
-  },
-  paper: {
-    pointerEvents: "auto",
-    padding: ".5rem",
-  },
-}));
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
 const GridItem = ({
   category,
@@ -82,37 +70,32 @@ const GridItem = ({
   );
 };
 
-const CategoryPopover = ({
-  handlePopoverOpenSub,
-  catImageUrl,
-  openSub,
-  anchorElSub,
-  subCategory,
-  shimmer,
-  handlePopoverCloseSub,
-  categories,
-}) => {
-  const dispatch = useDispatch();
-  const searchKey = "";
+const CategoryPopover = ({ handlePopoverCloseSub, categories }) => {
   const router = useRouter();
-  const theme = useTheme();
-  const classes = useStyles();
-  const primaryColor = theme.palette.primary.main;
+
   const handleClick = (item) => {
-    //dispatch(setStoreSelectedItems([]));
-    router.push({
-      pathname: "/home",
-      query: {
-        search: "category",
-        id: item?.id,
-        module_id: `${getModuleId()}`,
-        name: btoa(item?.name),
-        data_type: "category",
-        from: "nav",
-      },
-    });
+    const query =
+      getCurrentModuleType() === "rental"
+        ? {
+            pathname: "/rental/vehicle-search",
+            query: { categoryId: item?.id },
+          }
+        : {
+            pathname: "/home",
+            query: {
+              search: "category",
+              id: item?.id,
+              module_id: getModuleId(),
+              name: btoa(item?.name),
+              data_type: "category",
+              from: "nav",
+            },
+          };
+
+    router.push(query);
     handlePopoverCloseSub?.();
   };
+
   const handleClickToSubCategory = (item) => {
     router.push({
       pathname: "/home",
@@ -152,7 +135,6 @@ const CategoryPopover = ({
     <Box
       sx={{
         padding: "2rem",
-        // width: { md: "1123px", lg: "1000px" },
         minWidth: "253px",
       }}
     >
@@ -185,7 +167,7 @@ const CategoryPopover = ({
         })}
         <Grid item xs={getGridSize(hasChildLength()?.length)}>
           {categories?.slice?.(0, 5)?.map((item, index) => {
-            if (item?.childes?.length === 0) {
+            if (!item?.childes || item?.childes?.length === 0) {
               return (
                 <CustomStackFullWidth
                   justifyContent="space-between"

@@ -15,7 +15,7 @@ const CustomPhoneNumberInputStyled = styled(PhoneInput)(
     "&.react-tel-input .special-label": {
       fontSize: "12px !important",
       fontWeight: "400 !important",
-      color: theme.palette.neutral[900],
+      color: theme.palette.neutral[1000],
       left: languageDirection === "rtl" ? "80%" : "10px",
       backgroundColor: theme.palette.background.paper,
       zIndex: "999",

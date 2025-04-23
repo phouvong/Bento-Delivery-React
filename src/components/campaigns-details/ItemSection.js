@@ -10,7 +10,6 @@ const ItemSection = ({ campaignsDetails, isLoading, isRefetching }) => {
   const [page_limit, setPageLimit] = useState(10);
   const [offset, setOffset] = useState(1);
   const { configData } = useSelector((state) => state.configData);
-  const store_image_url = `${configData?.base_urls?.store_image_url}`;
   const matches = useMediaQuery("(max-width:1475px)");
   const matchesXs = useMediaQuery("(max-width:480px)");
   return (
@@ -28,7 +27,7 @@ const ItemSection = ({ campaignsDetails, isLoading, isRefetching }) => {
               >
                 <StoreCard
                   item={store}
-                  imageUrl={`${configData?.base_urls?.store_cover_photo_url}/${store?.cover_photo}`}
+                  imageUrl={store?.cover_photo_full_url}
                 />
               </Grid>
             );

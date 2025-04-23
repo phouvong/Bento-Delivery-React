@@ -2,28 +2,23 @@ import React from "react";
 import {
   CustomStackFullWidth,
   StoreImageBox,
-} from "../../styled-components/CustomStyles.style";
+} from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { Stack } from "@mui/system";
 import { alpha, IconButton, Typography } from "@mui/material";
 import deleteIcon from "../../assets/delete.png";
 import { useTheme } from "@emotion/react";
 import CustomRatings from "../search/CustomRatings";
 import CustomDivider from "../CustomDivider";
-import { removeWishListStore } from "../../redux/slices/wishList";
+import { removeWishListStore } from "redux/slices/wishList";
 import toast from "react-hot-toast";
-import { useWishListStoreDelete } from "../../api-manage/hooks/react-query/wish-list/useWishListStoreDelete";
-import Link from "next/link";
-import { getModuleId } from "../../helper-functions/getModuleId";
+import { useWishListStoreDelete } from "api-manage/hooks/react-query/wish-list/useWishListStoreDelete";
 import { useRouter } from "next/router";
-import { getImageUrl } from "utils/CustomFunctions";
 const StoreWishCard = ({ data, setSideDrawerOpen }) => {
   const router = useRouter();
   const theme = useTheme();
   const dispatch = useDispatch();
-  const { configData } = useSelector((state) => state.configData);
-  const store_image_url = `${configData?.base_urls?.store_image_url}`;
   const moduleId = JSON.parse(window.localStorage.getItem("module"))?.id;
   const storeIdOrSlug = data?.id ? data?.id : data?.slug;
 
@@ -99,7 +94,7 @@ const StoreWishCard = ({ data, setSideDrawerOpen }) => {
         <Stack alignItems="center" justifyContent="center">
           <IconButton onClick={(e) => deleteWishlistStore(e, data?.id)}>
             <CustomImageContainer
-              src={deleteIcon.src}
+              src={deleteIcon?.src}
               width="18px"
               height="18px"
             />

@@ -2,23 +2,28 @@ import React, { useEffect, useState } from "react";
 import {
   CustomPaperBigCard,
   CustomStackFullWidth,
-} from "../../styled-components/CustomStyles.style";
+} from "styled-components/CustomStyles.style";
 import { Grid, Typography } from "@mui/material";
 import { t } from "i18next";
 import CustomTextFieldWithFormik from "../form-fields/CustomTextFieldWithFormik";
 import CustomPhoneInput from "../custom-component/CustomPhoneInput";
 import { useFormik } from "formik";
-import { setGuestUserInfo } from "../../redux/slices/guestUserInfo";
-import { getLanguage } from "../../helper-functions/getLanguage";
+import { setGuestUserInfo } from "redux/slices/guestUserInfo";
+import { getLanguage, getModule } from "helper-functions/getLanguage";
 import { PrimaryButton } from "../Map/map.style";
 import TrackOrderDetails from "./TrackOrderDetails";
-import { getGuestId } from "../../helper-functions/getToken";
+import { getGuestId } from "helper-functions/getToken";
 import useGetTrackOrderData from "../../api-manage/hooks/react-query/order/useGetTrackOrderData";
-import { useDispatch } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+
+import Router from "next/router";
+import { useGetTripDetails } from "api-manage/hooks/react-query/useGetTripDetails";
 
 const TrackOrderInput = ({ configData }) => {
   const dispatch = useDispatch();
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const { selectedModule } = useSelector((state) => state.utilsData);
+
   const trackOrderFormik = useFormik({
     initialValues: {
       order_id: "",
@@ -28,7 +33,11 @@ const TrackOrderInput = ({ configData }) => {
       try {
         dispatch(setGuestUserInfo(values));
         setShowOrderDetails(true);
-        refetchTrackOrder();
+        if (getModule()?.module_type === "rental") {
+          refetchData();
+        } else {
+          refetchTrackOrder();
+        }
       } catch (err) {}
     },
   });
@@ -49,6 +58,16 @@ const TrackOrderInput = ({ configData }) => {
     trackOrderFormik?.values?.contact_person_number,
     guestId
   );
+  const {
+    data: tripDetails,
+    refetch: refetchData,
+    isFetching,
+  } = useGetTripDetails(trackOrderFormik?.values?.order_id);
+  useEffect(() => {
+    if (tripDetails) {
+      Router.push(`/rental/trip-status/${tripDetails?.id}?from=""`);
+    }
+  }, [tripDetails]);
 
   return (
     <CustomStackFullWidth pt="40px" spacing={2}>
@@ -59,16 +78,16 @@ const TrackOrderInput = ({ configData }) => {
           fontSize="20px"
           fontWeight="600"
         >
-          {t("Track Your Order")}
+          {selectedModule?.module_type==="rental"?t("Track Your Trip"):t("Track Your Order")}
         </Typography>
         <form noValidate onSubmit={trackOrderFormik.handleSubmit}>
           <Grid container spacing={2} paddingX={{ xs: ".5rem", md: "2rem" }}>
             <Grid item xs={12} md={5}>
               <CustomTextFieldWithFormik
-                placeholder={t("Enter your order id")}
+                placeholder={selectedModule?.module_type==="rental"? t("Enter your trip id"):t("Enter your order id")}
                 required="true"
                 type="text"
-                label={t("Order Id")}
+                label={selectedModule?.module_type==="rental"?t("Trip Id"):t("Order Id")}
                 touched={trackOrderFormik.touched.order_id}
                 errors={trackOrderFormik.errors.order_id}
                 fieldProps={trackOrderFormik.getFieldProps("order_id")}
@@ -89,7 +108,7 @@ const TrackOrderInput = ({ configData }) => {
               />
             </Grid>
             <Grid item xs={12} md={2}>
-              <PrimaryButton type="submit">{t("Search Order")}</PrimaryButton>
+              <PrimaryButton type="submit">{selectedModule?.module_type==="rental" ? t("Search Trip"):t("Search Order")}</PrimaryButton>
             </Grid>
           </Grid>
         </form>

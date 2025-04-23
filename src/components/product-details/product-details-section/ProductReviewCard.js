@@ -1,24 +1,20 @@
 import React, { useState } from "react";
-import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { Avatar, Typography, useTheme } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import CustomImageContainer from "../../CustomImageContainer";
-import CustomRatings from "../../search/CustomRatings";
 import { useSelector } from "react-redux";
 import CustomModal from "../../modal";
-import { Scrollbar } from "../../srollbar";
 import CloseIcon from "@mui/icons-material/Close";
 import IconButton from "@mui/material/IconButton";
 import StarIcon from "@mui/icons-material/Star";
-import { getDateFormat, getImageUrl } from "utils/CustomFunctions";
+import { getDateFormat } from "utils/CustomFunctions";
 import { ReadMore } from "components/store-details/ReadMore";
 
 const ProductReviewCard = ({ review, storename }) => {
   const { configData } = useSelector((state) => state.configData);
   const [openModal, setOpenModal] = useState(false);
   const theme = useTheme();
-  const userImageUrl = configData?.base_urls?.customer_image_url;
-
   return (
     <>
       <CustomStackFullWidth
@@ -28,7 +24,8 @@ const ProductReviewCard = ({ review, storename }) => {
       >
         <Stack direction="row" spacing={2}>
           <Avatar
-            src={`${userImageUrl}/${review?.customer?.image}`}
+            src={review?.customer_image
+              }
             width="42px"
             height="42px"
           />
@@ -44,9 +41,11 @@ const ProductReviewCard = ({ review, storename }) => {
                 WebkitBoxOrient: "vertical",
               }}
             >
-              {`${review?.customer?.f_name}` +
-                " " +
-                `${review?.customer?.l_name}`}
+              {review?.customer_name
+                ? review?.customer_name
+                : `${review?.customer?.f_name}` +
+                  " " +
+                  `${review?.customer?.l_name}`}
             </Typography>
             <Stack direction="row">
               <StarIcon

@@ -47,7 +47,7 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
         spacing={2}
       >
         <CustomImageContainer
-          src={sort.src}
+          src={sort?.src}
           height="12px"
           width="12px"
           objectFit="contain"

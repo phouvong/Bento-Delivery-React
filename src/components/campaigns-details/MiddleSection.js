@@ -14,7 +14,8 @@ const MiddleSection = ({ campaignsDetails, image }) => {
           src={image}
           width="100px"
           borderRadius=".6rem"
-          objectfit="contain"
+          objectfit="cover"
+          height="70px"
         />
         <Stack justifyContent="center" alignItems="flex-start">
           <Typography fontWeight="600" variant="h6">

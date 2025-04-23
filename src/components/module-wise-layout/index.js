@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useMediaQuery } from "@mui/material";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -11,7 +10,7 @@ import useGetModule from "../../api-manage/hooks/react-query/useGetModule";
 import HomePageComponents from "../home/HomePageComponents";
 import ModuleSelect from "../module-select/ModuleSelect";
 
-const ModuleWiseLayout = ({ configData }) => {
+const ModuleWiseLayout = ({ configData, landingPageData }) => {
 	const [rerender, setRerender] = useState(false);
 	const { selectedModule } = useSelector((state) => state.utilsData);
 	const { data, refetch } = useGetModule();
@@ -58,11 +57,14 @@ const ModuleWiseLayout = ({ configData }) => {
 					moduleSelectHandler={moduleSelectHandler}
 					selectedModule={selectedModule}
 					data={data}
-					configData={configData}
 					dispatch={dispatch}
 				/>
 			)}
-			<HomePageComponents key={rerender} configData={configData} />
+			<HomePageComponents
+				key={rerender}
+				configData={configData}
+				landingPageData={landingPageData}
+			/>
 		</CustomStackFullWidth>
 	);
 };

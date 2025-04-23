@@ -2,11 +2,11 @@ import MainApi from "../../../MainApi";
 import { useQuery } from "react-query";
 import { all_cart_list } from "../../../ApiRoutes";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
-import {getToken} from "../../../../helper-functions/getToken";
+import { getToken } from "helper-functions/getToken";
 
 const getData = async (guestId) => {
   try {
-    const userToken=getToken()
+    const userToken = getToken();
     const params = !userToken ? `?guest_id=${guestId}` : "";
     const { data } = await MainApi.get(`${all_cart_list}${params}`);
     return data;

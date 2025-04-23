@@ -7,7 +7,7 @@ import { getGuestId } from "helper-functions/getToken";
 import { useSelector } from "react-redux";
 import PushNotificationLayout from "../../PushNotificationLayout";
 
-const OrderDetails = ({ configData, id }) => {
+const OrderDetails = ({ configData, id, page }) => {
   const router = useRouter();
   const guestId = getGuestId();
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
@@ -37,6 +37,7 @@ const OrderDetails = ({ configData, id }) => {
           refetch={refetch}
           id={id}
           dataIsLoading={dataIsLoading}
+          page={page}
         />
       </PushNotificationLayout>
     </div>

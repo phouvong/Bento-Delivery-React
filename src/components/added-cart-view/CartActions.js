@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import PropTypes from "prop-types";
 import { PrimaryButton } from "../Map/map.style";
 import { Stack } from "@mui/system";
 import { useTheme } from "@mui/material";
@@ -11,7 +10,7 @@ import GuestCheckoutModal from "../cards/GuestCheckoutModal";
 import dynamic from "next/dynamic";
 const AuthModal = dynamic(() => import("components/auth/AuthModal"));
 const CartActions = (props) => {
-  const { setSideDrawerOpen, cartList } = props;
+  const { setSideDrawerOpen, cartList, text } = props;
   const { configData } = useSelector((state) => state.configData);
   const token = localStorage.getItem("token");
   const [open, setOpen] = useState(false);
@@ -78,9 +77,15 @@ const CartActions = (props) => {
         fullWidth
         borderRadius="7px"
       >
-        {cartList?.length > 0
-          ? t("Proceed To Checkout")
-          : t("Continue Shopping")}
+        {text ? (
+          text
+        ) : (
+          <>
+            {cartList?.length > 0
+              ? t("Proceed To Checkout")
+              : t("Continue Shopping")}
+          </>
+        )}
       </PrimaryButton>
       {open && (
         <GuestCheckoutModal

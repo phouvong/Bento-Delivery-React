@@ -360,3 +360,35 @@ video {
 [dir='rtl'] .testimonials-slider .slick-slide {
     float: left;
 }
+.no-pointer-events {
+    pointer-events: none;
+}
+
+.scaleAnimation {
+    transform: scale(1.1);
+}
+
+.transition {
+    transition: transform 250ms linear;
+}
+button.gm-ui-hover-effect  {
+    display: none !important;  /* Hides the close icon */
+    overflow: hidden !important;
+}
+.gm-style-iw-ch{
+    padding-top: 0 !important;
+}
+.gm-style .gm-style-iw-c{
+    padding: 5px 10px  !important;
+    background-color: #000;
+    border-radius: 5px !important;
+}
+.gm-style-iw-d {
+    overflow: hidden !important;
+}
+.gm-style .gm-style-iw-tc::after {
+    background-color: #000;
+    width: 13px !important;
+    height: 9px !important;
+    left: 7px !important;
+}

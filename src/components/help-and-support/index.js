@@ -119,6 +119,7 @@ const HelpAndSupport = (props) => {
           latitude={configData?.default_location?.lat}
           longitude={configData?.default_location?.lng}
           address={configData?.address}
+          isFooter={true}
         />
       )}
     </Box>

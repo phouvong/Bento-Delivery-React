@@ -104,17 +104,6 @@ const SideBarWithData = forwardRef((props, ref) => {
           )}
         </>
       );
-      // if (isLoading) {
-      //   return (
-      //     <>
-      //       {[...Array(4)].map((item, index) => {
-      //         return <>{getProductShimmer()}</>;
-      //       })}
-      //     </>
-      //   );
-      // } else {
-      //
-      // }
     } else {
       return (
         <>
@@ -125,7 +114,7 @@ const SideBarWithData = forwardRef((props, ref) => {
                   <Grid key={index} item xs={12} sm={4} md={4}>
                     <StoreCard
                       item={item}
-                      imageUrl={`${configData?.base_urls?.store_cover_photo_url}/${item?.cover_photo}`}
+                      imageUrl={item?.cover_photo_full_url}
                     />
                   </Grid>
                 ))

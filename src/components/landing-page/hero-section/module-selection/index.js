@@ -16,7 +16,6 @@ import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import useGetModule from "../../../../api-manage/hooks/react-query/useGetModule";
 import { setModules } from "../../../../redux/slices/configData";
-import { setSelectedModule } from "../../../../redux/slices/utils";
 import { CustomStackFullWidth } from "../../../../styled-components/CustomStyles.style";
 import {
   module_bottom,
@@ -25,11 +24,19 @@ import {
 import CustomImageContainer from "../../../CustomImageContainer";
 import CustomAlert from "../../../alert/CustomAlert";
 import CustomModal from "../../../modal";
-import { zoneWiseModule } from "../../../module-select/ModuleSelect";
-
+import { zoneWiseModule } from "../../../module-select/ModuleSelect"; 
 import CloseIcon from "@mui/icons-material/Close";
 import ErrorIcon from "@mui/icons-material/Error";
-import { getImageUrl } from "utils/CustomFunctions";
+import { setSelectedModule } from "redux/slices/utils";
+import { setCartList } from "redux/slices/cart";
+import useGetBookingList from "api-manage/hooks/react-query/useGetBookingList";
+import useGetAllCartList from "api-manage/hooks/react-query/add-cart/useGetAllCartList";
+import { handleProductValueWithOutDiscount } from "utils/CustomFunctions";
+import { getSelectedVariations } from "components/header/second-navbar/SecondNavbar";
+import { getGuestId } from "helper-functions/getToken";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import useDeleteAllCarts from "api-manage/hooks/react-query/useDeleteAllCarts";
+import toast from "react-hot-toast";
 
 export const CustomPaper = styled(Paper)(({ theme }) => ({
   //minWidth: "500px",
@@ -92,14 +99,61 @@ export const ModuleSelection = ({
   fromsignup,
   disableAutoFocus,
   setOpenModuleSelection,
+  zoneId
 }) => {
   const router = useRouter();
   const [openModal, setOpenModal] = useState(location);
   const { configData } = useSelector((state) => state.configData);
+  const { cartList } = useSelector((state) => state.cart);
+  const { selectedModule } = useSelector((state) => state.utilsData);
   const { t } = useTranslation();
   const { data, refetch, isRefetching, isFetched } = useGetModule();
   const theme = useTheme();
   const dispatch = useDispatch();
+  const {mutate} = useDeleteAllCarts();
+  const moduleType = getCurrentModuleType();
+  const cartListSuccessHandler = (res) => {
+    if (res) {
+      const tempCartLists = res?.map((item) => ({
+        ...item?.item,
+        cartItemId: item?.id,
+        totalPrice:
+          handleProductValueWithOutDiscount(item?.item) * item?.quantity,
+        selectedAddons: item?.item?.addons,
+        quantity: item?.quantity,
+        food_variations: item?.item?.food_variations,
+        itemBasePrice: item?.item?.price,
+        selectedOption:
+          moduleType !== "food"
+            ? item?.variation
+            : getSelectedVariations(item?.item?.food_variations),
+      }));
+      dispatch(setCartList(tempCartLists));
+    }
+    router.push("/home");
+      setOpenModal(false);
+      closeModal?.();
+  };
+
+  const {
+    data: cartListData,
+    refetch: cartListRefetch,
+    isLoading,
+  } = useGetAllCartList(getGuestId(),cartListSuccessHandler);
+
+  const bookingSuccess = (res) => {
+    dispatch(setCartList(res));
+    router.push("/home");
+    setOpenModal(false);
+    closeModal?.(selectedModule);
+  };
+  const {
+    data: bookingLists,
+    isLoading: bookingListsIsLoading,
+    refetch: bookingRefetch,
+  } = useGetBookingList(getGuestId(), bookingSuccess);
+
+
 
   const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
   useEffect(() => {
@@ -112,13 +166,47 @@ export const ModuleSelection = ({
   }, [data]);
   const handleCloseModal = () => {
     setOpenModal(false);
-    closeModal?.();
+    closeModal?.(selectedModule);
   };
+
   const handleItemOnClick = (item) => {
     localStorage.setItem("module", JSON.stringify(item));
     dispatch(setSelectedModule(item));
+    if(cartList?.carts?.length > 0 && item?.module_type === "rental"){
+      const pickupZoneIds = cartList?.carts[0]?.provider?.pickup_zone_id;
+      const targetZoneIds = Array.isArray(zoneId) ? zoneId : JSON.parse(zoneId);
+      const inZone = targetZoneIds.some(id => pickupZoneIds?.includes(id.toString()));
+      if(inZone) {
+        toast.success(t("Location set successfully"));
+        router.push("/home");
+            setOpenModal(false);
+            closeModal?.(item);
+      }else{
+        mutate(null, {
+          onSuccess: (res) => {
+            dispatch(setCartList(res));
+            toast.error(t("Your cart has been cleared as the selected zone does not support the previous pickup point."));
+            router.push("/home");
+            setOpenModal(false);
+            closeModal?.();
+          },
+          onError: (error) => {
+            toast.error(error.response.data.message);
+          }
+        })
+      }
+    }else{
+    router.push("/home");
     setOpenModal(false);
     closeModal?.(item);
+    }
+    
+    // if (item?.module_type === "rental") {
+    //  bookingRefetch();
+    // } else {
+    //    cartListRefetch();
+    // }
+   
   };
   const handleSingleModule = (data) => {
     dispatch(setSelectedModule(data));
@@ -152,9 +240,7 @@ export const ModuleSelection = ({
             </CustomPaper>
           </CustomModal>
         );
-      } else if (data?.length === 1) {
-        handleSingleModule(data[0]);
-      } else {
+      }  else {
         return (
           <CustomModal
             openModal={openModal}
@@ -200,7 +286,7 @@ export const ModuleSelection = ({
                                     display: "-webkit-box",
                                     WebkitLineClamp: "1",
                                     WebkitBoxOrient: "vertical",
-                                    maxWidth: "60px",
+                                
                                   }}
                                 >
                                   {item?.module_name}

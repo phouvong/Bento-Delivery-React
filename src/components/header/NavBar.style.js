@@ -15,34 +15,29 @@ import bgImg from "../../../public/bgimge.jpg";
 import React from "react";
 
 export const AppBarStyle = styled(AppBar)(({ theme, scrolling, isSmall }) => ({
-  // transition: "all ease-in-out 0.3s",
   top: !scrolling ? "0" : isSmall ? "0px" : "-30px",
   background: `${theme.palette.mode === "light" && "#fff !important"}`,
-  WebkitAnimation: !isSmall && scrolling ? "fadeInUp 0.4s" : "fadeInDown 0.4s",
-  animation: !isSmall && scrolling ? "fadeInUp 0.4s" : "fadeInDown 0.4s",
-  "@keyframes fadeInUp": {
-    "0%": {
-      transform: "translateY(30px)",
-    },
-    "100%": {
-      transform: "translateY(0)",
-    },
-  },
-  "@keyframes fadeInDown": {
-    "0%": {
-      transform: "translateY(-30px)",
-    },
-    "100%": {
-      transform: "translateY(0)",
-    },
-  },
+  transition: "all 0.4s ease",
+  // WebkitAnimation: !isSmall && scrolling ? "fadeInUp 0.4s" : "fadeInDown 0.4s",
+  // animation: !isSmall && scrolling ? "fadeInUp 0.4s" : "fadeInDown 0.4s",
+  // "@keyframes fadeInUp": {
+  //   "0%": {
+  //     transform: "translateY(30px)",
+  //   },
+  //   "100%": {
+  //     transform: "translateY(0)",
+  //   },
+  // },
+  // "@keyframes fadeInDown": {
+  //   "0%": {
+  //     transform: "translateY(-30px)",
+  //   },
+  //   "100%": {
+  //     transform: "translateY(0)",
+  //   },
+  // },
 }));
 
-export const CustomBgImage = styled(Stack)(({ theme }) => ({
-  backgroundImage: `url(${bgImg})`,
-  backgroundSize: "cover",
-  backgroundPosition: "center",
-}));
 export const CustomStackForLoaction = styled(Stack)(({ theme }) => ({
   justifyContent: "center",
   cursor: "pointer",
@@ -169,8 +164,6 @@ export const StyledMenu = styled((props) => (
 export const NavLinkStyle = styled(Stack)(({ theme, language_direction }) => ({
   color: `${theme.palette.mode === "dark" ? "#fff" : "#000"}`,
   fontSize: "16px",
-
-  // marginRight: language_direction === 'rtl' ? '16px' : '0px',
   underLine: "none",
   "&:hover": {
     color: theme.palette.primary.main,
@@ -204,16 +197,8 @@ export const CustomDrawer = styled(Drawer)(({ theme, router }) => ({
     maxWidth: "320px",
     width: "96vw",
     height: "calc(100dvh-56px)",
-    //bottom: "-56px",
     transition: "transform 0.3s ease-in-out",
     zIndex: "1200",
-
-    // marginLeft: router.pathname === "/" && "24px",
-    // marginRight: router.pathname === "/" && "24px",
-    // [theme.breakpoints.down("sm")]: {
-    //   marginLeft: router.pathname === "/" && "16px",
-    //   marginRight: router.pathname === "/" && "16px",
-    // },
   },
 }));
 export const CustomBottomNavigationAction = styled(BottomNavigationAction)(

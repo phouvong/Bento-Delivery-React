@@ -2,12 +2,12 @@ import React, { useEffect, useId } from "react";
 
 import { Popover, useTheme } from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import CategoryPopover from "./CategoryPopover";
-import { getLanguage } from "../../../helper-functions/getLanguage";
+import { getLanguage, getModule } from "helper-functions/getLanguage";
 import { useDispatch, useSelector } from "react-redux";
-import { useGetCategories } from "../../../api-manage/hooks/react-query/all-category/all-categorys";
-import { setCategories } from "../../../redux/slices/storedData";
+import { useGetCategories } from "api-manage/hooks/react-query/all-category/all-categorys";
+import { setCategories } from "redux/slices/storedData";
 import NavStorePopover from "./NavStorePopover";
 
 const useStyles = makeStyles((theme) => ({
@@ -33,6 +33,10 @@ const NavPopover = ({
 }) => {
   const classes = useStyles();
   const { categories } = useSelector((state) => state.storedData);
+  const rentalCategories = useSelector(
+    (state) => state?.rentalCategoriesLists?.rentalCategories
+  );
+
   const theme = useTheme();
   const popoverDivId = useId();
   const {
@@ -53,9 +57,10 @@ const NavPopover = ({
       dispatch(setCategories(categoriesData?.data));
     }
   }, [categoriesData]);
+
   const popoverHandle = () => {
     if (popoverFor === "category") {
-      if (categories?.length > 0) {
+      if (categories?.length > 0 || rentalCategories?.length > 0) {
         return (
           <CategoryPopover
             handlePopoverOpenSub={handlePopoverOpenSub}
@@ -64,9 +69,13 @@ const NavPopover = ({
             anchorElSub={anchorElSub}
             subCategory={subCategory}
             handlePopoverCloseSub={handlePopoverCloseSub}
-            categories={[...categories].sort(
-              (a, b) => b.childes.length - a.childes.length
-            )}
+            categories={
+              getModule()?.module_type === "rental"
+                ? rentalCategories
+                : [...categories].sort(
+                    (a, b) => b?.childes?.length - a?.childes?.length
+                  )
+            }
           />
         );
       }
@@ -98,6 +107,7 @@ const NavPopover = ({
       >
         {popoverHandle()}
       </Popover>
+
     </CustomStackFullWidth>
   );
 };

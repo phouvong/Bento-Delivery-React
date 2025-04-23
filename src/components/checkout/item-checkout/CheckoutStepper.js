@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
 
 import {
@@ -15,6 +15,7 @@ import { Check } from "@mui/icons-material";
 
 import { StepperCustomBorder } from "../CheckOut.style";
 import { useTheme } from "@emotion/react";
+import { useRouter } from "next/router";
 
 const CustomStepperLabels = styled(Stepper)(({ theme }) => ({
 	"& .MuiStepLabel-label.Mui-completed": {
@@ -34,7 +35,7 @@ const QontoConnector = styled(StepConnector)(({ theme }) => ({
 	},
 	[`&.${stepConnectorClasses.active}`]: {
 		[`& .${stepConnectorClasses.line}`]: {
-			borderColor: theme.palette.neutral[400],
+			borderColor:theme.palette.primary.main,
 		},
 	},
 	[`&.${stepConnectorClasses.completed}`]: {
@@ -43,7 +44,7 @@ const QontoConnector = styled(StepConnector)(({ theme }) => ({
 		},
 	},
 	[`& .${stepConnectorClasses.line}`]: {
-		borderColor: theme.palette.neutral[100],
+		borderColor: theme.palette.neutral[400],
 		borderTopWidth: 3,
 		borderRadius: 1,
 		[theme.breakpoints.down("md")]: {
@@ -98,19 +99,25 @@ function QontoStepIcon(props) {
 		</QontoStepIconRoot>
 	);
 }
-const CheckoutStepper = () => {
-	const [actStep, setActStep] = useState(2);
+const CheckoutStepper = ({text,text1,text2}) => {
+	const [actStep, setActStep] = useState(1);
 	const steps = [
 		{
-			label: "Add To Cart",
+			label: text2||"Add To Cart",
 		},
 		{
-			label: "Fill details",
+			label:text || "Fill details",
 		},
 		{
-			label: "Confirmation",
+			label: text1 || "Confirmation",
 		},
 	];
+	const router = useRouter()
+	useEffect(() => {
+		if (router.pathname === "/rental/checkout") {
+			setActStep(2)
+		}
+	}, [router.pathname])	
 	return (
 		<CustomStackFullWidth>
 			<CustomStepperLabels

@@ -1,34 +1,23 @@
 import { Box } from "@mui/system";
 import { t } from "i18next";
 import React, { useEffect, useState } from "react";
-import {
-  CustomPaperBigCard,
-  CustomStackFullWidth,
-} from "styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import AuthHeader from "../AuthHeader";
 import SignUpForm from "./SignUpForm";
-// import AcceptTermsAndConditions from "../../../../pages/auth/AcceptTermsAndConditions";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { Typography, useTheme } from "@mui/material";
-import {
-  onErrorResponse,
-  onSingleErrorResponse,
-} from "api-manage/api-error-response/ErrorResponses";
+import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { useSignUp } from "api-manage/hooks/react-query/auth/useSignUp";
 import { useFireBaseOtpVerify } from "api-manage/hooks/react-query/forgot-password/useFIreBaseOtpVerify";
 import { useVerifyPhone } from "api-manage/hooks/react-query/forgot-password/useVerifyPhone";
 import useGetProfile from "api-manage/hooks/react-query/profile/useGetProfile";
-import { auth } from "firebase";
-import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { useFormik } from "formik";
 import { getGuestId } from "helper-functions/getToken";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "redux/slices/profileInfo";
 import { setWelcomeModal } from "redux/slices/utils";
-import { setDefaultLanguage } from "utils/setDefaultLanguage";
 import { signup_successfull } from "utils/toasterMessages";
 import { ModuleSelection } from "../../landing-page/hero-section/module-selection";
 import CustomModal from "../../modal";
@@ -47,19 +36,15 @@ const SignUp = ({
 }) => {
   const router = useRouter();
   const dispatch = useDispatch();
-  //const { configData } = useSelector((state) => state.configData);
-  const { profileInfo } = useSelector((state) => state.profileInfo);
   const [openModuleSelection, setOpenModuleSelection] = useState(false);
   const theme = useTheme();
   const [otpData, setOtpData] = useState({ type: "" });
   const [mainToken, setMainToken] = useState(null);
   const [openOtpModal, setOpenOtpModal] = useState(false);
-  //const [welcomeModal, setWelcomeModal] = useState(false);
   const [selectedModule, setSelectedModule] = useState(null);
   const [verificationId, setVerificationId] = useState(null);
   const [loginValue, setLoginValue] = useState(null);
   const guestId = getGuestId();
-  // const { sendOTP, verificationId, isOtpSent } = useFirebasePhoneAuth();
 
   const signUpFormik = useFormik({
     initialValues: {

@@ -1,19 +1,13 @@
 import React from "react";
-import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
-import { alpha, Card, IconButton, Typography, useTheme } from "@mui/material";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
+import {  Card,  Typography, useTheme } from "@mui/material";
 import { Stack } from "@mui/system";
 import { t } from "i18next";
 import CustomImageContainer from "../../CustomImageContainer";
-import { useSelector } from "react-redux";
-import { CustomButtonPrimary } from "../../../styled-components/CustomButtons.style";
-import DriveFileRenameOutlineOutlinedIcon from "@mui/icons-material/DriveFileRenameOutlineOutlined";
-import styled from "@emotion/styled";
+import { CustomButtonPrimary } from "styled-components/CustomButtons.style";
 import { CustomButtonStack } from "components/checkout/CheckOut.style";
-import { getImageUrl } from "utils/CustomFunctions";
+
 const ParcelInfo = ({ parcelCategories }) => {
-  const theme = useTheme();
-  const { configData } = useSelector((state) => state.configData);
-  const borderColor = theme.palette.primary.main;
   return (
     <CustomStackFullWidth>
       <Card sx={{ padding: "1.2rem " }}>
@@ -22,15 +16,6 @@ const ParcelInfo = ({ parcelCategories }) => {
             <Stack justifyCenter="center" alignItems="center" flexGrow="1">
               <Typography variant="h6">{t("Parcel Info")}</Typography>
             </Stack>
-            {/*<Stack*/}
-            {/*  sx={{ border: `1px solid ${borderColor}`, borderRadius: "50%" }}*/}
-            {/*>*/}
-            {/*  <IconButton>*/}
-            {/*    <DriveFileRenameOutlineOutlinedIcon*/}
-            {/*      style={{ color: theme.palette.primary.main }}*/}
-            {/*    />*/}
-            {/*  </IconButton>*/}
-            {/*</Stack>*/}
           </Stack>
 
           <Stack

@@ -34,7 +34,7 @@ const FooterTop = (props) => {
 									mt: "-65px",
 									textAlign: { xs: "center", md: "left" },
 									ml: { md: "-30px" },
-									position: { sm: "absolute", bottom: "10px" },
+									position: { sm: "absolute", bottom: "5px" },
 								}}
 							>
 								<SubscribeImage />

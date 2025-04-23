@@ -49,6 +49,7 @@ const TopDetails = (props) => {
     refetchOrderDetails,
     refetchTrackData,
     dataIsLoading,
+    page,
   } = props;
   const { t } = useTranslation();
   const theme = useTheme();
@@ -370,7 +371,7 @@ const TopDetails = (props) => {
         !data?.[0]?.item_campaign_id &&
         trackData &&
         trackData?.order_status === "delivered" &&
-        getToken() &&
+        getToken() && data?.length > 0 &&
         hasChatAndReview(trackData?.store)?.isReview === 1 && (
           <Stack direction="row" spacing={0.5}>
             <Link href={`/rate-and-review/${id}`}>
@@ -469,6 +470,7 @@ const TopDetails = (props) => {
           trackDataIsLoading={trackDataIsLoading}
           trackDataIsFetching={trackDataIsFetching}
           handleOfflineClose={handleOfflineClose}
+          page={page}
         />
       </CustomModal>
 

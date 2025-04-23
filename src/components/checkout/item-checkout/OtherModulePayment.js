@@ -28,7 +28,7 @@ import wallet from "../assets/wallet.png";
 import money from "../assets/money.png";
 import OfflinePaymentIcon from "../assets/OfflinePaymentIcon";
 
-const PayButton = styled(Button)(({ theme, value, paymentMethod }) => ({
+export const PayButton = styled(Button)(({ theme, value, paymentMethod }) => ({
   padding: "15px 15px",
   gap: "5px",
   border: "1px solid",

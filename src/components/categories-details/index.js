@@ -11,11 +11,10 @@ import StoresInfoCard from "../home/stores-with-filter/cards-grid/StoresInfoCard
 import noData from "../../../public/static/nodata.png";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useSelector } from "react-redux";
-import { getModuleId } from "../../helper-functions/getModuleId";
 import ProductCardShimmer from "../search/ProductCardShimmer";
 import GroupButtons from "../GroupButtons";
-import { getItemsOrFoods } from "../../helper-functions/getItemsOrFoods";
-import { getStoresOrRestaurants } from "../../helper-functions/getStoresOrRestaurants";
+import { getItemsOrFoods } from "helper-functions/getItemsOrFoods";
+import { getStoresOrRestaurants } from "helper-functions/getStoresOrRestaurants";
 import {
   not_found_text,
   not_found_text_item,

@@ -3,13 +3,10 @@ import CustomSideDrawer from "../side-drawer/CustomSideDrawer";
 import WishLists from "./WishLists";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { t } from "i18next";
-import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import DrawerHeader from "../added-cart-view/DrawerHeader";
-import CartIcon from "../added-cart-view/assets/CartIcon";
-import { useTheme } from "@emotion/react";
 
 const WishListCardView = (props) => {
-  const theme = useTheme();
   const closeHandler = () => {
     setSideDrawerOpen(false);
   };

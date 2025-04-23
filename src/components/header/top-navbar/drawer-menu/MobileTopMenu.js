@@ -18,6 +18,8 @@ import { getModuleId } from "helper-functions/getModuleId";
 import { setPopularStores } from "redux/slices/storedData";
 import ThemeSwitches from "../ThemeSwitches";
 import CustomLanguage from "../language/CustomLanguage";
+import { getModule } from "helper-functions/getLanguage";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
 const MobileTopMenu = ({
   handleRoute,
@@ -36,8 +38,9 @@ const MobileTopMenu = ({
     location = localStorage.getItem("location");
     token = localStorage.getItem("token");
   }
-  const { configData, countryCode, language } = useSelector(
-    (state) => state.configData
+  const { countryCode, language } = useSelector((state) => state.configData);
+  const rentalCategories = useSelector(
+    (state) => state?.rentalCategoriesLists?.rentalCategories
   );
 
   const { data: categoriesData, refetch } = useGetCategories();
@@ -77,21 +80,26 @@ const MobileTopMenu = ({
   }, []);
   const popular = t("Popular");
   const latest = t("Latest");
+
+
   const collapsableMenu = {
     cat: {
       text: "Categories",
-      items: categoriesData?.data?.map((item) => item),
+      items:
+        getModule()?.module_type !== "rental"
+          ? categoriesData?.data?.map((item) => item)
+          : rentalCategories?.map((item) => item),
       path: "/category",
     },
     latest: {
       text: `${latest} ${getStoresOrRestaurants()}`,
       items: latestStore?.stores?.slice(0, 12)?.map((i) => i),
-      path: "/store",
+      path:  getCurrentModuleType() === "rental" ? "/rental/provider-details" : "/store",
     },
     popularStore: {
       text: `${popular} ${getStoresOrRestaurants()}`,
       items: popularStores?.map((i) => i),
-      path: "/store",
+      path: getCurrentModuleType() === "rental" ? "/rental/provider-details" : "/store",
     },
     profile: {
       text: "Profile",

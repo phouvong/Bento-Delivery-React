@@ -22,7 +22,6 @@ const StoreRegistration = () => {
   const dispatch = useDispatch();
   const router = useRouter();
   const [resData, setResData] = useState({});
-  // const [activeStep, setActiveStep] = useState(0);
   const { flag, active } = router.query;
   const { allData, activeStep } = useSelector((state) => state.storeRegData);
   const [formValues, setFormValues] = useState({});
@@ -136,7 +135,7 @@ const StoreRegistration = () => {
       <CustomContainer>
         <CustomStackFullWidth justify="center" mt={{ xs: "1rem", md: "1rem" }}>
           <Typography fontSize="36px" fontWeight="700" textAlign="center">
-            {t("Store Application")}
+            {t("Vendor Application")}
           </Typography>
           <StoreStepper flag={flag} activeStep={activeStep} />
           {handleActiveStep()}

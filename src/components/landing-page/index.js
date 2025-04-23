@@ -14,6 +14,7 @@ import DiscountBanner from "./DiscountBanner";
 import HeroSection from "./hero-section/HeroSection";
 import Registration from "./Registration";
 const MapModal = dynamic(() => import("../Map/MapModal"));
+
 const LandingPage = ({ configData, landingPageData }) => {
   const Testimonials = dynamic(() => import("./Testimonials"), {
     ssr: false,
@@ -22,6 +23,7 @@ const LandingPage = ({ configData, landingPageData }) => {
   const [open, setOpen] = useState(false);
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+
   const { coords } = useGeolocated({
     positionOptions: {
       enableHighAccuracy: false,

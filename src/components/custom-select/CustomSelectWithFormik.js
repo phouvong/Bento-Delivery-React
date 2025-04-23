@@ -63,19 +63,19 @@ const CustomSelectWithFormik = (props) => {
         onChange={handleChange}
         error={Boolean(touched && errors)}
         helperText={touched && errors}
-        displayEmpty // This makes the placeholder visible
+        placeholder={placeholder}
+        displayEmpty
+        renderValue={value !== "" ? undefined : () => placeholder}
         {...fieldProps}
         sx={{
           height: "45px",
           "& .MuiSelect-select": {
             height: "45px",
             display: "flex",
-            alignItems: "center", // Center the text vertically
+            alignItems: "center",
           },
         }}
       >
-        {/* Placeholder MenuItem */}
-
         {/* Dynamic options */}
         {selectFieldData?.length > 0 &&
           selectFieldData.map((item, index) => (
@@ -83,8 +83,9 @@ const CustomSelectWithFormik = (props) => {
               key={index}
               value={item.value}
               sx={{
-                "&:hover": {
+                "&:not(.Mui-selected):hover": {
                   backgroundColor: "primary.main",
+                  color: "#fff",
                 },
               }}
             >
@@ -92,9 +93,9 @@ const CustomSelectWithFormik = (props) => {
             </MenuItem>
           ))}
       </Select>
-      {touched && errors && !value && (
+      {touched && errors && (
         <FormHelperText sx={{ color: theme.palette.error.main }}>
-          {t("Please select an option.")}
+          {t(errors)}
         </FormHelperText>
       )}
     </FormControl>

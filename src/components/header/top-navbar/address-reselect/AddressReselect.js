@@ -7,12 +7,12 @@ import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { CustomStackFullWidth } from "../../../../styled-components/CustomStyles.style";
 import AddressReselectPopover from "./AddressReselectPopover";
+import { getModule } from "helper-functions/getLanguage";
 
 const AddressReselect = ({ location, setOpenDrawer }) => {
   const theme = useTheme();
   const router = useRouter();
   const [openReselectModal, setOpenReselectModal] = useState(false);
-  //const { configData, token } = useSelector((state) => state.configDataSettings);
   const [openPopover, setOpenPopover] = useState(false);
   const [address, setAddress] = useState(null);
   const { t } = useTranslation();
@@ -20,19 +20,18 @@ const AddressReselect = ({ location, setOpenDrawer }) => {
   if (typeof window !== "undefined") {
     token = localStorage.getItem("token");
   }
+
+  let currentLatLngForMar;
+  if (typeof localStorage.getItem("currentLatLng") !== undefined) {
+    currentLatLngForMar = JSON.parse(localStorage.getItem("currentLatLng"));
+  }
+
+  let currentLatLng;
   useEffect(() => {
     let currentLatLng;
     if (typeof localStorage.getItem("currentLatLng") !== undefined) {
       currentLatLng = JSON.parse(localStorage.getItem("currentLatLng"));
       const location = localStorage.getItem("location");
-
-      // setAddress({
-      //   ...currentLatLng,
-      //   latitude: currentLatLng?.lat,
-      //   longitude: currentLatLng?.lng,
-      //   address: location,
-      //   address_type: "Selected Address1",
-      // });
     }
   }, []);
 
@@ -45,28 +44,16 @@ const AddressReselect = ({ location, setOpenDrawer }) => {
         const value = [address.zone_ids];
 
         localStorage.setItem("zoneid", JSON.stringify(address.zone_ids));
-        toast.success(t("New delivery address selected."));
+        toast.success(t(`New ${getModule()?.module_type==="rental" ? "Pickup" : "Delivery"} address selected.`));
         handleClosePopover();
-        // window.location.reload();
       }
     }
   }, [address]);
   const handleClickToLandingPage = () => {
     setOpenPopover(true);
     setOpenDrawer(false);
-    // if (token) {
-    // } else {
-    //   toast.error(t("Login required."));
-    // }
-    //
-    // setOpenReselectModal(true);
-    // localStorage.removeItem("location");
-    // localStorage.removeItem("zoneid");
-    // router.push("/");
   };
-  const handleModalClose = () => {
-    setOpenReselectModal(false);
-  };
+
   const anchorRef = useRef(null);
   const handleClosePopover = () => {
     setOpenPopover(false);
@@ -133,6 +120,7 @@ const AddressReselect = ({ location, setOpenDrawer }) => {
         address={address}
         setAddress={setAddress}
         token={token}
+        currentLatLngForMar={currentLatLngForMar}
       />
     </>
   );

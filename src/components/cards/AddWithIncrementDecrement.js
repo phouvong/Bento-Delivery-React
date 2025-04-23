@@ -1,12 +1,12 @@
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import ShoppingBagIcon from "@mui/icons-material/ShoppingBag";
-import { alpha, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { alpha, Typography, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Box, Stack } from "@mui/system";
 import React, { useState } from "react";
-import { getCurrentModuleType } from "../../helper-functions/getCurrentModuleType";
-import { ModuleTypes } from "../../helper-functions/moduleTypes";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { ModuleTypes } from "helper-functions/moduleTypes";
 import Loading from "../custom-loading/Loading";
 import { PrimaryToolTip } from "./QuickView";
 
@@ -60,14 +60,13 @@ const AddWithIncrementDecrement = (props) => {
     isLoading,
     updateLoading,
   } = props;
+  const theme = useTheme();
   const [isAdded, setIsAdded] = useState(false);
   const [showIncDec, setShowIncDec] = useState(false);
-  const theme = useTheme();
-  const isSmallSize = useMediaQuery(theme.breakpoints.down("sm"));
+
   const handleCart = (e) => {
     e.stopPropagation();
     handleCardHoverFromCartIconClick?.(e);
-    // setIsAdded(true);
     addToCartHandler?.(e);
   };
 
@@ -75,6 +74,7 @@ const AddWithIncrementDecrement = (props) => {
     e.stopPropagation();
     handleIncrement?.();
   };
+
   const decrementHandler = (e) => {
     e.stopPropagation();
     handleDecrement?.();
@@ -89,6 +89,7 @@ const AddWithIncrementDecrement = (props) => {
     } else {
     }
   };
+
   const handleMouseLeave = () => {
     if (verticalCard) {
       setTimeout(() => {
@@ -96,12 +97,14 @@ const AddWithIncrementDecrement = (props) => {
       }, 500);
     }
   };
+
   const handleMouseEnter = () => {
     if (verticalCard) {
       setIsHover(false);
       setShowIncDec(true);
     }
   };
+
   const handleBackgroundColor = () => {
     if (verticalCard) {
       return theme.palette.neutral[300];
@@ -109,6 +112,7 @@ const AddWithIncrementDecrement = (props) => {
       return alpha(theme.palette.neutral[400], 0.1);
     }
   };
+
   const cardWiseManage = () => {
     if (verticalCard) {
       if (isProductExist) {
@@ -124,7 +128,6 @@ const AddWithIncrementDecrement = (props) => {
                 backgroundColor: handleBackgroundColor(),
                 borderRadius: "4px",
                 transition: "all ease 0.5s",
-                // position: "relative",
               }}
             >
               <CustomButton
@@ -208,7 +211,6 @@ const AddWithIncrementDecrement = (props) => {
             sx={{
               backgroundColor: handleBackgroundColor(),
               borderRadius: "10px",
-              // position: "relative",
             }}
           >
             <CustomButton onClick={(e) => decrementHandler(e)}>
@@ -263,10 +265,6 @@ const AddWithIncrementDecrement = (props) => {
                   transition: "all ease 0.5s",
                   border: (theme) =>
                     `1px solid ${alpha(theme.palette.neutral[400], 0.2)}`,
-                  // "&:hover": {
-                  //   backgroundColor: verticalCard && "primary.main",
-                  //   color: verticalCard && "whiteContainer.main",
-                  // },
                 }}
               >
                 <Loading color={theme.palette.primary.main} />
@@ -301,10 +299,6 @@ const AddWithIncrementDecrement = (props) => {
                         : onHover
                         ? "none"
                         : `1px solid ${alpha(theme.palette.neutral[400], 0.2)}`,
-                    // "&:hover": {
-                    //   backgroundColor: verticalCard && "primary.main",
-                    //   color: verticalCard && "whiteContainer.main",
-                    // },
                   }}
                 >
                   <ShoppingBagIcon fontSize="small" />
@@ -316,6 +310,7 @@ const AddWithIncrementDecrement = (props) => {
       }
     }
   };
+
   return <>{cardWiseManage()}</>;
 };
 

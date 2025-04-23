@@ -6,13 +6,14 @@ import { Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { SEARCH_NO_DATA_FOUND } from "../utils/staticTexts";
 import NoStoresSvg from "./svg-components/NoStoresSvg";
+import NoRentalSvg from "components/svg-components/NoRentalSvg";
 
 const EmptySearchResults = (props) => {
-  const { isItems, text } = props;
+  const { isItems, isRental, text } = props;
   const { t } = useTranslation();
   return (
     <CustomStackFullWidth alignItems="center" justifyContent="center">
-      {isItems ? <NoItemsSvg /> : <NoStoresSvg />}
+      {isRental ? <NoRentalSvg /> : isItems ? <NoItemsSvg /> : <NoStoresSvg />}
       <Typography
         sx={{
           textTransform: "capitalize",

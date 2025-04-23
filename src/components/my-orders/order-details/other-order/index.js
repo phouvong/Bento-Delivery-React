@@ -30,7 +30,7 @@ import { useSelector } from "react-redux";
 import { getGuestId } from "helper-functions/getToken";
 
 const OtherOrder = (props) => {
-  const { configData, data, refetch, id, dataIsLoading } = props;
+  const { configData, data, refetch, id, dataIsLoading, page } = props;
   const [openModal, setOpenModal] = useState(false);
   const [currentTab, setCurrentTab] = useState(orderDetailsMenuData[0]?.name);
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
@@ -168,6 +168,7 @@ const OtherOrder = (props) => {
             refetchOrderDetails={refetch}
             refetchTrackData={refetchTrackOrder}
             dataIsLoading={dataIsLoading}
+            page={page}
           />
           <CustomDivider border="1px" />
           {trackDataIsLoading ? null : (
@@ -204,6 +205,7 @@ const OtherOrder = (props) => {
             refetchOrderDetails={refetch}
             refetchTrackData={refetchTrackOrder}
             dataIsLoading={dataIsLoading}
+            page={page}
           />
           <CustomDivider />
           {trackDataIsLoading ? null : (

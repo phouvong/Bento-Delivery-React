@@ -22,11 +22,12 @@ import { setWelcomeModal } from "redux/slices/utils";
 
 const Menu = ({ onClose, cartListRefetch }) => {
   const { t } = useTranslation();
-  const [openModal, setOpenModal] = useState(false);
-  const [isLogoutLoading, setIsLogoutLoading] = useState(false);
-  const { configData } = useSelector((state) => state.configData);
   const dispatch = useDispatch();
   const router = useRouter();
+  const [openModal, setOpenModal] = useState(false);
+  const [isLogoutLoading, setIsLogoutLoading] = useState(false);
+  const { configData ,modules} = useSelector((state) => state.configData);
+
   const handleLogout = async () => {
     setIsLogoutLoading(true);
     dispatch(setWelcomeModal(false));
@@ -41,23 +42,14 @@ const Menu = ({ onClose, cartListRefetch }) => {
         router.push("/home");
         setOpenModal(false);
 
-        // dispatch(removeToken())
-        // let a = []
-        // dispatch(clearWishList(a))
-        // dispatch(setClearCart())
-        //
-        // toast.success(t(logoutSuccessFull))
-        // onClose?.()
-        // if (router.pathname === '/') {
-        //   router.push('/')
-        // } else {
-        //   router.push('/home')
-        // }
+      
       }, 500);
     } catch (err) {
       //   toast.error('Unable to logout.');
     }
   };
+
+  
   const handleClick = (item) => {
     if (item?.id === 10) {
       router.push({
@@ -79,7 +71,9 @@ const Menu = ({ onClose, cartListRefetch }) => {
           if (
             (configData?.customer_wallet_status === 0 && item.id === 4) ||
             (configData?.loyalty_point_status === 0 && item.id === 5) ||
-            (configData?.ref_earning_status === 0 && item.id === 6)
+            (configData?.ref_earning_status === 0 && item.id === 6) || (
+            (!modules?.find((item) => item?.module_type === 'rental') && item.id === 3) || (modules?.find((item) => item?.module_type === 'rental')?.status === 0 && item.id === 3)
+            )
           ) {
             return null;
           } else {

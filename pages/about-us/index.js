@@ -10,9 +10,15 @@ import { getImageUrl } from "utils/CustomFunctions";
 const Index = ({ configData, landingPageData }) => {
   const { t } = useTranslation();
   const { data, refetch, isFetching } = useGetPolicyPage("/api/v1/about-us");
+
   useEffect(() => {
-    refetch();
-  }, []);
+    if (refetch) refetch();
+  }, [refetch]);
+
+  if (!configData) {
+    return <div>{t("Configuration data is not available")}</div>;
+  }
+
   return (
     <>
       <CssBaseline />
@@ -32,25 +38,41 @@ const Index = ({ configData, landingPageData }) => {
 };
 
 export default Index;
-export const getStaticProps = async () => {
-  // Fetch configuration data
-  const configRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/config`,
-    {
-      method: "GET",
-      headers: {
-        "X-software-id": 33571750,
-        "X-server": "server",
-        origin: process.env.NEXT_CLIENT_HOST_URL,
-      },
-    }
-  );
-  const config = await configRes.json();
 
-  return {
-    props: {
-      configData: config, // Pass configuration data as props
-    },
-    revalidate: 3600, // Revalidate every 1 hour (3600 seconds)
-  };
+export const getStaticProps = async () => {
+  try {
+    const configRes = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/config`,
+      {
+        method: "GET",
+        headers: {
+          "X-software-id": 33571750,
+          "X-server": "server",
+          origin: process.env.NEXT_CLIENT_HOST_URL,
+        },
+      }
+    );
+
+    if (!configRes.ok) {
+      throw new Error(`Failed to fetch config: ${configRes.statusText}`);
+    }
+
+    const config = await configRes.json();
+
+    return {
+      props: {
+        configData: config,
+      },
+      revalidate: 3600,
+    };
+  } catch (error) {
+    console.error("Error fetching config data:", error);
+
+    return {
+      props: {
+        configData: null,
+      },
+      revalidate: 3600,
+    };
+  }
 };

@@ -13,7 +13,7 @@ import useGetZoneId from "../../../../api-manage/hooks/react-query/google-api/us
 import dynamic from "next/dynamic";
 const MapModal = dynamic(() => import("../../../Map/MapModal"));
 const AddressReselectPopover = (props) => {
-  const { anchorEl, onClose, open, t, address, setAddress, token, ...other } =
+  const { anchorEl, onClose, open, t, address, setAddress, token, currentLatLngForMar, ...other } =
     props;
   const theme = useTheme();
   const [openMapModal, setOpenMapModal] = useState(false);
@@ -29,6 +29,7 @@ const AddressReselectPopover = (props) => {
     userDecisionTimeout: 5000,
     isGeolocationEnabled: true,
   });
+
   const handleAgreeLocation = () => {
     // e.stopPropagation();
     if (coords) {
@@ -55,7 +56,7 @@ const AddressReselectPopover = (props) => {
 
   useEffect(() => {
     handleSetLocation();
-  }, [currentLocation, location]);
+  }, [currentLocation, location,address?.address]);
   useEffect(() => {
     if (geoCodeResults?.results && showCurrentLocation) {
       setCurrentLocation(geoCodeResults?.results[0]?.formatted_address);
@@ -164,7 +165,7 @@ const AddressReselectPopover = (props) => {
         </Stack>
       </Popover>
       {openMapModal && (
-        <MapModal open={openMapModal} handleClose={handleCloseMapModal} />
+        <MapModal open={openMapModal} handleClose={handleCloseMapModal}  selectedLocation={currentLatLngForMar}/>
       )}
     </>
   );

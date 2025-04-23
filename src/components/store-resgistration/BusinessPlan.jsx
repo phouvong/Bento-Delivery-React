@@ -32,7 +32,7 @@ const BusinessPlan = ({ formSubmit, isLoading }) => {
   const [selectedPackage, setSelectedPackage] = useState(null);
   const [isHover, setIsHover] = useState(false);
   const settings = {
-    infinite: true,
+    infinite: false,
     speed: 500,
     slidesToShow: 3,
     slidesToScroll: 1,

@@ -1,27 +1,18 @@
-import React, { useEffect } from "react";
-import { CustomStackFullWidth } from "../../../../styled-components/CustomStyles.style";
-import { alpha, Typography, useTheme } from "@mui/material";
-import { t } from "i18next";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
+import { Typography, useTheme } from "@mui/material";
 import { Stack } from "@mui/system";
 import CustomImageContainer from "../../../CustomImageContainer";
-import freeD from "../../../../../public/static/landing-page/image 24.svg";
-import food from "../../../../../public/static/landing-page/food.svg";
 import { useTranslation } from "react-i18next";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import useGetItemCampaigns from "../../../../api-manage/hooks/react-query/useGetItemCampaigns";
-import { useSelector } from "react-redux";
 import ViewMore from "../ViewMore";
-import Link from "next/link";
 import { Skeleton } from "@mui/material";
-import { getModuleId } from "../../../../helper-functions/getModuleId";
+import { getModuleId } from "helper-functions/getModuleId";
 import { useRouter } from "next/router";
-import { getImageUrl } from "utils/CustomFunctions";
 
 const NavFoodCampaigns = ({ campaigns, isLoading }) => {
   const router = useRouter();
   const { t } = useTranslation();
   const theme = useTheme();
-  const { configData } = useSelector((state) => state.configData);
 
   const handleClick = (e, item) => {
     e.stopPropagation();
@@ -37,6 +28,7 @@ const NavFoodCampaigns = ({ campaigns, isLoading }) => {
       { shallow: true }
     );
   };
+
   return (
     <CustomStackFullWidth spacing={4} sx={{ height: "100%" }}>
       <Typography variant="h6" fontWeight="500" textAlign="center">

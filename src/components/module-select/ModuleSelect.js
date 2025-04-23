@@ -1,11 +1,10 @@
 import { Skeleton, styled, Tooltip } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import React from "react";
-import { setSelectedModule } from "../../redux/slices/utils";
+import { setSelectedModule } from "redux/slices/utils";
 import CustomImageContainer from "../CustomImageContainer";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
-import { getImageUrl } from "utils/CustomFunctions";
 
 const Container = styled(Stack)(({ theme }) => ({
   position: "fixed",
@@ -16,6 +15,8 @@ const Container = styled(Stack)(({ theme }) => ({
   background: theme.palette.background.paper,
   borderTopLeftRadius: "29px",
   borderBottomLeftRadius: "29px",
+  maxHeight: "calc(100vh - 300px)",
+  overflowY: "auto",
   [theme.breakpoints.down("sm")]: {
     display: "none",
   },
@@ -25,6 +26,7 @@ const ModuleContainer = styled(Box)(({ theme, selected }) => ({
   cursor: "pointer",
   width: "62px",
   height: "62px",
+  minHeight: "62px",
   borderRadius: "11px",
   display: "flex",
   alignItems: "center",
@@ -53,24 +55,22 @@ export const zoneWiseModule = (data) => {
   if (typeof window !== "undefined") {
     currentZoneIds = JSON.parse(localStorage.getItem("zoneid"));
   }
-  const result = data.filter((moduleItem) => {
+  return data.filter((moduleItem) => {
     const zoneIds = moduleItem?.zones?.map((zone) => zone.id);
     return currentZoneIds?.some((id) => zoneIds?.includes(id));
   });
-  return result;
 };
 
 const ModuleSelect = ({
   moduleSelectHandler,
   selectedModule,
   data,
-  configData,
   dispatch,
 }) => {
+  const router = useRouter();
   const { interestId, existingModuleId } = useSelector(
     (state) => state.categoryIds
   );
-  const router = useRouter();
 
   const handleModuleSelect = (item) => {
     dispatch(setSelectedModule(item));
@@ -84,6 +84,7 @@ const ModuleSelect = ({
       router.push("/interest", undefined, { shallow: true });
     }
   };
+
   return (
     <Container p=".8rem" spacing={2}>
       {data ? (
