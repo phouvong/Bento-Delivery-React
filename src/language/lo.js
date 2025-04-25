@@ -1,4 +1,4 @@
-export const english = {
+export const lao = {
   "Valid till": "ໃຊ້ໄດ້ເຖິງ",
   get: "ເອົາ",
   Sold: "ຂາຍ",
