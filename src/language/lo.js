@@ -1059,8 +1059,8 @@ export const lao = {
   "Notify me when it is back": "Notify me when it is back",
   "Remaining Wallet Balance": "Remaining Wallet Balance",
 
-  "FIND YOUR HAPPINESS": "FIND YOUR HAPPINESS",
-  "For the love of delicious food.": "For the love of delicious food.",
+  "FIND YOUR HAPPINESS": "ຄົ້ນຫາອາຫານທີ່ທ່ານມັກ",
+  "For the love of delicious food.": "ມີອາຫານຫລາກຫລາຍທີ່ພ້ອມເສີບທ່ານແລ້ວ.",
 
   "Deliver to the front door": "Deliver to the front door",
   "Deliver to the reception desk": "Deliver to the reception desk",
@@ -1126,11 +1126,11 @@ export const lao = {
   "We provide best quality & valuable products around the world":
     "We provide best quality & valuable products around the world",
   "Popular Store": "Popular Store",
-  "Search foods and restaurants...": "Search foods and restaurants...",
-  "Wanna Try  Again!": "Wanna Try  Again!",
+  "Search foods and restaurants...": "ຄົ້ນຫາອາຫານ ແລະ ຮ້ານທີ່ທ່ານຕ້ອງການ...",
+  "Wanna Try  Again!": "ຕ້ອງການສັ່ງອີກຄັ້ງ!",
   "Get your recent food from the restaurant you recently visited":
-    "Get your recent food from the restaurant you recently visited",
-  "Special Food Offers": "Special Food Offers",
+    "ສັ່ງເອົາອາຫານທີ່ທ່ານເຄີຍສັ່ງຜ່ານມາແລ່ວ",
+  "Special Food Offers": "ຂໍ້ສະເໜີອາຫານສຸດພິເສດ",
   "Sorry no data found related to your search":
     "Sorry no data found related to your search",
   "Items not found!": "Items not found!",
