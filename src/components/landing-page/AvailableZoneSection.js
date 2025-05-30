@@ -146,7 +146,7 @@ const AvailableZoneSection = ({ landingPageData }) => {
 														textDecoration: "none",
 														"&:hover": {
 															boxShadow: `0px 4px 12px 0px ${theme.palette.neutral[100]}`,
-															color: "#039d55",
+															color: "#FF361F",
 														},
 													}}
 													data-bs-toggle="popover"
