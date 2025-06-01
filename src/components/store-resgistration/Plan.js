@@ -17,7 +17,7 @@ const PlanItemContainer = styled(Box)(({ theme, isActive, activeItem }) => ({
   "--border-clr": isActive
     ? theme.palette.neutral[400]
     : theme.palette.neutral[300],
-  "--success": isActive ? "#ffffff" : "#FF361F",
+  "--success": isActive ? "#ffffff" : "#039D55",
   "--primary-clr": isActive ? "#f99c4d" : "#00868f",
   backgroundColor: isActive
     ? theme.palette.primary.main

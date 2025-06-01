@@ -22,7 +22,7 @@ const TripOngoingLocationIcon = () => {
 				/>
 				<path
 					d="M7.97656 14.4873H24.3384"
-					stroke="#FF361F"
+					stroke="#039D55"
 					strokeWidth="1.30895"
 					strokeLinecap="round"
 					strokeDasharray="2.62 2.62"

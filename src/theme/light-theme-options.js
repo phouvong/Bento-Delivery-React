@@ -32,7 +32,7 @@ const background = {
 const divider = "#E6E8F0";
 
 const primary = {
-	main: "#FF361F",
+	main: "#039D55",
 	deep: "#026034",
 	light: "#EBFDF2",
 	dark: "#1c6641",
@@ -43,13 +43,13 @@ const primary = {
 	customType3: "#29CE00",
 	overLay: "#000000",
 	lite: "rgba(3, 157, 85, 0.1)",
-	icon: "#FF361F",
+	icon: "#039D55",
 };
 const moduleTheme = {
-	pharmacy: "#FF361F",
-	ecommerce: "#FF361F",
-	food: "#FF361F",
-	parcel: "#FF361F",
+	pharmacy: "#039D55",
+	ecommerce: "#039D55",
+	food: "#039D55",
+	parcel: "#039D55",
 };
 const horizontalCardBG = "#E4FFF3";
 
