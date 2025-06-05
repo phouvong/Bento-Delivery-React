@@ -253,7 +253,7 @@ export const baseThemeOptions = {
     button: {
       fontWeight: 600,
     },
-    fontFamily: '"Roboto","sans-serif"',
+    fontFamily: '"Noto Serif Lao", serif',
     //this is default font size for typography
     body1: {
       fontSize: "0.875rem",
