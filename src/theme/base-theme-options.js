@@ -253,7 +253,7 @@ export const baseThemeOptions = {
     button: {
       fontWeight: 600,
     },
-    fontFamily: '"Rubik","sans-serif"',
+    fontFamily: '"TT Norms Pro Sans Serif"',
     //this is default font size for typography
     body1: {
       fontSize: "0.875rem",
