@@ -1,7 +1,6 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import { english } from "./en";
-import { lao } from "./lo";
 import { bengali } from "./bn";
 import { arabic } from "./ar";
 import { spain } from "./es";
@@ -12,9 +11,6 @@ import { spain } from "./es";
 const resources = {
   en: {
     translation: english,
-  },
-  lo: {
-    translation: lao,
   },
   es: {
     translation: spain,
@@ -31,8 +27,8 @@ i18n
   .use(initReactI18next) // passes i18n down to react-i18next
   .init({
     resources,
-    lng: "lo", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
-    fallbackLng: "lo",
+    lng: "en", // language to use, more information here: https://www.i18next.com/overview/configuration-options#languages-namespaces-resources
+    fallbackLng: "en",
     interpolation: {
       escapeValue: false, // react already safes from xss
     },
