@@ -4,6 +4,7 @@ import CustomImageContainer from "../../CustomImageContainer";
 
 import { Box } from "@mui/system";
 import { getImageUrl } from "utils/CustomFunctions";
+import NextImage from "components/NextImage";
 
 const ImageContainer = styled(Box)(({ theme }) => ({
   position: "relative",
@@ -12,6 +13,9 @@ const ImageContainer = styled(Box)(({ theme }) => ({
   maxHeight: "190px",
   maxWidth: "200px",
   overflow: "hidden",
+  img:{
+    width:"100%",
+    height: "100%",},
   [theme.breakpoints.up("md")]: {
     height: "190px",
   },
@@ -51,11 +55,11 @@ const Grocery = (props) => {
             sx={{ cursor: "pointer" }}
           >
             <ImageContainer>
-              <CustomImageContainer
+              <NextImage
                 src={item?.image_full_url}
                 alt={item?.title}
-                height="100%"
-                width="100%"
+                height={190}
+                width={200}
                 objectfit="cover"
               />
             </ImageContainer>

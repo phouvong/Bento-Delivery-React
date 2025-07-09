@@ -76,6 +76,7 @@ import ModuleModal from "./ModuleModal";
 import ProductsUnavailable from "./ProductsUnavailable";
 import QuickView, { PrimaryToolTip } from "./QuickView";
 import SpecialCard, { FoodHalalHaram, FoodVegNonVegFlag } from "./SpecialCard";
+import NextImage from "components/NextImage";
 
 export const CardWrapper = styled(Card)(
   ({
@@ -287,26 +288,18 @@ const ProductCard = (props) => {
     }
   };
   const handleBadge = () => {
-    if (Number.parseInt(item?.store_discount) === 0) {
-      if (Number.parseInt(item?.discount) > 0) {
-        if (item?.discount_type === "percent") {
-          return <CustomBadge top={10} text={`${item?.discount}${p_off}`} />;
-        } else {
-          return (
-            <CustomBadge
-              top={10}
-              text={`${getAmountWithSign(
-                item?.discount,
-                item?.discount % 1 ? true : false
-              )}`}
-            />
-          );
-        }
-      }
-    } else {
-      if (Number.parseInt(item?.store_discount) > 0) {
+    if (Number.parseInt(item?.discount) > 0) {
+      if (item?.discount_type === "percent") {
+        return <CustomBadge top={10} text={`${item?.discount}${p_off}`} />;
+      } else {
         return (
-          <CustomBadge top={10} text={`${item?.store_discount}${p_off}`} />
+          <CustomBadge
+            top={10}
+            text={`${getAmountWithSign(
+              item?.discount,
+              item?.discount % 1 ? true : false
+            )}`}
+          />
         );
       }
     }
@@ -1164,11 +1157,11 @@ const ProductCard = (props) => {
                 </Stack>
               )}
               {handleBadge()}
-              <CustomImageContainer
+              <NextImage
                 src={item?.image_full_url}
                 alt={item?.title}
-                height="100%"
-                width="100%"
+                height={horizontalcard?"144":"212"}
+                width={horizontalcard?"131":"195"}
                 objectfit="cover"
                 borderRadius="3px"
               />

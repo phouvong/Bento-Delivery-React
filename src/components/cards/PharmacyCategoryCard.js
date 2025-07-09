@@ -1,11 +1,11 @@
 import { Skeleton, styled, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { getModuleId } from "helper-functions/getModuleId";
-import { btoa } from "next/dist/compiled/@edge-runtime/primitives/encoding";
 import Link from "next/link";
 import { useState } from "react";
 import { textWithEllipsis } from "styled-components/TextWithEllipsis";
 import CustomImageContainer from "../CustomImageContainer";
+import NextImage from "components/NextImage";
 
 const Wrapper = styled(Box)(({ theme }) => ({
   cursor: "pointer",
@@ -61,7 +61,7 @@ const PharmacyCategoryCard = ({ image, title, id, onlyshimmer }) => {
           search: "category",
           id: id,
           module_id: `${getModuleId()}`,
-          name: title && btoa(title),
+          name: title && (title),
           data_type: "category",
         },
       }}
@@ -78,11 +78,11 @@ const PharmacyCategoryCard = ({ image, title, id, onlyshimmer }) => {
               variant="rectangular"
             />
           ) : (
-              <CustomImageContainer
+              <NextImage
                   src={image}
                   alt={title}
                   height={122}
-                  width="100%"
+                  width={122}
                   borderRadius="60px 60px 0px 0px"
                   objectFit="cover"
                   loading="eager"

@@ -15,7 +15,7 @@ import { getStoresOrRestaurants } from "helper-functions/getStoresOrRestaurants"
 import { getGuestId, getToken } from "helper-functions/getToken";
 import moment from "moment/moment";
 import Router from "next/router";
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer, useState,useRef } from "react";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "react-query";
@@ -85,6 +85,32 @@ import thunderstorm from "../assets/thunderstorm.svg";
 import { useFormik } from "formik";
 
 import * as Yup from "yup";
+import {useGetTax} from "api-manage/hooks/react-query/order-place/useGetTax";
+export const deepEqual=(obj1, obj2)=> {
+  if (obj1 === obj2) return true;
+
+  if (
+    typeof obj1 !== "object" ||
+    obj1 === null ||
+    typeof obj2 !== "object" ||
+    obj2 === null
+  ) {
+    return false;
+  }
+
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+  if (keys1.length !== keys2.length) return false;
+
+  for (const key of keys1) {
+    if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 
 const ItemCheckout = (props) => {
   const { configData, router, page, cartList, campaignItemList, totalAmount } =
@@ -160,6 +186,7 @@ const ItemCheckout = (props) => {
     refetch: refetchOfflinePaymentOptions,
     isLoading: offlineIsLoading,
   } = useGetOfflinePaymentOptions();
+  const {mutate:taxMutate,data}=useGetTax()
 
   const passwordHandler = (value) => {
     formik.setFieldValue("password", value);
@@ -172,23 +199,12 @@ const ItemCheckout = (props) => {
     refetchOfflinePaymentOptions();
   }, []);
   useEffect(() => {
+
     if (storeId) {
       refetch();
     }
   }, [storeId]);
 
-  useEffect(() => {
-    const currentLatLng = JSON.parse(localStorage.getItem("currentLatLng"));
-    const location = localStorage.getItem("location");
-    setAddress({
-      ...currentLatLng,
-      latitude: currentLatLng?.lat,
-      longitude: currentLatLng?.lng,
-      address: location,
-      address_type: "Selected Address",
-    });
-    refetch();
-  }, []);
   const currentLatLng = JSON.parse(
     window.localStorage.getItem("currentLatLng")
   );
@@ -245,7 +261,6 @@ const ItemCheckout = (props) => {
       onError: onSingleErrorResponse,
     }
   );
-  useEffect(() => {}, [customerData]);
 
   useEffect(() => {
     const currentLatLng = JSON.parse(localStorage.getItem("currentLatLng"));
@@ -272,6 +287,7 @@ const ItemCheckout = (props) => {
     );
     setTaxAmount(taxAmount);
   }, [cartList, couponDiscount, storeData]);
+
   useEffect(() => {
     const total_order_amount = getFinalTotalPrice(
       cartList,
@@ -312,10 +328,7 @@ const ItemCheckout = (props) => {
             : [],
         add_on_qtys:
           cart?.selectedAddons?.length > 0
-            ? cart?.selectedAddons?.map((add) => {
-                totalQty += add.quantity;
-                return totalQty;
-              })
+            ? cart?.selectedAddons?.map((add) => add.quantity)
             : [],
         add_ons:
           cart?.selectedAddons?.length > 0
@@ -492,6 +505,32 @@ const ItemCheckout = (props) => {
       };
     }
   };
+
+
+  const prevCartRef = useRef(null);
+  const prevCouponRef = useRef(null);
+
+  useEffect(() => {
+    if (!cartList || !storeData) return;
+
+    const cartChanged = !deepEqual(prevCartRef.current, cartList);
+    const couponChanged = !deepEqual(prevCouponRef.current, couponDiscount);
+
+    if (cartChanged || couponChanged) {
+      prevCartRef.current = cartList;
+      prevCouponRef.current = couponDiscount;
+
+      const productList = page === "campaign" ? campaignItemList : cartList;
+      const totalQty = 0;
+      const carts = handleProductList(productList, totalQty);
+      const orderObject = handleOrderMutationObject(carts, productList);
+
+      taxMutate(orderObject, {
+        onError: onErrorResponse,
+      });
+    }
+  }, [cartList, campaignItemList, couponDiscount, storeData]);
+
   const handlePlaceOrder = () => {
     const itemsList = page === "campaign" ? campaignItemList : cartList;
     const isAvailable =
@@ -981,6 +1020,15 @@ const ItemCheckout = (props) => {
                   isZoneDigital={isZoneDigital}
                   setPaymentMethodImage={setPaymentMethodImage}
                   paymentMethodImage={paymentMethodImage}
+                  remainingBalance={
+                    customerData?.data?.wallet_balance - payableAmount
+                  }
+                  handlePartialPayment={handlePartialPayment}
+                  walletBalance={customerData?.data?.wallet_balance}
+                  removePartialPayment={removePartialPayment}
+                  switchToWallet={switchToWallet}
+                  customerData={customerData}
+                  payableAmount={payableAmount}
                 />
               )}
 
@@ -1079,24 +1127,24 @@ const ItemCheckout = (props) => {
                       payableAmount={payableAmount}
                     />
                   )}
-                  {configData?.customer_wallet_status === 1 &&
-                    customerData?.data?.wallet_balance > 0 &&
-                    configData?.partial_payment_status === 1 && (
-                      <Grid item md={12} xs={12}>
-                        <PartialPayment
-                          remainingBalance={
-                            customerData?.data?.wallet_balance - payableAmount
-                          }
-                          handlePartialPayment={handlePartialPayment}
-                          usePartialPayment={usePartialPayment}
-                          walletBalance={customerData?.data?.wallet_balance}
-                          paymentMethod={paymentMethod}
-                          switchToWallet={switchToWallet}
-                          removePartialPayment={removePartialPayment}
-                          payableAmount={payableAmount}
-                        />
-                      </Grid>
-                    )}
+                  {/*{configData?.customer_wallet_status === 1 &&*/}
+                  {/*  customerData?.data?.wallet_balance > 0 &&*/}
+                  {/*  configData?.partial_payment_status === 1 && (*/}
+                  {/*    <Grid item md={12} xs={12}>*/}
+                  {/*      <PartialPayment*/}
+                  {/*        remainingBalance={*/}
+                  {/*          customerData?.data?.wallet_balance - payableAmount*/}
+                  {/*        }*/}
+                  {/*        handlePartialPayment={handlePartialPayment}*/}
+                  {/*        usePartialPayment={usePartialPayment}*/}
+                  {/*        walletBalance={customerData?.data?.wallet_balance}*/}
+                  {/*        paymentMethod={paymentMethod}*/}
+                  {/*        switchToWallet={switchToWallet}*/}
+                  {/*        removePartialPayment={removePartialPayment}*/}
+                  {/*        payableAmount={payableAmount}*/}
+                  {/*      />*/}
+                  {/*    </Grid>*/}
+                  {/*  )}*/}
                   {getCurrentModuleType() === "food" && storeData?.cutlery && (
                     <Cutlery isChecked={cutlery} handleChange={handleCutlery} />
                   )}
@@ -1115,7 +1163,7 @@ const ItemCheckout = (props) => {
                     cartList={page === "campaign" ? campaignItemList : cartList}
                     storeData={storeData}
                     couponDiscount={couponDiscount}
-                    taxAmount={taxAmount}
+                    taxAmount={data}
                     distanceData={distanceData}
                     total_order_amount={total_order_amount}
                     configData={configData}

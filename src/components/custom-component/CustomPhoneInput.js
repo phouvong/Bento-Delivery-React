@@ -123,7 +123,8 @@ const CustomPhoneInput = ({
   lanDirection,
   height,
   borderRadius,
-                            background
+                            background,
+                            removeLabel
 }) => {
   const changeHandler = (e) => {
     onHandleChange(e);

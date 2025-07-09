@@ -5,8 +5,8 @@ import { Button, Stack } from "@mui/material";
 export const WrapperCurrentLocationPick = styled(Stack)(
   ({ theme, isXSmall }) => ({
     position: "absolute",
-    right: isXSmall ? 16 : 30,
-    bottom: isXSmall ? 20 : 40,
+    right: isXSmall ? 16 : 25,
+    bottom: isXSmall ? 20 : 80,
   })
 );
 export const CustomBoxWrapper = styled(Box)(({ theme, expand }) => ({

@@ -18,32 +18,32 @@ import CustomContainer from "../container";
 import DollarSignHighlighter from "../DollarSignHighlighter";
 import DeliveryImage from "./svg-components/deliveryImage";
 
-export const CustomButton = styled(Button)(({ theme, boxshadow }) => ({
-  backgroundColor: theme.palette.primary.main,
-  //   width: "150px",
-  height: "45px",
-  borderRadius: "30px",
-  boxShadow: "0px 4px 60px rgba(3, 157, 85, 0.2)",
-  color: theme.palette.whiteContainer.main,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  "&:hover": {
-    backgroundColor: theme.palette.primary.deep,
-  },
-  [theme.breakpoints.down("sm")]: {
-    // width: "130px",
-    height: "35px",
-    marginTop: "-2px",
-  },
+export const CustomButton = styled(Button)(({ theme }) => ({
+    backgroundColor: theme.palette.primary.main,
+    height: "45px",
+    borderRadius: "30px",
+    boxShadow: "0px 4px 60px rgba(3, 157, 85, 0.2)",
+    color: theme.palette.whiteContainer.main,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    "&:hover": {
+      backgroundColor: theme.palette.primary.deep,
+    },
+    [theme.breakpoints.down("sm")]: {
+      height: "35px",
+      marginTop: "-2px",
+    },
 }));
-const ComponentOne = ({ landingPageData, configData, handleOrderNow }) => {
+
+const ComponentOne = ({ landingPageData }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const router = useRouter();
   const handleButtonClick = () => {
     router.push(landingPageData?.company_button_url);
   };
+
   return (
     <>
       <CustomContainer>

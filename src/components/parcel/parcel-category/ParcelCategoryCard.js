@@ -8,6 +8,7 @@ import { setParcelCategories } from "redux/slices/parcelCategoryData";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { textWithEllipsis } from "styled-components/TextWithEllipsis";
 import CustomImageContainer from "../../CustomImageContainer";
+import NextImage from "components/NextImage";
 
 const ParcelCard = styled(Card)(({ theme }) => ({
 	padding: "20px",
@@ -45,12 +46,16 @@ const ParcelCategoryCard = (props) => {
 		<CustomStackFullWidth>
 			<ParcelCard {...props} onClick={handleClick}>
 				<Grid container spacing={3}>
-					<Grid item xs={3} sm={4} md={4} alignSelf="center">
-						<CustomImageContainer
-							width={{ xs: "65px", sm: "80px", md: "100px" }}
+					<Grid item xs={3} sm={4} md={4} alignSelf="center"
+					sx={{img:{
+						width:"100%",
+						height:"100%",
+						}}}>
+						<NextImage
+							width={100}
 							src={data?.image_full_url}
-							height={{ xs: "65px", sm: "80px", md: "100px" }}
-							objectfit="cover"
+							height={100}
+							objectFit="cover"
 						/>
 					</Grid>
 					<Grid item xs={9} sm={8} md={8} alignSelf="center">

@@ -371,32 +371,6 @@ const BasicInformationForm = ({
               touched={profileFormik.touched.name && "true"}
             />
           </Grid>
-          {/*<Grid item md={6} xs={12}>*/}
-          {/*  <TextField*/}
-          {/*    sx={{ width: "100%" }}*/}
-          {/*    InputProps={{*/}
-          {/*      style: {*/}
-          {/*        height: "45px", // Set your desired height value here*/}
-          {/*      },*/}
-          {/*    }}*/}
-          {/*    id="outlined-basic"*/}
-          {/*    // label="Enter Last Name"*/}
-          {/*    variant="outlined"*/}
-          {/*    name="l_name"*/}
-          {/*    value={profileFormik.values.l_name}*/}
-          {/*    onChange={profileFormik.handleChange}*/}
-          {/*    label={t("Last Name")}*/}
-          {/*    required*/}
-          {/*    error={*/}
-          {/*      profileFormik.touched.l_name &&*/}
-          {/*      Boolean(profileFormik.errors.l_name)*/}
-          {/*    }*/}
-          {/*    helperText={*/}
-          {/*      profileFormik.touched.l_name && profileFormik.errors.l_name*/}
-          {/*    }*/}
-          {/*    touched={profileFormik.touched.l_name && "true"}*/}
-          {/*  />*/}
-          {/*</Grid>*/}
           <Grid item md={6} xs={12}>
             <Stack position="relative">
               <TextField
@@ -434,7 +408,7 @@ const BasicInformationForm = ({
                   {" "}
                   {email && (
                     <>
-                      {data?.is_email_verified === 1 &&
+                      {data?.is_email_verified === "1" &&
                       email === profileFormik?.values.email ? (
                         <VerifiedIcon />
                       ) : (

@@ -146,7 +146,7 @@ const HeroLocationForm = () => {
     if (places) {
       const tempData = places?.suggestions?.map((item) => ({
         place_id: item.placePrediction.placeId,
-        description: `${item.placePrediction.structuredFormat.mainText.text}, ${item.placePrediction.structuredFormat.secondaryText.text}`,
+        description: `${item?.placePrediction?.structuredFormat?.mainText.text}, ${item?.placePrediction?.structuredFormat?.secondaryText?.text}`,
       }));
       setPredictions(tempData);
     }

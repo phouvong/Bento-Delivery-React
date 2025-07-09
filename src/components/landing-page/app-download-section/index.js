@@ -44,11 +44,11 @@ export const CustomButton = styled(Button)(({ theme }) => ({
 const AppDownloadSection = ({ configData, landingPageData }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-  const primaryColor = theme.palette.primary.dark;
   const { t } = useTranslation();
   const goToApp = (s) => {
     window.open(s);
   };
+
   return (
     <CustomContainer>
       <Wrapper>

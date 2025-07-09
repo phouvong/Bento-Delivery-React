@@ -38,10 +38,6 @@ const PercelDelivery = ({ configData }) => {
   let token = getToken();
   const [openAuth, setOpenAuth] = useState(false);
   const [modalFor, setModalFor] = useState("sign-in");
-  // if (typeof window !== undefined) {
-  //   token = localStorage.getItem("token");
-  // }
-
   const { coords, isGeolocationAvailable, isGeolocationEnabled, getPosition } =
     useGeolocated({
       positionOptions: {
@@ -66,7 +62,7 @@ const PercelDelivery = ({ configData }) => {
         : parcelInfo?.senderPhone
         ? parcelInfo?.senderPhone
         : "",
-      senderEmail: parcelInfo?.senderEmail ? parcelInfo?.senderEmail : "",
+      senderEmail: profileInfo? profileInfo?.email:parcelInfo?.senderEmail ? parcelInfo?.senderEmail : "",
       receiverName: parcelInfo?.receiverName ? parcelInfo?.receiverName : "",
       receiverPhone: parcelInfo?.receiverPhone ? parcelInfo?.receiverPhone : "",
       receiverEmail: parcelInfo?.receiverEmail ? parcelInfo?.receiverEmail : "",

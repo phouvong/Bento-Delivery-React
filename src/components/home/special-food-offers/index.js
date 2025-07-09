@@ -16,6 +16,7 @@ import SpecialOfferCardShimmer from "../../Shimmer/SpecialOfferCardSimmer";
 import H2 from "../../typographies/H2";
 import { NextFood, PrevFood } from "../best-reviewed-items/SliderSettings";
 import { HomeComponentsWrapper } from "../HomePageComponents";
+import {useRouter} from "next/router";
 
 const SpecialFoodOffers = ({ title }) => {
   const { t } = useTranslation();
@@ -28,6 +29,7 @@ const SpecialFoodOffers = ({ title }) => {
     useGetDiscountedItems(params);
   const [isHover, setIsHover] = useState(false);
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
+  const router =useRouter()
 
   useEffect(() => {
     refetch();
@@ -97,6 +99,18 @@ const SpecialFoodOffers = ({ title }) => {
       },
     ],
   };
+  const navigateToHome = () => {
+    router.push({
+      pathname: '/home',
+      query: {
+        search: "special-offer",
+        module_id: getModuleId(),
+        data_type: "discounted",
+      },
+    }).then(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  };
 
   return (
     <>
@@ -132,17 +146,19 @@ const SpecialFoodOffers = ({ title }) => {
               {isFetching ? (
                 <Skeleton width="100px" variant="80px" />
               ) : (
-                <Link
-                  href={{
-                    pathname: "/home",
-                    query: {
-                      search: "special-offer",
-                      module_id: getModuleId(),
-                      data_type: "discounted",
-                    },
-                  }}
-                >
+                // <Link
+                //   href={{
+                //     pathname: "/home",
+                //     query: {
+                //       search: "special-offer",
+                //       module_id: getModuleId(),
+                //       data_type: "discounted",
+                //     },
+                //   }}
+                //   scroll={true}
+                // >
                   <Button
+                    onClick={navigateToHome}
                     variant="text"
                     sx={{
                       transition: "all ease 0.5s",
@@ -154,7 +170,7 @@ const SpecialFoodOffers = ({ title }) => {
                   >
                     {t("View all")}
                   </Button>
-                </Link>
+                // </Link>
               )}
             </CustomStackFullWidth>
             <RTL direction={lanDirection}>

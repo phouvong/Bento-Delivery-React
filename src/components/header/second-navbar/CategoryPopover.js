@@ -86,7 +86,7 @@ const CategoryPopover = ({ handlePopoverCloseSub, categories }) => {
               search: "category",
               id: item?.id,
               module_id: getModuleId(),
-              name: btoa(item?.name),
+              name: (item?.name),
               data_type: "category",
               from: "nav",
             },
@@ -103,7 +103,7 @@ const CategoryPopover = ({ handlePopoverCloseSub, categories }) => {
         search: "category",
         id: item?.id,
         module_id: `${getModuleId()}`,
-        name: btoa(item?.name),
+        name: (item?.name),
         data_type: "category",
       },
     });

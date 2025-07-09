@@ -25,6 +25,7 @@ import QuickView, { PrimaryToolTip } from "./QuickView";
 import GradeRoundedIcon from "@mui/icons-material/GradeRounded";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import ClosedNow from "components/closed-now";
+import NextImage from "components/NextImage";
 const ContentSection = styled(Box)(({ theme }) => ({
   background: "",
   marginTop: "10px",
@@ -65,6 +66,9 @@ const ImageWrapper = styled(CustomBoxFullWidth)(({ theme }) => ({
   borderRadius: "10px",
   height: "130px",
   overflow: "hidden",
+  "img": { width:"100%",
+    height: "100%",
+    },
   [theme.breakpoints.down("sm")]: {
     height: "140px",
   },
@@ -99,8 +103,6 @@ const StoreCard = (props) => {
   };
 
   const quickViewHandleClick = (e) => {
-    // e.stopPropagation();
-    // dispatch({ type: ACTION.setOpenModal, payload: true });
   };
   const addToWishlistHandler = (e) => {
     e.stopPropagation();
@@ -161,23 +163,23 @@ const StoreCard = (props) => {
       onClick={() => handleClick()}
     >
       <ImageWrapper>
-        <CustomImageContainer
+        <NextImage alt={item?.name}
           src={imageUrl}
           // alt={t("Background")}
-          height="100%"
-          width="100%"
+          height={140}
+          width={221}
           borderRadius="10px"
           objectFit="cover"
         />
         {getCurrentModuleType() === "rental" && (
            <Box sx={{ position: "absolute", bottom: 0, left: 10 }}>
-           <CustomImageContainer
-           src={item?.logo_full_url}
+           <NextImage
+            src={item?.logo_full_url}
             alt={t("Background")}
-           height="60px"
-           width="60px"
-           borderRadius="10px"
-           objectFit="cover"/>
+            height={60}
+            width={60}
+            borderRadius="10px"
+            objectFit="cover"/>
           </Box>
         )}
         

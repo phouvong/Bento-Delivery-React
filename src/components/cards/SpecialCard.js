@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import { Grid, Tooltip, Typography } from "@mui/material";
+import {Grid, Tooltip, Typography, useMediaQuery, useTheme} from "@mui/material";
 import { Box, Stack, styled } from "@mui/system";
 import { t } from "i18next";
 import { useState } from "react";
@@ -19,6 +19,7 @@ import Body2 from "../typographies/Body2";
 import AddWithIncrementDecrement from "./AddWithIncrementDecrement";
 import { CustomOverLay } from "./Card.style";
 import QuickView, { PrimaryToolTip } from "./QuickView";
+import NextImage from "components/NextImage";
 
 const VegNonVegFlag = styled(Box)(({ theme, veg, rounded }) => ({
   height: "14px",
@@ -95,6 +96,8 @@ const SpecialCard = (props) => {
 
   const classes = textWithEllipsis();
   const [isHover, setIsHover] = useState(false);
+  const theme=useTheme()
+  const isSmall = useMediaQuery(theme.breakpoints.down("md"));
 
   const getModuleWiseItemName = () => {
     if (getCurrentModuleType() === ModuleTypes.FOOD) {
@@ -163,11 +166,15 @@ const SpecialCard = (props) => {
         )}
         {<OrganicTag status={item?.organic} top="40px" />}
         {handleBadge()}
-        <Box borderRadius="8px" overflow="hidden" height="100%">
-          <CustomImageContainer
+        <Box borderRadius="8px" overflow="hidden" height="100%" sx={ {img:{
+          width:"100%",
+          height: "100%",}
+        }}>
+          <NextImage
             src={item?.image_full_url}
-            height="100%"
-            width="100%"
+            height={isSmall?140:180}
+            alt={item?.name}
+            width={210}
             objectfit="cover"
           />
         </Box>

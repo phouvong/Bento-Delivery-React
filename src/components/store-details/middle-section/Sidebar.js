@@ -27,6 +27,9 @@ import VegNonVegCheckBox from "../../group-buttons/OutlinedGroupButtons";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import { useSelector } from "react-redux";
+import Funnel from "components/svg-components/Funnel";
+import StoreFilter from "components/store-details/middle-section/StoreFilter";
+import {filterTypeItems} from "components/search/filterTypes";
 
 export const CustomPaperBox = styled(Box)(({ theme }) => ({
   backgroundColor: "paper.default",
@@ -151,6 +154,10 @@ const Sidebar = (props) => {
     handleSelection,
     checkState,
     setCheckState,
+    setRatingCount,
+    setFilterData,
+    ratingCount,
+    filterItem
   } = props;
 
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -205,8 +212,14 @@ const Sidebar = (props) => {
   const content = (
     <CustomStackFullWidth sx={{ padding: "1rem" }} spacing={2}>
       {isSmall && (
-        <CustomBoxFullWidth sx={{ mt: "3rem" }}>
+        <CustomBoxFullWidth sx={{ mt: "3rem",spacing:"10px" }}>
           <HighToLow handleSortBy={handleSortBy} sortBy={sortBy} />
+          <StoreFilter
+            setRatingCount={setRatingCount}
+            ratingCount={ratingCount}
+            filterTypeItems={filterItem}
+            setFilterData={setFilterData}
+          />
         </CustomBoxFullWidth>
       )}
       {state.categories?.length > 0 && (

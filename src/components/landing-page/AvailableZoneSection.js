@@ -13,6 +13,7 @@ import CustomContainer from "components/container";
 import CustomImageContainer from "components/CustomImageContainer";
 
 import { t } from "i18next";
+import NextImage from "components/NextImage";
 
 const ComponentTwoContainer = styled(Box)(
 	({ theme, paddingTop, paddingBottom }) => ({
@@ -146,7 +147,7 @@ const AvailableZoneSection = ({ landingPageData }) => {
 														textDecoration: "none",
 														"&:hover": {
 															boxShadow: `0px 4px 12px 0px ${theme.palette.neutral[100]}`,
-															color: "#039D55",
+															color: "#039d55",
 														},
 													}}
 													data-bs-toggle="popover"
@@ -198,10 +199,17 @@ const AvailableZoneSection = ({ landingPageData }) => {
 								position: "relative",
 								width: { xs: "223px", md: "440px" },
 								height: { xs: "150px", md: "380px" },
+                "img": {
+                  width: "100%",
+                  height: "100%",
+                }
 							}}
 						>
-							<CustomImageContainer
+							<NextImage
 								src={landingPageData?.available_zone_image_full_url}
+                width={440}
+                height={380}
+                objectFit="cover"
 							/>
 						</Box>
 					</Grid>

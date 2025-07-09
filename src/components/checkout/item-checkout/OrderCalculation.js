@@ -15,7 +15,7 @@ import {
   getReferDiscount,
 } from "helper-functions/CardHelpers";
 import { getToken } from "helper-functions/getToken";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { setTotalAmount } from "redux/slices/cart";
@@ -47,7 +47,6 @@ const OrderCalculation = (props) => {
     zoneData,
     setDeliveryFee,
     extraCharge,
-    usePartialPayment,
     walletBalance,
     setPayableAmount,
     additionalCharge,
@@ -59,6 +58,7 @@ const OrderCalculation = (props) => {
     customerData,
     initVauleEx,
     isLoading,
+    taxAmount
   } = props;
 
   const token = getToken();
@@ -145,15 +145,18 @@ const OrderCalculation = (props) => {
       extraCharge,
       additionalCharge,
       packagingCharge,
-      referDiscount
+      referDiscount,
+      taxAmount?.tax_amount
     );
     setPayableAmount(totalAmount);
     dispatch(setTotalAmount(totalAmount));
     return totalAmount;
   };
-  const discountedPrice = getProductDiscount(cartList, storeData);
+  let diffDiscount={
+    value:0
+  }
+  const discountedPrice = getProductDiscount(cartList, storeData,diffDiscount);
   const totalAmountAfterPartial = handleOrderAmount() - walletBalance;
-
   const finalTotalAmount = profileInfo?.is_valid_for_discount
     ? handleOrderAmount() - referDiscount
     : handleOrderAmount();
@@ -211,6 +214,7 @@ const OrderCalculation = (props) => {
         <Grid item md={4} xs={4} align="right">
           <Typography textTransform="capitalize" align="right">
             {getAmountWithSign(getSubTotalPrice(cartList))}
+
           </Typography>
         </Grid>
         <Grid item md={8} xs={8}>
@@ -275,12 +279,11 @@ const OrderCalculation = (props) => {
             </Grid>
           </>
         ) : null}
-        {storeData ? (
-          storeData?.tax ? (
+        {
+          taxAmount?.tax_included!==null && taxAmount?.tax_included === 0 ? (
             <>
               <Grid item md={8} xs={8}>
-                {t("TAX")} ({storeData?.tax}%{" "}
-                {configData?.tax_included === 1 && t("Included")})
+                {t("VAT/TAX")}
               </Grid>
               <Grid item md={4} xs={4} align="right">
                 <Stack
@@ -289,25 +292,15 @@ const OrderCalculation = (props) => {
                   justifyContent="flex-end"
                   spacing={0.5}
                 >
-                  {configData?.tax_included === 0 && (
-                    <Typography>{"(+)"}</Typography>
-                  )}
                   <Typography>
-                    {storeData &&
-                      getAmountWithSign(
-                        getTaxableTotalPrice(
-                          cartList,
-                          couponDiscount,
-                          storeData,
-                          referDiscount
-                        )
-                      )}
+                    {taxAmount?.tax_included === 0 && <>{"(+)"}</>}
+                    {getAmountWithSign(taxAmount?.tax_amount)}
                   </Typography>
                 </Stack>
               </Grid>
             </>
           ) : null
-        ) : null}
+      }
         {orderType === "delivery" || orderType === "schedule_order" ? (
           Number.parseInt(configData?.dm_tips_status) === 1 ? (
             <>
@@ -443,7 +436,16 @@ const OrderCalculation = (props) => {
                   paddingInlineStart: "7px",
                 }}
               >
+                <Typography
+                  component="span"
+                sx={{ textTransform: "capitalize",
+                  fontWeight: "700",}}
+                >
                 {t("Total")}
+                <Typography sx={{marginInlineStart:"5px"}} component="span" fontSize="12px" fontWeight="400" color={theme.palette.primary.main}>
+                  {taxAmount?.tax_included === 1 && taxAmount?.tax_included!==null && ("(Vat/Tax incl.)")}
+                </Typography>
+                </Typography>
               </Grid>
               <Grid item md={4} xs={4} align="right">
                 <Stack
@@ -463,43 +465,19 @@ const OrderCalculation = (props) => {
             </>
           )}
         </TotalGrid>
-        {usePartialPayment && payableAmount > walletBalance ? (
-          <>
-            <Grid item md={8} xs={8} sx={{ textTransform: "capitalize" }}>
-              {t("Paid by wallet")}
-            </Grid>
-            <Grid item md={4} xs={4} align="right">
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="flex-end"
-                spacing={0.5}
-              >
-                <Typography>{"(-)"}</Typography>
-                <Typography>{getAmountWithSign(walletBalance)}</Typography>
-              </Stack>
-            </Grid>
-          </>
-        ) : null}
-        {usePartialPayment && payableAmount > walletBalance ? (
-          <>
-            <Grid item md={8} xs={8}>
-              {t("Due Payment")}
-            </Grid>
-            <Grid item md={4} xs={4} align="right">
-              <Stack
-                direction="row"
-                alignItems="center"
-                justifyContent="flex-end"
-                spacing={0.5}
-              >
-                <Typography>
-                  {getAmountWithSign(totalAmountAfterPartial)}
-                </Typography>
-              </Stack>
-            </Grid>
-          </>
-        ) : null}
+        {diffDiscount?.value>0  ?<Typography
+          sx={{
+            fontSize: "14px",
+            fontWeight: "400",
+            width: "100%",
+            color: (theme) => theme.palette.neutral[1000],
+            padding: "5px 0px",
+            backgroundColor: "#FFF6CA",
+          }}
+          align="center"
+        >
+          {t(`You got ${getAmountWithSign(diffDiscount?.value)} additional discount`)}
+        </Typography> : null}
         {token && cashbackAmount?.cashback_amount > 0 && (
           <Grid item xs={12}>
             <Box

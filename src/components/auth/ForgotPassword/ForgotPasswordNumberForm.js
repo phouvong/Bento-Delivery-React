@@ -41,25 +41,23 @@ const ForgotPasswordNumberForm = ({
   const router =useRouter()
   const { t } = useTranslation();
   const { configData } = useSelector((state) => state.configData);
-
   const [openSignIn, setOpenSignIn] = useState(false);
   const [modalFor, setModalFor] = useState("sign-in");
 
-
   useEffect(() => {
-    const { centralize_login
+    const { centralize_login,is_mail_active,is_sms_active
     } = configData || {};
     if (centralize_login) {
       const { phone_verification_status, email_verification_status } =
         centralize_login;
-     if(phone_verification_status===1 && email_verification_status===1){
+     if(is_mail_active && is_sms_active){
        setHasVerificationMethod(true)
        setPhoneOrEmail("phone")
       }
-     else if (phone_verification_status === 1) {
+     else if (is_sms_active) {
        setHasVerificationMethod(true)
         setPhoneOrEmail("phone");
-      } else if (email_verification_status === 1) {
+      } else if (is_mail_active) {
         setHasVerificationMethod(true)
         setPhoneOrEmail("email");
       }else{

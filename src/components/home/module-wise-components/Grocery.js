@@ -23,6 +23,7 @@ import Stores from "../stores";
 import VisitAgain from "../visit-again";
 import PharmacyStaticBanners from "./pharmacy/pharmacy-banners/PharmacyStaticBanners";
 import TopOffersNearMe from "../top-offers-nearme";
+import RecommendedStore from "components/home/recommended-store";
 
 const menus = ["All", "Beauty", "Bread & Juice", "Drinks", "Milks"];
 const Grocery = (props) => {
@@ -81,6 +82,11 @@ const Grocery = (props) => {
       <Grid item xs={12} sx={{ marginTop: { xs: "-10px", sm: "10px" } }}>
         <CustomContainer>
           <FeaturedCategories configData={configData} />
+        </CustomContainer>
+      </Grid>
+      <Grid item xs={12}>
+        <CustomContainer>
+          <RecommendedStore/>
         </CustomContainer>
       </Grid>
         {token && (<Grid item xs={12} mb={3}>

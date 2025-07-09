@@ -6,6 +6,8 @@ const ContainerWrapper = styled(Container)(({ theme }) => ({
 	[theme.breakpoints.up("lg")]: {
 		// Add your styles for the 'lg' breakpoint here
 		maxWidth: "1300px", // Example value, you can replace it with your desired maxWidth
+	 marginLeft: "auto !important", // Center the container
+		marginRight: "auto !important", // Center the container
 	},
 }));
 const CustomContainer = (props) => {

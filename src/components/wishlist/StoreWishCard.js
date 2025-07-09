@@ -48,8 +48,7 @@ const StoreWishCard = ({ data, setSideDrawerOpen }) => {
           store_zone_id: `${data?.zone_id}`,
         },
       },
-      undefined,
-      { shallow: true }
+
     );
 
     setSideDrawerOpen(false);

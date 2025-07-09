@@ -7,7 +7,7 @@ import React, {useEffect} from "react";
 export const data = [
   {
     id: 1,
-    userType: "Seller",
+    userType: "Vendor",
     value: "vendor",
   },
   {

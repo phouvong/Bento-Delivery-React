@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Grid, useMediaQuery } from "@mui/material";
+import {Grid, Typography, useMediaQuery} from "@mui/material";
 import { useSelector } from "react-redux";
 import CustomEmptyResult from "../custom-empty-result";
 import noData from "../../../public/static/newnoitem.png";
@@ -14,7 +14,11 @@ const ItemSection = ({ campaignsDetails, isLoading, isRefetching }) => {
   const matchesXs = useMediaQuery("(max-width:480px)");
   return (
     <>
-      <Grid container spacing={{ xs: 0.5, md: 3 }}>
+      <Grid container spacing={{ xs: 0.5, md: 1 }}>
+        <Grid item xs={12}>
+          <Typography paddingLeft="20px" fontSize="20px" fontWeight="700">{("Store list")}</Typography>
+
+        </Grid>
         {campaignsDetails?.stores?.length > 0 &&
           campaignsDetails?.stores?.map((store) => {
             return (
@@ -38,8 +42,8 @@ const ItemSection = ({ campaignsDetails, isLoading, isRefetching }) => {
         <CustomEmptyResult
           label="No store found"
           image={noData}
-          height="350px"
-          withd="350px"
+          height="200px"
+          width="200px"
         />
       )}
     </>

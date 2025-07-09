@@ -22,14 +22,12 @@ import { toast } from "react-hot-toast";
 import { formatPhoneNumber } from "utils/CustomFunctions";
 import useGetZoneList from "api-manage/hooks/react-query/zone-list/zone-list";
 import { ActonButtonsSection } from "components/deliveryman-registration/CustomStylesDeliveryman";
+import BusinessTin from "components/store-resgistration/BusinessTin";
 
 export const generateInitialValues = (languages, allData) => {
-
-
 	const initialValues = {
 		restaurant_name: {},
 		restaurant_address: {},
-		vat: allData?.vat || "",
 		min_delivery_time: allData?.min_delivery_time || "",
 		max_delivery_time: allData?.max_delivery_time || "",
 		logo: allData?.logo ? allData?.logo : "",
@@ -46,6 +44,10 @@ export const generateInitialValues = (languages, allData) => {
 		module_id: allData?.module_id || "",
 		delivery_time_type: allData?.delivery_time_type || "",
 		pickup_zone_id: allData?.pickup_zone_id || "",
+		tin: allData?.tin || "",
+		tin_expire_date: allData?.tin_expire_date || "",
+		tin_certificate_image: allData?.tin_certificate_image || "",
+
 	};
 
 	// Set initial values for each language
@@ -67,12 +69,15 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
 	const { modules, configData } = useSelector((state) => state.configData);
 	const [polygonPaths, setPolygonPaths] = useState([]);
 	const [currentTab, setCurrentTab] = useState(0);
+	const [selectedDates, setSelectedDates] = useState(null);
 	const [selectedLanguage, setSelectedLanguage] = React.useState("en");
 	const [selectedZone, setSelectedZone] = React.useState(null);
 	const [inZone, setInZone] = React.useState(null);
 	const { allData, activeStep } = useSelector((state) => state.storeRegData);
 	const { data, refetch } = useGetModule();
 	const initialValues = generateInitialValues(configData?.language, allData);
+	const [file, setFile] = useState(null);
+	const [preview, setPreview] = useState(null);
 
 
 	const RestaurantJoinFormik = useFormik({
@@ -178,6 +183,21 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
 	const lNameHandler = (value) => {
 		RestaurantJoinFormik.setFieldValue("l_name", value);
 	};
+	const tinNumberHandler = (value) => {
+		const filtered = value.replace(/[^0-9\-\/]/g, "")
+		RestaurantJoinFormik.setFieldValue("tin", filtered);
+	};
+
+	useEffect(() => {
+		if(selectedDates && selectedDates[0]){
+			const tempSelectedDates = new Date(selectedDates[0]);
+			RestaurantJoinFormik.setFieldValue(
+				"tin_expire_date",
+				tempSelectedDates
+			);
+		}
+
+	}, [selectedDates]);
 	const phoneHandler = (values) => {
 		RestaurantJoinFormik.setFieldValue("phone", formatPhoneNumber(values));
 	};
@@ -201,6 +221,13 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
 			"cover_photo",
 			value.currentTarget.files[0]
 		);
+	};
+	const singleFileUploadHandlerForTinFile = (value) => {
+		// const file = e.currentTarget.files[0];
+		RestaurantJoinFormik.setFieldValue("tin_certificate_image", value);
+	};
+	const imageOnchangeHandlerForTinImage = (value) => {
+		RestaurantJoinFormik.setFieldValue("tin_certificate_image", value);
 	};
 	const imageOnchangeHandlerForCoverPhoto = (value) => {
 		RestaurantJoinFormik.setFieldValue("cover_photo", value);
@@ -322,8 +349,11 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
 	}, [configData?.default_location, zoneData?.data]);
 
 	const handleReset = () => {
+		setFile(null)
+		setPreview(null)
 		RestaurantJoinFormik.resetForm();
-	  };
+		setSelectedDates(null);
+	};
 	return (
 		<CustomStackFullWidth
 			sx={{
@@ -457,6 +487,30 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
 						emailHandler={emailHandler}
 						passwordHandler={passwordHandler}
 					/>
+				</CustomStackFullWidth>
+				<CustomStackFullWidth
+					mt="20px"
+					sx={{
+						backgroundColor: (theme) => theme.palette.neutral[100],
+						// backgroundColor: (theme) => alpha(theme.palette.neutral[400], 0.1),
+						padding: "1rem",
+						borderRadius: "8px",
+					}}
+				>
+			     <BusinessTin
+						 RestaurantJoinFormik={RestaurantJoinFormik}
+						 tinNumberHandler={tinNumberHandler}
+						 selectedDates={selectedDates}
+						 setSelectedDates={setSelectedDates}
+						 imageOnchangeHandlerForTinImage={imageOnchangeHandlerForTinImage}
+						 singleFileUploadHandlerForTinFile={singleFileUploadHandlerForTinFile}
+						 preview={preview}
+						 setFile={setFile}
+						 file={file}
+						 setPreview={setPreview}
+
+
+					 />
 				</CustomStackFullWidth>
 				<Grid item md={12} xs={12} mt="1rem" align="end">
 				<ActonButtonsSection>

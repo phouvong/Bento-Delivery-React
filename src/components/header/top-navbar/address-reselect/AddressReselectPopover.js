@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Popover, Stack, Typography, useTheme } from "@mui/material";
+import {Button, Popover, Stack, Typography, useTheme} from "@mui/material";
 
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
@@ -40,6 +40,7 @@ const AddressReselectPopover = (props) => {
     }
     setGeoLocationEnable(true);
     setZoneIdEnabled(true);
+    window.reload()
   };
 
   const handleSetLocation = async () => {
@@ -142,21 +143,23 @@ const AddressReselectPopover = (props) => {
               )}
             </Stack>
           </SimpleBar>
-          <Stack
-            onClick={handleAgreeLocation}
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="center"
-            gap="10px"
-            sx={{ cursor: "pointer" }}
-          >
-            <ControlPointOutlinedIcon
-              sx={{ color: theme.palette.primary.main }}
-            />
-            <Typography fontWeight={600} color={theme.palette.primary.main}>
+         <Button
+           fullWidth
+              onClick={handleAgreeLocation}
+              startIcon={
+                <ControlPointOutlinedIcon sx={{ color: theme.palette.primary.main }} />
+              }
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+
+                fontWeight: 600,
+                color: theme.palette.primary.main,
+              }}
+            >
               {t("Use Current Location")}
-            </Typography>
-          </Stack>
+            </Button>
           <Stack width="100%" justifyContent="center" alignItems="center">
             <CustomButtonPrimary onClick={() => setOpenMapModal(true)}>
               {t("Pick from map")}

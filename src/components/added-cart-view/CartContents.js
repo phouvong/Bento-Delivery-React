@@ -26,19 +26,6 @@ const CartContents = (props) => {
       alignItems="center"
       mt=".7rem"
     >
-      <Stack direction="row" spacing={1} alignItems="center" marginBottom="5px">
-        <CustomImageContainer
-          src={cartImage.src}
-          width="16px"
-          height="16px"
-          objectfit="cover"
-        />
-        <Typography color={theme.palette.primary.main} fontSize="12px">
-          {`${discountContent} ${getAmountWithSign(
-            cartItemTotalDiscount(cartList)
-          )}`}
-        </Typography>
-      </Stack>
 
       <SimpleBar
         style={{

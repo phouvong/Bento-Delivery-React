@@ -6,6 +6,7 @@ import { t } from "i18next";
 import Link from "next/link";
 import { memo } from "react";
 import placeholder from "../assets/product.png";
+import NextImage from "components/NextImage";
 
 const BrandCard = (props) => {
 	const { image, name, stock, id, horizontal, baseUrl, items_count } = props;
@@ -51,12 +52,9 @@ const BrandCard = (props) => {
 					}}
 					className="brand-card-image"
 				>
-					<img
+					<NextImage
 						src={imageUrl}
-						onError={(e) => {
-							e.target.onerror = null; // Prevent infinite loop if fallback image also fails
-							e.target.src = placeholder.src; // Replace with your fallback image path
-						}}
+						loading="lazy"
 						width={200}
 						height={200}
 						alt="Brand"

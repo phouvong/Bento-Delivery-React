@@ -55,7 +55,7 @@ function MyApp(props) {
       localStorage.clear(); // Clear local storage
       localStorage.setItem("appVersion", currentVersion); // Update stored version
     }
-  }, []);
+  }, [currentVersion]);
   useScrollRestoration();
   return (
     <>

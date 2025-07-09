@@ -1,8 +1,6 @@
 import {
   Box,
   Grid,
-  NoSsr,
-  alpha,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -14,17 +12,17 @@ import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
-import CustomImageContainer from "../../CustomImageContainer";
 import CustomContainer from "../../container";
 import MobileFrame from "../assets/MobileFrame";
 import HeroLocationForm from "./HeroLocationForm";
 import HeroTitleSection from "./HeroTitleSection";
 import HeroBgSvg from "components/landing-page/HeroBgSvg";
+import NextImage from "components/NextImage";
 
 const DynamicModuleSelection = dynamic(() =>
   import("./module-selection/ModuleSelectionRaw")
 );
-const HeroSection = ({ configData, landingPageData, handleOrderNow }) => {
+const HeroSection = ({ landingPageData }) => {
   const theme = useTheme();
   const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
@@ -78,13 +76,9 @@ const HeroSection = ({ configData, landingPageData, handleOrderNow }) => {
             md={7}
             sx={{ padding: { xs: "1rem", sm: "2rem", md: "3rem" } }}
           >
-            <NoSsr>
-              <HeroTitleSection
-                configData={configData}
-                landingPageData={landingPageData}
-                handleOrderNow={handleOrderNow}
-              />
-            </NoSsr>
+            <HeroTitleSection
+              landingPageData={landingPageData}
+            />
           </Grid>
           <Grid item xs={4} md={5} align="right">
             <CustomStackFullWidth
@@ -126,12 +120,13 @@ const HeroSection = ({ configData, landingPageData, handleOrderNow }) => {
                   zIndex: 100,
                 }}
               >
-                <CustomImageContainer
+                <NextImage
                   src={landingPageData?.header_icon_full_url}
                   alt={t("icon")}
-                  height="100%"
-                  width="100%"
+                  width={210}
+                  height={190}
                   objectFit="cover"
+                  priority
                 />
               </Box>
             </CustomStackFullWidth>

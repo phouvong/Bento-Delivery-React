@@ -2,7 +2,7 @@ import React from "react";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { ChatSidebarDesktop } from "./Chat.style";
 import ChatContent from "./ChatContent";
-import { CustomPaperBigCard } from "../../styled-components/CustomStyles.style";
+import { CustomPaperBigCard } from "styled-components/CustomStyles.style";
 
 import "simplebar-react/dist/simplebar.min.css";
 

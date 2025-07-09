@@ -8,6 +8,7 @@ import {
 } from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
 import CustomContainer from "../container";
+import NextImage from "components/NextImage";
 
 const Banners = ({ landingPageData, isSmall }) => {
   const infiniteManage = () => {
@@ -67,12 +68,12 @@ const Banners = ({ landingPageData, isSmall }) => {
                 },
               }}
             >
-              <CustomImageContainer
+              <NextImage
                 src={item}
                 alt="banners"
-                height="100%"
-                width="100%"
-                objectfit="cover"
+                height={173}
+                width={394}
+                objectFit="cover"
                 borderRadius="5px"
               />
             </Box>
@@ -88,6 +89,9 @@ const Banners = ({ landingPageData, isSmall }) => {
           "& .slick-slider": {
             "& .slick-slide": {
               padding: { xs: "5px", md: "11px" },
+              "img": {
+                width: "100%",
+              }
             },
           },
         }}
@@ -116,12 +120,12 @@ const Banners = ({ landingPageData, isSmall }) => {
                   },
                 }}
               >
-                <CustomImageContainer
+                <NextImage
                   src={item}
                   alt="banners"
-                  height="100%"
-                  width="100%"
-                  objectfit="cover"
+                  height={173}
+                  width={394}
+                  objectFit="cover"
                   borderRadius="5px"
                 />
               </Box>
@@ -178,16 +182,21 @@ const Banners = ({ landingPageData, isSmall }) => {
             border: (theme) =>
               `0.828571px solid ${alpha(theme.palette.primary.main, 0.15)}`,
             position: "relative",
-            height: "175px",
+            height: "200px",
             borderRadius: "5px",
+            width: "100%",
+            "img": {
+              width: "100%",
+              height: "100%",
+            }
           }}
         >
-          <CustomImageContainer
+          <NextImage
             src={landingPageData?.promotion_banners_full_url[0]}
             alt="banners"
-            height="100%"
-            width="100%"
-            objectfit="cover"
+            height={175}
+            width={1250}
+            objectFit="cover"
             borderRadius="5px"
           />
         </Box>
@@ -202,7 +211,7 @@ const Banners = ({ landingPageData, isSmall }) => {
         return <>{sliderManage()}</>;
       }
     } else {
-      if (landingPageData?.promotion_banners?.length === 1) {
+      if (landingPageData?.promotion_banners?.length !== 1) {
         return <>{singleImageManage()}</>;
       } else if (landingPageData?.promotion_banners?.length === 2) {
         return <>{twoItemManage()}</>;

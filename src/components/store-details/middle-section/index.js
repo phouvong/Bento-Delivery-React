@@ -7,7 +7,7 @@ import {
   NoSsr,
   Skeleton,
   Stack,
-  Typography,
+  Typography, useMediaQuery, useTheme,
 } from "@mui/material";
 import Sidebar from "./Sidebar";
 import {
@@ -29,12 +29,15 @@ import HighToLow from "../../../sort/HighToLow";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { useSelector } from "react-redux";
 
+
 import { getDiscountedAmount } from "helper-functions/CardHelpers";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import { useInView } from "react-intersection-observer";
 import { removeDuplicates } from "utils/CustomFunctions";
 import DotSpin from "../../DotSpin";
 import SearchIcon from "@mui/icons-material/Search";
+import StoreFilter from "components/store-details/middle-section/StoreFilter";
+import {filterTypeItems} from "components/search/filterTypes";
 
 export const handleShimmerProducts = () => {
   return (
@@ -135,8 +138,11 @@ export const getLowToHigh = (data) => {
 const MiddleSection = (props) => {
   const { storeDetails, ownCategories, isSmall, storeShare, setExpanded } =
     props;
+  const theme =useTheme()
+  const isSmallSize = useMediaQuery(theme.breakpoints.down("sm"));
   const [state, dispatch] = useReducer(reducer, initialState);
-
+  const [filterData,setFilterData] = useState([])
+  const [ratingCount,setRatingCount] = useState(0)
   const [checkState, setCheckState] = React.useState({
     veg: false,
     non_veg: false,
@@ -157,6 +163,8 @@ const MiddleSection = (props) => {
     minMax: state.minMax,
     type: state.type,
     limit: limit,
+    filterData: filterData,
+    ratingCount:ratingCount,
     ...storeShare,
   };
   const searchPageParams = {
@@ -297,7 +305,7 @@ const MiddleSection = (props) => {
     if (state.searchKey === "" || !state.searchKey) {
       refetch();
     }
-  }, [state.categoryId, state.type, id]);
+  }, [state.categoryId, state.type, id,pageParams?.filterData,ratingCount]);
 
   useEffect(() => {
     if (state.searchKey) {
@@ -480,6 +488,14 @@ const MiddleSection = (props) => {
   if (inView) {
     setExpanded(false);
   }
+  const checkModuleWiseFilterItem= () => {
+    if(getCurrentModuleType() === ModuleTypes.FOOD){
+      return filterTypeItems
+    }else{
+      return filterTypeItems?.filter((item)=>item.value!=="available_now")
+
+    }
+  }
   return (
     <NoSsr>
       <CustomBoxFullWidth>
@@ -570,7 +586,7 @@ const MiddleSection = (props) => {
                   </Grid>
                 ) : (
                   <>
-                    <Grid item xs={7} md={7.5}>
+                    <Grid item xs={7} md={getCurrentModuleType() === ModuleTypes.FOOD?4:6} >
                       {getCurrentModuleType() === ModuleTypes.FOOD ? (
                         <VegNonVegCheckBox
                           selected={state.type}
@@ -587,20 +603,40 @@ const MiddleSection = (props) => {
                         />
                       )}
                     </Grid>
-                    <Grid item xs={7} md={4.5}>
+                    <Grid item xs={7}  md={getCurrentModuleType() === ModuleTypes.FOOD?8:6}  align="right">
                       {getCurrentModuleType() === ModuleTypes.FOOD ? (
-                        <CustomSearch
-                          label={t("Search for items...")}
-                          selectedValue={state.searchKey}
-                          handleSearchResult={handleSearchResult}
-                          type2
-                        />
+                        <Stack direction="row" spacing={1} alignItems="center" justifyContent="right">
+                          <CustomSearch
+                            label={t("Search for items...")}
+                            selectedValue={state.searchKey}
+                            handleSearchResult={handleSearchResult}
+                            type2
+                          />
+                          <StoreFilter
+                            key={storeId}
+                            setRatingCount={setRatingCount}
+                            ratingCount={ratingCount}
+                            filterTypeItems={checkModuleWiseFilterItem()}
+                            setFilterData={setFilterData}
+                          />
+                        </Stack>
                       ) : (
-                        <HighToLow
-                          handleSortBy={handleSortBy}
-                          sortBy={state.sortBy}
-                        />
+                        <Stack direction="row" spacing={1} alignItems="center">
+                          <HighToLow
+                            handleSortBy={handleSortBy}
+                            sortBy={state.sortBy}
+                          />
+                          <StoreFilter
+                            key={storeId}
+                            setRatingCount={setRatingCount}
+                            ratingCount={ratingCount}
+                            filterTypeItems={checkModuleWiseFilterItem()}
+                            setFilterData={setFilterData}
+                          />
+                        </Stack>
+
                       )}
+
                     </Grid>{" "}
                   </>
                 )}
@@ -642,6 +678,10 @@ const MiddleSection = (props) => {
                 handleSelection={handleSelection}
                 checkState={checkState}
                 setCheckState={setCheckState}
+                filterItem={checkModuleWiseFilterItem()}
+                setFilterData={setFilterData}
+                ratingCount={ratingCount}
+                setRatingCount={setRatingCount}
               />
             </Grid>
             <Grid

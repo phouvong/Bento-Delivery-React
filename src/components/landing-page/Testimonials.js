@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
-import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
 
 import { RTL } from "components/rtl";

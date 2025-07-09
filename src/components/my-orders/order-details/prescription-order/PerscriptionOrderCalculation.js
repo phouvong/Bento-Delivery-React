@@ -69,22 +69,24 @@ const PrescriptionOrderCalculation = ({
               getAmountWithSign(trackOrderData?.coupon_discount_amount)}
           </Typography>
         </CustomStackFullWidth>
-        <CustomStackFullWidth
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-          spacing={2}
-        >
-          <Typography>
-            {t("Vat/Tax")}
-            {trackOrderData?.tax_status === "included" ? "(included)" : ""}
-          </Typography>
-          <Typography>
-            {trackOrderData?.tax_status !== "included" && " (+) "}
-            {trackOrderData &&
-              getAmountWithSign(trackOrderData?.total_tax_amount)}
-          </Typography>
-        </CustomStackFullWidth>
+        {trackOrderData?.tax_status==="excluded" && trackOrderData?.total_tax_amount>0 && (
+          <CustomStackFullWidth
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            spacing={2}
+          >
+            <Typography>
+              {t("VAT/TAX")}
+            </Typography>
+            <Typography>
+              {trackOrderData?.tax_status !== "included" && " (+) "}
+              {trackOrderData &&
+                getAmountWithSign(trackOrderData?.total_tax_amount)}
+            </Typography>
+          </CustomStackFullWidth>
+        )}
+
         <CustomStackFullWidth
           direction="row"
           alignItems="center"
@@ -135,8 +137,11 @@ const PrescriptionOrderCalculation = ({
           justifyContent="space-between"
           spacing={2}
         >
-          <Typography fontWeight="bold" color="primary.main">
+          <Typography component="span" fontWeight="bold" color="primary.main">
             {t("Total")}
+            {trackOrderData?.tax_status==="included" && (  <Typography component="span" ml={"3px"} fontSize="12px" fontWeight="normal" color="text.secondary">
+              {t("(Vat/Tax incl.)")}
+            </Typography>)}
           </Typography>
           <Typography fontWeight="bold">
             {trackOrderData && getAmountWithSign(trackOrderData?.order_amount)}

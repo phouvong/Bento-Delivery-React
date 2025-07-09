@@ -143,3 +143,5 @@ export const trip_details = "api/v1/rental/user/trip/get-trip-details";
 export const popular_provider="api/v1/rental/provider/popular"
 export const vehicle_category_list = "/api/v1/rental/vehicle/category-list";
 export const removeAllCartItems = "api/v1/rental/user/cart/remove-cart";
+export const recommended_provider="api/v1/stores/recommended";
+export const tax_api = "api/v1/customer/order/get-Tax";

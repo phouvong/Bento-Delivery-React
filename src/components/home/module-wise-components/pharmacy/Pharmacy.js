@@ -19,6 +19,7 @@ import CommonConditions from "./common-conditions";
 import FeaturedStores from "./featured-stores";
 import PharmacyStaticBanners from "./pharmacy-banners/PharmacyStaticBanners";
 import TopOffersNearMe from "components/home/top-offers-nearme";
+import RecommendedStore from "components/home/recommended-store";
 
 const menus = ["All", "New", "Baby Care", "Womans Care", "Mens"];
 
@@ -75,12 +76,17 @@ const Pharmacy = ({ configData }) => {
           <FeaturedCategories configData={configData} />
         </CustomContainer>
       </Grid>
-
+      <Grid item xs={12}>
+        <CustomContainer>
+          <RecommendedStore/>
+        </CustomContainer>
+      </Grid>
       <Grid item xs={12}>
         <CustomContainer>
           <PharmacyStaticBanners />
         </CustomContainer>
       </Grid>
+
       <Grid item xs={12}>
         <CustomContainer>
           <VisitAgain

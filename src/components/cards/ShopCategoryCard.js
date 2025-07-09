@@ -1,12 +1,12 @@
 import { Grid, Skeleton, styled, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { btoa } from "next/dist/compiled/@edge-runtime/primitives/encoding";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { getModuleId } from "../../helper-functions/getModuleId";
 import { CustomBoxFullWidth } from "../../styled-components/CustomStyles.style";
 import { textWithEllipsis } from "../../styled-components/TextWithEllipsis";
 import CustomImageContainer from "../CustomImageContainer";
+import NextImage from "components/NextImage";
 
 const Wrapper = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -43,34 +43,7 @@ const ShopCategoryCard = (props) => {
   const classes = textWithEllipsis();
   return (
     <Wrapper>
-        {/*<Grid container>*/}
-        {/*  <Grid*/}
-        {/*    item*/}
-        {/*    xs={6}*/}
-        {/*    container*/}
-        {/*    sx={{ p: "8px" }}*/}
-        {/*    alignItems="center"*/}
-        {/*    justifyContent="center"*/}
-        {/*  >*/}
-        {/*    <Grid item xs={12}>*/}
-        {/*      <Typography*/}
-        {/*        variant="h7"*/}
-        {/*        fontWeight="400"*/}
-        {/*        className={classes.multiLineEllipsis}*/}
-        {/*      >*/}
-        {/*        <Skeleton variant="text" width="50px" />*/}
-        {/*      </Typography>*/}
-        {/*    </Grid>*/}
-        {/*    <Grid item xs={12}>*/}
-        {/*      <Typography variant="body2" color="customColor.textGray">*/}
-        {/*        {t("Explore Items")}*/}
-        {/*      </Typography>*/}
-        {/*    </Grid>*/}
-        {/*  </Grid>*/}
-        {/*  <Grid item xs={6}>*/}
-        {/*    <Skeleton variant="ractangle" height="120px" width="100%" />*/}
-        {/*  </Grid>*/}
-        {/*</Grid>*/}
+
 
         <Link
           href={{
@@ -79,7 +52,7 @@ const ShopCategoryCard = (props) => {
               search: "category",
               id: `${item?.id}`,
               module_id: `${getModuleId()}`,
-              name: item?.name && btoa(item?.name),
+              name: item?.name && item?.name,
               data_type: "category",
             },
           }}
@@ -132,13 +105,13 @@ const ShopCategoryCard = (props) => {
             <Grid item xs={6}>
               <ImageWrapper>
                 {onlyshimmer ? (<Skeleton variant="ractangle" height="100%" width="100%" />) : (
-                  <CustomImageContainer
-                    height="100%"
-                    width="100%"
+                  <NextImage
+                    height={115}
+                    width={106}
                     src={imageUrl}
                     borderRadius="5px"
                     objectFit="cover"
-                    loading="loading"
+                    //loading="loading"
                     bg="#ddd"
                   />
                 )}

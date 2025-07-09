@@ -8,6 +8,7 @@ import { t } from "i18next";
 import { useTheme } from "@emotion/react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { getAmountWithSign } from "../../../helper-functions/CardHelpers";
+import {PayButton} from "components/checkout/item-checkout/OtherModulePayment";
 
 const PartialPayment = ({
   handlePartialPayment,
@@ -22,98 +23,46 @@ const PartialPayment = ({
 }) => {
   const theme = useTheme();
   return (
-    <CustomStackFullWidth
-      sx={{
-        background: `url(${partialImage.src})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        padding: "15px",
-        backgroundColor: (theme) => alpha(theme.palette.primary.light, 0.2),
-        borderRadius: "10px",
-        border: "1px solid",
-        borderColor: (theme) => alpha(theme.palette.primary.main, 0.4),
-        marginTop: margin ? margin : "20px",
-        marginBottom: margin ? margin : "20px",
-      }}
-    >
+    <PayButton>
       <CustomStackFullWidth direction="row" spacing={1}>
         <PartialSvg />
+
         <Stack>
+          <Typography fontSize="10px" color={theme.palette.neutral[500]}>
+            {   paymentMethod === 'wallet' && switchToWallet ? t('Remaining Balance') : t('Wallet Balance')}
+          </Typography>
           <Typography
             fontSize="20px"
             fontWeight="700"
             color={theme.palette.primary.main}
           >
-            {getAmountWithSign(walletBalance)}
-          </Typography>
-          <Typography fontSize="10px" color={theme.palette.neutral[500]}>
-            {!switchToWallet ? (
-              usePartialPayment ? (
-                t("Has  paid by your wallet.")
-              ) : (
-                t("You have balance in  your wallet")
-              )
-            ) : (
-              <Typography fontSize="10px" color={theme.palette.neutral[500]}>
-                {t("Has  paid by your wallet.")}
-              </Typography>
+            {paymentMethod === 'wallet' && switchToWallet ? getAmountWithSign(
+              remainingBalance,
+
+            ) : getAmountWithSign(
+              walletBalance
+
             )}
+
           </Typography>
+
         </Stack>
       </CustomStackFullWidth>
-      <CustomStackFullWidth
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-      >
-        {!usePartialPayment && !switchToWallet ? (
-          <Typography fontSize="12px" color={theme.palette.primary.main}>
-            {t("Do you want to use now?")}
-          </Typography>
-        ) : (
-          <Stack spacing={0.5}>
-            <Stack direction="row" alignItems="center" spacing={0.5}>
-              <CheckCircleIcon
-                color="primary"
-                style={{ width: "12px", height: "12px" }}
-              />
-              <Typography
-                component="span"
-                fontSize="12px"
-                color={theme.palette.primary.main}
-              >
-                {t("Applied !")}
-              </Typography>
-            </Stack>
-            {walletBalance > payableAmount ? (
-              <>
-                {remainingBalance && !usePartialPayment && (
-                  <Typography fontSize="12px">
-                    {t("Remaining Wallet Balance")}:
-                    <Typography component="span" fontSize="12px">
-                      {getAmountWithSign(remainingBalance)}
-                    </Typography>
-                  </Typography>
-                )}
-              </>
-            ) : null}
-          </Stack>
-        )}
-        {!usePartialPayment && !switchToWallet ? (
-          <Button variant="contained" onClick={handlePartialPayment}>
-            {t("Use")}
-          </Button>
-        ) : (
-          <Button
-            variant="outlined"
-            onClick={removePartialPayment}
-            sx={{ color: theme.palette.error.main }}
-          >
-            {t("Remove")}
-          </Button>
-        )}
-      </CustomStackFullWidth>
-    </CustomStackFullWidth>
+      {!usePartialPayment && !switchToWallet ? (
+        <Button variant="outlined" onClick={handlePartialPayment}>
+          {t("Apply")}
+        </Button>
+      ) : (
+        <Button
+          variant="outlined"
+          onClick={removePartialPayment}
+          sx={{ color: theme.palette.error.main }}
+        >
+          {t("Remove")}
+        </Button>
+      )}
+
+</PayButton>
   );
 };
 

@@ -26,6 +26,7 @@ import FeaturedCategoriesWithFilter from "./FeaturedCategoriesWithFilter";
 import NewArrivals from "./NewArrivals";
 import SinglePoster from "./SinglePoster";
 import TopOffersNearMe from "components/home/top-offers-nearme";
+import RecommendedStore from "components/home/recommended-store";
 
 const Shop = ({ configData }) => {
   const menus = ["All", "Beauty", "Bread & Juice", "Drinks", "Milks"];
@@ -80,6 +81,11 @@ const Shop = ({ configData }) => {
       <Grid item xs={12} sx={{ marginTop: { xs: "-10px", sm: "10px" } }}>
         <CustomContainer>
           <FeaturedCategories configData={configData} />
+        </CustomContainer>
+      </Grid>
+      <Grid item xs={12}>
+        <CustomContainer>
+          <RecommendedStore/>
         </CustomContainer>
       </Grid>
       <Grid item xs={12}>

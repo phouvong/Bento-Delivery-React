@@ -1,6 +1,6 @@
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import PlaceIcon from "@mui/icons-material/Place";
-import { alpha, Button, Card, Grid, styled, Typography } from "@mui/material";
+import {alpha, Button, Card, Grid, styled, Typography, useMediaQuery} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Box, Stack } from "@mui/system";
 import { useAddStoreToWishlist } from "api-manage/hooks/react-query/wish-list/useAddStoreToWishLists";
@@ -23,6 +23,7 @@ import CustomRatingBox from "../CustomRatingBox";
 import ProductMoreView from "../home/visit-again/ProductMoreView";
 import { CustomOverLay } from "./Card.style";
 import QuickView, { PrimaryToolTip } from "./QuickView";
+import NextImage from "components/NextImage";
 
 export const getModuleWiseData = () => {
 	switch (getCurrentModuleType()) {
@@ -105,15 +106,17 @@ const KmShowing = ({ distance }) => {
 const VisitAgainCard = (props) => {
 	const { item, isVisited } = props;
 	const classes = textWithEllipsis();
+	const theme = useTheme();
+	const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 	const [isHover, setIsHover] = useState(false);
 	const { t } = useTranslation();
 	const { mutate: addFavoriteMutation } = useAddStoreToWishlist();
 	const { mutate } = useWishListStoreDelete();
 	const dispatch = useDispatch();
-	const theme = useTheme();
 	const router = useRouter();
 	const { wishLists } = useSelector((state) => state.wishList);
 	const [isWishlisted, setIsWishlisted] = useState(false);
+
 
 	useEffect(() => {
 		wishlistItemExistHandler();
@@ -209,13 +212,17 @@ const VisitAgainCard = (props) => {
 					position: "relative",
 					height: { xs: "100px", md: "132px" },
 					width: "100%",
+					img:{
+						width:"100%",
+						height: "100%",}
+
 				}}
 			>
-				<CustomImageContainer
+				<NextImage
 					src={imageUrl}
 					alt={item?.name}
-					height="100%"
-					width="100%"
+					height={isSmall ? 100 : 132}
+					width={261}
 					obejctfit="contain"
 					borderRadius="10px"
 				/>

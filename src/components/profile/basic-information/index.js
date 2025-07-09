@@ -148,7 +148,7 @@ const BasicInformation = (props) => {
                           >
                             {data?.email || ""}
                           </Typography>
-                          {data?.is_email_verified === 1 ? (
+                          {data?.is_email_verified === "1" ? (
                             <VerifiedIcon style={{ marginLeft: "8px" }} />
                           ) : (
                             configData?.centralize_login

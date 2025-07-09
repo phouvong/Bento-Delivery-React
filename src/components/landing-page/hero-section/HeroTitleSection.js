@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 
 import {
   alpha,
@@ -9,15 +9,15 @@ import {
   useTheme,
 } from "@mui/material";
 
-import { getCurrentModuleType } from "../../../helper-functions/getCurrentModuleType";
-import { getLanguage } from "../../../helper-functions/getLanguage";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { getLanguage } from "helper-functions/getLanguage";
 import DollarSignHighlighter from "../../DollarSignHighlighter";
 import DownArrow from "../assets/DownArrow";
 import DownArrowRTL from "../assets/DownArrowRTL";
 import HeroLocationForm from "./HeroLocationForm";
 import ModuleSelectionRaw from "./module-selection/ModuleSelectionRaw";
 
-const HeroTitleSection = ({ configData, landingPageData, handleOrderNow }) => {
+const HeroTitleSection = ({ landingPageData }) => {
   const theme = useTheme();
   const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const [currentLocation, setCurrentLocation] = useState(null);

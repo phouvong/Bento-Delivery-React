@@ -25,6 +25,7 @@ import ClosedNow from "../../closed-now";
 import { HomeComponentsWrapper } from "../HomePageComponents";
 import Menus from "../best-reviewed-items/Menus";
 import { foodNewArrivalsettings, settings } from "./sliderSettings";
+import NextImage from "components/NextImage";
 
 const ImageWrapper = styled(Box)(({ theme }) => ({
   position: "relative",
@@ -198,13 +199,17 @@ const NewArrivalStores = () => {
                                 borderRadius: "50%",
                                 overflow: "hidden",
                                 width: "100%",
+                                img:{
+                                  width: "100%",
+                                  height: "100%",
+                                }
                               }}
                             >
-                              <CustomImageContainer
+                              <NextImage
                                 src={item?.logo_full_url}
                                 alt={item?.title}
-                                height="100%"
-                                width="100%"
+                                height={100}
+                                width={100}
                                 objectFit="cover"
                                 borderRadius="50%"
                               />

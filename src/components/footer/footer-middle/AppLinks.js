@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 import appleicon from "../../../../public/static/footer/apple.svg";
 import playstoreicon from "../../../../public/static/footer/playstore.svg";
 import CustomImageContainer from "../../CustomImageContainer";
+import NextImage from "components/NextImage";
 
 export const CustomButton = styled(Button)(({ theme, graybackground }) => ({
   height: "50px",
@@ -55,12 +56,12 @@ const AppLinks = (props) => {
         justifyContent="space-between"
         spacing={0.5}
       >
-        <CustomImageContainer
+        <NextImage
           src={playstoreicon?.src}
           alt="GooglePlay"
           objectFit="cover"
-          height="24px"
-          width="24px"
+          height={24}
+          width={24}
         />
         <Stack alignItems="flex-start" justifyContent="center">
           <Typography
@@ -98,12 +99,12 @@ const AppLinks = (props) => {
         justifyContent="space-between"
         spacing={0.5}
       >
-        <CustomImageContainer
+        <NextImage
           src={appleicon?.src}
           alt="GooglePlay"
           objectFit="cover"
-          height="30px"
-          width="30px"
+          height={30}
+          width={30}
         />
         <Stack alignItems="flex-start" justifyContent="center">
           <Typography

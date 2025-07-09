@@ -10,6 +10,7 @@ import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style
 import CustomImageContainer from "../CustomImageContainer";
 import WhyChooseSimmer from "../Shimmer/Parcel/WhyChooseSimmer";
 import LineSvg from "./asset/LineSvg";
+import NextImage from "components/NextImage";
 
 const settings = {
 	dots: false,
@@ -191,12 +192,16 @@ const ParcelFeatures = () => {
 										width="100%"
 										display="flex !important"
 										spacing={{ xs: 1, sm: 2, md: 3 }}
+										sx={{img:{
+											width:"100%",
+												height:"100%",
+												}}}
 									>
-										<CustomImageContainer
+										<NextImage
 											src={item?.image_full_url}
-											width="140px"
-											height="122px"
-											objectfit="contain"
+											width={140}
+											height={122}
+											objectFit="contain"
 											smWidth="64px"
 											smHeight="56px"
 										/>

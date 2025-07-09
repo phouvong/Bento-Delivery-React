@@ -151,7 +151,7 @@ const BusinessPlan = ({ formSubmit, isLoading }) => {
               </Stack>
               <Typography fontSize="13px" color={theme.palette.neutral[400]}>
                 {t(
-                  `Store will pay ${configData?.admin_commission}% commission to 6amMart from each order. You will get access of all the features and options  in store panel , app and interaction with user.`
+                  `Store will pay ${configData?.admin_commission}% commission to ${configData?.business_name} from each order. You will get access of all the features and options  in store panel , app and interaction with user.`
                 )}
               </Typography>
             </Stack>

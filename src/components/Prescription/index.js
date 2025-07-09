@@ -41,7 +41,7 @@ const Prescription = ({ storeId, expanded }) => {
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
   const router = useRouter();
   const handleClick = () => {
-    if (token) {
+    if ( getToken()) {
       handleRoute();
     } else {
       toast.error(t(not_logged_in_message));

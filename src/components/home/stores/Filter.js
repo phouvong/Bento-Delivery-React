@@ -19,13 +19,13 @@ import {
 import CustomSlider from "../../search/CustomSlider";
 import CustomRatings from "../../search/CustomRatings";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
 const Filter = (props) => {
 	const { border, priceRange, filterDataAndFunctions, minMax, setMinMax } =
 		props;
 	const {
 		filterData,
-		setFilterData,
 		handleCheckbox,
 		handleChangeRatings,
 		getRatingValue,
@@ -33,28 +33,13 @@ const Filter = (props) => {
 	} = filterDataAndFunctions;
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const open = Boolean(anchorEl);
-
 	const { t } = useTranslation();
-	//
-	// useEffect(() => {
-	//   setMinMax([priceRange?.[0]?.min_price, priceRange?.[0]?.max_price]);
-	// }, [priceRange]);
-
 	const handleMinMax = (value) => {
-		// if (value[0] === 0) {
-		//   value[0] = priceRange?.[0]?.min_price;
-		// }
 		setMinMax(value);
-		// handleDataByFilter?.(newData);
 	};
 	const handleClick = (event) => {
 		setAnchorEl(event.currentTarget);
 	};
-	const handleClose = (value) => {
-		setAnchorEl(null);
-		// setSelectedFilterValue(value);
-	};
-
 	// Split the array into two halves.
 	const dataWithoutPrice = filterData?.filter(
 		(item) =>
@@ -123,7 +108,7 @@ const Filter = (props) => {
 											if (
 												(currentTab === 0 &&
 													item?.value ===
-														"currently_open") ||
+													"currently_open") ||
 												(currentTab === 0 &&
 													item?.value === "nearby")
 											) {
@@ -133,13 +118,13 @@ const Filter = (props) => {
 													<FormControlLabel
 														sx={{
 															"& .MuiFormControlLabel-label":
-																{
-																	fontSize:
-																		"13px",
-																	fontWeight:
-																		item?.checked &&
-																		"450",
-																},
+															{
+																fontSize:
+																	"13px",
+																fontWeight:
+																	item?.checked &&
+																	"450",
+															},
 														}}
 														key={index}
 														control={
@@ -168,13 +153,13 @@ const Filter = (props) => {
 									{filterData?.length > 0 &&
 										secondHalf?.map((item, index) => {
 											if (
-												(currentTab === 0 &&
+												((currentTab === 0 &&
 													item?.value ===
-														"currently_open") ||
+													"currently_open") ||
 												item?.value === "coupon" ||
 												item?.value ===
-													"free_delivery" ||
-												item?.value === "fast_delivery"
+												"free_delivery" ||
+												item?.value === "fast_delivery" ) || (currentTab===1 && item?.value==="available_now" || getCurrentModuleType()!=="food" )
 											) {
 												return null;
 											} else {
@@ -182,13 +167,13 @@ const Filter = (props) => {
 													<FormControlLabel
 														sx={{
 															"& .MuiFormControlLabel-label":
-																{
-																	fontSize:
-																		"13px",
-																	fontWeight:
-																		item?.checked &&
-																		"420",
-																},
+															{
+																fontSize:
+																	"13px",
+																fontWeight:
+																	item?.checked &&
+																	"420",
+															},
 														}}
 														key={index}
 														control={
@@ -227,16 +212,16 @@ const Filter = (props) => {
 														if (
 															(currentTab === 0 &&
 																item?.value ===
-																	"currently_open") ||
+																"currently_open") ||
 															(currentTab === 0 &&
 																item?.value ===
-																	"nearby") ||
+																"nearby") ||
 															(currentTab === 0 &&
 																item?.value ===
-																	"coupon") ||
+																"coupon") ||
 															(currentTab === 0 &&
 																item?.value ===
-																	"free_delivery")
+																"free_delivery")
 														) {
 															return null;
 														} else {
@@ -244,13 +229,13 @@ const Filter = (props) => {
 																<FormControlLabel
 																	sx={{
 																		"& .MuiFormControlLabel-label":
-																			{
-																				fontSize:
-																					"13px",
-																				fontWeight:
-																					item?.checked &&
-																					"450",
-																			},
+																		{
+																			fontSize:
+																				"13px",
+																			fontWeight:
+																				item?.checked &&
+																				"450",
+																		},
 																	}}
 																	key={index}
 																	control={
@@ -280,37 +265,7 @@ const Filter = (props) => {
 													}
 												)}
 										</Grid>
-										{/*<Grid item xs={6}>*/}
-										{/*  {filterData?.length > 0 &&*/}
-										{/*    secondHalf?.map((item, index) => {*/}
-										{/*      if (*/}
-										{/*        currentTab === 0 &&*/}
-										{/*        item?.value === "currently_open"*/}
-										{/*      ) {*/}
-										{/*        return null;*/}
-										{/*      } else {*/}
-										{/*        return (*/}
-										{/*          <FormControlLabel*/}
-										{/*            sx={{*/}
-										{/*              "& .MuiFormControlLabel-label": {*/}
-										{/*                fontSize: "13px",*/}
-										{/*                fontWeight: item?.checked && "420",*/}
-										{/*              },*/}
-										{/*            }}*/}
-										{/*            key={index}*/}
-										{/*            control={*/}
-										{/*              <Checkbox*/}
-										{/*                checked={item?.checked}*/}
-										{/*                onChange={(e) => handleCheckbox(item, e)}*/}
-										{/*                name={item?.label}*/}
-										{/*              />*/}
-										{/*            }*/}
-										{/*            label={item?.label}*/}
-										{/*          />*/}
-										{/*        );*/}
-										{/*      }*/}
-										{/*    })}*/}
-										{/*</Grid>*/}
+
 									</>
 								)}
 								{currentTab === 0 ? (
@@ -343,7 +298,7 @@ const Filter = (props) => {
 											handleChangeRatings={
 												handleChangeRatings
 											}
-											// readOnly
+										// readOnly
 										/>
 									</CustomStackFullWidth>
 								</Grid>

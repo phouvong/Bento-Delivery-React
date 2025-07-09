@@ -22,6 +22,7 @@ import CustomMultipleRatings from "../CustomMultipleRatings";
 import ClosedNow from "../closed-now";
 import { PrimaryToolTip } from "./QuickView";
 import map from "./assets/map.png";
+import NextImage from "components/NextImage";
 
 const CustomStyledStack = styled(CustomStackFullWidth)(({ theme }) => ({
   background: theme.palette.neutral[100],
@@ -46,6 +47,10 @@ const CustomStyledBox = styled(CustomBoxFullWidth)(({ theme }) => ({
   opacity: 2,
   position: "relative",
   overflow: "hidden",
+  img:{
+    width: "100%",
+    height: "100%",
+  }
 }));
 
 const CustomStyledStackInner = styled(CustomStackFullWidth)(({ theme }) => ({
@@ -82,6 +87,10 @@ const CustomLogoContainer = styled("span")(({ theme }) => ({
   position: "relative",
   marginTop: "-30px",
   overflow: "hidden",
+  img:{
+    width: "100%",
+    height: "100%",
+  },
   [theme.breakpoints.down("sm")]: {
     height: "57px",
     width: "80px",
@@ -165,13 +174,13 @@ const NearbyStoreCard = (props) => {
   return (
     <CustomStyledStack onClick={handleClick}>
       <CustomStyledBox>
-        <CustomImageContainer
+        <NextImage
           src={item?.cover_photo_full_url}
           alt={item?.name}
-          height="100%"
-          width="100%"
+          height={100}
+          width={281}
           borderRadius="10px 10px 0px 0px"
-          objectfit="cover"
+          objectFit="cover"
         />
       </CustomStyledBox>
       <CustomStyledStackInner spacing={0.5}>
@@ -184,11 +193,11 @@ const NearbyStoreCard = (props) => {
           <CustomLogoContainer
             sx={{ overflow: "hidden", borderRadius: "10px" }}
           >
-            <CustomImageContainer
+            <NextImage
               src={item?.logo_full_url}
               alt={item?.name}
-              height="100%"
-              width="100%"
+              height={65}
+              width={95}
               objectfit="cover"
             />
             <ClosedNow

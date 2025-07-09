@@ -34,6 +34,7 @@ import useGetMostTrips from "../../../api-manage/hooks/react-query/useGetMostTri
 import { useTheme } from "@emotion/react";
 import { getGuestId, getToken } from "helper-functions/getToken";
 import { setOrderDetailsModal } from "redux/slices/offlinePaymentData";
+import {useGetTax} from "api-manage/hooks/react-query/order-place/useGetTax";
 
 const PrescriptionCheckout = ({ storeId }) => {
   const router = useRouter();
@@ -55,6 +56,8 @@ const PrescriptionCheckout = ({ storeId }) => {
   const { data: storeData, refetch } = useGetStoreDetails(storeId);
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
   const guestId = getGuestId();
+  const [payableAmount,setPayableAmount] = useState(0);
+  const {mutate:taxMutate,data}=useGetTax()
 
   useEffect(() => {
     refetch();
@@ -101,7 +104,6 @@ const PrescriptionCheckout = ({ storeId }) => {
     "order-place",
     OrderApi.prescriptionPlaceOrder
   );
-
   const handleOrderMutationObject = () => {
     const originData = {
       latitude: storeData?.latitude,
@@ -125,8 +127,24 @@ const PrescriptionCheckout = ({ storeId }) => {
       guest_id: guestId,
       contact_person_name: guestUserInfo?.contact_person_name,
       contact_person_number: guestUserInfo?.contact_person_number,
+      is_prescription: true,
     };
   };
+
+  useEffect(() => {
+    if (storeData) {
+      const order = handleOrderMutationObject();
+      taxMutate(order, {
+        onError: (error) => {
+          error?.response?.data?.errors?.forEach((item) =>
+            toast.error(item.message, {
+              position: "bottom-right",
+            })
+          );
+        },
+      });
+    }
+  }, [storeData?.id]);
 
   const handlePlaceOrder = () => {
     const handleSuccessSecond = (res) => {
@@ -215,6 +233,7 @@ const PrescriptionCheckout = ({ storeId }) => {
               isZoneDigital={isZoneDigital}
               setPaymentMethodImage={setPaymentMethodImage}
               paymentMethodImage={paymentMethodImage}
+              payableAmount={payableAmount}
             />
           )}
           <PrescriptionUpload
@@ -230,6 +249,7 @@ const PrescriptionCheckout = ({ storeId }) => {
             configData={configData}
             forprescription="true"
             setDeliveryTip={setDeliveryTip}
+            isHomeDelivery={configData?.home_delivery_status}
           />
           {orderType !== "take_away" && (
             <DeliveryManTip
@@ -266,6 +286,7 @@ const PrescriptionCheckout = ({ storeId }) => {
             </>
             {distanceData && storeData ? (
               <PrescriptionOrderCalculation
+                taxAmount={data}
                 storeData={storeData}
                 distanceData={distanceData}
                 configData={configData}
@@ -278,6 +299,7 @@ const PrescriptionCheckout = ({ storeId }) => {
                 zoneData={zoneData}
                 totalOrderAmount={0}
                 deliveryTip={deliveryTip}
+                setPayableAmount={setPayableAmount}
               />
             ) : (
               <OrderCalculationShimmer />

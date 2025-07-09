@@ -43,14 +43,16 @@ import { useGetOrderCancelReason } from "api-manage/hooks/react-query/order/useG
 import { getToken } from "helper-functions/getToken";
 
 const getAddOnsNames = (addOns) => {
-  const names = addOns?.map(
+  if (!addOns || addOns.length === 0) return "";
+
+  const names = addOns.map(
     (item, index) =>
-      `${addOns[0]?.name}(${addOns[0]?.quantity})${
-        index !== addOns?.length - 1 ? "," : ""
-      }`
+      `${item.name}(${item.quantity})${index !== addOns.length - 1 ? "," : ""}`
   );
-  return names;
+
+  return names.join(" ");
 };
+
 
 const OrderSummery = (props) => {
   const {
@@ -511,15 +513,6 @@ const OrderSummery = (props) => {
           </Grid>
         </Grid>
       )}
-      {/*<ModuleModal*/}
-      {/*  open={state.openModal}*/}
-      {/*  handleModalClose={handleClose}*/}
-      {/*  configData={configData}*/}
-      {/*  productDetailsData={item}*/}
-      {/*  addToWishlistHandler={addToWishlistHandler}*/}
-      {/*  removeFromWishlistHandler={removeFromWishlistHandler}*/}
-      {/*  isWishlisted={isWishlisted}*/}
-      {/*/>*/}
       <CustomModal
         openModal={openAdmin}
         handleClose={() => setOpenAdmin(false)}

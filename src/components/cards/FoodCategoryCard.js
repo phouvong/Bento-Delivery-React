@@ -3,13 +3,13 @@ import {
   Grid,
   Skeleton,
   Tooltip,
-  Typography,
+  Typography, useMediaQuery,
 } from "@mui/material";
 import { Box, Stack, styled } from "@mui/system";
-import { btoa } from "next/dist/compiled/@edge-runtime/primitives/encoding";
 import { useRouter } from "next/router";
 import { getModuleId } from "helper-functions/getModuleId";
 import CustomImageContainer from "../CustomImageContainer";
+import NextImage from "components/NextImage";
 
 const FeatureImageBox = styled(Stack)(({ theme }) => ({
   width: "100%",
@@ -29,6 +29,8 @@ const FoodCategoryCard = (props) => {
     slug,
   } = props;
   const router = useRouter();
+  const theme=useTheme()
+  const isSmall = useMediaQuery(theme.breakpoints.down("md"));
 
   const handleClick = () => {
     router.push({
@@ -37,7 +39,7 @@ const FoodCategoryCard = (props) => {
         search: "category",
         id: id,
         module_id: `${getModuleId()}`,
-        name: name && btoa(name),
+        name: name && (name),
         data_type: "category",
       },
     });
@@ -75,19 +77,14 @@ const FoodCategoryCard = (props) => {
             {onlyshimmer ? (<Stack sx={{ height: {xs: "56px", sm: "120px"}, width: {xs: "56px", sm: "120px"} }}>
                 <Skeleton variant="circular" width="100%" height="100%" />
             </Stack>) : (
-                <CustomImageContainer
+                <NextImage
                     src={categoryImageUrl}
                     alt={name}
-                    height="120px"
-                    maxWidth="120px"
-                    width="120px"
+                    height={isSmall?56:120}
+                    width={isSmall?56:120}
                     borderRadius="50%"
-                    objectFit="cover"
-                    smMb="5px"
-                    smHeight="56px "
-                    smMaxWidth="56px"
-                    cursor="pointer"
-                    loading="loading"
+
+                    //loading="loading"
                     bg="#ddd"
                 />
             )}

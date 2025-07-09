@@ -44,7 +44,10 @@ const RunningCampaigns = () => {
         },
         undefined,
         { shallow: true }
-      );
+      ).then(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+
     } else {
       setCampaignsData(product);
       setOpenModal(true);

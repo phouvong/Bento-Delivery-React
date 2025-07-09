@@ -15,24 +15,26 @@ const getData = async (pageParams) => {
     minMax,
     moduleId,
     storeZoneId,
+    filterData,
+    ratingCount,
   } = pageParams;
   const categoryId = categoryIdEr?.length === 0 ? [0] : categoryIdEr;
   if (getCurrentModuleType()) {
     if (minMax[0] !== 0 && minMax[1] !== 1) {
       const { data } = await MainApi.get(
-        `${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&min_price=${minMax[0]}&max_price=${minMax[1]}`
+        `${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&min_price=${minMax[0]}&max_price=${minMax[1]}&filter=${JSON.stringify(filterData)}&rating_count=${ratingCount}`
       );
       return data;
     } else {
       const { data } = await MainApi.get(
-        `${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}`
+        `${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&filter=${JSON.stringify(filterData)}&rating_count=${ratingCount}`
       );
       return data;
     }
   } else {
     if (minMax[0] !== 0 && minMax[1] !== 1) {
       const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&min_price=${minMax[0]}&max_price=${minMax[1]}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&min_price=${minMax[0]}&max_price=${minMax[1]}&filter=${JSON.stringify(filterData)}&rating_count=${ratingCount}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -44,7 +46,7 @@ const getData = async (pageParams) => {
       return data;
     } else {
       const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}`,
+        `${process.env.NEXT_PUBLIC_BASE_URL}${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&filter=${JSON.stringify(filterData)}&rating_count=${ratingCount}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -60,7 +62,7 @@ const getData = async (pageParams) => {
 
 export default function useGetStoresCategoriesItem(pageParams, handleSuccess) {
   return useInfiniteQuery(
-    ["stores-categories-item", pageParams.offset, pageParams.storeId],
+    ["stores-categories-item", pageParams.offset, pageParams.storeId,pageParams?.filterData],
     () => getData(pageParams),
     {
       // enabled: false,

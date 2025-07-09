@@ -5,12 +5,18 @@ import { useTranslation } from "react-i18next";
 import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
 import promotionalBanner from "./assets/promotional_banner.png";
+import NextImage from "components/NextImage";
 
 export const BannerWrapper = styled(Box)(({ theme }) => ({
   width: "100%",
   height: "360px",
   position: "relative",
   marginTop: "20px",
+  img:{
+    width: "100%",
+    height: "100%",
+
+  },
   "&:hover": {
     img: {
       transform: "scale(1.02)",
@@ -51,10 +57,10 @@ const PromotionalBanner = ({ bannerData }) => {
     <>
       {bannerData?.bottom_section_banner && (
         <BannerWrapper>
-          <CustomImageContainer
+          <NextImage
             src={bannerData?.bottom_section_banner_full_url}
-            height="100%"
-            width="100%"
+            height={360}
+            width={1440}
             objectFit="cover"
           />
         </BannerWrapper>

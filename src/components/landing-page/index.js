@@ -58,16 +58,8 @@ const LandingPage = ({ configData, landingPageData }) => {
   return (
     <>
       <PushNotificationLayout>
-        <HeroSection
-          configData={configData}
-          landingPageData={landingPageData}
-          handleOrderNow={handleOrderNow}
-        />
-        <ComponentOne
-          landingPageData={landingPageData}
-          configData={configData}
-          handleOrderNow={handleOrderNow}
-        />
+        <HeroSection landingPageData={landingPageData} />
+        <ComponentOne landingPageData={landingPageData} />
         {landingPageData?.promotion_banners?.length > 0 ? (
           <Banners landingPageData={landingPageData} isSmall={isSmall} />
         ) : null}

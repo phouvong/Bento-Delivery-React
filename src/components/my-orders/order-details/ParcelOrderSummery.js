@@ -350,6 +350,32 @@ const ParcelOrderSummery = ({
                   )}
                 </CustomStackFullWidth>
               ) : null}
+              {data?.tax_status !== "included" && data?.total_tax_amount>0 ? (
+                <CustomStackFullWidth
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="space-between"
+                  spacing={2}
+                >
+                  <Typography
+                    fontSize="14px"
+                    color={theme.palette.neutral[400]}
+                  >
+                    {t("VAT/TAX")}
+                  </Typography>
+                  {data ? (
+                    <Typography
+                      fontSize="14px"
+                      color={theme.palette.neutral[400]}
+                    >
+                      {data && getAmountWithSign(data?.total_tax_amount)}
+                    </Typography>
+                  ) : (
+                    <Skeleton width="100px" variant="text" />
+                  )}
+                </CustomStackFullWidth>
+              ) : null}
+
               {data?.dm_tips !== null || data?.dm_tips !== 0 ? (
                 <CustomStackFullWidth
                   direction="row"
@@ -416,7 +442,13 @@ const ParcelOrderSummery = ({
                 justifyContent="space-between"
                 spacing={2}
               >
-                <Typography fontWeight="500">{t("Total Amount")}</Typography>
+                <Typography component="span" fontWeight="500">{t("Total Amount")}
+                  {data?.tax_status==="included" ? (
+                    <Typography sx={{marginInlineStart:"5px"}} component="span" fontWeight="400" color={theme.palette.neutral[400]} fontSize="12px" ml={1}>
+                      {t("(Vat/Tax incl.)")}
+                    </Typography>
+                  ) : null}
+                </Typography>
                 {data ? (
                   <Typography fontWeight="600">
                     {data && getAmountWithSign(data?.order_amount)}

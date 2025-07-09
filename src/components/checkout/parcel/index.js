@@ -48,6 +48,9 @@ import {
 import { setGuestUserOrderId } from "redux/slices/guestUserInfo";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import {useGetTax} from "api-manage/hooks/react-query/order-place/useGetTax";
+import deliveryFree from "components/checkout/DeliveryFree";
+import {onErrorResponse} from "api-manage/api-error-response/ErrorResponses";
 
 const ParcelCheckout = () => {
   const theme = useTheme();
@@ -107,7 +110,7 @@ const ParcelCheckout = () => {
     formik.setFieldValue("confirm_password", value);
   };
   const tempDistance = handleDistance(
-    data?.data,
+    data,
     {
       latitude: parcelInfo?.receiverLocations?.latitude,
       longitude: parcelInfo?.receiverLocations?.longitude,
@@ -191,7 +194,6 @@ const ParcelCheckout = () => {
     ) {
       let deliveryFee =
         convertedDistance * parcelCategories?.parcel_per_km_shipping_charge;
-
       if (deliveryFee > parcelCategories?.parcel_minimum_shipping_charge) {
         return deliveryFee + extraCharge;
       } else {
@@ -237,11 +239,7 @@ const ParcelCheckout = () => {
     order_amount: parcelDeliveryFree() + Number(deliveryTip),
     order_type: "parcel",
     payment_method: isDigital,
-    distance: handleDistance(
-      data?.data,
-      parcelInfo?.senderLocations,
-      parcelInfo?.receiverLocations
-    ),
+    distance:tempDistance,
     discount_amount: 0,
     tax_amount: 0,
     receiver_details: receiverDetails,
@@ -263,6 +261,19 @@ const ParcelCheckout = () => {
   };
 
   const { data: order, isLoading, mutate: orderMutation } = useOrderPlace();
+  const {data:taxData,mutate}=useGetTax()
+
+  useEffect(() => {
+    if(parcelDeliveryFree()){
+      const newOrderObject = {
+        ...orderMutationObject,
+        order_amount: parcelDeliveryFree(),
+      };
+      mutate(newOrderObject,{
+        onError:onErrorResponse
+      })
+    }
+  }, [parcelDeliveryFree()]);
 
   const orderPlace = () => {
     if (paidBy === "sender") {
@@ -587,25 +598,6 @@ const ParcelCheckout = () => {
                           {getAmountWithSign(parcelDeliveryFree())}
                         </Typography>
                       </Stack>
-
-                      {/*{profileInfo?.is_valid_for_discount ? (*/}
-                      {/*  <>*/}
-                      {/*    <Stack direction="row" justifyContent="space-between">*/}
-                      {/*      <Typography fontWeight="500">*/}
-                      {/*        {t("Referral Discount")}*/}
-                      {/*      </Typography>*/}
-                      {/*      <Typography fontWeight="500">*/}
-                      {/*        {getAmountWithSign(*/}
-                      {/*          getReferDiscount(*/}
-                      {/*            parcelDeliveryFree(),*/}
-                      {/*            profileInfo?.discount_amount,*/}
-                      {/*            profileInfo?.discount_amount_type*/}
-                      {/*          )*/}
-                      {/*        )}*/}
-                      {/*      </Typography>*/}
-                      {/*    </Stack>*/}
-                      {/*  </>*/}
-                      {/*) : null}*/}
                       <Stack direction="row" justifyContent="space-between">
                         <Typography fontWeight="500">
                           {t("Delivery Man Tips")}
@@ -614,6 +606,21 @@ const ParcelCheckout = () => {
                           {getAmountWithSign(deliveryTip)}
                         </Typography>
                       </Stack>
+                      {
+                        taxData?.tax_included!==null && taxData?.tax_included === 0 ? (
+                          <>
+                            <Stack direction="row" justifyContent="space-between">
+                              <Typography fontWeight="500">
+                                {t("VAT/TAX")}
+                              </Typography>
+                              <Typography fontWeight="500">
+                                {taxData?.tax_included === 0 && <>{"(+)"}</>}
+                                {getAmountWithSign(taxData?.tax_amount)}
+                              </Typography>
+                            </Stack>
+                          </>
+                        ) : null
+                      }
                       {configData?.additional_charge_status === 1 && (
                         <Stack direction="row" justifyContent="space-between">
                           <Typography fontWeight="500">
@@ -627,17 +634,24 @@ const ParcelCheckout = () => {
 
                       <CustomDivider border="1px" />
                       <Stack direction="row" justifyContent="space-between">
-                        <Typography fontWeight="500" color="primary">
-                          {t("Total")}
+                        <Typography fontWeight="500" color="primary" component="span">
+                          {t("Total") }
+                          {taxData?.tax_included === 1 && taxData?.tax_included!==null && (
+                            <Typography fontSize="12px" sx={{marginInlineStart:"5px"}} color="primary" component="span">
+                              { ("(Vat/Tax incl.)")}
+                            </Typography>
+                          )}
+
                         </Typography>
                         <Typography fontWeight="500" color="primary">
                           {getAmountWithSign(
                             parcelDeliveryFree() +
-                              Number(deliveryTip) +
+                              Number(deliveryTip) + taxData?.tax_amount+
                               (configData?.additional_charge
                                 ? configData?.additional_charge
-                                : 0)
+                                : 0 )
                           )}
+
                         </Typography>
                       </Stack>
                     </CustomStackFullWidth>

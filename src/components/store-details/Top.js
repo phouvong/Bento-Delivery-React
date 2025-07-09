@@ -110,7 +110,7 @@ const Top = (props) => {
     isLoading,
     setOpenReviewModal,
   } = props;
-
+  console.log({storeDetails})
   const [state, dispatch] = useReducer(reducer, initialState);
   const theme = useTheme();
   const dispatchRedux = useDispatch();
@@ -241,6 +241,30 @@ const Top = (props) => {
               height: "122px",
             }}
           >
+            {storeDetails?.discount ? (
+              <Stack
+                sx={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  backgroundColor: (theme) =>
+                    alpha(theme.palette.primary.main, 0.7),
+                  color: (theme) => theme.palette.neutral[100],
+                  padding: "10px",
+                  borderRadius: "10px",
+                }}
+              >
+                <Typography fontSize="13px" fontWeight="600" textAlign="center">
+                  {`${storeDetails?.discount?.discount}% discount will be applicable when  order amount exceeds is more than  ${getAmountWithSign(
+                    storeDetails?.discount?.min_purchase
+                  )} max ${getAmountWithSign(
+                    storeDetails?.discount?.max_discount
+                  )}, discount is applicable.`}
+                  .
+                </Typography>
+              </Stack>
+            ) : null}
             {bannersData?.length ? (
               <Slider {...settings}>
                 {bannersData?.map((banner) => {
@@ -498,7 +522,7 @@ const Top = (props) => {
     } else {
       return (
         <CustomStackFullWidth direction="row">
-          <ContentWrapper>
+          <ContentWrapper >
             <CustomImageContainer
               src={bannerCover}
               width="100%"
@@ -506,6 +530,7 @@ const Top = (props) => {
               objectFit="cover"
               borderRadius="10px"
             />
+
             <ContentBox>
               <CustomBoxFullWidth
                 sx={{
@@ -731,7 +756,32 @@ const Top = (props) => {
               </CustomBoxFullWidth>
             </ContentBox>
           </ContentWrapper>
-          <Stack width="50%">
+          <Stack width="50%" sx={{position:"relative"}}>
+            {storeDetails?.discount ? (
+              <Stack
+                sx={{
+                  position: "absolute",
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  backgroundColor: (theme) =>
+                    alpha(theme.palette.primary.main, 0.7),
+                  color: (theme) => theme.palette.neutral[100],
+                  padding: "10px",
+                  borderRadius: "0px",
+                  zIndex: 999,
+                }}
+              >
+                <Typography fontSize="13px" fontWeight="600" textAlign="center">
+                  {`${storeDetails?.discount?.discount}% discount will be applicable when  order amount exceeds is more than  ${getAmountWithSign(
+                    storeDetails?.discount?.min_purchase
+                  )} max ${getAmountWithSign(
+                    storeDetails?.discount?.max_discount
+                  )} ,discount is applicable.`}
+                  .
+                </Typography>
+              </Stack>
+            ) : null}
             {!isLoading ? (
               <>
                 {bannersData?.length ? (

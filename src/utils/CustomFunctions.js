@@ -376,7 +376,7 @@ const handleProductWiseDiscount = (items) => {
       } else {
         let a =
           handleProductValueWithOutDiscount(item) -
-          getConvertDiscount(
+          getConvertDiscountNew(
             item.discount,
             item.discount_type,
             handleProductValueWithOutDiscount(item),
@@ -391,60 +391,67 @@ const handleProductWiseDiscount = (items) => {
   return totalDiscount;
 };
 
-export const getProductDiscount = (items, storeData) => {
+export const getProductDiscount = (items, storeData,diffDiscount) => {
+  const productWiseDiscount = handleProductWiseDiscount(items);
   if (storeData?.discount) {
-    let endDate = storeData?.discount?.end_date;
-    let endTime = storeData?.discount?.end_time;
-    let combinedEndDateTime = moment(
+    const endDate = storeData?.discount?.end_date;
+    const endTime = storeData?.discount?.end_time;
+    const combinedEndDateTime = moment(
       `${endDate} ${endTime}`,
       "YYYY-MM-DD HH:mm:ss"
-    ).format();
-    let currentDateTime = moment().format();
-    if (combinedEndDateTime > currentDateTime) {
-      //shop wise discount
-      let restaurentDiscount = storeData?.discount?.discount;
-      let resDisType = storeData?.discount?.discount_type;
-      let restaurentMinimumPurchase = storeData?.discount?.min_purchase;
-      let restaurentMaxDiscount = storeData?.discount?.max_discount;
-      let totalDiscount = handleTotalDiscountBasedOnModules(
+    );
+    const currentDateTime = moment();
+
+    // Check if the store discount is still valid
+    if (combinedEndDateTime.isAfter(currentDateTime)) {
+     // console.log("Store discount is available");
+      const {
+        discount: restaurentDiscount,
+        discount_type: resDisType,
+        min_purchase: restaurentMinimumPurchase,
+        max_discount: restaurentMaxDiscount,
+      } = storeData.discount;
+
+      // Calculate shop-level total discount
+      const totalDiscount = handleTotalDiscountBasedOnModules(
         items,
         restaurentDiscount,
         resDisType
       );
 
-      let purchasedAmount = items.reduce(
-        (total, product) =>
-          ((product?.food_variations.length > 0
-            ? handleProductValueWithOutDiscount(product)
-            : product?.price) +
-            (product?.selectedAddons?.length > 0
-              ? product?.selectedAddons?.reduce(
-                  (total, addOn) => addOn.price * addOn.quantity + total,
-                  0
-                )
-              : 0)) *
-            product.quantity +
-          total,
-        0
-      );
+      // Calculate total purchased amount
+      const purchasedAmount = items.reduce((total, product) => {
+        const basePrice = product?.food_variations?.length > 0
+          ? handleProductValueWithOutDiscount(product)
+          : product?.selectedOption?.length>0?product?.price + (product?.selectedOption?.reduce?.((sum, opt) => sum + (opt?.price || 0), 0) || 0):product?.price;
+
+
+        const addonPrice = product?.selectedAddons?.length > 0
+          ? product.selectedAddons.reduce(
+            (addonTotal, addOn) => addonTotal + addOn.price * addOn.quantity,
+            0
+          )
+          : 0;
+
+        return total + (basePrice + addonPrice) * product.quantity;
+      }, 0);
+      // If eligible for store discount, calculate the final applicable discount
       if (purchasedAmount >= restaurentMinimumPurchase) {
-        if (totalDiscount >= restaurentMaxDiscount) {
-          return restaurentMaxDiscount;
-        } else {
-          return totalDiscount;
+        const applicableStoreDiscount = Math.min(totalDiscount, restaurentMaxDiscount);
+        if (diffDiscount) {
+          diffDiscount.value = applicableStoreDiscount - productWiseDiscount;
         }
-      } else {
-        return 0;
+
+        // ✅ Return the higher discount: store vs product
+        return Math.max(applicableStoreDiscount, productWiseDiscount);
       }
-    } else {
-      //product wise discount
-      return handleProductWiseDiscount(items);
     }
-  } else {
-    //product wise discount
-    return handleProductWiseDiscount(items);
   }
+
+  // Return product-wise discount if no valid store-wide discount
+  return productWiseDiscount;
 };
+
 
 export const getConvertDiscount = (dis, disType, price, restaurantDiscount) => {
   if (restaurantDiscount === 0) {
@@ -459,6 +466,16 @@ export const getConvertDiscount = (dis, disType, price, restaurantDiscount) => {
   } else {
     return price - (price * restaurantDiscount) / 100;
   }
+};
+export const getConvertDiscountNew = (dis, disType, price, restaurantDiscount) => {
+  if (dis !== 0) {
+    if (disType === "amount") {
+      price = price - dis;
+    } else if (disType === "percent") {
+      price = price - (dis / 100) * price;
+    }
+  }
+  return price;
 };
 
 export const getFinalTotalPrice = (
@@ -595,8 +612,8 @@ function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
 }
 
 export const handleDistance = (distance, origin, destination) => {
-  if (distance?.distanceMeters) {
-    return distance?.distanceMeters / 1000;
+  if (typeof distance?.distanceMeters === 'number') {
+    return Number(distance?.distanceMeters) / 1000;
   } else if (distance?.status === "ZERO_RESULTS") {
     return (
       distanceInKmBetweenEarthCoordinates(
@@ -692,15 +709,23 @@ export const getDeliveryFees = (
       destination
     );
     let deliveryFee = convertedDistance * configData?.per_km_shipping_charge;
-
     let totalOrderAmount = cartItemsTotalAmount(cartList);
+    const isAdminFreeDeliveryEnabled = configData?.admin_free_delivery?.status === true;
+    const freeDeliveryType = configData?.admin_free_delivery?.type;
+    const freeDeliveryThreshold = configData?.admin_free_delivery?.free_delivery_over;
+    const isFreeDeliveryByAmount =
+      freeDeliveryType === "free_delivery_by_order_amount" &&
+      freeDeliveryThreshold > 0 &&
+      totalOrderAmount >= freeDeliveryThreshold;
+    const isFreeDeliveryToAllStores = freeDeliveryType === "free_delivery_to_all_store";
     //restaurant self delivery system checking
-    if (Number.parseInt(storeData?.self_delivery_system) === 1) {
-      if (storeData?.free_delivery) {
+    if (Number.parseInt(storeData?.self_delivery_system ) === 1) {
+      const storeWiseDeliveryFee = convertedDistance * storeData?.per_km_shipping_charge || 0;
+      if (storeData?.free_delivery || ((isAdminFreeDeliveryEnabled && (isFreeDeliveryByAmount || isFreeDeliveryToAllStores)))) {
         return 0;
       } else {
         deliveryFee =
-          convertedDistance * storeData?.per_km_shipping_charge || 0;
+          storeWiseDeliveryFee
         if (
           deliveryFee >= storeData?.minimum_shipping_charge &&
           deliveryFee <= storeData.maximum_shipping_charge
@@ -718,17 +743,6 @@ export const getDeliveryFees = (
         }
       }
     } else {
-      const isAdminFreeDeliveryEnabled = configData?.admin_free_delivery?.status === true;
-      const freeDeliveryType = configData?.admin_free_delivery?.type;
-      const freeDeliveryThreshold = configData?.admin_free_delivery?.free_delivery_over;
-
-      const isFreeDeliveryByAmount =
-        freeDeliveryType === "free_delivery_by_order_amount" &&
-        freeDeliveryThreshold > 0 &&
-        totalOrderAmount >= freeDeliveryThreshold;
-
-      const isFreeDeliveryToAllStores = freeDeliveryType === "free_delivery_to_all_store";
-      
       if (zoneData?.data?.zone_data?.length > 0) {
         const chargeInfo = getInfoFromZoneData(zoneData);
         if (
@@ -838,19 +852,16 @@ export const getCalculatedTotal = (
   extraCharge,
   additionalCharge,
   packagingCharge,
-  referDiscount
+  referDiscount,
+  vatAmount
 ) => {
+  const taxAmount=vatAmount|| 0
   if (couponDiscount) {
     if (couponDiscount?.coupon_type === "free_delivery") {
       return (
         getSubTotalPrice(cartList) -
         getProductDiscount(cartList, storeData) +
-        handleTaxIncludeExclude(
-          cartList,
-          couponDiscount,
-          storeData,
-          referDiscount
-        ) -
+        taxAmount -
         (couponDiscount
           ? getCouponDiscount(couponDiscount, storeData, cartList)
           : 0)
@@ -859,12 +870,7 @@ export const getCalculatedTotal = (
       return (
         getSubTotalPrice(cartList) -
         getProductDiscount(cartList, storeData) +
-        handleTaxIncludeExclude(
-          cartList,
-          couponDiscount,
-          storeData,
-          referDiscount
-        ) -
+        taxAmount -
         (couponDiscount
           ? getCouponDiscount(couponDiscount, storeData, cartList)
           : 0) +
@@ -890,12 +896,7 @@ export const getCalculatedTotal = (
     return (
       getSubTotalPrice(cartList) -
       getProductDiscount(cartList, storeData) +
-      handleTaxIncludeExclude(
-        cartList,
-        couponDiscount,
-        storeData,
-        referDiscount
-      ) -
+      taxAmount -
       0 +
       getDeliveryFees(
         storeData,

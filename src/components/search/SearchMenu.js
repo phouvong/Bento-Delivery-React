@@ -127,7 +127,6 @@ const SearchMenu = (props) => {
 							)}
 						</>
 					)}
-
 					<Grid item xs={5} md={2.5}>
 						{isSmallSize ? (
 							<Box

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
 import { Stack, styled } from "@mui/system";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
-import { IconButton, Tooltip, Typography, Zoom } from "@mui/material";
+import {alpha, IconButton, Tooltip, Typography, Zoom} from "@mui/material";
 import { t } from "i18next";
 import InfoIcon from "@mui/icons-material/Info";
 import { DeliveryCaption } from "../CheckOut.style";
@@ -17,11 +17,13 @@ import CustomImageContainer from "../../CustomImageContainer";
 import wallet from "../assets/wallet.png";
 import money from "../assets/money.png";
 import OfflinePaymentIcon from "../assets/OfflinePaymentIcon";
+import PaymentIcon from '@mui/icons-material/Payment';
+import {getAmountWithSign} from "helper-functions/CardHelpers";
 
 const PaymentMethodBox = styled(CustomStackFullWidth)(({ theme }) => ({
   borderRadius: "5px",
   border: "1px solid",
-  borderColor: theme.palette.warning.light,
+  borderColor: alpha(theme.palette.primary.main, 0.5),
   boxShadow: "px 3px 20px -5px rgba(3, 157, 85, 0.10)",
   padding: "15px",
   alignItems: "center",
@@ -43,6 +45,12 @@ const AddPaymentMethod = (props) => {
     isZoneDigital,
     setPaymentMethodImage,
     paymentMethodImage,
+    handlePartialPayment,
+    walletBalance,
+    removePartialPayment,
+    switchToWallet,
+    customerData,
+    payableAmount
   } = props;
   const [openModal, setOpenModel] = useState(false);
   const { offlineMethod } = useSelector((state) => state.offlinePayment);
@@ -75,45 +83,67 @@ const AddPaymentMethod = (props) => {
         direction="row"
         justifyContent="space-between"
         onClick={handleClick}
+        sx={{justifyContent:"space-between"}}
       >
-        {paymentMethod ? (
-          <Stack direction="row" gap={1} alignItems="center">
+        {(paymentMethod || usePartialPayment) ? (
+          <Stack direction="row" gap={1} alignItems="center" >
             {paymentMethod?.match("offline_payment") ? (
               <OfflinePaymentIcon />
             ) : (
-              <CustomImageContainer
-                src={paymentMethodImage}
-                width="60px"
-                height="20px"
-                alt="Payment Method Image"
-                objectfit="contain"
-              />
+              <>
+                {usePartialPayment?(<PaymentIcon
+                  style={{ width: "20px", height: "20px" }}
+
+                />):( <CustomImageContainer
+                  src={paymentMethodImage}
+                  width="auto"
+                  height="20px"
+                  alt="Payment Method Image"
+                  objectfit="contain"
+                />)}
+              </>
+
             )}
             <Typography
               fontSize="12px"
-              fontWeight="500"
-              color={theme.palette.primary.main}
+               fontWeight="500"
+               component="span"
               textTransform="capitalize"
             >
-              {paymentMethod === "offline_payment"
+              {usePartialPayment ? t("Paid By Wallet"):paymentMethod === "offline_payment"
                 ? `${paymentMethod?.replaceAll("_", " ")} (${
                     offlineMethod?.method_name
                   })`
-                : t(paymentMethod?.replaceAll("_", " "))}
+                : t(paymentMethod?.replaceAll("_", " "))}{" "}:{" "}
+                <Typography component="span" fontWeight="500" fontSize="12px">{getAmountWithSign(usePartialPayment?walletBalance:payableAmount)}</Typography>
             </Typography>
+            {usePartialPayment && paymentMethod && (
+              <Typography   fontSize="12px"
+                            fontWeight="500"
+                            component="span"
+                            textTransform="capitalize"
+                            paddingInlineStart={{xs:"0xp",md:"50px"}}
+              >
+                {paymentMethod === "offline_payment"
+                  ? `${t("offline payment")} (${offlineMethod?.method_name})`
+                  : t(paymentMethod.replaceAll("_", " "))} {t("(Due)")} {" "}:{" "}
+                <Typography component="span" fontWeight="500" fontSize="12px">{getAmountWithSign(payableAmount-walletBalance)}</Typography>
+              </Typography>
+            )}
+
           </Stack>
         ) : (
           <Stack direction="row" alignItems="center" spacing={1}>
-            <AddCircleOutlineIcon
+            <PaymentIcon
               style={{ width: "20px", height: "20px" }}
-              color="primary"
+
             />
             <Typography
               fontSize="12px"
               fontWeight="500"
-              color={theme.palette.primary.main}
+
             >
-              {t("Add Payment Method")}
+              {t("Select Payment Method")}
             </Typography>
             <Stack sx={{ cursor: "pointer" }}>
               <Tooltip
@@ -138,6 +168,7 @@ const AddPaymentMethod = (props) => {
           openModal={openModal}
           handleClose={() => setOpenModel(false)}
           minWidth="300px"
+          maxWidth="660px"
         >
           <CustomStackFullWidth
             direction="row"
@@ -177,6 +208,12 @@ const AddPaymentMethod = (props) => {
             setPaymentMethodImage={setPaymentMethodImage}
             setSwitchToWallet={setSwitchToWallet}
             isZoneDigital={isZoneDigital}
+            handlePartialPayment={handlePartialPayment}
+            walletBalance={walletBalance}
+            removePartialPayment={removePartialPayment}
+            switchToWallet={switchToWallet}
+            customerData={customerData}
+            payableAmount={payableAmount}
           />
         </CustomModal>
       )}

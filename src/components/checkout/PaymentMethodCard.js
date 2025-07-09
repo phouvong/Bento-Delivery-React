@@ -52,7 +52,8 @@ const PaymentMethodCard = (props) => {
         direction="row"
         gap="8px"
         alignItems="center"
-        paddingLeft={{ xs: "5px", sm: "5px", md: "15px" }}
+        py={{ xs: "10px", sm: "10px", md: "0px" }}
+
       >
         {parcel === "true" ? (
           <CustomImageContainer
@@ -65,7 +66,7 @@ const PaymentMethodCard = (props) => {
         ) : (
           !isSmall && (
             <CustomImageContainer
-              width="60px"
+              width="auto"
               height="20px"
               objectfit="contain"
               borderRadius="50%"
@@ -84,13 +85,8 @@ const PaymentMethodCard = (props) => {
     );
   };
   return (
-    <Stack paddingLeft={parcel === "true" ? "0px" : "20px"}>
+    <Stack >
       <FormControl
-        sx={{
-          marginRight: { xs: "0px" },
-          marginLeft: { xs: "5px" },
-          paddingLeft: "5px",
-        }}
       >
         <RadioGroup
           aria-labelledby="demo-radio-buttons-group-label"
@@ -98,6 +94,7 @@ const PaymentMethodCard = (props) => {
           onChange={handleChange}
         >
           <FormControlLabel
+            sx={{flexGrow:1,marginInlineStart:{xs:"0px",md:"-11px"}}}
             value={type}
             control={
               <Radio

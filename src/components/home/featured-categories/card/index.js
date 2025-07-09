@@ -4,17 +4,17 @@ import {
   Stack,
   styled,
   Tooltip,
-  Typography,
+  Typography, useMediaQuery, useTheme,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
 import CustomImageContainer from "../../../CustomImageContainer";
 
 import { getModuleId } from "helper-functions/getModuleId";
-import { btoa } from "next/dist/compiled/@edge-runtime/primitives/encoding";
 import Link from "next/link";
 import { CustomBoxFullWidth } from "styled-components/CustomStyles.style";
 import { textWithEllipsis } from "styled-components/TextWithEllipsis";
+import NextImage from "components/NextImage";
 
 export const Card = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -37,7 +37,9 @@ export const Card = styled(Box)(({ theme }) => ({
 const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
   const [hover, setHover] = useState(false);
   const classes = textWithEllipsis();
-
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isExtraSmallScreen = useMediaQuery(theme.breakpoints.down("xs"));
   return (
     <Link
       href={{
@@ -46,7 +48,7 @@ const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
           search: "category",
           id: id,
           module_id: `${getModuleId()}`,
-          name: title && btoa(title),
+          name: title && (title),
           data_type: "category",
         },
       }}
@@ -84,6 +86,9 @@ const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
             position: "relative",
             height: { xs: "95px", md: "110px" },
             width: "100%",
+            img:{
+              width:"100%",
+              height: "100%",}
           }}
         >
           {onlyshimmer ? (
@@ -92,15 +97,15 @@ const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
                   height="100%"
                   variant="rectangle"
                 />
-          ) : (<CustomImageContainer
+          ) : (<NextImage
               src={image}
               alt={title}
-              height="100%"
-              width="100%"
+              height={110}
+              width={106}
               objectFit="cover"
-              loading="loading"
               bg="#ddd"
-          />)}
+            />
+          )}
         </Stack>
         <Tooltip
           title={title}

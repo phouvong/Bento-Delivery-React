@@ -36,12 +36,12 @@ const CustomSelectWithFormik = (props) => {
   };
 
   return (
-    <FormControl fullWidth>
+    <FormControl fullWidth variant="outlined">
       <InputLabel
         required={required}
         id="demo-simple-select-label"
         sx={{
-          color: theme.palette.neutral[400],
+          color: theme.palette.neutral[500],
           display: "flex",
           alignItems: "start !important",
           fontSize: "13px",
@@ -56,6 +56,7 @@ const CustomSelectWithFormik = (props) => {
         {inputLabel}
       </InputLabel>
       <Select
+        variant="outlined"
         labelId="demo-simple-select-label"
         id="demo-simple-select"
         value={value}

@@ -23,9 +23,6 @@ const ValidationSchemaForRestaurant = () => {
 		f_name: Yup.string().required(t("Name is required")),
 		l_name: Yup.string().required(t("last name required")),
 		phone: Yup.string().required(t("phone number required")),
-		vat: Yup.string()
-			.required(t("Vat is required"))
-			.max(100, t("Vat/tax must not exceed 100 characters")),
 		min_delivery_time: Yup.string().required(t("Minimum Delivery Time")),
 		max_delivery_time: Yup.string().required(t("Maximum Delivery Time")),
 		delivery_time_type: Yup.string().required(
@@ -81,6 +78,24 @@ const ValidationSchemaForRestaurant = () => {
 		confirm_password: Yup.string()
 			.required(t("Confirm Password required"))
 			.oneOf([Yup.ref("password"), null], t("Passwords must match")),
+		tin: Yup.string()
+			.required(t("Taxpayer Identification Number(TIN) is required"))
+			.matches(/^[0-9\W]*$/, t("TIN can only contain numbers and symbols"))
+			.min(3, t("TIN must be at least 3 characters"))
+			.max(20, t("TIN cannot exceed 20 characters")),
+
+		tin_expire_date: Yup.date()
+			.nullable()
+			.transform((curr, orig) => (orig === "" ? null : curr))
+			.required(t("TIN Expire Date is required"))
+			.min(new Date(), t("TIN expire date cannot be in the past")),
+		tin_certificate_image: Yup.mixed()
+			.required(t("TIN Certificate Image is required"))
+			.test(
+				"fileSize",
+				t("File too large (max 20MB)"),
+				(value) => !value || (value && value.size <= FILE_SIZE)
+			)
 	});
 };
 

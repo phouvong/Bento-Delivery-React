@@ -38,7 +38,6 @@ const ForgotPassword = ({ configData }) => {
     setPage((currPage) => currPage - 1);
   };
 
-  console.log({data})
   const handleFirstForm = (values) => {
     setData({
       phone: values.phone,

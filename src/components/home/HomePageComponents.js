@@ -49,18 +49,20 @@ const HomePageComponents = ({ configData, landingPageData }) => {
 	const { profileInfo } = useSelector((state) => state.profileInfo);
 	const router = useRouter();
 	const dispatch = useDispatch();
+	const token = getToken();
 	const { welcomeModal } = useSelector((state) => state.utilsData);
 	const moduleType = getCurrentModuleType();
+
 
 	const zoneid =
 		typeof window !== "undefined"
 			? localStorage.getItem("zoneid")
 			: undefined;
-	const token = getToken();
+
 
 	useEffect(() => {
 		window.scrollTo(0, 0);
-	}, []);
+	}, [router.query.search]);
 
 	const onSuccessHandler = (response) => {
 		setWishListsData(response);

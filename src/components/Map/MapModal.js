@@ -62,6 +62,7 @@ const MapModal = ({
 }) => {
   const router = useRouter();
   const theme = useTheme();
+
   const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const { configData } = useSelector((state) => state.configData);
   const { t } = useTranslation();
@@ -94,7 +95,6 @@ const MapModal = ({
     enabled
   );
   const dispatch = useDispatch();
-
   const { coords, isGeolocationAvailable, isGeolocationEnabled, getPosition } =
     useGeolocated({
       positionOptions: {
@@ -222,8 +222,11 @@ const MapModal = ({
       } else {
         if (fromStore) {
           handleClose();
-        } else {
-          
+        }else if(location && selectedModule){
+          window.location.reload();
+          handleClose();
+        }
+        else {
           setOpenModuleSelection(true);
         }
       }

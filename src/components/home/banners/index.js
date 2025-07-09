@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Grid, Skeleton, styled } from "@mui/material";
+import {Grid, Skeleton, styled, useMediaQuery, useTheme} from "@mui/material";
 import { Box } from "@mui/system";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
@@ -17,6 +17,7 @@ import {
 } from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../../CustomImageContainer";
 import FoodDetailModal from "../../food-details/foodDetail-modal/FoodDetailModal";
+import NextImage from "components/NextImage";
 
 export const BannersWrapper = styled(Box)(({ theme }) => ({
   cursor: "pointer",
@@ -25,6 +26,11 @@ export const BannersWrapper = styled(Box)(({ theme }) => ({
   height: "234px",
   position: "relative",
   overflow: "hidden",
+  img:{
+    width:'100%',
+    height:'100%',
+  },
+
 
   "&:hover": {
     img: {
@@ -42,6 +48,9 @@ export const BannersWrapper = styled(Box)(({ theme }) => ({
 
 const Banners = () => {
   const router = useRouter();
+  const theme=useTheme()
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const isExtraSmallScreen = useMediaQuery(theme.breakpoints.down("xs"));
   const { selectedModule } = useSelector((state) => state.utilsData);
   const { banners } = useSelector((state) => state.storedData);
   const { data, refetch: refetchBannerData, isFetched } = useGetBanners();
@@ -95,7 +104,9 @@ const Banners = () => {
         },
         undefined,
         { shallow: true }
-      );
+      ).then(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     } else if (banner?.type === "default") {
       window.open(banner?.link, "_blank");
     } else {
@@ -228,13 +239,13 @@ const Banners = () => {
                             key={index}
                             onClick={() => handleBannerClick(item)}
                         >
-                          <CustomImageContainer
-                              src={item?.image_full_url}
-                              alt={item?.title}
-                              height="100%"
-                              width="100%"
-                              objectfit="cover"
-                              borderRadius="10px"
+                          <NextImage
+                            src={item?.image_full_url}
+                            alt={item?.title}
+                            height={isExtraSmallScreen?"150": isSmallScreen ? "200" : "234"}
+                            width={624}
+                            objectFit="cover"
+                            borderRadius="10px"
                           />
                         </BannersWrapper>
                     ))}

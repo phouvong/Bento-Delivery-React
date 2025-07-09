@@ -1,23 +1,23 @@
 export const filterTypeItems = [
   // { label: "On Sale", value: "on_sale", checked: false },
   // { label: "Nearby", value: "nearby", checked: false },
+  {
+    label: "Available for Now",
+    value: "available_now",
+    checked: false,
+  },
   // {
-  //   label: "Currently Open",
-  //   value: "currently_open",
+  //   label: "Top Rated",
+  //   value: "top_rated",
   //   checked: false,
   // },
-  {
-    label: "Top Rated",
-    value: "top_rated",
-    checked: false,
-  },
   { label: "Discounted", value: "discounted", checked: false },
   //{ label: "From Campaign", value: "from_campaign", checked: false },
-  {
-    label: "Popular",
-    value: "popular",
-    checked: false,
-  },
+  // {
+  //   label: "Popular",
+  //   value: "popular",
+  //   checked: false,
+  // },
 
   // {
   //   label: "Price",
@@ -58,7 +58,14 @@ export const filterTypeStores = [
     value: "free_delivery",
     checked: false,
   },
+  {
+    label: "Available for Now",
+    value: "available_now",
+    checked: false,
+  },
   { label: "Coupon Applicable Restaurants", value: "coupon", checked: false },
+
+
   // {
   //   label: "Best Seller",
   //   value: "best_seller",

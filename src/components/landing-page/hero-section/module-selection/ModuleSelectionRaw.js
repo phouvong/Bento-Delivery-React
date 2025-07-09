@@ -19,6 +19,7 @@ import useGetModule from "api-manage/hooks/react-query/useGetModule";
 import { setModules } from "redux/slices/configData";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import NextImage from "components/NextImage";
 
 const CardWrapper = styled(Stack)(({ theme, bg_change }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -45,8 +46,7 @@ const ImageWrapper = styled(Box)(({ theme }) => ({
   height: "33px",
   position: "relative",
 }));
-const Card = ({ item, configData, isSelected, handleClick }) => {
-  const theme = useTheme();
+const Card = ({ item, isSelected, handleClick }) => {
   const { t } = useTranslation();
 
   return (
@@ -109,13 +109,14 @@ const Card = ({ item, configData, isSelected, handleClick }) => {
           </Stack>
         )}
         <ImageWrapper>
-          <CustomImageContainer
+          <NextImage
             src={item?.icon_full_url}
             alt={item?.module_name}
-            height="100%"
-            width="100%"
-            obejctfit="contained"
+            height={33}
+            width={33}
+            objectFit="contain"
             borderRadius="5px"
+            priority
           />
         </ImageWrapper>
       </CustomStackFullWidth>
@@ -126,7 +127,7 @@ const Card = ({ item, configData, isSelected, handleClick }) => {
 const ModuleSelectionRaw = (props) => {
   const { isSmall } = props;
   const dispatch = useDispatch();
-  const { modules, configData } = useSelector((state) => state.configData);
+  const { modules } = useSelector((state) => state.configData);
   const [isSelected, setIsSelected] = useState(getCurrentModuleType());
   const { data, refetch } = useGetModule();
   useEffect(() => {
@@ -158,7 +159,6 @@ const ModuleSelectionRaw = (props) => {
                   <div key={index}>
                     <Card
                       item={item}
-                      configData={configData}
                       isSelected={isSelected}
                       handleClick={handleClick}
                     />
@@ -186,7 +186,6 @@ const ModuleSelectionRaw = (props) => {
                 <Card
                   key={index}
                   item={item}
-                  configData={configData}
                   isSelected={isSelected}
                   handleClick={handleClick}
                 />

@@ -26,7 +26,6 @@ const SearchResult = (props) => {
   const {
     searchValue,
     configData,
-
     fromAllCategories,
     fromNav,
     routeTo,

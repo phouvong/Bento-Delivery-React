@@ -6,9 +6,8 @@ import {
   store_registration,
 } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
-
+import dayjs from "dayjs";
 const postData = async (storeData) => {
-
   const translationsR = [];
   for (const [locale, name] of Object.entries(storeData.restaurant_name)) {
     translationsR.push({ id: null, locale, key: "name", value: name });
@@ -22,7 +21,6 @@ const postData = async (storeData) => {
   const translations = JSON.stringify(translationsR);
   const finalData = {
     translations,
-    tax: storeData.vat,
     minimum_delivery_time: storeData?.min_delivery_time,
     maximum_delivery_time: storeData?.max_delivery_time,
     latitude: storeData?.lng,
@@ -40,6 +38,11 @@ const postData = async (storeData) => {
     logo: storeData?.logo,
     cover_photo: storeData?.cover_photo,
     pickup_zone_id:storeData?.pickup_zone_id? JSON.stringify(storeData?.pickup_zone_id?.map(String)):[],
+    tin: storeData?.tin || "",
+    tin_expire_date: storeData?.tin_expire_date
+      ? dayjs(storeData.tin_expire_date).format("YYYY-MM-DD")
+      : "",
+    tin_certificate_image: storeData?.tin_certificate_image || "",
   };
   const formData = new FormData();
   const appendFormData = (formData, data, parentKey = "") => {

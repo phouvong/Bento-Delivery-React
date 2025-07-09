@@ -228,10 +228,7 @@ const FoodDetailModal = ({
             : [],
         add_on_qtys:
           selectedAddons?.length > 0
-            ? selectedAddons?.map((add) => {
-                totalQty += add.quantity;
-                return totalQty;
-              })
+            ? selectedAddons.map((add) => add.quantity)
             : [],
         item_id: product?.id,
         price: totalPrice,
@@ -264,13 +261,9 @@ const FoodDetailModal = ({
                 return add.id;
               })
             : [],
-        add_on_qtys:
-          selectedAddons?.length > 0
-            ? selectedAddons?.map((add) => {
-                totalQty += add.quantity;
-                return totalQty;
-              })
-            : [],
+        add_on_qtys:selectedAddons?.length > 0
+          ? selectedAddons.map((add) => add.quantity)
+          : [],
         item_id: modalData[0]?.id,
         price: totalPrice,
         quantity: quantity,
