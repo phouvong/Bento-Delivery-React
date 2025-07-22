@@ -7,7 +7,7 @@ import { getImageUrl } from "utils/CustomFunctions";
 import MainLayout from "../../src/components/layout/MainLayout";
 import SEO from "../../src/components/seo";
 import CustomContainer from "../../src/components/container";
-import DeliveryManComponent from "../../src/components/deliveryman-registration/ DeliveryManComponent";
+import DeliveryManComponent from "../../src/components/deliveryman-registration/DeliveryManComponent";
 import { useDispatch, useSelector } from "react-redux";
 import { useGetConfigData } from "../../src/api-manage/hooks/useGetConfigData";
 import { setConfigData } from "../../src/redux/slices/configData";
