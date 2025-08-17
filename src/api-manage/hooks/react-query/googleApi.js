@@ -17,6 +17,9 @@ export const GoogleApi = {
     );
   },
   distanceApi: (origin, destination) => {
+    if(!origin || !destination) {
+      throw new Error("Origin and destination must be provided");
+    }
     return MainApi.get(
       `/api/v1/config/distance-api?origin_lat=${origin.latitude}&origin_lng=${
         origin.longitude

@@ -22,7 +22,9 @@ const CartActions = (props) => {
   const dispatch = useDispatch();
 
   const handleRoute = () => {
-    router.push("/checkout?page=cart", undefined, { shallow: true });
+    router.push("/checkout?page=cart", undefined, { shallow: true }).then(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   };
   const handleCheckout = () => {
     if (
@@ -32,36 +34,23 @@ const CartActions = (props) => {
     ) {
       setOpen(true);
     } else if (cartList?.length > 0 && token) {
-      router.push("/checkout?page=cart", undefined, { shallow: true });
+      router.push("/checkout?page=cart", undefined, { shallow: true }).then(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
       setSideDrawerOpen(false);
     } else {
       if (cartList?.length === 0) {
         setSideDrawerOpen(false);
-        router.push("/home", undefined, { shallow: true });
+        router.push("/home", undefined, { shallow: true }).then(() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
       } else {
         setOpenAuth(true);
-        // setSideDrawerOpen(false);
-        //router.push('/auth/sign-in');
       }
     }
   };
-  // const handleCheckout = () => {
-  //   if (cartList?.length > 0) {
-  //     router.push("/checkout?page=cart", undefined, { shallow: true });
-  //     setSideDrawerOpen(false);
-  //   } else {
-  //     if (router.pathname === "/home") {
-  //       setSideDrawerOpen(false);
-  //     } else {
-  //       router.push("/home", undefined, { shallow: true });
-  //     }
-  //   }
-  // };
-  const handleClearAll = () => {
-    dispatch(setClearCart());
-    // dispatch(setCouponInfo(null));
-    // setOpenModal(false);
-  };
+
+
   return (
     <Stack
       direction="row"

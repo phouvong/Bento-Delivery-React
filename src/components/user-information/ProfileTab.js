@@ -76,7 +76,6 @@ const ProfileTab = ({
             (configData?.loyalty_point_status === 0 && item.id === 5) ||
             (configData?.ref_earning_status === 0 && item.id === 6) || 
             (!modules?.find((item) => item?.module_type === 'rental') && item.id === 3) || (modules?.find((item) => item?.module_type === 'rental')?.status === 0 && item.id === 3)
-          
           ) {
             return null;
           } else {
@@ -133,7 +132,6 @@ const ProfileTab = ({
           sx={{ cursor: "pointer" }}
         />
       )}
-
       <Popover
         open={open}
         anchorEl={anchorEl}

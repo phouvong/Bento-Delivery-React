@@ -12,7 +12,7 @@ import {
   LoadScript,
   Polyline,
   DirectionsRenderer,
-  OverlayView,
+  OverlayView, MarkerF,
 } from "@react-google-maps/api";
 import { alpha, CircularProgress, IconButton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
@@ -64,6 +64,7 @@ const MapComponent = (props) => {
     deliveryManLng,
     isStore,
     isFooter,
+    defaultControl
   } = props;
   const theme = useTheme();
   const lineColor = theme.palette.primary.main;
@@ -82,6 +83,7 @@ const MapComponent = (props) => {
 
   const options = useMemo(
     () => ({
+      disableDefaultUI: defaultControl,
       zoomControl: false,
       streetViewControl: false,
       mapTypeControl: false,
@@ -107,22 +109,38 @@ const MapComponent = (props) => {
     }
   }, [state.map]);
 
-  const directionRoute = async () => {
-    if (google && google.maps) {
-      const directionsService = new google.maps.DirectionsService();
-      const results = await directionsService.route({
-        origin: center,
-        destination: center1,
-        travelMode: google.maps.TravelMode.DRIVING,
-      });
-      setDirectionsResponse(results);
+  const tryDirections = async () => {
+    const modes = [
+      google.maps.TravelMode.DRIVING,
+      google.maps.TravelMode.WALKING,
+      google.maps.TravelMode.BICYCLING,
+    ];
+
+    const directionsService = new google.maps.DirectionsService();
+    for (const mode of modes) {
+      try {
+        const result = await directionsService.route({
+          origin: center,
+          destination: center1,
+          travelMode: mode,
+        });
+        setDirectionsResponse(result);
+        return; // success
+      } catch (err) {
+        console.warn(`Route failed with mode ${mode}:`, err);
+      }
     }
+
+    // Fallback if all fail
+    //alert("No route found. Showing direct line.");
+    setDirectionsResponse(null); // or trigger Polyline fallback
   };
   useEffect(() => {
     if (deliveryManLat) {
-      directionRoute();
+      tryDirections();
     }
   }, [deliveryManLat, deliveryManLng, latitude, longitude]);
+
   const handleZoomIn = () => {
     if (zoom <= 21) {
       setZoom((prevZoom) => Math.min(prevZoom + 1));
@@ -134,7 +152,6 @@ const MapComponent = (props) => {
       setZoom((prevZoom) => Math.max(prevZoom - 1));
     }
   };
-
   return isLoaded ? (
     <Stack>
       <Stack
@@ -180,19 +197,6 @@ const MapComponent = (props) => {
         onUnmount={onUnmount}
         options={options}
       >
-        {/*{directionsResponse && (*/}
-        {/*  <DirectionsRenderer*/}
-        {/*    options={{*/}
-        {/*      suppressMarkers: true,*/}
-        {/*      polylineOptions: {*/}
-        {/*        strokeColor: lineColor, // Customize the route path color*/}
-
-        {/*        strokeWeight: 4, // Customize the route path thickness*/}
-        {/*      },*/}
-        {/*    }}*/}
-        {/*    directions={directionsResponse}*/}
-        {/*  />*/}
-        {/*)}*/}
 
         {directionsResponse ? (
           <>
@@ -207,45 +211,30 @@ const MapComponent = (props) => {
               }}
               directions={directionsResponse}
             />
-            <OverlayView
+            <MarkerF
               position={{
                 lat: directionsResponse.routes[0].legs[0].start_location.lat(),
                 lng: directionsResponse.routes[0].legs[0].start_location.lng(),
               }}
-              mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-              getPixelPositionOffset={(width, height) => ({
-                x: -width / 3,
-                y: -height / 1.5,
-              })}
+              icon={{
+                url:"/meeting-point.svg",
+                scaledSize: new window.google.maps.Size(30, 30),
+              }}
             >
-              <CustomImageContainer src={ddd.src} width="40px" height="40px" />
-            </OverlayView>
+              {/*<CustomImageContainer src={ddd.src} width="40px" height="40px" />*/}
+            </MarkerF>
             {isFooter ? null : (
-              <OverlayView
+              <MarkerF
                 position={{
                   lat: directionsResponse.routes[0].legs[0].end_location.lat(),
                   lng: directionsResponse.routes[0].legs[0].end_location.lng(),
                 }}
-                mapPaneName={OverlayView.OVERLAY_MOUSE_TARGET}
-                getPixelPositionOffset={(width, height) => ({
-                  x: -width / 2,
-                  y: -height / 1.5,
-                })}
-              >
-                {isStore ? (
-                  <StoreIcon
-                    sx={{
-                      color: (theme) => theme.palette.error.main,
-                      width: "40px",
-                      height: "40px",
-                      background: (theme) => theme.palette.neutral[100],
-                      borderRadius: "50%",
-                    }}
-                  />
-                ) : (
-                  <DeliveryManMapMarker />
-                )}
-              </OverlayView>
+                icon={{
+                  url:"/delivery_man_marker.png",
+                  scaledSize: new google.maps.Size(30, 40),
+                }}
+              />
+
             )}
           </>
         ) : (

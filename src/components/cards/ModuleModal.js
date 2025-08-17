@@ -7,6 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { useTheme } from "@emotion/react";
+import {useGetItemDetails} from "api-manage/hooks/react-query/product-details/useGetItemDetails";
 
 const ModuleModal = (props) => {
   const theme = useTheme();
@@ -18,50 +19,58 @@ const ModuleModal = (props) => {
     addToWishlistHandler,
     removeFromWishlistHandler,
     isWishlisted,
+    productUpdate
   } = props;
+
+  const handleSuccess = (resData) => {
+  }
+  const params={
+    id:productDetailsData?.id
+  }
+  const {data}=useGetItemDetails(params, handleSuccess,productUpdate)
+
   return (
+
     <>
-      {productDetailsData && (
-        <Modal open={open} onClose={handleModalClose} disableAutoFocus={true}>
-          <FoodDetailModalStyle sx={{ bgcolor: "background.paper" }}>
-            <CustomStackFullWidth
-              direction="row"
-              alignItems="center"
-              justifyContent="flex-end"
-              sx={{ position: "relative" }}
+      <Modal open={open} onClose={handleModalClose} disableAutoFocus={true}>
+        <FoodDetailModalStyle sx={{ bgcolor: "background.paper" }}>
+          <CustomStackFullWidth
+            direction="row"
+            alignItems="center"
+            justifyContent="flex-end"
+            sx={{ position: "relative" }}
+          >
+            <IconButton
+              onClick={handleModalClose}
+              sx={{
+                zIndex: "99",
+                position: "absolute",
+                top: -20,
+                right: "-2.5%",
+                backgroundColor: (theme) => theme.palette.neutral[100],
+                borderRadius: "50%",
+                [theme.breakpoints.down("md")]: {
+                  top: 10,
+                  right: 5,
+                },
+              }}
             >
-              <IconButton
-                onClick={handleModalClose}
-                sx={{
-                  zIndex: "99",
-                  position: "absolute",
-                  top: -20,
-                  right: "-2.5%",
-                  backgroundColor: (theme) => theme.palette.neutral[100],
-                  borderRadius: "50%",
-                  [theme.breakpoints.down("md")]: {
-                    top: 10,
-                    right: 5,
-                  },
-                }}
-              >
-                <CloseIcon sx={{ fontSize: "16px", fontWeight: "700" }} />
-              </IconButton>
-            </CustomStackFullWidth>
-            <Scrollbar style={{ maxHeight: "calc(100vh - 120px)" }}>
-              <ProductDetailsSection
-                productDetailsData={productDetailsData}
-                configData={configData}
-                modalmanage="true"
-                handleModalClose={handleModalClose}
-                addToWishlistHandler={addToWishlistHandler}
-                removeFromWishlistHandler={removeFromWishlistHandler}
-                isWishlisted={isWishlisted}
-              />
-            </Scrollbar>
-          </FoodDetailModalStyle>
-        </Modal>
-      )}
+              <CloseIcon sx={{ fontSize: "16px", fontWeight: "700" }} />
+            </IconButton>
+          </CustomStackFullWidth>
+          <Scrollbar style={{ maxHeight: "calc(100vh - 120px)" }}>
+            <ProductDetailsSection
+              productDetailsData={productUpdate?productDetailsData:data}
+              configData={configData}
+              modalmanage="true"
+              handleModalClose={handleModalClose}
+              addToWishlistHandler={addToWishlistHandler}
+              removeFromWishlistHandler={removeFromWishlistHandler}
+              isWishlisted={isWishlisted}
+            />
+          </Scrollbar>
+        </FoodDetailModalStyle>
+      </Modal>
     </>
   );
 };

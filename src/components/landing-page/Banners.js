@@ -10,7 +10,7 @@ import CustomImageContainer from "../CustomImageContainer";
 import CustomContainer from "../container";
 import NextImage from "components/NextImage";
 
-const Banners = ({ landingPageData, isSmall }) => {
+const Banners = ({ landingPageData, isSmall,feature }) => {
   const infiniteManage = () => {
     if (isSmall) {
       if (landingPageData?.promotion_banners?.length === 1) {
@@ -211,7 +211,7 @@ const Banners = ({ landingPageData, isSmall }) => {
         return <>{sliderManage()}</>;
       }
     } else {
-      if (landingPageData?.promotion_banners?.length !== 1) {
+      if (landingPageData?.promotion_banners?.length === 1) {
         return <>{singleImageManage()}</>;
       } else if (landingPageData?.promotion_banners?.length === 2) {
         return <>{twoItemManage()}</>;

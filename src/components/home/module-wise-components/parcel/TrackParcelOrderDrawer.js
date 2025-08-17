@@ -28,6 +28,8 @@ import emptyImage from "../../../../assets/empty.png";
 import { CustomCloseIconButton } from "../../../added-cart-view/Cart.style";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useRouter } from "next/router";
+import {setGuestUserInfo} from "redux/slices/guestUserInfo";
+import {useDispatch} from "react-redux";
 
 const CustomLine = styled(Box)(({ theme }) => ({
   borderLeft: "1px dashed",
@@ -39,7 +41,7 @@ const CustomLine = styled(Box)(({ theme }) => ({
 const TrackParcelOrderDrawer = (props) => {
   const theme = useTheme();
   const router = useRouter();
-
+const dispatch = useDispatch();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const [orderData, setOrderData] = useState(null);
   const { sideDrawerOpen, orderId, setSideDrawerOpen, phoneOrEmail } = props;
@@ -110,10 +112,11 @@ const TrackParcelOrderDrawer = (props) => {
     setSideDrawerOpen(false);
   };
   const handleClick = () => {
+    dispatch(setGuestUserInfo({contact_person_number: phone}));
     router.push(
       {
         pathname: "/profile",
-        query: { orderId: trackOrderData?.id, page: "my-orders" },
+        query: { orderId: trackOrderData?.id, page: "my-orders",phone:phone },
       },
       undefined,
       { shallow: true }
@@ -171,6 +174,7 @@ const TrackParcelOrderDrawer = (props) => {
                     ? trackOrderData?.delivery_man?.lng
                     : trackOrderData?.receiver_details?.longitude
                 }
+                defaultControl
               />
               <Stack
                 position="absolute"

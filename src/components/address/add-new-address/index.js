@@ -111,7 +111,7 @@ const AddNewAddress = (props) => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (zoneData) {
-        localStorage.setItem("zoneid", zoneData?.zone_id);
+        //localStorage.setItem("zoneid", zoneData?.zone_id);
       }
     }
   }, [zoneData]);

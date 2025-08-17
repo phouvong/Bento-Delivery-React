@@ -159,6 +159,7 @@ const ReceiverInfoFrom = ({
                 testLocation={testLocation}
                 toReceiver="true"
               />
+
             </CustomStackFullWidth>
             {/*<CustomStackFullWidth>*/}
             {/*  <Card sx={{ padding: "1rem" }} elevation={9}>*/}

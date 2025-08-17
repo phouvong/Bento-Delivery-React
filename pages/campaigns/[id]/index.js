@@ -18,6 +18,9 @@ const Index = ({ configData, landingPageData }) => {
     refetch();
   }, [id]);
 
+
+
+
   return (
     <>
       <CssBaseline />

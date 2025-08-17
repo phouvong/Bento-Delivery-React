@@ -16,7 +16,7 @@ import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.st
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import * as Yup from "yup";
-import { useResetPassword } from "../../../api-manage/hooks/react-query/forgot-password/useResetPassword";
+import { useResetPassword } from "api-manage/hooks/react-query/forgot-password/useResetPassword";
 import { useDispatch } from "react-redux";
 import { setOpenForgotPasswordModal } from "redux/slices/utils";
 
@@ -65,7 +65,6 @@ const NewPassword = ({ data, goBack,phoneOrEmail }) => {
   return (
     <Box>
       <CustomStackFullWidth sx={{maxWidth:"370px"}}>
-
         <Stack mt="2rem" padding="0 20px">
           <form noValidate onSubmit={newPassFormik.handleSubmit}>
             <FormControl sx={{ mt: 2 }} variant="outlined" fullWidth>
@@ -73,6 +72,7 @@ const NewPassword = ({ data, goBack,phoneOrEmail }) => {
                 {t("Password")}
               </InputLabel>
               <OutlinedInput
+                placeholder="Minimum 8 characters"
                 require
                 type={showPassword ? "text" : "password"}
                 id="password"
@@ -113,6 +113,7 @@ const NewPassword = ({ data, goBack,phoneOrEmail }) => {
                 {t("Confirm Password")}
               </InputLabel>
               <OutlinedInput
+                placeholder="Re-enter your password"
                 require
                 type={showConfirmPassword ? "text" : "password"}
                 id="confirm_password"

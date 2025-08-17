@@ -145,16 +145,7 @@ const SignUp = ({
 
     setOpenModuleSelection(false);
   };
-  // const handleCloseWelcomeModal = () => {
-  //   if (
-  //     selectedModule.module_type === "ecommerce" ||
-  //     selectedModule.module_type === "food"
-  //   ) {
-  //     router.push("/interest", undefined, { shallow: true });
-  //   } else {
-  //     router.push("/home", undefined, { shallow: true });
-  //   }
-  // };
+
 
   const { mutate, isLoading, error } = useSignUp();
   const formSubmitHandler = (values) => {

@@ -310,25 +310,6 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
           )}
         </>
       ) : null}
-      {/*{trackOrderData?.partially_paid_amount ? (*/}
-      {/*  <CustomStackFullWidth*/}
-      {/*    direction="row"*/}
-      {/*    alignItems="center"*/}
-      {/*    justifyContent="space-between"*/}
-      {/*    spacing={2}*/}
-      {/*  >*/}
-      {/*    <Typography*/}
-      {/*      fontSize="14px"*/}
-      {/*      textTransform="capitalize"*/}
-      {/*      fontWeight="bold"*/}
-      {/*    >*/}
-      {/*      {t("due amount")}*/}
-      {/*    </Typography>*/}
-      {/*    <Typography fontSize="14px" fontWeight="bold">*/}
-      {/*      {trackOrderData && getAmountWithSign(due_amount)}*/}
-      {/*    </Typography>*/}
-      {/*  </CustomStackFullWidth>*/}
-      {/*) : null}*/}
     </OrderSummaryCalculationCard>
   );
 };

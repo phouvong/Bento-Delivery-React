@@ -32,6 +32,7 @@ const CheckOutPage = () => {
     buyNowItemList,
     totalAmount,
   } = useSelector((state) => state.cart);
+
   const cartList = getCartListModuleWise(aliasCartList);
   const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
   useEffect(() => {
@@ -66,6 +67,7 @@ const CheckOutPage = () => {
               <PrescriptionCheckout
                 storeId={store_id}
                 configData={configData}
+                page={page}
               />
             )}
             {page === "campaign" && campaignItemList.length > 0 && (

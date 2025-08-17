@@ -21,6 +21,9 @@ const OtpLogin = ({
   rememberMeHandleChange,
   fireBaseId,
   configData,
+  isRemember,
+                    getActiveLoginType,
+  onlyOtp
 }) => {
   const theme = useTheme();
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
@@ -48,6 +51,8 @@ const OtpLogin = ({
                 value="remember"
                 color="primary"
                 onChange={rememberMeHandleChange}
+                isRemember={isRemember|| false}
+
               />
             }
             label={
@@ -102,6 +107,10 @@ const OtpLogin = ({
           </LoadingButton>
         </CustomStackFullWidth>
       </form>
+      {!onlyOtp && (
+        <Typography onClick={getActiveLoginType} mt="1rem" sx={{textDecoration:"underLine",cursor:'pointer',color:theme=>theme=>theme.palette.primary.main}} textAlign="center">{("Go Back")}</Typography>
+      )}
+
     </CustomStackFullWidth>
   );
 };

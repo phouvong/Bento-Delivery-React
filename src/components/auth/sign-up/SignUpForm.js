@@ -129,7 +129,7 @@ const SignUpForm = ({
             required
             type="password"
             label={t("Password")}
-            placeholder={t("Password")}
+            placeholder={t("Minimum 8 characters")}
             touched={signUpFormik.touched.password}
             errors={signUpFormik.errors.password}
             fieldProps={signUpFormik.getFieldProps("password")}
@@ -156,7 +156,7 @@ const SignUpForm = ({
             required
             type="password"
             label={t("Confirm Password")}
-            placeholder={t("Confirm Password")}
+            placeholder={t("Re-enter your password")}
             touched={signUpFormik.touched.confirm_password}
             errors={signUpFormik.errors.confirm_password}
             fieldProps={signUpFormik.getFieldProps("confirm_password")}

@@ -205,7 +205,7 @@ const AdsCard = (props) => {
                     }}
                 >
                   <Stack position="relative">
-                    {(item?.is_rating_active === 1 || item.is_review_active === 1) && (
+                    {(item?.is_rating_active === 1 || item.is_review_active === 1) && (item?.average_rating>0 || item?.reviews_comments_count>0) && (
                         <Stack
                             maxWidth="90px"
                             width="100%"

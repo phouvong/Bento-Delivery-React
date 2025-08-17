@@ -16,7 +16,7 @@ const getData = async (guestId) => {
 };
 
 export default function useGetAllCartList(guestId, cartListSuccessHandler) {
-  return useQuery("cart-item", () => getData(guestId), {
+  return useQuery("cart-itemss", () => getData(guestId), {
     onSuccess: cartListSuccessHandler,
     enabled: false, // Enable the query only when guestId is defined
     onError: onSingleErrorResponse,

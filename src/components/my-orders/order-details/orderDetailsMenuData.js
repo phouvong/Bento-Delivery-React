@@ -11,7 +11,7 @@ export const orderDetailsMenuData = [
   },
 
   {
-    id: 3,
+    id: 9,
     name: "delivery-man-info",
   },
   {
@@ -44,7 +44,7 @@ export const orderDetailsMenuDataForParcel = [
     name: "delivery-man-info",
   },
   {
-    id: 3,
+    id: 0,
     name: "track-order",
   },
 ];

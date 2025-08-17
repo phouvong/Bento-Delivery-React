@@ -11,7 +11,7 @@ const SignUpValidation = () => {
   return Yup.object({
     email_or_phone: Yup.string()
       .required(t("Please give a phone number"))
-      .min(10, "number must be 10 digits"),
+      .min(10, "Number must be 10 digits"),
     password: Yup.string()
       //.min(8, t("Password is too short - should be 8 chars minimum."))
       .required(t("Password is required")),

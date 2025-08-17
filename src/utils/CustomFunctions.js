@@ -612,6 +612,7 @@ function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
 }
 
 export const handleDistance = (distance, origin, destination) => {
+  console.log({distance})
   if (typeof distance?.distanceMeters === 'number') {
     return Number(distance?.distanceMeters) / 1000;
   } else if (distance?.status === "ZERO_RESULTS") {
@@ -673,19 +674,25 @@ export const getInfoFromZoneData = (zoneData) => {
 
 export let bad_weather_fees = 0;
 
-const getDeliveryFeeByBadWeather = (
+export const getDeliveryFeeByBadWeather = (
   charge,
-  increasedDeliveryFee,
-  increasedDeliveryFeeStatus
+  surgePrice
 ) => {
   const totalCharge = charge;
-  if (increasedDeliveryFeeStatus === 1) {
-    const tempValue = totalCharge * (increasedDeliveryFee / 100);
-    bad_weather_fees = tempValue;
-    return totalCharge + tempValue;
-  } else {
+
+  if(Number(surgePrice?.price)>0){
+    if(surgePrice?.price_type==="percent"){
+        const tempValue = totalCharge * (Number(surgePrice?.price) / 100);
+        bad_weather_fees = tempValue;
+        return totalCharge + tempValue;
+    }else{
+        bad_weather_fees = Number(surgePrice?.price);
+        return totalCharge + Number(surgePrice?.price);
+    }
+  }else {
     return totalCharge;
   }
+
 };
 
 export const getDeliveryFees = (
@@ -699,7 +706,8 @@ export const getDeliveryFees = (
   zoneData,
   origin,
   destination,
-  extraCharge
+  extraCharge,
+  surgePrice
 ) => {
   if (orderType === "delivery" || orderType === "schedule_order") {
     //convert m to km
@@ -721,6 +729,7 @@ export const getDeliveryFees = (
     //restaurant self delivery system checking
     if (Number.parseInt(storeData?.self_delivery_system ) === 1) {
       const storeWiseDeliveryFee = convertedDistance * storeData?.per_km_shipping_charge || 0;
+
       if (storeData?.free_delivery || ((isAdminFreeDeliveryEnabled && (isFreeDeliveryByAmount || isFreeDeliveryToAllStores)))) {
         return 0;
       } else {
@@ -745,41 +754,48 @@ export const getDeliveryFees = (
     } else {
       if (zoneData?.data?.zone_data?.length > 0) {
         const chargeInfo = getInfoFromZoneData(zoneData);
-        if (
-          chargeInfo?.pivot?.per_km_shipping_charge !== null &&
-          chargeInfo?.pivot?.per_km_shipping_charge >= 0
-        ) {
-          deliveryFee =
-            convertedDistance *
-            (chargeInfo?.pivot?.per_km_shipping_charge || 0);
+        if(chargeInfo?.pivot?.delivery_charge_type ==="fixed"){
           if((isAdminFreeDeliveryEnabled && (isFreeDeliveryByAmount || isFreeDeliveryToAllStores)) ||
-          orderType === "take_away") {
+            orderType === "take_away") {
             return 0;
-          } else if (
-            deliveryFee <= chargeInfo?.pivot?.minimum_shipping_charge
+          }else{
+            return getDeliveryFeeByBadWeather(chargeInfo?.pivot?.fixed_shipping_charge + extraCharge,surgePrice);
+          }
+        }else{
+          if (
+            chargeInfo?.pivot?.per_km_shipping_charge !== null &&
+            chargeInfo?.pivot?.per_km_shipping_charge >= 0
           ) {
-            return getDeliveryFeeByBadWeather(
-              chargeInfo?.pivot?.minimum_shipping_charge + extraCharge,
-              chargeInfo?.increased_delivery_fee,
-              chargeInfo?.increased_delivery_fee_status
-            );
-          } else if (
-            deliveryFee >= chargeInfo?.pivot?.maximum_shipping_charge &&
-            chargeInfo?.pivot?.maximum_shipping_charge !== null
-          ) {
-            return getDeliveryFeeByBadWeather(
-              chargeInfo?.pivot?.maximum_shipping_charge + extraCharge,
-              chargeInfo?.increased_delivery_fee,
-              chargeInfo?.increased_delivery_fee_status
-            );
-          } else {
-            return getDeliveryFeeByBadWeather(
-              deliveryFee + extraCharge,
-              chargeInfo?.increased_delivery_fee,
-              chargeInfo?.increased_delivery_fee_status
-            );
+            deliveryFee =
+              convertedDistance *
+              (chargeInfo?.pivot?.per_km_shipping_charge || 0);
+            if((isAdminFreeDeliveryEnabled && (isFreeDeliveryByAmount || isFreeDeliveryToAllStores)) ||
+              orderType === "take_away") {
+              return 0;
+            } else if (
+              deliveryFee <= chargeInfo?.pivot?.minimum_shipping_charge
+            ) {
+              return getDeliveryFeeByBadWeather(
+                chargeInfo?.pivot?.minimum_shipping_charge + extraCharge,
+                surgePrice
+              );
+            } else if (
+              deliveryFee >= chargeInfo?.pivot?.maximum_shipping_charge &&
+              chargeInfo?.pivot?.maximum_shipping_charge !== null
+            ) {
+              return getDeliveryFeeByBadWeather(
+                chargeInfo?.pivot?.maximum_shipping_charge + extraCharge,
+                surgePrice
+              );
+            } else {
+              return getDeliveryFeeByBadWeather(
+                deliveryFee + extraCharge,
+                surgePrice
+              );
+            }
           }
         }
+
       }
     }
   } else {
@@ -853,7 +869,8 @@ export const getCalculatedTotal = (
   additionalCharge,
   packagingCharge,
   referDiscount,
-  vatAmount
+  vatAmount,
+  surgePrice
 ) => {
   const taxAmount=vatAmount|| 0
   if (couponDiscount) {
@@ -885,7 +902,8 @@ export const getCalculatedTotal = (
           zoneData,
           origin,
           destination,
-          extraCharge
+          extraCharge,
+          surgePrice
         ) +
         deliveryTip +
         additionalCharge +
@@ -909,7 +927,8 @@ export const getCalculatedTotal = (
         zoneData,
         origin,
         destination,
-        extraCharge
+        extraCharge,
+        surgePrice
       ) +
       deliveryTip +
       additionalCharge +
@@ -1107,7 +1126,7 @@ export function capitalizeText(text) {
     .join(" "); // Join the words back into a string
 }
 export function formatPhoneNumber(number) {
-  const str = number.toString();
+  const str = number?.toString();
   if (str.startsWith("+")) {
     return str;
   } else {

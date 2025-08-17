@@ -25,7 +25,12 @@ const PharmacyStaticBanners = () => {
       },
       undefined,
       { shallow: true }
-    );
+    ).then(() => {
+      // Add slight delay to ensure new page is mounted
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 100); // delay helps after DOM updates
+    });
   };
 
   const settings = {

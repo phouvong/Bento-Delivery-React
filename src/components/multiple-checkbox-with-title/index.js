@@ -37,6 +37,7 @@ const MultipleCheckboxWithTitle = (props) => {
     id,
     selectedCategoriesHandler,
   } = props;
+
   const { t } = useTranslation();
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
@@ -45,13 +46,14 @@ const MultipleCheckboxWithTitle = (props) => {
   const storeSelectedItems = useSelector(
     (state) => state.categoryIds.storeSelectedItems
   );
+
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   useEffect(() => {
     setSelectedId(id);
   }, [id]);
   useEffect(() => {
-    selectedCategoriesHandler?.(isSmall ? storeSelectedItems : selectedItems);
+    selectedCategoriesHandler?.(isSmall ? storeSelectedItems : selectedItems,isAllSelected);
   }, [selectedItems, storeSelectedItems]);
   useEffect(() => {
     if (searchValue === VIEW_ALL_TEXT.allCategories && data?.length > 0) {
@@ -65,7 +67,24 @@ const MultipleCheckboxWithTitle = (props) => {
       checkHandler(selectedCategory);
     }
   }, [data, searchValue, id]);
+  useEffect(() => {
+    const totalLength = data.length + data.reduce((acc, item) => acc + (item.childes?.length || 0), 0);
+    const checkDuplicate = Array.isArray(selectedItems) ? [...new Set(selectedItems)] : [];
+
+    if (totalLength === checkDuplicate.length && !isAllSelected) {
+      setIsAllSelected(true); // Only run if not already selected
+      allCheckHandler({ checked: true, id: "all" });
+    }
+
+    if (totalLength !== checkDuplicate.length && isAllSelected) {
+      // Optional: reset flag if something is unchecked
+      setIsAllSelected(false);
+    }
+  }, [data, selectedItems]);
+
   const checkHandler = (checkedData) => {
+
+    setIsAllSelected(false )
     if (isSmall) {
       const parent = data?.find((item) => item?.id === checkedData?.id);
       let ids = [];

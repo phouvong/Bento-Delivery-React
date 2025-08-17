@@ -23,7 +23,7 @@ export const prescription_image_error_text =
   "Please upload your prescription image";
 export const out_of_stock = "Out of Stock";
 export const coupon_minimum =
-  "To apply this coupon, total item amount should be minimum";
+  "To apply this coupon,the minimum purchase amount is";
 export const wallet_transfer_message = "Point to wallet transfer successfully.";
 export const out_of_limits = "Out of Limits";
 export const cart_item_remove = "Cart item remove successfully";

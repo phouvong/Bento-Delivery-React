@@ -35,7 +35,6 @@ const FoodDetailsManager = (props) => {
 
     handleRouteToStore,
   } = props;
-
   return (
     <Grid container direction="row">
       <Grid item xs={12} md={12} position="relative">

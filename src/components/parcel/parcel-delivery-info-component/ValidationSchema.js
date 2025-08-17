@@ -13,11 +13,11 @@ const ValidationSchemaForRestaurant = () => {
         .required(t("Email is required")),
     senderPhone: Yup.string()
       .required(t("Sender phone required"))
-      .min(10, "number must be 10 digits"),
+      .min(10, "Number must be 10 digits"),
     receiverName: Yup.string().required(t("Receiver name required")),
     receiverPhone: Yup.string()
       .required(t("Receiver phone required"))
-      .min(10, "number must be 10 digits"),
+      .min(10, "Number must be 10 digits"),
   });
 };
 

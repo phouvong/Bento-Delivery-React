@@ -122,7 +122,6 @@ export const getItemDataForAddToCart = (
   mainPrice,
   guest_id
 ) => {
-  console.log({values})
   let totalQty = 0;
   return {
     guest_id: guest_id,

@@ -41,7 +41,6 @@ const ProductCardMedia = ({
 
   const discountChipHandler = () => {
     if (restaurant_discount > 0) {
-      // let discountAmount = (price * restaurant_discount) / 100
 
       return (
         <OfferTypography
@@ -50,12 +49,7 @@ const ProductCardMedia = ({
         >
           {restaurant_discount}
           {t("% OFF")}
-          {/*{getAmount(*/}
-          {/*    discountAmount,*/}
-          {/*    currencySymbolDirection,*/}
-          {/*    currencySymbol,*/}
-          {/*    digitAfterDecimalPoint*/}
-          {/*)}*/}
+
         </OfferTypography>
       );
     } else {
@@ -115,13 +109,6 @@ const ProductCardMedia = ({
         </Box>
       )}
 
-      {/*<CustomCardMedia*/}
-      {/*    component="img"*/}
-      {/*    alt={name}*/}
-      {/*    height={height}*/}
-      {/*    image={image}*/}
-
-      {/*/>*/}
     </>
   );
 };

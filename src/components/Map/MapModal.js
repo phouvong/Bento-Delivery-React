@@ -203,10 +203,10 @@ const MapModal = ({
           wishlistRefetch();
         }
       }
-      if (fromReceiver !== "1") {
+      if (fromReceiver !== "1" && toparcel!=="1") {
         localStorage.setItem("zoneid", zoneId);
       }
-      if (fromReceiver !== "1") {
+      if (fromReceiver !== "1" && toparcel!=="1") {
         localStorage.setItem(
           "location",
           geoCodeResults?.results[0]?.formatted_address

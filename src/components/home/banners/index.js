@@ -46,14 +46,14 @@ export const BannersWrapper = styled(Box)(({ theme }) => ({
   },
 }));
 
-const Banners = () => {
+const Banners = ({feature}) => {
   const router = useRouter();
   const theme=useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isExtraSmallScreen = useMediaQuery(theme.breakpoints.down("xs"));
   const { selectedModule } = useSelector((state) => state.utilsData);
   const { banners } = useSelector((state) => state.storedData);
-  const { data, refetch: refetchBannerData, isFetched } = useGetBanners();
+  const { data, refetch: refetchBannerData, isFetched } = useGetBanners(feature);
   const [bannersData, setBannersData] = useState([]);
   const [foodBanner, setFoodBanner] = useState();
   const [openModal, setOpenModal] = useState(false);
@@ -97,16 +97,21 @@ const Banners = () => {
   };
   const handleBannerClick = (banner) => {
     if (banner?.isCampaign) {
+
       router.push(
-        {
-          pathname: "/campaigns/[id]",
-          query: { id: `${banner?.id}`, module_id: `${getModuleId()}` },
-        },
-        undefined,
-        { shallow: true }
-      ).then(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
+          {
+            pathname: "/campaigns/[id]",
+            query: { id: `${banner?.id}`, module_id: `${getModuleId()}` },
+          },
+          undefined,
+          { scroll: false } // Disable Next.js auto scroll
+        )
+        .then(() => {
+          // Add slight delay to ensure new page is mounted
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }, 100); // delay helps after DOM updates
+        });
     } else if (banner?.type === "default") {
       window.open(banner?.link, "_blank");
     } else {
@@ -235,19 +240,27 @@ const Banners = () => {
                 <SliderCustom>
                   <Slider {...settings}>
                     {bannersData.map((item, index) => (
-                        <BannersWrapper
-                            key={index}
-                            onClick={() => handleBannerClick(item)}
-                        >
-                          <NextImage
-                            src={item?.image_full_url}
-                            alt={item?.title}
-                            height={isExtraSmallScreen?"150": isSmallScreen ? "200" : "234"}
-                            width={624}
-                            objectFit="cover"
-                            borderRadius="10px"
-                          />
-                        </BannersWrapper>
+                      <BannersWrapper
+                        key={index}
+                        onClick={
+                          item?.type === "default" && item?.link===null
+                            ? undefined
+                            : () => handleBannerClick(item)
+                        }
+                        sx={{
+                          cursor:
+                            item?.type === "default" && item?.link===null ? "default" : "pointer",
+                        }}
+                      >
+                        <NextImage
+                          src={item?.image_full_url}
+                          alt={item?.title}
+                          height={isExtraSmallScreen ? "150" : isSmallScreen ? "200" : "234"}
+                          width={624}
+                          objectFit="cover"
+                          borderRadius="10px"
+                        />
+                      </BannersWrapper>
                     ))}
                   </Slider>
                 </SliderCustom>

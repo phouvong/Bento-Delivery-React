@@ -49,9 +49,9 @@ const DeliveryDetails = (props) => {
 		passwordHandler,
 		check,
 		setCheck,
-		isHomeDelivery
+		isHomeDelivery,
+		page
 	} = props;
-
 	const { t } = useTranslation();
 	const theme = useTheme();
 	const isSmall = useMediaQuery("(max-width:490px)");
@@ -163,7 +163,7 @@ const DeliveryDetails = (props) => {
 							)}
 						</>
 					) : null}
-					{storeData?.schedule_order && (
+					{!forprescription &&  storeData?.schedule_order && getToken() && (
 						<DeliveryOptionButton
 							fullwidth="true"
 							orderType={orderType === "schedule_order"}

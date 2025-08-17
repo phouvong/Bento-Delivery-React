@@ -14,11 +14,7 @@ const ItemSection = ({ campaignsDetails, isLoading, isRefetching }) => {
   const matchesXs = useMediaQuery("(max-width:480px)");
   return (
     <>
-      <Grid container spacing={{ xs: 0.5, md: 1 }}>
-        <Grid item xs={12}>
-          <Typography paddingLeft="20px" fontSize="20px" fontWeight="700">{("Store list")}</Typography>
-
-        </Grid>
+      <Grid container spacing={{ xs: 0.5, md: 1 }} paddingTop="1.5rem">
         {campaignsDetails?.stores?.length > 0 &&
           campaignsDetails?.stores?.map((store) => {
             return (

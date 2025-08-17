@@ -1381,4 +1381,5 @@ export const english = {
 	"Forgot your password":"Forgot your password",
 	"Please enter the registered":"Please enter the registered",
 	"where you want to sent your password recovery OTP.":"where you want to sent your password recovery OTP.",
+	"Note:":"Note:"
 };

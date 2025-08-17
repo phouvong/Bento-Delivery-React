@@ -184,13 +184,13 @@ const StoreCard = (props) => {
         )}
         
         
-        {isWishlisted && (
-          <Box sx={{ position: "absolute", top: 10, right: 10 }}>
-            <FavoriteWrapper>
-              <FavoriteIcon fontSize="small" />
-            </FavoriteWrapper>
-          </Box>
-        )}
+        {/*{isWishlisted && (*/}
+        {/*  <Box sx={{ position: "absolute", top: 10, right: 10 }}>*/}
+        {/*    <FavoriteWrapper>*/}
+        {/*      <FavoriteIcon fontSize="small" />*/}
+        {/*    </FavoriteWrapper>*/}
+        {/*  </Box>*/}
+        {/*)}*/}
         <ClosedNow
           active={item?.active}
           open={item?.open}

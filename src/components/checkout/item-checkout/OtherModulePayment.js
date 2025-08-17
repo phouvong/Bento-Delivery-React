@@ -469,7 +469,7 @@ const OtherModulePayment = (props) => {
         px="16px"
         position="sticky"
         bottom={0}
-        bgcolor="#fff" // Add background to prevent overlap
+        //bgcolor="#fff" // Add background to prevent overlap
         zIndex={10}
       >
 

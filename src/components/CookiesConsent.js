@@ -57,7 +57,12 @@ const CookiesConsent = ({ text }) => {
             <Button variant="outline" color="primary" onClick={handleDeny}>
               {t("Deny")}
             </Button>
-            <Button variant="contained" color="primary" onClick={handleAccept}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleAccept}
+              sx={{ color: "#fff" }} // force white text
+            >
               {t("Accept")}
             </Button>
           </Stack>

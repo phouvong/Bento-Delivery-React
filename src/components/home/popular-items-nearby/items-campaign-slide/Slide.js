@@ -88,7 +88,7 @@ const Slide = ({ item }) => {
     <CustomStackFullWidth>
       <CustomBoxFullWidth
         sx={{
-          height: "260px",
+          height: "220px",
           backgroundColor: (theme) => theme.palette.neutral[100],
           borderRadius: "10px",
           position: "relative",
@@ -141,7 +141,7 @@ const Slide = ({ item }) => {
           </Stack>
           {getModuleWiseItemName()}
         </Stack>
-        <CustomStackFullWidth mt="100px" spacing={1}>
+        <CustomStackFullWidth mt="10px" spacing={1}>
           <CustomLinearProgressbar value={(item?.sold / item?.stock) * 100} />
           <CustomStackFullWidth
             direction="row"

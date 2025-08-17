@@ -6,7 +6,7 @@ import {
   CustomStackFullWidth,
   SliderCustom,
 } from "../../../../styled-components/CustomStyles.style";
-import { Typography, alpha, useMediaQuery, useTheme } from "@mui/material";
+import {Typography, alpha, useMediaQuery, useTheme, Stack} from "@mui/material";
 import CustomImageContainer from "../../../CustomImageContainer";
 import bg from "./assets/bg.png";
 import Slide from "./Slide";
@@ -19,16 +19,18 @@ import CustomCountdown from "../../../countdown";
 import CustomLinearProgressbar from "../../../linear-progressbar";
 import useGetFlashSales from "../../../../api-manage/hooks/react-query/useGetFlashSales";
 import { useRouter } from "next/router";
+import {t} from "i18next";
+import ProductCard from "components/cards/ProductCard";
 
 const CustomCounterBox = styled(CustomStackFullWidth)(({ theme }) => ({
-  transform: "translateY(-115px)",
-  height: "20px",
+  marginTop:"10px",
+  marginBottom:"10px"
 }))
 
 const StyledCustomSlider = styled(SliderCustom)(({ theme, isSmall }) => ({
   "& .slick-dots": {
-    top:"500px",
-
+    top:"365px",
+    maxWidth:"100px",
     "& li": {
       backgroundColor: alpha(theme.palette.primary.main, 0.2),
       width: "8px",
@@ -69,7 +71,7 @@ const ItemsCampaign = ({ flashSales }) => {
       height="100%"
       alignItems="center"
       justifyContent="flex-start"
-      onClick={handleFlashSales}
+
       sx={{
         backgroundColor: (theme) => alpha(theme.palette.neutral[400], 0.1),
         padding: "4px",
@@ -78,17 +80,9 @@ const ItemsCampaign = ({ flashSales }) => {
         cursor: "pointer",
       }}
     >
-      <StyledCustomSlider isSmall={isSmall}>
-        <Slider {...settings}>
-          {flashSales?.active_products?.slice(0,15).map((item, index) => {
-            return (
-              <Box key={index}>
-                <Slide item={item} />
-              </Box>
-            );
-          })}
-        </Slider>
-      </StyledCustomSlider>
+      <Typography fontSize="22px" fontWeight="700" mt="16px">
+        {t("Flash Sale")}
+      </Typography>
       {flashSales?.active_products?.length > 0 &&
         <CustomCounterBox
           alignItems="center"
@@ -99,6 +93,28 @@ const ItemsCampaign = ({ flashSales }) => {
             endDate={flashSales?.end_date}
           />
         </CustomCounterBox>}
+      <StyledCustomSlider isSmall={isSmall}>
+        <Slider {...settings}>
+          {flashSales?.active_products?.slice(0,5).map((item, index) => {
+            return (
+              <Box key={index}>
+                <ProductCard
+                  item={{ ...item?.item }}
+                  cardheight="340px"
+                  cardFor="flashSale"
+                  cardType="vertical-type"
+                  sold={item?.sold}
+                  stock={item?.available_stock}
+                />
+                {/*<Slide item={item} />*/}
+              </Box>
+            );
+          })}
+        </Slider>
+      </StyledCustomSlider>
+       <Stack width="100%" alignItems="end" justifyContent="center">
+         <Typography   onClick={handleFlashSales} sx={{textDecoration:"underLine",color:theme=>theme.palette.neutral[400]}} fontSize="16px" fontWeight="600"  marginRight="10px">{("See All")}</Typography>
+       </Stack>
     </CustomStackFullWidth>
   );
 };

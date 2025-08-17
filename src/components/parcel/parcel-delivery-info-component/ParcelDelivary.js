@@ -32,7 +32,7 @@ const PercelDelivery = ({ configData }) => {
   const [receiverLocation, setReceiverLocation] = useState(
     parcelInfo ? parcelInfo?.receiverLocations : {}
   );
-  const [receiverFormattedAddress, setReceiverFormattedAddress] = useState("");
+  const [receiverFormattedAddress, setReceiverFormattedAddress] = useState(parcelInfo? parcelInfo?.receiverAddress : "");
   const [open, setOpen] = useState(false);
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
   let token = getToken();
@@ -86,7 +86,6 @@ const PercelDelivery = ({ configData }) => {
     setSenderLocation(currentLocationLatLng);
     setSenderFormattedAddress(currentLocation);
   }, []);
-
   useEffect(() => {
     addAddressFormik.setFieldValue(
       "senderPhone",

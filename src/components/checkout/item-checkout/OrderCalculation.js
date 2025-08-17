@@ -14,8 +14,8 @@ import {
   getAmountWithSign,
   getReferDiscount,
 } from "helper-functions/CardHelpers";
-import { getToken } from "helper-functions/getToken";
-import React, { useState } from "react";
+import {getGuestId, getToken} from "helper-functions/getToken";
+import React, {useEffect, useState} from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { setTotalAmount } from "redux/slices/cart";
@@ -32,6 +32,8 @@ import {
 } from "utils/CustomFunctions";
 import CustomDivider from "../../CustomDivider";
 import { CalculationGrid, TotalGrid } from "../CheckOut.style";
+import {useGetSurgePrice} from "api-manage/hooks/react-query/order-place/useGetSurgePrice";
+import {onErrorResponse} from "api-manage/api-error-response/ErrorResponses";
 
 const OrderCalculation = (props) => {
   const {
@@ -58,7 +60,8 @@ const OrderCalculation = (props) => {
     customerData,
     initVauleEx,
     isLoading,
-    taxAmount
+    taxAmount,
+    scheduleAt
   } = props;
 
   const token = getToken();
@@ -68,6 +71,20 @@ const OrderCalculation = (props) => {
   const tempExtraCharge = extraCharge ?? 0;
   const theme = useTheme();
   let couponType = "coupon";
+  const {data:surgePrice,mutate}=useGetSurgePrice()
+  useEffect(() => {
+    if(storeData){
+      const temData={
+        zone_id: storeData?.zone_id,
+        module_id: storeData?.module_id,
+        date_time:orderType==="schedule_order"?scheduleAt: new Date().toISOString(),
+        guest_id:getGuestId()
+      }
+      mutate(temData,{
+        onError:onErrorResponse
+      })
+    }
+    }, [storeData,orderType,scheduleAt]);
   const handleDeliveryFee = () => {
     let price = getDeliveryFees(
       storeData,
@@ -80,10 +97,12 @@ const OrderCalculation = (props) => {
       zoneData,
       origin,
       destination,
-      tempExtraCharge
+      tempExtraCharge,
+      surgePrice
+
     );
 
-    setDeliveryFee(orderType === "delivery" ? 0 : price);
+    setDeliveryFee(orderType !== "delivery" ? 0 : price);
     if (price === 0) {
       return <Typography>{t("Free")}</Typography>;
     } else {
@@ -146,7 +165,8 @@ const OrderCalculation = (props) => {
       additionalCharge,
       packagingCharge,
       referDiscount,
-      taxAmount?.tax_amount
+      taxAmount?.tax_amount,
+      surgePrice
     );
     setPayableAmount(totalAmount);
     dispatch(setTotalAmount(totalAmount));
@@ -166,13 +186,11 @@ const OrderCalculation = (props) => {
     "cashback. The minimum purchase required to avail this offer is"
   );
   const text3 = t("However, the maximum cashback amount is");
-  const extraText = t("This charge includes extra vehicle charge");
+  const extraText = t("This delivery fee includes all the applicable charges on delivery");
   const badText = t("and bad weather charge");
-  const deliveryToolTipsText = `${extraText} ${getAmountWithSign(
-    tempExtraCharge
-  )}${
-    bad_weather_fees !== 0
-      ? ` ${badText} ${getAmountWithSign(bad_weather_fees)}`
+  const deliveryToolTipsText = `${extraText}${
+    surgePrice?.customer_note_status !== 0 
+      ? `. ${surgePrice?.customer_note} `
       : ""
   }`;
   return (

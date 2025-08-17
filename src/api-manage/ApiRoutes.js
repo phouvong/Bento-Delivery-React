@@ -145,3 +145,5 @@ export const vehicle_category_list = "/api/v1/rental/vehicle/category-list";
 export const removeAllCartItems = "api/v1/rental/user/cart/remove-cart";
 export const recommended_provider="api/v1/stores/recommended";
 export const tax_api = "api/v1/customer/order/get-Tax";
+export const surge_price="/api/v1/customer/order/get-surge-price"
+export const item_details_api = "/api/v1/items/details";

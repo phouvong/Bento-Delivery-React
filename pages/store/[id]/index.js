@@ -1,145 +1,135 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import MainLayout from "../../../src/components/layout/MainLayout";
 import { useDispatch } from "react-redux";
-import Router, { useRouter } from "next/router";
+import Router from "next/router";
 import { setConfigData } from "redux/slices/configData";
 import StoreDetails from "../../../src/components/store-details";
 import { config_api, store_details_api } from "api-manage/ApiRoutes";
 import SEO from "../../../src/components/seo";
 import { NoSsr } from "@mui/material";
-import scrollToTop from "components/ScrollToTop";
 import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 
-const Index = ({ configData, storeDetails, landingPageData }) => {
+const StorePage = ({ configData, storeDetails, distance }) => {
   const dispatch = useDispatch();
-  const router = useRouter();
-  const { distance } = router.query;
-  const metaTitle = `${
-    storeDetails?.meta_title ? storeDetails?.meta_title : storeDetails?.name
-  } - ${configData?.business_name}`;
-  const metaImage =
-    storeDetails?.meta_image_full_url ?? storeDetails.cover_photo_full_url;
-  const [isSSR, setIsSSR] = useState(true);
-  const initialSet = () => {
-    const stores = [];
-    stores.push(storeDetails);
-    localStorage.setItem("visitedStores", JSON.stringify(stores));
-  };
-  const manageVisitAgain = () => {
-    if (localStorage.getItem("visitedStores")) {
-      let visitedStores = JSON.parse(localStorage.getItem("visitedStores"));
-      if (visitedStores?.length > 0) {
-        if (!visitedStores.find((item) => item?.id === storeDetails?.id)) {
-          visitedStores.push({
-            ...storeDetails,
-            distance: distance,
-          });
-        }
-        localStorage.setItem("visitedStores", JSON.stringify(visitedStores));
-      } else {
-        initialSet();
+  useScrollToTop();
+
+  const metaTitle = `${storeDetails?.meta_title || storeDetails?.name} - ${configData?.business_name}`;
+  const metaImage = storeDetails?.meta_image_full_url || storeDetails?.cover_photo_full_url;
+
+  const manageVisitedStores = () => {
+    const key = "visitedStores";
+    try {
+      const stored = localStorage.getItem(key);
+      const visitedStores = stored ? JSON.parse(stored) : [];
+
+      const alreadyVisited = visitedStores.some(store => store?.id === storeDetails?.id);
+      if (!alreadyVisited) {
+        visitedStores.push({ ...storeDetails, distance });
+        localStorage.setItem(key, JSON.stringify(visitedStores));
       }
-    } else {
-      initialSet();
+    } catch {
+      // do nothing on error
     }
   };
+
   useEffect(() => {
-    //setIsSSR(false);
     if (storeDetails) {
-      manageVisitAgain();
-      // initialSet();
+      manageVisitedStores();
     }
-    if (configData) {
-      if (configData.length === 0) {
-        Router.push("/404");
-      } else if (configData?.maintenance_mode) {
-        Router.push("/maintainance");
-      } else {
-        dispatch(setConfigData(configData));
-      }
+
+    if (!configData || Object.keys(configData).length === 0) {
+      Router.replace("/404");
+    } else if (configData?.maintenance_mode) {
+      Router.replace("/maintainance");
     } else {
+      dispatch(setConfigData(configData));
     }
   }, [configData, storeDetails]);
 
   return (
     <>
-      <>
-        <CssBaseline />
-        <SEO
-          title={metaTitle ? metaTitle : "loading"}
-          image={metaImage}
-          businessName={configData?.business_name}
-          description={storeDetails?.meta_description}
-          configData={configData}
-        />
-
-        <MainLayout configData={configData} landingPageData={landingPageData}>
-          <NoSsr>
-            <StoreDetails storeDetails={storeDetails} configData={configData} />
-          </NoSsr>
-        </MainLayout>
-      </>
+      <CssBaseline />
+      <SEO
+        title={metaTitle}
+        image={metaImage}
+        businessName={configData?.business_name}
+        description={storeDetails?.meta_description}
+        configData={configData}
+      />
+      <MainLayout configData={configData}>
+        <NoSsr>
+          <StoreDetails storeDetails={storeDetails} configData={configData} />
+        </NoSsr>
+      </MainLayout>
     </>
   );
 };
 
-export default Index;
-export const getServerSideProps = async (context) => {
-  const storeId = context.query.id;
-  const moduleId = context.query.module_id;
-  const { req } = context;
-  const language = req.cookies.languageSetting;
-  const lat = context.query.lat;
-  const lng = context.query.lng;
+export default StorePage;
 
-  const configRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}${config_api}`,
-    {
+export const getServerSideProps = async (context) => {
+  const {
+    id: storeId,
+    module_id: moduleId,
+    lat,
+    lng,
+    distance,
+  } = context.query;
+  const { req } = context;
+  const language = req.cookies.languageSetting || "en";
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
+
+  try {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    const origin = process.env.NEXT_CLIENT_HOST_URL;
+
+    const headersCommon = {
+      "X-software-id": 33571750,
+      "X-server": "server",
+      origin,
+      "X-localization": language,
+    };
+
+    console.time("Fetch Config");
+    const configRes = await fetch(`${baseUrl}${config_api}`, {
       method: "GET",
-      headers: {
-        "X-software-id": 33571750,
-        "X-server": "server",
-        origin: process.env.NEXT_CLIENT_HOST_URL,
-        "X-localization": language,
-        lat: lat,
-        lng: lng,
-      },
-    }
-  );
-  const storeDetailsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}${store_details_api}/${storeId}`,
-    {
+      headers: { ...headersCommon, lat, lng },
+      signal: controller.signal,
+    });
+    console.timeEnd("Fetch Config");
+
+    console.time("Fetch Store Details");
+    const storeDetailsRes = await fetch(`${baseUrl}${store_details_api}/${storeId}`, {
       method: "GET",
-      headers: {
-        moduleId: moduleId,
-        "X-software-id": 33571750,
-        "X-server": "server",
-        origin: process.env.NEXT_CLIENT_HOST_URL,
-        "X-localization": language,
-      },
+      headers: { ...headersCommon, moduleId },
+      signal: controller.signal,
+    });
+    console.timeEnd("Fetch Store Details");
+
+    clearTimeout(timeout);
+
+    if (!configRes.ok || !storeDetailsRes.ok) {
+      throw new Error("One or more API calls failed.");
     }
-  );
-  const landingPageRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/react-landing-page`,
-    {
-      method: "GET",
-      headers: {
-        "X-software-id": 33571750,
-        "X-server": "server",
-        origin: process.env.NEXT_CLIENT_HOST_URL,
-        "X-localization": language,
+
+    const configData = await configRes.json();
+    const storeDetails = await storeDetailsRes.json();
+
+    return {
+      props: {
+        configData,
+        storeDetails,
+        distance: distance || null,
       },
-    }
-  );
-  const landingPageData = await landingPageRes.json();
-  const config = await configRes.json();
-  const storeDetails = await storeDetailsRes.json();
-  return {
-    props: {
-      configData: config,
-      storeDetails: storeDetails,
-      landingPageData: landingPageData,
-    },
-  };
+    };
+  } catch (error) {
+    clearTimeout(timeout);
+    console.error("SSR fetch failed:", error.message);
+    return {
+      notFound: true,
+    };
+  }
 };

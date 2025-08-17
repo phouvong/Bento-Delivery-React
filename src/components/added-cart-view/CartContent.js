@@ -360,6 +360,7 @@ const CartContent = (props) => {
             ...cartItem,
             cart_id: cartItem?.cartItemId,
           }}
+          productUpdate
         />
       )}
     </>

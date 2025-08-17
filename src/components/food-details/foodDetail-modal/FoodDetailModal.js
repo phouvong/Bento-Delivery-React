@@ -47,9 +47,10 @@ import { handleValuesFromCartItems } from "../../product-details/product-details
 import useCartItemUpdate from "../../../api-manage/hooks/react-query/add-cart/useCartItemUpdate";
 import { getGuestId } from "helper-functions/getToken";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import {useGetItemDetails} from "api-manage/hooks/react-query/product-details/useGetItemDetails";
 
 const FoodDetailModal = ({
-  product,
+  product:fromCard,
   handleModalClose,
   imageBaseUrl,
   open,
@@ -63,6 +64,7 @@ const FoodDetailModal = ({
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const theme = useTheme();
+  const [product,setProduct] = useState(fromCard);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [totalPrice, setTotalPrice] = useState(null);
   const [varPrice, setVarPrice] = useState(null);
@@ -84,21 +86,48 @@ const FoodDetailModal = ({
   if (typeof window !== "undefined") {
     token = localStorage.getItem("token");
   }
+  const handleSuccessItem = (resData) => {
+  }
+  const params={
+    id:fromCard?.id
+  }
+  const {data}=useGetItemDetails(params, handleSuccessItem,productUpdate)
+
   useEffect(() => {
+    if(productUpdate){
+      handleInitialTotalPriceVarPriceQuantitySet(
+        fromCard,
+        setModalData,
+        productUpdate,
+        setTotalPrice,
+        setVarPrice,
+        setQuantity,
+        setSelectedOptions,
+        setTotalWithoutDiscount,
+        setSelectedAddOns,
+        setOtherSelectedOption
+      );
+    }else{
+      if(data){
+        handleInitialTotalPriceVarPriceQuantitySet(
+          data,
+          setModalData,
+          productUpdate,
+          setTotalPrice,
+          setVarPrice,
+          setQuantity,
+          setSelectedOptions,
+          setTotalWithoutDiscount,
+          setSelectedAddOns,
+          setOtherSelectedOption
+        );
+      }
+      }
+
+
     //initially setting these states to use further
-    handleInitialTotalPriceVarPriceQuantitySet(
-      product,
-      setModalData,
-      productUpdate,
-      setTotalPrice,
-      setVarPrice,
-      setQuantity,
-      setSelectedOptions,
-      setTotalWithoutDiscount,
-      setSelectedAddOns,
-      setOtherSelectedOption
-    );
-  }, [product]);
+
+  }, [product,data]);
 
   const notify = (i) => toast(i);
   const itemValuesHandler = (itemIndex, variationValues) => {
@@ -184,32 +213,38 @@ const FoodDetailModal = ({
     }
   };
   const updateCartSuccessHandler = (res) => {
-    const indexNumber = getIndexFromArrayByComparision(cartList, modalData[0]);
-    if (res) {
-      let product = {};
-      res?.forEach((item) => {
-        product = {
-          ...item?.item,
-          cartItemId: item?.id,
-          totalPrice: item?.price,
-          quantity: item?.quantity,
-          food_variations: item?.item?.food_variations,
-          selectedAddons: selectedAddons,
-          selectedOption: selectedOptions,
-          itemBasePrice: item?.item?.price,
+    if (res && res.length > 0) {
+      const updatedProducts = res.map((item) => {
+        const indexNumber = getIndexFromArrayByComparision(cartList, item?.item); // use current item
+        return {
+          product: {
+            ...item?.item,
+            cartItemId: item?.id,
+            totalPrice: item?.price,
+            quantity: item?.quantity,
+            food_variations: item?.item?.food_variations,
+            selectedAddons: selectedAddons,
+            selectedOption: selectedOptions,
+            itemBasePrice: item?.item?.price,
+          },
+          indexNumber,
         };
       });
-      dispatch(
-        setUpdateVariationToCart({
-          newObj: product,
-          indexNumber: indexNumber,
-        })
-      );
+
+      updatedProducts.forEach(({ product, indexNumber }) => {
+        dispatch(
+          setUpdateVariationToCart({
+            newObj: product,
+            indexNumber,
+          })
+        );
+      });
+
       toast.success(t("Item updated successfully"));
       handleModalClose?.();
-      //dispatch()
     }
   };
+
 
   const addOrUpdateToCartByDispatch = () => {
     if (productUpdate) {

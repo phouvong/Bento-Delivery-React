@@ -291,52 +291,47 @@ const Sidebar = (props) => {
               pt=".5rem"
               //flexWrap='wrap'
             >
-              <TextField
+              <Box
                 sx={{
-                  backgroundColor: (theme) => theme.palette.neutral[300],
+                  display: "flex",
+                  alignItems: "center",
+                  backgroundColor: theme=>theme.palette.primary.light,
+                  padding: "12px 12px",
+                  borderRadius: "5px",
+                  fontWeight: 500,
+                  fontSize: "14px",
+                  width: "fit-content",
+                  minWidth:"100px",
+                  justifyContent: "center",
+                  border:"1px solid",
+                    borderColor: (theme) => theme.palette.primary.main,
                 }}
-                variant="outlined"
-                value={minMax[0] <= 0 ? "" : minMax[0]}
-                onChange={(e) => {
-                  if (e.target.value >= 0) {
-                    setMinMax((prevState) => [
-                      parseFloat(e.target.value),
-                      prevState[1],
-                    ]);
-                  }
-                }}
-                label={t("Min")}
-                InputProps={{
-                  readOnly: true,
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      {configData?.currency_symbol}
-                    </InputAdornment>
-                  ),
-                }}
-              />
+              >
+                {configData?.currency_symbol} {minMax[0] <= 0 ? "0" : minMax[0]}
+              </Box>
+
               <Typography>-</Typography>
-              <TextField
+              <Box
                 sx={{
-                  backgroundColor: (theme) => theme.palette.neutral[300],
+                  display: "flex",
+                  alignItems: "center",
+                  backgroundColor: theme=>theme.palette.primary.light,
+                  padding: "12px 12px",
+                  borderRadius: "5px",
+                  fontWeight: 500,
+                  fontSize: "14px",
+                  width: "fit-content",
+                  minWidth:"100px",
+                  justifyContent: "center",
+                  border:"1px solid",
+                  borderColor: (theme) => theme.palette.primary.main,
                 }}
-                variant="outlined"
-                value={minMax[1] === 0 ? "" : minMax[1]}
-                onChange={(e) => {
-                  if (e.target.value >= 0) {
-                    setMinMax((prevState) => [prevState[0], e.target.value]);
-                  }
-                }}
-                label={t("Max")}
-                InputProps={{
-                  readOnly: true,
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      {configData?.currency_symbol}
-                    </InputAdornment>
-                  ),
-                }}
-              />
+              >
+                <Box component="span" sx={{ marginRight: "4px" }}>
+                  {configData?.currency_symbol}
+                </Box>
+                {minMax[1] === 0 ? "" : minMax[1]}
+              </Box>
             </CustomStackFullWidth>
           </CustomStackFullWidth>
         </CustomPaperBox>

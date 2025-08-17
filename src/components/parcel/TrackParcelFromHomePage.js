@@ -57,9 +57,19 @@ const TrackParcelFromHomePage = () => {
 
   return (
     <CustomStackFullWidth justifyContent="center" alignItems="center">
-      <Stack spacing={1} direction="row" width="100%" justifyContent="center">
+      <Stack spacing={1} direction="row" width="100%" justifyContent="center"
+        sx={{
+          backgroundColor:theme=>theme.palette.neutral[100],
+          maxWidth:"1000px",
+          borderRadius:"20px",
+          padding:"1rem",
+          boxShadow:"0px 15px 30px 0px rgba(71, 71, 71, 0.10)"
+
+        }}
+
+      >
         <Stack
-          maxWidth={{ xs: "252px", sm: "252px", md: token ? "452px" : "700px" }}
+          maxWidth={{ xs: "252px", sm: "252px", md: "100%" }}
           width="100%"
           direction={{ xs: "column", sm: "column", md: "row" }}
           spacing={1}
@@ -74,6 +84,7 @@ const TrackParcelFromHomePage = () => {
               sx: {
                 height: isSmall ? 35 : 43,
                 backgroundColor: (theme) => theme.palette.neutral[100],
+                borderRadius:"10px"
               },
             }}
             InputLabelProps={{
@@ -94,14 +105,14 @@ const TrackParcelFromHomePage = () => {
               lanDirection={lanDirection}
               height={isSmall ? "35px" : "43px"}
               borderRadius="8px"
-              background={"transparent"}
+              background={theme.palette.mode==="dark"?"transparent":"none"}
 
             />
           )}
 
           <Stack maxWidth={isSmall ? "100%" : "120px"} width="100%">
             <TrackButton
-              radius="8px"
+              radius="10px"
               smPadding="7px 16px"
               fullWidth="true"
               onClick={handleClick}

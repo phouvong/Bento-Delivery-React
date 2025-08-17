@@ -114,7 +114,7 @@ const QuickView = ({
           {isWishlisted ? (
             <PrimaryToolTip text="Remove from wishlist">
               <IconButtonStyled onClick={(e) => removeFromWishlistHandler(e)}>
-                <FavoriteIcon />
+                <FavoriteIcon color={theme.palette.primary.main} />
               </IconButtonStyled>
             </PrimaryToolTip>
           ) : (

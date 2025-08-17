@@ -110,7 +110,6 @@ const Top = (props) => {
     isLoading,
     setOpenReviewModal,
   } = props;
-  console.log({storeDetails})
   const [state, dispatch] = useReducer(reducer, initialState);
   const theme = useTheme();
   const dispatchRedux = useDispatch();
@@ -239,13 +238,14 @@ const Top = (props) => {
             sx={{
               position: "relative",
               height: "122px",
+              borderBottomRightRadius:"10px"
             }}
           >
             {storeDetails?.discount ? (
               <Stack
                 sx={{
                   position: "absolute",
-                  bottom: 0,
+                  bottom: "6px",
                   left: 0,
                   right: 0,
                   backgroundColor: (theme) =>
@@ -274,6 +274,7 @@ const Top = (props) => {
                       onClick={() => handleBannerClick(banner?.default_link)}
                       sx={{
                         cursor: "pointer",
+                        borderBottomRightRadius:"10px"
                       }}
                     >
                       <CustomImageContainer
@@ -756,12 +757,12 @@ const Top = (props) => {
               </CustomBoxFullWidth>
             </ContentBox>
           </ContentWrapper>
-          <Stack width="50%" sx={{position:"relative"}}>
+          <Stack width="50%" sx={{position:"relative",}}>
             {storeDetails?.discount ? (
               <Stack
                 sx={{
                   position: "absolute",
-                  bottom: 0,
+                  bottom:"6px",
                   left: 0,
                   right: 0,
                   backgroundColor: (theme) =>
@@ -769,6 +770,7 @@ const Top = (props) => {
                   color: (theme) => theme.palette.neutral[100],
                   padding: "10px",
                   borderRadius: "0px",
+                  borderBottomRightRadius:"10px",
                   zIndex: 999,
                 }}
               >
@@ -810,12 +812,15 @@ const Top = (props) => {
                     })}
                   </Slider>
                 ) : (
-                  <CustomImageContainer
-                    src={bannerCover}
-                    width="100%"
-                    height="250px"
-                    objectFit="cover"
-                  />
+                  <Stack sx={{borderBottomRightRadius:"10%"}}>
+                    <CustomImageContainer
+                      src={bannerCover}
+                      width="100%"
+                      height="251px"
+                      objectFit="cover"
+                      borderBottomRightRadius="10px"
+                    />
+                  </Stack>
                 )}
               </>
             ) : (

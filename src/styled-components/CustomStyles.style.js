@@ -340,7 +340,8 @@ export const CustomImageContainerStyled = styled(Box)(
 		cursor,
 		aspect_ratio,
 		padding,
-		bg
+		bg,
+		 borderBottomRightRadius
 	}) => ({
 		//maxWidth:'20rem',
 		display: "inline-flex",
@@ -353,6 +354,7 @@ export const CustomImageContainerStyled = styled(Box)(
 		marginBottom: margin_bottom,
 		position: "relative",
 		borderRadius: border_radius || "none",
+		borderBottomRightRadius:borderBottomRightRadius ? borderBottomRightRadius : "none",
 		[theme.breakpoints.down("md")]: {
 			height: mdHeight ? mdHeight : "",
 		},

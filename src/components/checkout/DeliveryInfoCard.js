@@ -59,9 +59,11 @@ const DeliveryInfoCard = ({
 					</Typography>
 				</Stack>
 				<Typography fontSize="12px" color={theme.palette.neutral[500]}>
-					Road: {roadNumber ?? 0} House : {houseNumber ?? 0},Floor:{" "}
-					{floor ?? 0}
+					{roadNumber && `Road: ${roadNumber} `}
+					{houseNumber && `House: ${houseNumber} `}
+					{floor && `Floor: ${floor}`}
 				</Typography>
+
 			</Stack>
 		</CustomStackFullWidth>
 	);

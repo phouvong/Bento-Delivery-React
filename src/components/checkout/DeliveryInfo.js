@@ -22,7 +22,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CustomModal from "../modal";
 import CloseIcon from "@mui/icons-material/Close";
 import DeliveryInstruction from "./DeliveryInstruction";
-import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import BorderColorIcon from '@mui/icons-material/BorderColor';
 import { getToken } from "helper-functions/getToken";
 import { useSelector } from "react-redux";
 
@@ -219,9 +219,13 @@ const DeliveryInfo = ({
 						<Typography fontSize="16px" fontWeight="500">
 							{t("Add More Delivery Instruction")}
 						</Typography>
-						<IconButton>
+						{selectedInstruction ? (<IconButton>
+							<BorderColorIcon sx={{color:theme=>theme.palette.primary.main}} fontSize="medium" onClick={handleClick} />
+						</IconButton>):(
+							<IconButton>
 							<AddIcon fontSize="medium" onClick={handleClick} />
-						</IconButton>
+						</IconButton>)}
+
 					</Stack>
 					<Stack>
 						{customerInstruction && (
@@ -229,31 +233,38 @@ const DeliveryInfo = ({
 								direction="row"
 								gap="10px"
 								justifyContent="flex-start"
+								sx={{
+									backgroundColor:theme=>theme.palette.neutral[300],
+									padding:"8px 10px",
+									borderRadius:"8px"
+								}}
 							>
-								<MeetingRoomIcon
-									sx={{ color: theme.palette.primary.main }}
-								/>
 								<Stack
-									gap="5px"
+									gap="10px"
 									direction="row"
 									alignItems="center"
 									justifyContent="space-between"
 									width="100%"
+
 								>
 									<Typography
 										fontSize="12px"
 										fontWeight={400}
-										color={theme.palette.primary.main}
+										//color={theme.palette.primary.main}
 									>
 										{selectedInstruction}
 									</Typography>
 									<Stack
-										justifyContent="flex-start"
+										justifyContent="flex-end"
+										alignItems='end'
 										sx={{ cursor: "pointer" }}
-										pr="20px"
+
 									>
 										<CloseIcon
-											fontSize="18px"
+											sx={{width:"20px",
+											     height:"20px",
+												fontWeight:"700"
+											}}
 											onClick={handleRemoveInstruction}
 										/>
 									</Stack>
@@ -262,29 +273,45 @@ const DeliveryInfo = ({
 						)}
 						{customNote && (
 							<Stack
-								gap="5px"
+								gap="10px"
 								direction="row"
 								alignItems="center"
 								justifyContent="space-between"
 								width="100%"
+								sx={{
+									backgroundColor:theme=>theme.palette.neutral[300],
+									padding:"8px 10px",
+									borderRadius:"8px"
+								}}
+								marginTop="10px"
 							>
-								<Typography
-									fontSize="12px"
-									fontWeight={400}
-									color={alpha(
-										theme.palette.neutral[600],
-										0.7
-									)}
-								>
-									{customNote}
-								</Typography>
+								<Stack>
+									<Typography
+										fontSize="12px"
+										fontWeight={600}
+
+									>Note:</Typography>
+									<Typography
+										fontSize="12px"
+										fontWeight={400}
+										color={alpha(
+											theme.palette.neutral[600],
+											0.7
+										)}
+									>
+										{customNote}
+									</Typography>
+								</Stack>
 								<Stack
-									justifyContent="flex-start"
+									justifyContent="flex-end"
+									alignItems='end'
 									sx={{ cursor: "pointer" }}
-									pr="20px"
 								>
 									<CloseIcon
-										fontSize="18px"
+										sx={{width:"20px",
+											height:"20px",
+											fontWeight:"700"
+										}}
 										onClick={handleRemoveInstructionDes}
 									/>
 								</Stack>
@@ -306,8 +333,8 @@ const DeliveryInfo = ({
 								sx={{
 									zIndex: "99",
 									position: "absolute",
-									top: 10,
-									right: 10,
+									top: 0,
+									right: 0,
 									backgroundColor: (theme) =>
 										theme.palette.neutral[100],
 									borderRadius: "50%",
@@ -318,7 +345,7 @@ const DeliveryInfo = ({
 								}}
 							>
 								<CloseIcon
-									sx={{ fontSize: "24px", fontWeight: "500" }}
+									sx={{ fontSize: "20px", fontWeight: "700" }}
 								/>
 							</IconButton>
 						</CustomStackFullWidth>
@@ -330,6 +357,7 @@ const DeliveryInfo = ({
 							setSelectedInstruction={setSelectedInstruction}
 							customNote={customNote}
 							setCustomNote={setCustomNote}
+
 						/>
 					</CustomModal>
 				</CustomStackFullWidth>

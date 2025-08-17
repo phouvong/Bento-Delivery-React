@@ -28,6 +28,7 @@ const HaveCoupon = (props) => {
     setSwitchToWallet,
     payableAmount,
     walletBalance,
+    min_order_amount
   } = props;
   const theme = useTheme();
   const { couponInfo } = useSelector((state) => state.profileInfo);
@@ -48,35 +49,44 @@ const HaveCoupon = (props) => {
   };
   const handleSuccess = (response) => {
     const totalAmountOverall = totalAmount - deliveryFee - deliveryTip;
-    if (
-      Number.parseInt(response?.data?.min_purchase) <=
-      Number.parseInt(totalAmountOverall)
-    ) {
-      if (response?.data?.discount_type === "percent") {
-        dispatch(setCouponInfo(response.data));
-        toast.success(t("Coupon Applied"));
-        dispatch(setCouponType(response.data.coupon_type));
-        setCouponDiscount({ ...response.data, zoneId: zoneId });
-      } else {
-        if (
-          response?.data?.discount &&
-          payableAmount >= response?.data?.discount
-        ) {
+    if(min_order_amount && totalAmountOverall < min_order_amount) {
+      if (
+        Number.parseInt(response?.data?.min_purchase) <=
+        Number.parseInt(totalAmountOverall)
+      ) {
+        if (response?.data?.discount_type === "percent") {
           dispatch(setCouponInfo(response.data));
           toast.success(t("Coupon Applied"));
           dispatch(setCouponType(response.data.coupon_type));
           setCouponDiscount({ ...response.data, zoneId: zoneId });
         } else {
-          toast.error(t("Your total price must be more then coupon amount"));
+          if (
+            response?.data?.discount &&
+            payableAmount >= response?.data?.discount
+          ) {
+            dispatch(setCouponInfo(response.data));
+            toast.success(t("Coupon Applied"));
+            dispatch(setCouponType(response.data.coupon_type));
+            setCouponDiscount({ ...response.data, zoneId: zoneId });
+          } else {
+            toast.error(t("Your total price must be more then coupon amount"));
+          }
         }
+      } else {
+        toast.error(
+          `${t(coupon_minimum)} ${getAmountWithSign(
+            response?.data?.min_purchase
+          )}`
+        );
       }
-    } else {
+    }else{
       toast.error(
         `${t(coupon_minimum)} ${getAmountWithSign(
           response?.data?.min_purchase
         )}`
       );
     }
+
   };
   const { isLoading, refetch } = useQuery(
     "apply-coupon",

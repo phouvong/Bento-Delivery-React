@@ -39,9 +39,11 @@ const SignInForm = ({
   handleSignUp,
   only,
   handleClick,
-  handleClose
+  handleClose,
+                      isRemember
 }) => {
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
+
   const theme = useTheme();
   const textColor = theme.palette.whiteContainer.main;
   const [isPhone, setIsPhone] = useState("");
@@ -57,6 +59,7 @@ const SignInForm = ({
       setIsPhone("email");
     }
   }, [loginFormik.values.email_or_phone]);
+
   return (
     <form noValidate onSubmit={loginFormik.handleSubmit}>
       <CustomStackFullWidth alignItems="center">
@@ -108,7 +111,7 @@ const SignInForm = ({
             required="true"
             type="password"
             label={t("Password")}
-            placeholder={t("Enter password")}
+            placeholder={t("Minimum 8 characters")}
             touched={loginFormik.touched.password}
             errors={loginFormik.errors.password}
             fieldProps={loginFormik.getFieldProps("password")}
@@ -141,6 +144,7 @@ const SignInForm = ({
                   value="remember"
                   color="primary"
                   onChange={rememberMeHandleChange}
+                  checked={isRemember || false}
                 />
               }
               label={

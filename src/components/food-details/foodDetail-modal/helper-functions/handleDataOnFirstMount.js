@@ -13,12 +13,12 @@ export const handleInitialTotalPriceVarPriceQuantitySet = (
 ) => {
   setModalData([product]);
   if (productUpdate) {
-    setTotalPrice(product.totalPrice);
-    setVarPrice(product.totalPrice);
+    setTotalPrice(product?.totalPrice);
+    setVarPrice(product?.totalPrice);
   } else {
-    setTotalPrice(product.price);
-    setVarPrice(product.price);
-    setTotalWithoutDiscount(product.price);
+    setTotalPrice(product?.price);
+    setVarPrice(product?.price);
+    setTotalWithoutDiscount(product?.price);
   }
 
   if (product.quantity) {

@@ -151,7 +151,7 @@ const ItemCheckout = (props) => {
   const { profileInfo } = useSelector((state) => state.profileInfo);
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
   const { offlinePaymentInfo } = useSelector((state) => state.offlinePayment);
-
+  const [dDistance, setDDistance] = useState(null);
   const token = getToken();
   const dispatch = useDispatch();
   const { t } = useTranslation();
@@ -199,7 +199,6 @@ const ItemCheckout = (props) => {
     refetchOfflinePaymentOptions();
   }, []);
   useEffect(() => {
-
     if (storeId) {
       refetch();
     }
@@ -221,19 +220,24 @@ const ItemCheckout = (props) => {
     refetch: refetchDistance,
     isLoading,
   } = useQuery(
-    ["get-distance", storeData, address],
+    ["get-distancesss", storeData, address,orderType],
     () => GoogleApi.distanceApi(storeData, address),
     {
-      enabled: false,
+      enabled: true,
       onError: onErrorResponse,
     }
   );
+  console.log({distanceData})
+
   const tempDistance = handleDistance(
     distanceData?.data,
     { latitude: storeData?.latitude, longitude: storeData?.longitude },
     address
   );
-
+  useEffect(() => {
+    setDDistance(Number(distanceData?.data?.distanceMeters) / 1000)
+  }, [distanceData]);
+  console.log({tempDistance,dDistance})
   const {
     data: extraCharge,
     isLoading: extraChargeLoading,
@@ -261,7 +265,7 @@ const ItemCheckout = (props) => {
       onError: onSingleErrorResponse,
     }
   );
-
+  console.log({dDistance})
   useEffect(() => {
     const currentLatLng = JSON.parse(localStorage.getItem("currentLatLng"));
     const location = localStorage.getItem("location");
@@ -274,9 +278,11 @@ const ItemCheckout = (props) => {
     });
     refetch();
   }, []);
-  useEffect(() => {
-    storeData && address && refetchDistance();
-  }, [storeData, address?.lat, address?.lng]);
+  // useEffect(() => {
+  //   if(storeData?.latitude && address){
+  //     refetchDistance()
+  //   };
+  // }, [storeData, address?.lat, address?.lng,orderType]);
 
   useEffect(() => {
     const taxAmount = getTaxableTotalPrice(
@@ -309,8 +315,6 @@ const ItemCheckout = (props) => {
     offlineMutate(offlinePaymentData);
   };
 
-  //orderId
-  //offlinePaymentInfo
   useEffect(() => {
     if (offlineCheck) {
       handleOffineOrder();
@@ -369,6 +373,7 @@ const ItemCheckout = (props) => {
     });
   };
 
+  console.log({distanceData})
   const handleOrderMutationObject = (carts, productList) => {
     const guestId = getToken() ? "" : guest_id;
     const isDigital =
@@ -457,6 +462,11 @@ const ItemCheckout = (props) => {
       formData.append("password", formik.values.password);
       return formData;
     } else {
+      console.log("vvv", handleDistance(
+        distanceData,
+        originData,
+        address
+      ),distanceData)
       return {
         cart: JSON.stringify(carts),
         ...address,
@@ -466,16 +476,12 @@ const ItemCheckout = (props) => {
         // order_time: scheduleAt,
         payment_method: isDigital,
         order_type: orderType === "schedule_order" ? "delivery" : orderType,
-        store_id: storeData?.id,
+        store_id: storeId,
         coupon_code: couponDiscount?.code,
         coupon_discount_amount: couponDiscount?.discount,
         coupon_discount_title: couponDiscount?.title,
         discount_amount: getProductDiscount(productList),
-        distance: handleDistance(
-          distanceData?.data,
-          originData,
-          address
-        ),
+        distance: dDistance || tempDistance,
         order_amount: totalAmount,
         dm_tips: deliveryTip,
         cutlery: cutlery,
@@ -511,7 +517,7 @@ const ItemCheckout = (props) => {
   const prevCouponRef = useRef(null);
 
   useEffect(() => {
-    if (!cartList || !storeData) return;
+    if ((!cartList || !storeData) && !storeId ) return;
 
     const cartChanged = !deepEqual(prevCartRef.current, cartList);
     const couponChanged = !deepEqual(prevCouponRef.current, couponDiscount);
@@ -524,9 +530,9 @@ const ItemCheckout = (props) => {
       const totalQty = 0;
       const carts = handleProductList(productList, totalQty);
       const orderObject = handleOrderMutationObject(carts, productList);
-
+      console.log({orderObject})
       taxMutate(orderObject, {
-        onError: onErrorResponse,
+       // onError: onErrorResponse,
       });
     }
   }, [cartList, campaignItemList, couponDiscount, storeData]);
@@ -651,6 +657,7 @@ const ItemCheckout = (props) => {
         };
         if (carts?.length > 0) {
           let order = handleOrderMutationObject(carts, productList);
+          console.log({order})
           orderMutation(order, {
             onSuccess: handleSuccess,
             onError: (error) => {
@@ -1125,6 +1132,7 @@ const ItemCheckout = (props) => {
                       setSwitchToWallet={setSwitchToWallet}
                       walletBalance={customerData?.data?.wallet_balance}
                       payableAmount={payableAmount}
+                      min_order_amount={storeData?.minimum_order}
                     />
                   )}
                   {/*{configData?.customer_wallet_status === 1 &&*/}
@@ -1193,6 +1201,7 @@ const ItemCheckout = (props) => {
                     customerData={customerData}
                     initVauleEx={storeData?.extra_packaging_amount}
                     isLoading={isLoading}
+                    scheduleAt={scheduleAt}
                   />
 
                   <PlaceOrder

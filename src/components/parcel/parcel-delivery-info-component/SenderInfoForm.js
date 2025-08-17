@@ -110,6 +110,7 @@ const SenderInfoForm = ({
                 onHandleChange={senderPhoneHandler}
                 initCountry={configData?.country}
                 touched={addAddressFormik.touched.senderPhone}
+
                 errors={addAddressFormik.errors.senderPhone}
                 rtlChange="true"
                 lanDirection={lanDirection}
@@ -209,37 +210,6 @@ const SenderInfoForm = ({
               </CustomStackFullWidth>
             )}
 
-            {/*<CustomStackFullWidth>*/}
-            {/*  <CustomTextFieldWithFormik*/}
-            {/*    type="text"*/}
-            {/*    label={t("Street number")}*/}
-            {/*    touched={addAddressFormik.touched.senderRoad}*/}
-            {/*    errors={addAddressFormik.errors.senderRoad}*/}
-            {/*    fieldProps={addAddressFormik.getFieldProps("senderRoad")}*/}
-            {/*    onChangeHandler={senderRoadHandler}*/}
-            {/*    value={addAddressFormik.values.senderRoad}*/}
-            {/*  />*/}
-            {/*</CustomStackFullWidth>*/}
-            {/*<CustomStackFullWidth direction="row" spacing={1.3}>*/}
-            {/*  <CustomTextFieldWithFormik*/}
-            {/*    type="text"*/}
-            {/*    label={t("House no.")}*/}
-            {/*    touched={addAddressFormik.touched.senderHouse}*/}
-            {/*    errors={addAddressFormik.errors.senderHouse}*/}
-            {/*    fieldProps={addAddressFormik.getFieldProps("senderHouse")}*/}
-            {/*    onChangeHandler={senderHouseHandler}*/}
-            {/*    value={addAddressFormik.values.senderHouse}*/}
-            {/*  />*/}
-            {/*  <CustomTextFieldWithFormik*/}
-            {/*    type="text"*/}
-            {/*    label={t("Floor no.")}*/}
-            {/*    touched={addAddressFormik.touched.senderFloor}*/}
-            {/*    errors={addAddressFormik.errors.senderFloor}*/}
-            {/*    fieldProps={addAddressFormik.getFieldProps("senderFloor")}*/}
-            {/*    onChangeHandler={senderFloorHandler}*/}
-            {/*    value={addAddressFormik.values.senderFloor}*/}
-            {/*  />*/}
-            {/*</CustomStackFullWidth>*/}
           </CustomStackFullWidth>
         </CustomStackFullWidth>
       </Card>

@@ -7,7 +7,7 @@ import {
 } from "styled-components/CustomStyles.style";
 import H1 from "../../typographies/H1";
 import { Stack } from "@mui/system";
-import { Grid, Typography } from "@mui/material";
+import {Grid, Tooltip, Typography} from "@mui/material";
 import DeliveryInfo from "../DeliveryInfo";
 import Billing from "../Billing";
 import PaymentMethod from "../PaymentMethod";
@@ -19,7 +19,7 @@ import { t } from "i18next";
 import { baseUrl } from "api-manage/MainApi";
 import Router, { useRouter } from "next/router";
 import useGetZoneId from "../../../api-manage/hooks/react-query/google-api/useGetZone";
-import { handleDistance } from "utils/CustomFunctions";
+import {getDeliveryFeeByBadWeather, handleDistance} from "utils/CustomFunctions";
 import useGetVehicleCharge from "../../../api-manage/hooks/react-query/order-place/useGetVehicleCharge";
 import CustomModal from "../../modal";
 import CustomImageContainer from "../../CustomImageContainer";
@@ -51,6 +51,8 @@ import * as Yup from "yup";
 import {useGetTax} from "api-manage/hooks/react-query/order-place/useGetTax";
 import deliveryFree from "components/checkout/DeliveryFree";
 import {onErrorResponse} from "api-manage/api-error-response/ErrorResponses";
+import {useGetSurgePrice} from "api-manage/hooks/react-query/order-place/useGetSurgePrice";
+import InfoIcon from "@mui/icons-material/Info";
 
 const ParcelCheckout = () => {
   const theme = useTheme();
@@ -86,7 +88,7 @@ const ParcelCheckout = () => {
     parcelInfo?.senderLocations,
     parcelInfo?.receiverLocations
   );
-
+  const {data:surgePrice,mutate:surgeMutate}=useGetSurgePrice()
   const token = getToken();
   const guest_id = getGuestId();
   const formik = useFormik({
@@ -117,7 +119,6 @@ const ParcelCheckout = () => {
     },
     address
   );
-
   const {
     data: offlinePaymentOptions,
     refetch: refetchOfflinePaymentOptions,
@@ -159,11 +160,10 @@ const ParcelCheckout = () => {
       ...currentLatLng,
       latitude: currentLatLng?.lat,
       longitude: currentLatLng?.lng,
-      address: location,
+      address: parcelInfo?.senderAddress,
       address_type: "Selected Address",
     });
   }, []);
-
   const handleOffineOrder = () => {
     const offlinePaymentData = {
       ...offlinePaymentInfo,
@@ -174,9 +174,23 @@ const ParcelCheckout = () => {
     dispatch(setOrderDetailsModal(true));
     offlineMutate(offlinePaymentData);
   };
+  const zoneId = JSON.parse(localStorage.getItem("zoneid"));
+  useEffect(() => {
 
-  //orderId
-  //offlinePaymentInfo
+    if(parcelCategories && zoneId){
+
+      const temData={
+        zone_id: zoneId?.[0],
+        module_id: parcelCategories?.module_id,
+        date_time: new Date().toISOString(),
+        guest_id:getGuestId()
+      }
+      surgeMutate(temData,{
+        onError:onErrorResponse
+      })
+    }
+
+  }, [parcelCategories]);
   useEffect(() => {
     if (offlineCheck) {
       handleOffineOrder();
@@ -195,17 +209,17 @@ const ParcelCheckout = () => {
       let deliveryFee =
         convertedDistance * parcelCategories?.parcel_per_km_shipping_charge;
       if (deliveryFee > parcelCategories?.parcel_minimum_shipping_charge) {
-        return deliveryFee + extraCharge;
+        return getDeliveryFeeByBadWeather(deliveryFee + extraCharge,surgePrice);
       } else {
-        return parcelCategories?.parcel_minimum_shipping_charge + extraCharge;
+        return getDeliveryFeeByBadWeather(parcelCategories?.parcel_minimum_shipping_charge + extraCharge,surgePrice);
       }
     } else {
       let deliveryFee =
         convertedDistance * configData?.parcel_per_km_shipping_charge;
       if (deliveryFee > configData?.parcel_minimum_shipping_charge) {
-        return deliveryFee + extraCharge;
+        return getDeliveryFeeByBadWeather(deliveryFee + extraCharge,surgePrice);
       } else {
-        return configData?.parcel_minimum_shipping_charge + extraCharge;
+        return getDeliveryFeeByBadWeather(configData?.parcel_minimum_shipping_charge + extraCharge,surgePrice);
       }
     }
   };
@@ -519,7 +533,18 @@ const ParcelCheckout = () => {
       item?.modules?.find((module) => module?.module_type === "parcel")
     );
   };
-
+  const extraText = t("This charge includes extra vehicle charge");
+  const deliveryToolTipsText = `${extraText} ${getAmountWithSign(
+    extraCharge
+  )}${
+    surgePrice?.customer_note_status !== 0
+      ? ` ${surgePrice?.customer_note} ${
+        surgePrice?.type === "amount"
+          ? getAmountWithSign(surgePrice?.price)
+          : `${surgePrice?.price}%`
+      }`
+      : ""
+  }`;
   return (
     <>
       {method === "offline" ? (
@@ -593,6 +618,14 @@ const ParcelCheckout = () => {
                       <Stack direction="row" justifyContent="space-between">
                         <Typography fontWeight="500">
                           {t("Delivery Fee")}
+                          {extraCharge>0|| surgePrice?.price>0 ? (<Tooltip
+                            title={deliveryToolTipsText}
+                            placement="top"
+                            arrow={true}
+                          >
+                            <InfoIcon sx={{ fontSize: "11px" }} />
+                          </Tooltip>):null}
+
                         </Typography>
                         <Typography fontWeight="500">
                           {getAmountWithSign(parcelDeliveryFree())}

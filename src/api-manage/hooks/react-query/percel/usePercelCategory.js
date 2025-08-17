@@ -9,7 +9,7 @@ const getParcelCategory = async () => {
 };
 
 export default function useGetParcelCategory() {
-  return useQuery("parcel-category", getParcelCategory, {
+  return useQuery("parcel-categorys", getParcelCategory, {
     enabled: false,
     onError: onSingleErrorResponse,
   });

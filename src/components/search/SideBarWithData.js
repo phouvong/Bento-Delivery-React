@@ -119,16 +119,7 @@ const SideBarWithData = forwardRef((props, ref) => {
                   </Grid>
                 ))
               )}
-              {/*{pageData?.map((item, index) => {*/}
-              {/*  return (*/}
-              {/*    <Grid key={index} item xs={12} sm={4} md={4}>*/}
-              {/*      <StoreCard*/}
-              {/*        item={item}*/}
-              {/*        imageUrl={`${configData?.base_urls?.store_cover_photo_url}/${item?.cover_photo}`}*/}
-              {/*      />*/}
-              {/*    </Grid>*/}
-              {/*  );*/}
-              {/*})}*/}
+
             </>
           )}
         </>

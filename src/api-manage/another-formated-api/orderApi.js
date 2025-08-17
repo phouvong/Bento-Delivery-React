@@ -1,11 +1,12 @@
 import MainApi from "../MainApi";
+import {getToken} from "helper-functions/getToken";
 
 export const OrderApi = {
   placeOrder: (formData) => {
     return MainApi.post("/api/v1/customer/order/place", formData);
   },
   prescriptionPlaceOrder: (orderData) => {
-
+    console.log({orderData})
     const {
       store_id,
       distance,
@@ -27,17 +28,22 @@ export const OrderApi = {
     formData.append("address", address);
     formData.append("longitude", longitude);
     formData.append("latitude", latitude);
-    prescriptionImages.forEach((prescriptionImages) => {
-      formData.append("order_attachment[]", prescriptionImages);
+
+    prescriptionImages.forEach((image) => {
+      formData.append("order_attachment[]", image);
     });
+
     formData.append("order_note", order_note);
-    formData.append("guest_id",guest_id)
-    formData.append("contact_person_number",contact_person_number)
-    formData.append("contact_person_name",contact_person_name)
-    formData.append("dm_tips",dm_tips)
+    formData.append("guest_id", guest_id);
+
+    if (!getToken()) {
+      formData.append("contact_person_number", contact_person_number);
+      formData.append("contact_person_name", contact_person_name);
+    }
+
+    formData.append("dm_tips", dm_tips);
     formData.append("order_type", order_type);
     formData.append("payment_method", payment_method);
-
     return MainApi.post("/api/v1/customer/order/prescription/place", formData);
   },
   orderHistory: (orderType, limit, offset) => {

@@ -246,7 +246,6 @@ const ProductCard = (props) => {
       setIsProductExist(false);
     }
   }, [aliasCartList]);
-
   const getItemFromCartlist = () => {
     const cartList = getCartListModuleWise(aliasCartList);
     return cartList?.find((things) => things.id === item?.id);
@@ -404,27 +403,30 @@ const ProductCard = (props) => {
 
   const addToCart = (e) => {
     if (item?.module_type === "ecommerce") {
-      if (item?.variations.length > 0) {
+      if (item?.variations?.length > 0 || item?.has_variant) {
         router.push({
           pathname: "/product/[id]",
           query: {
             id: `${item?.slug ? item?.slug : item?.id}`,
             module_id: `${getModuleId()}`,
           },
+        }).then(() => {
+          window.scrollTo({ top: 0, behavior: "smooth" }); // ✅ scroll to top after navigation
         });
       } else {
         e.stopPropagation();
         addToCartHandler();
+
       }
-    } else {
+    }else {
       if (item?.module_type === "food") {
-        if (item?.food_variations?.length > 0) {
+        if (item?.food_variations?.length > 0 ||  item?.has_variant) {
           dispatch({ type: ACTION.setOpenModal, payload: true });
         } else {
           e.stopPropagation();
           addToCartHandler();
         }
-      } else if (item?.variations?.length > 0) {
+      } else if (item?.variations?.length > 0 || item?.has_variant) {
         dispatch({ type: ACTION.setOpenModal, payload: true });
       } else {
         e.stopPropagation();
@@ -822,29 +824,30 @@ const ProductCard = (props) => {
         spacing={0.6}
         p={item?.module_type === "pharmacy" ? "5px 16px 16px 16px" : "1rem"}
       >
-        {item?.module_type === "pharmacy" ? (
-          <Typography
-            sx={{
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              display: "-webkit-box",
-              WebkitLineClamp: "1",
-              WebkitBoxOrient: "vertical",
-              width: "100%",
-              paddingTop: "3px",
-              maxWidth: "200px",
-              wordWrap: "break-word",
-            }}
-            variant="body2"
-            color="#93A2AE"
-            textAlign="center"
-            component="h4"
-          >
-            {item?.generic_name[0]}
-          </Typography>
-        ) : (
-          <Body2 text={item?.store_name} component="h4" />
-        )}
+        <Body2 text={item?.store_name} component="h4" />
+        {/*{item?.module_type === "pharmacy" ? (*/}
+        {/*  <Typography*/}
+        {/*    sx={{*/}
+        {/*      overflow: "hidden",*/}
+        {/*      textOverflow: "ellipsis",*/}
+        {/*      display: "-webkit-box",*/}
+        {/*      WebkitLineClamp: "1",*/}
+        {/*      WebkitBoxOrient: "vertical",*/}
+        {/*      width: "100%",*/}
+        {/*      paddingTop: "3px",*/}
+        {/*      maxWidth: "200px",*/}
+        {/*      wordWrap: "break-word",*/}
+        {/*    }}*/}
+        {/*    variant="body2"*/}
+        {/*    color="#93A2AE"*/}
+        {/*    textAlign="center"*/}
+        {/*    component="h4"*/}
+        {/*  >*/}
+        {/*    {item?.generic_name[0]}*/}
+        {/*  </Typography>*/}
+        {/*) : (*/}
+        {/*  <Body2 text={item?.store_name} component="h4" />*/}
+        {/*)}*/}
 
         <PrimaryToolTip text={item?.name} placement="bottom" arrow="false">
           <Typography
@@ -949,8 +952,9 @@ const ProductCard = (props) => {
         alignItems="center"
         spacing={1.5}
         p="1rem"
+
       >
-        <Body2 text={item?.store_name} component="h4" />
+        <Body2 paddingTop="5px" text={item?.store_name} component="h4" />
         <PrimaryToolTip text={item?.name} placement="bottom" arrow="false">
           <H3 text={item?.name} component="h3" />
         </PrimaryToolTip>
@@ -1014,38 +1018,24 @@ const ProductCard = (props) => {
 
 
   return (
-    <Stack sx={{ position: "relative" }}>
-      {state.openModal && getCurrentModuleType() === "food" && item ? (
-        <FoodDetailModal
-          product={item}
-          imageBaseUrl={imageBaseUrl}
-          open={state.openModal}
-          handleModalClose={handleClose}
-          setOpen={(value) =>
-            dispatch({ type: ACTION.setOpenModal, payload: value })
-          }
-          addToWishlistHandler={addToWishlistHandler}
-          removeFromWishlistHandler={removeFromWishlistHandler}
-          isWishlisted={isWishlisted}
-        />
-      ) : (
-        <>
-          {cardFor === "flashSale" ? (
-            <>
-              {stock !== 0 && (
-                <ModuleModal
-                  open={state.openModal}
-                  handleModalClose={handleClose}
-                  configData={configData}
-                  productDetailsData={item}
-                  addToWishlistHandler={addToWishlistHandler}
-                  removeFromWishlistHandler={removeFromWishlistHandler}
-                  isWishlisted={isWishlisted}
-                />
-              )}
-            </>
-          ) : (
-            item && (
+    <> {state.openModal && getCurrentModuleType() === "food" && item ? (
+      <FoodDetailModal
+        product={item}
+        imageBaseUrl={imageBaseUrl}
+        open={state.openModal}
+        handleModalClose={handleClose}
+        setOpen={(value) =>
+          dispatch({ type: ACTION.setOpenModal, payload: value })
+        }
+        addToWishlistHandler={addToWishlistHandler}
+        removeFromWishlistHandler={removeFromWishlistHandler}
+        isWishlisted={isWishlisted}
+      />
+    ) : (
+      <>
+        {cardFor === "flashSale" ? (
+          <>
+            {stock !== 0 && state.openModal &&  (
               <ModuleModal
                 open={state.openModal}
                 handleModalClose={handleClose}
@@ -1055,10 +1045,25 @@ const ProductCard = (props) => {
                 removeFromWishlistHandler={removeFromWishlistHandler}
                 isWishlisted={isWishlisted}
               />
-            )
-          )}
-        </>
-      )}
+            )}
+          </>
+        ) : (
+          item && state.openModal && (
+            <ModuleModal
+              open={state.openModal}
+              handleModalClose={handleClose}
+              configData={configData}
+              productDetailsData={item}
+              addToWishlistHandler={addToWishlistHandler}
+              removeFromWishlistHandler={removeFromWishlistHandler}
+              isWishlisted={isWishlisted}
+            />
+          )
+        )}
+      </>
+    )}
+    <Stack sx={{ position: "relative" }}>
+
       {wishlistcard === "true" && (
         <HeartWrapper onClick={() => setOpenModal(true)} top="5px" right="5px">
           <DeleteIcon style={{ color: theme.palette.error.light }} />
@@ -1242,6 +1247,7 @@ const ProductCard = (props) => {
         <GetLocationAlert setOpenAlert={setOpenLocationAlert} />
       </CustomModal>
     </Stack>
+    </>
   );
 };
 

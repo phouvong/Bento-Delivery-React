@@ -36,7 +36,7 @@ import { getGuestId, getToken } from "helper-functions/getToken";
 import { setOrderDetailsModal } from "redux/slices/offlinePaymentData";
 import {useGetTax} from "api-manage/hooks/react-query/order-place/useGetTax";
 
-const PrescriptionCheckout = ({ storeId }) => {
+const PrescriptionCheckout = ({ storeId ,page}) => {
   const router = useRouter();
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -44,7 +44,6 @@ const PrescriptionCheckout = ({ storeId }) => {
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const [orderType, setOrderType] = useState("delivery");
   const [address, setAddress] = useState(undefined);
-  const [orderSuccess, setOrderSuccess] = useState(false);
   const [prescriptionImages, setPrescriptionImages] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [unavailable_item_note, setUnavailable_item_note] = useState(null);
@@ -114,20 +113,18 @@ const PrescriptionCheckout = ({ storeId }) => {
       payment_method: paymentMethod,
       order_type: orderType,
       store_id: storeData?.id,
-      distance: handleDistance(
-        distanceData?.data,
-        originData,
-        address
-      ),
+      distance: handleDistance(distanceData?.data, originData, address),
       prescriptionImages: prescriptionImages,
       order_note: note,
       dm_tips: deliveryTip,
       unavailable_item_note,
       delivery_instruction,
       guest_id: guestId,
-      contact_person_name: guestUserInfo?.contact_person_name,
-      contact_person_number: guestUserInfo?.contact_person_number,
       is_prescription: true,
+      ...(!getToken() && {
+        contact_person_name: guestUserInfo?.contact_person_name,
+        contact_person_number: guestUserInfo?.contact_person_number,
+      }),
     };
   };
 
@@ -189,6 +186,7 @@ const PrescriptionCheckout = ({ storeId }) => {
     });
   };
   const placeOrder = () => {
+
     if (paymentMethod && paymentMethod === "cash_on_delivery") {
       if (prescriptionImages.length > 0) {
         handlePlaceOrder();
@@ -247,9 +245,10 @@ const PrescriptionCheckout = ({ storeId }) => {
             setAddress={setAddress}
             address={address}
             configData={configData}
-            forprescription="true"
+            forprescription
             setDeliveryTip={setDeliveryTip}
             isHomeDelivery={configData?.home_delivery_status}
+            page={page}
           />
           {orderType !== "take_away" && (
             <DeliveryManTip

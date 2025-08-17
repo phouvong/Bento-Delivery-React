@@ -2,7 +2,6 @@ import React, { useId } from "react";
 import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import {
   Checkbox,
-  FormControlLabel,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -10,13 +9,14 @@ import { t } from "i18next";
 import { CustomTypography } from "../landing-page/hero-section/HeroSection.style";
 
 const AcceptTermsAndConditions = ({
-  handleCheckbox,
-  formikType,
-  handleClick,
-}) => {
+                                    handleCheckbox,
+                                    formikType,
+                                    handleClick,
+                                  }) => {
   const theme = useTheme();
   const descriptionId = useId();
   const id2 = useId();
+
   return (
     <CustomStackFullWidth>
       <CustomStackFullWidth
@@ -24,33 +24,25 @@ const AcceptTermsAndConditions = ({
         alignItems="center"
         spacing={{ xs: "0", md: ".5" }}
         sx={{ mt: "-10px" }}
+
       >
-        <FormControlLabel
-         
-          sx={{
-            marginRight: "5px",
-            "& .MuiFormControlLabel-label": {
-              fontSize: "14px",
-              color: (theme) => theme.palette.neutral[1000],
-            },
-            [theme.breakpoints.down("sm")]: {
-              "& .MuiFormControlLabel-label": {
-                fontSize: "12px",
-              },
-            },
-          }}
-          control={
-            <Checkbox
-            id={descriptionId}
-              value="ff"
-              color="primary"
-              onChange={handleCheckbox}
-              required="true"
-            />
-          }
-          label={t("You must accept the")}
+        <Checkbox
+          id={descriptionId}
+          value="ff"
+          color="primary"
+          onChange={handleCheckbox}
+          checked={formikType.values.tandc}
+          name="tandc"
+          required
+          sx={{ mr: "5px" }}
         />
-         <Typography id={id2}>
+        <Typography
+          id={id2}
+          sx={{
+            fontSize: { xs: "12px", sm: "14px" },
+            color: theme.palette.neutral[1000],
+          }}
+        >
           {t("You must accept the")}{" "}
           <span
             onClick={handleClick}
@@ -64,12 +56,13 @@ const AcceptTermsAndConditions = ({
           </span>
         </Typography>
       </CustomStackFullWidth>
+
       {formikType.touched.tandc && formikType.errors.tandc && (
         <CustomTypography
           variant="caption"
           sx={{
             fontWeight: "inherit",
-            color: (theme) => theme.palette.error.main,
+            color: theme.palette.error.main,
           }}
         >
           {t("You must accept the terms and conditions")}

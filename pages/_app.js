@@ -27,24 +27,24 @@ Router.events.on("routeChangeError", nProgress.done);
 Router.events.on("routeChangeComplete", nProgress.done);
 export const currentVersion = process.env.NEXT_PUBLIC_SITE_VERSION;
 const clientSideEmotionCache = createEmotionCache();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      cacheTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 2, // 2 minutes
+    },
+  },
+});
 
 function MyApp(props) {
   const {
     Component,
     emotionCache = clientSideEmotionCache,
     pageProps,
-    configData,
   } = props;
   const getLayout = Component.getLayout ?? ((page) => page);
   const { t } = useTranslation();
-  const queryClient = new QueryClient({
-    defaultOptions: {
-      queries: {
-        cacheTime: 1000 * 60 * 5, // 5 minutes
-        staleTime: 1000 * 60 * 2, // 2 minutes
-      },
-    },
-  });
+
   //storing persisted data
   let persistor = persistStore(store);
 

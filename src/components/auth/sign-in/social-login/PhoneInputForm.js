@@ -27,7 +27,7 @@ const PhoneInputForm = (props) => {
 		validationSchema: Yup.object({
 			phone: Yup.string()
 				.required(t("Please give a phone number"))
-				.min(10, "number must be 10 digits"),
+				.min(10, "Number must be 10 digits"),
 		}),
 		onSubmit: async (values, helpers) => {
 			try {

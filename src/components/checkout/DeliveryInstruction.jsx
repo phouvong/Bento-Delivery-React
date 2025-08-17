@@ -19,19 +19,21 @@ const DeliveryInstruction = (props) => {
     const { t } = useTranslation();
     const theme = useTheme();
     const [error, setError] = useState(false);
+    const [value,setValue] = useState("");
     const handleRadioChange = (event) => {
         setSelectedInstruction(event.target.value);
     };
     const handleCustomNote = (e) => {
         const text = e.target.value;
         if (text.length < 266) {
-            setCustomNote(text)
+            setValue(text)
             setError(false)
         } else {
             setError(true)
         }
     }
     const applyInstruction = () => {
+        setCustomNote(value)
         if (selectedInstruction) {
             if (customNote !== "") {
                 setCustomerInstruction(`${selectedInstruction} ( ${customNote} )`);
@@ -48,14 +50,14 @@ const DeliveryInstruction = (props) => {
     return (
         <CustomStackFullWidth
             justifyContent="center"
-            padding={{ xs: "30px 20px", sm: "45px 60px" }}
+            padding={{ xs: "30px 20px", sm: "30px 30px" }}
             gap="10px"
-            minWidth={{ xs: "300px", md: "450px" }}
+            minWidth={{ xs: "300px", md: "500px" }}
         >
             {deliveryInstruction?.data.length > 0 ?
                 <>
                     <Typography fontSize={{ xs: "14px", sm: "16px", md: "18px" }} fontWeight={600} variant="h6">{t("Choose Delivery Instructions")}</Typography>
-                    <Stack padding="0 10px">
+                    <Stack padding="5px 10px">
                         <FormControl component="fieldset">
                             <RadioGroup value={selectedInstruction} onChange={handleRadioChange}>
                                 {deliveryInstruction?.data.map((instruction) => (
@@ -65,10 +67,16 @@ const DeliveryInstruction = (props) => {
                                             control={<Radio />}
                                             label={instruction.instruction}
                                             sx={{
-                                                border: `1px solid ${alpha(theme.palette.neutral[500], 0.3)}`,
-                                                borderRadius: "5px",
+                                                border: `1px solid ${alpha(theme.palette.neutral[500], 0.1)}`,
+                                                borderRadius: "10px",
                                                 paddingBlock: "5px",
-                                                marginRight: "-11px"
+                                                marginRight: "-11px",
+                                                paddingInlineEnd:"1rem",
+                                                '& .MuiFormControlLabel-label': {
+                                                    color:selectedInstruction===instruction.instruction?theme=>theme.palette.neutral[1000]:alpha(theme.palette.neutral[500], 0.8),
+                                                    fontWeight:selectedInstruction===instruction.instruction?"500":"400",
+                                                    fontSize: '14px', // optional
+                                                },
                                             }}
                                         />
                                     </Stack>
@@ -89,9 +97,9 @@ const DeliveryInstruction = (props) => {
             <TextField
                 rows={4}
                 multiline
-                value={customNote}
+                value={value}
                 fullWidth
-                placeholder='Please maintain the hygine'
+                placeholder='Please write a note'
                 id="custom_note"
                 name="custom_note"
                 onChange={handleCustomNote}
@@ -103,6 +111,7 @@ const DeliveryInstruction = (props) => {
                 </Stack>
             }
             <Button
+              sx={{marginTop:"1rem"}}
                 type="submit"
                 fullWidth
                 variant="contained"

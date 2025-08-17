@@ -45,16 +45,7 @@ const FeaturedCategories = () => {
   const dispatch = useDispatch();
   const { featuredCategories } = useSelector((state) => state.storedData);
   const slider = useRef(null);
-  const { data, refetch, isFetched } = useGetFeaturedCategories();
-  useEffect(() => {
-    refetch();
-  }, []);
-
-  useEffect(() => {
-    if (data) {
-      dispatch(setFeaturedCategories(data?.data));
-    }
-  }, [data]);
+  const { data, isFetched ,refetch,isLoading} = useGetFeaturedCategories();
 
   const moduleWiseCard = () => {
     switch (getCurrentModuleType()) {
@@ -75,7 +66,7 @@ const FeaturedCategories = () => {
             }}
           >
             <Slider {...settings} ref={slider}>
-              {[...featuredCategories].reverse().map((item, index) => {
+              {[...data?.data].reverse().map((item, index) => {
                 return (
                   <FeaturedItemCard
                     key={index}
@@ -92,7 +83,7 @@ const FeaturedCategories = () => {
       case ModuleTypes.PHARMACY:
         return (
           <Slider {...settings} ref={slider}>
-            {[...featuredCategories].reverse()?.map((item, index) => {
+            {[...data?.data].reverse()?.map((item, index) => {
               return (
                 <PharmacyCategoryCard
                   key={index}
@@ -108,7 +99,7 @@ const FeaturedCategories = () => {
       case ModuleTypes.ECOMMERCE:
         return (
           <Slider {...shopCategorySliderSettings} ref={slider}>
-            {featuredCategories?.map((item, index) => {
+            {data?.data?.map((item, index) => {
               return (
                 <ShopCategoryCard
                   key={index}
@@ -122,7 +113,7 @@ const FeaturedCategories = () => {
       case ModuleTypes.FOOD:
         return (
           <Slider {...foodCategorySliderSettings} ref={slider}>
-            {featuredCategories?.map((item, index) => {
+            {data?.data?.map((item, index) => {
               return (
                 <FoodCategoryCard
                   key={item?.id}
@@ -495,7 +486,7 @@ const FeaturedCategories = () => {
 
   return (
     <CustomBoxFullWidth sx={{ mt: "20px" }}>
-      {!isFetched ? (
+      {isLoading ? (
         <HomeComponentsWrapper>
           <SliderCustom
               sx={{
@@ -514,10 +505,10 @@ const FeaturedCategories = () => {
           </SliderCustom>
         </HomeComponentsWrapper>
       ) : (
-        featuredCategories &&
-        featuredCategories.length > 0 && (
+        data?.data &&
+        data?.data.length > 0 && (
           <HomeComponentsWrapper>
-            {featuredCategories && featuredCategories.length > 0 && (
+            {data?.data && data?.data.length > 0 && (
               <SliderCustom
                 sx={{
                   "& .slick-slider": {

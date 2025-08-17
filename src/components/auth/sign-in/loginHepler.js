@@ -27,7 +27,7 @@ export const getActiveLoginStatus = (state, loginDispatch) => {
       newStatus = "social";
       break;
     default:
-      newStatus = "manual";
+      newStatus = "";
   }
   loginDispatch({
     type: ACTIONS.setStatus,

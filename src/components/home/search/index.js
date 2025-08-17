@@ -61,10 +61,10 @@ const SearchResult = (props) => {
   }, []);
   const page_limit = 12;
 
-  const selectedCategoriesHandler = (dataArray) => {
+  const selectedCategoriesHandler = (dataArray,isAllSelected) => {
     if (dataArray?.length > 0) {
       setLinkRouteTo("");
-      dispatch(setSelectedCategories([...new Set(dataArray)]));
+      dispatch(setSelectedCategories(isAllSelected?[]:[...new Set(dataArray)]));
     } else {
       dispatch(setSelectedCategories([]));
     }

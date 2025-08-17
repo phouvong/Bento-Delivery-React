@@ -8,12 +8,13 @@ const CustomDrawerForSidebar = styled(Drawer)(
 		zIndex: theme.zIndex.appBar + 100,
 		maxWidth: maxWidth,
 		width: width,
-		height: height,
+		height: height||"100%",
 
 		"& .MuiDrawer-paper": {
 			maxWidth: maxWidth,
 			width: width,
-			height: height,
+			height: height||"100%",
+			backgroundColor:theme.palette.neutral[100],
 		},
 	})
 );

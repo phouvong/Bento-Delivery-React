@@ -234,24 +234,24 @@ const VisitAgainCard = (props) => {
 					</Box>
 				)}
 
-				{isWishlisted && (
-					<Stack
-						alignItems="center"
-						justifyContent="center"
-						sx={{
-							position: "absolute",
-							top: 10,
-							right: 10,
-							backgroundColor: (theme) => theme.palette.neutral[100],
-							height: "30px",
-							width: "30px",
-							borderRadius: "4px",
-							color: "primary.main",
-						}}
-					>
-						<FavoriteIcon fontSize="small" />
-					</Stack>
-				)}
+				{/*{isWishlisted && (*/}
+				{/*	<Stack*/}
+				{/*		alignItems="center"*/}
+				{/*		justifyContent="center"*/}
+				{/*		sx={{*/}
+				{/*			position: "absolute",*/}
+				{/*			top: 10,*/}
+				{/*			right: 10,*/}
+				{/*			backgroundColor: (theme) => theme.palette.neutral[100],*/}
+				{/*			height: "30px",*/}
+				{/*			width: "30px",*/}
+				{/*			borderRadius: "4px",*/}
+				{/*			color: "primary.main",*/}
+				{/*		}}*/}
+				{/*	>*/}
+				{/*		<FavoriteIcon fontSize="small" />*/}
+				{/*	</Stack>*/}
+				{/*)}*/}
 
 				<CustomOverLay hover={isHover}>
 					<QuickView

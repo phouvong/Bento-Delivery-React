@@ -34,10 +34,10 @@ const getFeaturedData = async () => {
   return await MainApi.get(`${categories_api}`);
 };
 export const useGetFeaturedCategories = (handleSuccess) => {
-  return useQuery("featured-categories-list", () => getFeaturedData(), {
-    // enabled: false,
-    staleTime: 1000 * 60 * 8,
-    cacheTime: 1000 * 60 * 8,
+  return useQuery(["featured-categories-lists",getCurrentModuleType()], () => getFeaturedData(), {
+     enabled: true,
+    cacheTime: 1000 * 60,        // 1 minute
+    staleTime: 1000 * 30,        // 30 seconds
     onError: onErrorResponse,
     onSuccess: (data) => {
       if (handleSuccess) {

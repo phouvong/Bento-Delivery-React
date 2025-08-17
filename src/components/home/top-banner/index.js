@@ -113,15 +113,6 @@ const TopBanner = () => {
         </Box>
       ) : (
         <Box sx={{ position: "absolute", height: "100%", width: "100%", "img": { objectFit: "cover", width: "100%", height: "100%" } }}>
-          {/*<CustomImageContainer*/}
-          {/*  src={getBGImage()}*/}
-          {/*  alt="banner"*/}
-          {/*  height="100%"*/}
-          {/*  width="100%"*/}
-          {/*  obejctfit="cover"*/}
-          {/*  loading="eager"*/}
-          {/*  fetchpriority="high"*/}
-          {/*/>*/}
           <Image width={1917} height={270} src={getBGImage()} alt="banner" priority={true} />
         </Box>
       )}

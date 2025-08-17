@@ -4,6 +4,7 @@ const initialState = {
   categories: [],
   subCategories: [],
   popularStores: [],
+  recommendedStores: [],
   newStores: [],
   basicCampaigns: [],
   banners: {
@@ -37,6 +38,9 @@ export const storedDataSlice = createSlice({
     },
     setPopularStores: (state, action) => {
       state.popularStores = action.payload;
+    },
+    setRecommendedStores: (state, action) => {
+      state.recommendedStores = action.payload;
     },
     setNewStores: (state, action) => {
       state.newStores = action.payload;
@@ -100,5 +104,6 @@ export const {
   setYouWillLoveItems,
   setResetStoredData,
   setAllSaveAddress,
+  setRecommendedStores
 } = storedDataSlice.actions;
 export default storedDataSlice.reducer;

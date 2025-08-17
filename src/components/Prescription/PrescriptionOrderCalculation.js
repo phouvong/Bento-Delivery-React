@@ -1,15 +1,19 @@
 import React, { useEffect } from "react";
 import { CalculationGrid, TotalGrid } from "../checkout/CheckOut.style";
-import { Grid, Stack, Typography, useTheme } from "@mui/material";
+import {Grid, Stack, Tooltip, Typography, useTheme} from "@mui/material";
 import CustomDivider from "../CustomDivider";
 import { t } from "i18next";
-import { getInfoFromZoneData, handleDistance } from "utils/CustomFunctions";
+import {getDeliveryFeeByBadWeather, getInfoFromZoneData, handleDistance} from "utils/CustomFunctions";
 import {
   getAmountWithSign,
   getReferDiscount,
 } from "helper-functions/CardHelpers";
 import { useDispatch, useSelector } from "react-redux";
 import useGetVehicleCharge from "../../api-manage/hooks/react-query/order-place/useGetVehicleCharge";
+import {useGetSurgePrice} from "api-manage/hooks/react-query/order-place/useGetSurgePrice";
+import {getGuestId} from "helper-functions/getToken";
+import {onErrorResponse} from "api-manage/api-error-response/ErrorResponses";
+import InfoIcon from "@mui/icons-material/Info";
 
 const PrescriptionOrderCalculation = ({
   storeData,
@@ -23,6 +27,7 @@ const PrescriptionOrderCalculation = ({
   deliveryTip,taxAmount
 ,setPayableAmount
 }) => {
+  const {data:surgePrice,mutate:surgeMutate}=useGetSurgePrice()
   const theme = useTheme();
   const tempDistance = handleDistance(distanceData?.data, origin, destination);
 
@@ -31,6 +36,19 @@ const PrescriptionOrderCalculation = ({
   useEffect(() => {
     extraChargeRefetch();
   }, [distanceData]);
+  useEffect(() => {
+    if(storeData){
+      const temData={
+        zone_id: storeData?.zone_id,
+        module_id: storeData?.module_id,
+        date_time: new Date().toISOString(),
+        guest_id:getGuestId()
+      }
+      surgeMutate(temData,{
+        onError:onErrorResponse
+      })
+    }
+  }, [storeData]);
   const getPrescriptionDeliveryFees = (
     storeData,
     configData,
@@ -100,14 +118,14 @@ const PrescriptionOrderCalculation = ({
           let deliveryFee = convertedDistance * perKmCharge;
       
           if (minCharge !== null && deliveryFee < minCharge) {
-            return minCharge + extraCharge;
+            return  getDeliveryFeeByBadWeather(minCharge + extraCharge,surgePrice);
           }
       
           if (maxCharge !== null && deliveryFee > maxCharge) {
-            return maxCharge + extraCharge;
+            return getDeliveryFeeByBadWeather(maxCharge + extraCharge,surgePrice);
           }
       
-          return deliveryFee + extraCharge;
+          return getDeliveryFeeByBadWeather(deliveryFee + extraCharge,surgePrice);
         }
       }
       
@@ -131,6 +149,19 @@ const PrescriptionOrderCalculation = ({
     localStorage.setItem("totalAmount", totalAmount);
     return totalAmount;
   };
+  const extraText = t("This charge includes extra vehicle charge");
+  const badText = t("and bad weather charge");
+  const deliveryToolTipsText = `${extraText} ${getAmountWithSign(
+    extraCharge
+  )}${
+    surgePrice?.customer_note_status !== 0
+      ? `. ${surgePrice?.customer_note} ${
+        surgePrice?.type === "amount"
+          ? getAmountWithSign(surgePrice?.price)
+          : `${surgePrice?.price}%`
+      }`
+      : ""
+  }`;
   return (
     <CalculationGrid container item md={12} xs={12} spacing={1}>
       <Grid item md={8} xs={8}>
@@ -183,6 +214,13 @@ const PrescriptionOrderCalculation = ({
       }
       <Grid item md={8} xs={8}>
         {t("Delivery fee")}
+        {extraCharge>0|| surgePrice?.price>0 ? (<Tooltip
+          title={deliveryToolTipsText}
+          placement="top"
+          arrow={true}
+        >
+          <InfoIcon sx={{ fontSize: "11px" }} />
+        </Tooltip>):null}
       </Grid>
       <Grid item md={4} xs={4} align="right">
       {storeData &&
