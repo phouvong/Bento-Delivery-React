@@ -8,6 +8,7 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import InfoIcon from '@mui/icons-material/Info';
 import { Stack } from "@mui/system";
 import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { GoogleApi } from "api-manage/hooks/react-query/googleApi";
@@ -34,6 +35,9 @@ import CancelOrder from "./CenacelOrder";
 import DigitalPaymentManage from "./DigitalPaymentManage";
 import OfflineOrderDetailsModal from "./offline-order/OfflineOrderDetailsModal";
 import PaymentUpdate from "./other-order/PaymentUpdate";
+import { getAmountWithSign } from "helper-functions/CardHelpers";
+import usePostParcelReturn from "api-manage/hooks/react-query/order/usePostParcelReturn";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 const TopDetails = (props) => {
   const {
@@ -61,8 +65,33 @@ const TopDetails = (props) => {
   const [cancelOpenModal, setCancelOpenModal] = useState(false);
   const [openModalForPayment, setModalOpenForPayment] = useState();
   const [cancelReason, setCancelReason] = useState(null);
+  const [additionalInfo, setAdditionalInfo] = useState(null);
+  const [returnFareOpenModal, setReturnFareOpenModal] = useState(false);
   const [openModalOffline, setOpenModelOffline] = useState(orderDetailsModal);
+  const [parcelReceiveModal, setParcelReceiveModal] = useState(false);
+  const [openReviewModal, setOpenReviewModal] = useState(false);
   const dispatch = useDispatch();
+  const { mutate: postParcelReturnMutation, isLoading: postParcelReturnLoading } = usePostParcelReturn();
+
+   const handlePostParcelReturn = () => {
+    const formData = {
+      guest_id: getGuestId(),
+      order_id: id,
+      order_status: "returned",
+      return_otp: trackData?.parcel_cancellation?.return_otp,
+    };
+    postParcelReturnMutation(formData, {
+      onSuccess: (res) => {
+        toast.success(res?.message);
+        setParcelReceiveModal(false);
+        refetchOrderDetails();
+        refetchTrackData();
+      },
+      onError: onErrorResponse,
+    });
+  };
+
+
 
   const buttonBackgroundColor = () => {
     if (trackData?.order_status === "pending") {
@@ -97,6 +126,9 @@ const TopDetails = (props) => {
     if (trackData?.order_status === "failed") {
       return theme.palette.error.main;
     }
+    if (trackData?.order_status === "returned") {
+      return theme.palette.primary.main;
+    }
   };
   const fontColor = () => {
     if (trackData?.order_status === "pending") {
@@ -122,34 +154,35 @@ const TopDetails = (props) => {
       retry: 1,
     }
   );
-  const { data: cancelReasonsData, refetch } = useGetOrderCancelReason();
+
+
+  const { data: cancelReasonsData, refetch } = useGetOrderCancelReason(trackData?.module_type, trackData?.order_status);
   useEffect(() => {
     refetch().then();
-  }, []);
+  }, [trackData?.order_status]);
 
   const { mutate: orderCancelMutation, isLoading: orderLoading } =
     usePostOrderCancel();
   const handleOnSuccess = () => {
-    if (!cancelReason) {
-      toast.error("Please select a cancellation reason");
-    } else {
       const handleSuccess = (response) => {
         refetchOrderDetails();
         refetchTrackData();
         setCancelOpenModal(false);
+        setReturnFareOpenModal(false)
         toast.success(response.message);
       };
       const formData = {
         guest_id: getGuestId(),
         order_id: id,
         reason: cancelReason,
+        note: additionalInfo,
         _method: "put",
       };
       orderCancelMutation(formData, {
         onSuccess: handleSuccess,
         onError: onErrorResponse,
       });
-    }
+
   };
 
   const today = moment(new Date());
@@ -200,6 +233,11 @@ const TopDetails = (props) => {
       .replace(/_/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
+  const getReturnFee = () => {
+  const totalFee = trackData?.order_amount - trackData?.dm_tips;
+  const returnFeePercent = Number(configData?.parcel_cancellation_basic_setup?.return_fee || 0);
+  return (totalFee * returnFeePercent) / 100;
+};
   return (
     // <HeadingBox>
     <CustomStackFullWidth
@@ -228,8 +266,6 @@ const TopDetails = (props) => {
             >
               {data?.[0]?.order_id ? data?.[0]?.order_id : data?.id}
             </Typography>
-            {/*{data?.[0]?.order_id ? data?.[0]?.order_id : data?.id}*/}
-
             <Typography
               component="span"
               fontSize="12px"
@@ -350,7 +386,7 @@ const TopDetails = (props) => {
 
             // color={theme.palette.whiteContainer}
           >
-            {trackData?.refund?.refund_status}
+            {`Refund ${trackData?.refund?.refund_status}`}
           </OrderStatusButton>
         </Stack>
       )}
@@ -370,8 +406,10 @@ const TopDetails = (props) => {
       {data &&
         !data?.[0]?.item_campaign_id &&
         trackData &&
-        trackData?.order_status === "delivered" &&
-        getToken() && data?.length > 0 &&
+        (trackData?.order_status === "delivered" ||
+          trackData?.order_status === "returned") &&
+        getToken() &&
+        data?.length > 0 &&
         hasChatAndReview(trackData?.store)?.isReview === 1 && (
           <Stack direction="row" spacing={0.5}>
             <Link href={`/rate-and-review/${id}`}>
@@ -424,16 +462,65 @@ const TopDetails = (props) => {
               isSmall={isSmall}
             />
           ) : (
-            trackData?.order_status === "pending" && (
-              <OrderStatusButton
-                background={theme.palette.error.deepLight}
-                onClick={() => setCancelOpenModal(true)}
-                // color={theme.palette.whiteContainer}
-                // sx={{ marginInlineStart: "auto" }}
-              >
-                {t("Cancel Order")}
-              </OrderStatusButton>
-            )
+            <>
+              {trackData?.module_type === "parcel" &&
+              trackData.order_status === "canceled" ? (
+                <>
+                  {trackData?.order_status === "canceled" &&
+                  trackData?.charge_payer === "sender" &&
+                  trackData?.parcel_cancellation?.before_pickup === 0 ? (
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      gap={4}
+                      padding="10px 10px"
+                      backgroundColor={theme.palette.neutral[300]}
+                      borderRadius="10px"
+                    >
+                      <Stack direction="row" alignItems="center" gap={2}>
+                        <Typography>{t("Parcel Returned OTP")}</Typography>
+                        <Typography fontSize="20px" fontWeight="700">
+                          {trackData?.parcel_cancellation?.return_otp}
+                        </Typography>
+                      </Stack>
+                      <Button
+                        sx={{ padding: "8px 10px", fontSize: "12px" }}
+                        variant="contained"
+                        onClick={() => setParcelReceiveModal(true)}
+                      >
+                        {"Parcel Received"}
+                      </Button>
+                    </Stack>
+                  ) : (
+                    <>
+                      {configData?.parcel_cancellation_status === 1 &&
+                        trackData?.order_status !== "canceled" &&
+                        trackData?.order_status !== "delivered" && (
+                          <OrderStatusButton
+                            background={theme.palette.error.deepLight}
+                            onClick={() => setCancelOpenModal(true)}
+                          >
+                            {t("Cancel Order")}
+                          </OrderStatusButton>
+                        )}
+                    </>
+                  )}
+                </>
+              ) : (
+                (getToken() && trackData?.module_type === "parcel"
+                  ? ["pending", "confirmed", "picked_up"].includes(
+                      trackData?.order_status
+                    )
+                  : trackData?.order_status === "pending") && (
+                  <OrderStatusButton
+                    background={theme.palette.error.deepLight}
+                    onClick={() => setCancelOpenModal(true)}
+                  >
+                    {t("Cancel Order")}
+                  </OrderStatusButton>
+                )
+              )}
+            </>
           )}
         </>
       )}
@@ -486,6 +573,13 @@ const TopDetails = (props) => {
           setModalOpen={setCancelOpenModal}
           handleOnSuccess={handleOnSuccess}
           orderLoading={orderLoading}
+          additionalInfo={additionalInfo}
+          setAdditionalInfo={setAdditionalInfo}
+          isParcel={trackData?.module_type === "parcel"}
+          orderStatus={trackData?.order_status}
+          setReturnFareOpenModal={setReturnFareOpenModal}
+          configData={configData}
+          loading={orderLoading}
         />
       </CustomModal>
 
@@ -502,6 +596,141 @@ const TopDetails = (props) => {
           id={trackData?.id}
         />
       </CustomModal>
+      <CustomModal
+        openModal={returnFareOpenModal}
+        setModalOpen={setReturnFareOpenModal}
+        handleClose={() => setReturnFareOpenModal(false)}
+      >
+        <Stack
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          gap={2}
+          p={4}
+          maxWidth="400px"
+          width="100%"
+          backgroundColor={theme.palette.neutral[100]}
+        >
+          {trackData?.charge_payer === "sender" ? (
+            <>
+              <Typography fontSize="12px" align="center">
+                {t(
+                  "If you cancel, your parcel will be back to you when rider will be available. You will have to pay a return fee to your delivery man."
+                )}
+              </Typography>
+              <Stack alignItems="center">
+                <Typography fontSize="32px" fontWeight={"bold"}>
+                  {getAmountWithSign(getReturnFee())}
+                </Typography>
+                <Typography fontSize="12px">{t("Return Fare")}</Typography>
+              </Stack>
+              <Button
+                loading={orderLoading}
+                variant="contained"
+                onClick={handleOnSuccess}
+              >
+                {t("Yes,Cancel")}
+              </Button>
+              <Typography
+                onClick={() => setReturnFareOpenModal(false)}
+                fontWeight="600"
+                sx={{
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                  color: "#000",
+                }}
+                variant="body2"
+              >
+                {t("Continue Delivery")}
+              </Typography>
+            </>
+          ) : (
+            <>
+              <Typography fontSize="12px" align="center">
+                {t(
+                  "If you cancel, your parcel will be back to you when rider will be available. You will have to pay a return fee to your delivery man."
+                )}
+              </Typography>
+              <Stack alignItems="center">
+                <Typography fontSize="32px" fontWeight={"bold"}>
+                  {getAmountWithSign(
+                    Number(getReturnFee()) + Number(data?.order_amount)
+                  )}
+                </Typography>
+                <Typography fontSize="12px">
+                  {t("Parcel Delivery Charge + Return Fare")}
+                </Typography>
+              </Stack>
+              <LoadingButton
+                loading={orderLoading}
+                variant="contained"
+                onClick={handleOnSuccess}
+              >
+                {t("Yes,Cancel")}
+              </LoadingButton>
+              <Typography
+                onClick={() => setReturnFareOpenModal(false)}
+                fontWeight="600"
+                sx={{
+                  textDecoration: "underline",
+                  cursor: "pointer",
+                  color: "#000",
+                }}
+                variant="body2"
+              >
+                {t("Continue Delivery")}
+              </Typography>
+            </>
+          )}
+        </Stack>
+      </CustomModal>
+      <CustomModal
+        openModal={parcelReceiveModal}
+        setModalOpen={setParcelReceiveModal}
+        handleClose={() => setParcelReceiveModal(false)}
+      >
+        <Stack
+          direction="column"
+          alignItems="center"
+          justifyContent="center"
+          gap={2}
+          p={4}
+          maxWidth="400px"
+          width="100%"
+          backgroundColor={theme.palette.neutral[100]}
+        >
+          <InfoIcon
+            sx={{
+              fontSize: "3rem",
+            }}
+            color="error"
+          />
+          <Typography fontSize="1rem" fontWeight="700">
+            {t("Have you received your parcel?")}
+          </Typography>
+          <Typography align="center">
+            {t(
+              "Please confirm only if the parcel has arrived and everything is in order"
+            )}
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <Button variant="contained" onClick={handlePostParcelReturn}>
+              {t("Yes,Received")}
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={() => setParcelReceiveModal(false)}
+            >
+              {t("No,Cancel")}
+            </Button>
+          </Stack>
+        </Stack>
+      </CustomModal>
+      <CustomModal
+        openModal={openReviewModal}
+        handleClose={() => setOpenReviewModal(false)}
+      ></CustomModal>
     </CustomStackFullWidth>
     // </HeadingBox>
   );

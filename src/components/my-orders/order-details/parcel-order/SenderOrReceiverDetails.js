@@ -6,6 +6,7 @@ import CustomImageContainer from "../../../CustomImageContainer";
 import nodata from "../../assets/nodata.png";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import PhoneIcon from "@mui/icons-material/Phone";
+import { formatPhoneNumber } from "utils/CustomFunctions";
 
 const SenderOrReceiverDetails = (props) => {
   const { address, phone, title, image, name } = props;
@@ -60,7 +61,7 @@ const SenderOrReceiverDetails = (props) => {
               fontSize="1rem"
               sx={{ color: (theme) => theme.palette.neutral[400] }}
             />
-            <Typography fontSize="12px">{phone}</Typography>
+            <Typography fontSize="12px">{formatPhoneNumber(phone)}</Typography>
           </Stack>
           <Typography fontSize="12px">
             {props.road ? `Floor: ${props.road}, ` : ""}

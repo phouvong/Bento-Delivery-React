@@ -257,10 +257,13 @@ const BasicInformationForm = ({
     mutate();
   };
   const handleReset = () => {
-    profileFormik.setFieldValue("name", "");
-    profileFormik.setFieldValue("l_name", "");
-    profileFormik.setFieldValue("email", "");
+    const name= f_name ? `${f_name} ${l_name ? l_name : ""}` : "";
+    profileFormik.setFieldValue("name", name?name:"");
+    profileFormik.setFieldValue("l_name", name?name:"");
+    profileFormik.setFieldValue("email", email? email : "");
+    profileFormik.setFieldValue("phone", phone ? phone : "");
     profileFormik.setFieldValue("password", "");
+    profileFormik.setFieldValue("confirm_password", "");
   };
   const handleVerified = (type) => {
     if (type === "email") {
@@ -295,18 +298,6 @@ const BasicInformationForm = ({
             />
             {t("Go Back")}
           </BackIconButton>
-
-          {/*<ButtonBox onClick={() => setOpenModal(true)}>*/}
-          {/*  <Button*/}
-          {/*    variant="outlined"*/}
-          {/*    type="submit"*/}
-          {/*    startIcon={<PersonRemoveIcon />}*/}
-          {/*  >*/}
-          {/*    <Typography fontWeight="400" fontSize="12px">*/}
-          {/*      {t("Delete My Account")}*/}
-          {/*    </Typography>*/}
-          {/*  </Button>*/}
-          {/*</ButtonBox>*/}
         </Stack>
       </Grid>
       <form noValidate onSubmit={profileFormik.handleSubmit}>
@@ -514,14 +505,8 @@ const BasicInformationForm = ({
                   name="password"
                   label={t("Password")}
                   type={showPassword ? "text" : "password"}
-                  error={
-                    profileFormik.touched.password &&
-                    Boolean(profileFormik.errors.password)
-                  }
-                  helperText={
-                    profileFormik.touched.password &&
-                    profileFormik.errors.password
-                  }
+                  error={Boolean(profileFormik.touched.password && profileFormik.errors.password)}
+                  helperText={profileFormik.touched.password && profileFormik.errors.password}
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -555,14 +540,8 @@ const BasicInformationForm = ({
                   type={showConfirmPassword ? "text" : "password"}
                   value={profileFormik.values.confirm_password}
                   onChange={profileFormik.handleChange}
-                  error={
-                    profileFormik.touched.confirm_password &&
-                    Boolean(profileFormik.errors.confirm_password)
-                  }
-                  helperText={
-                    profileFormik.touched.confirm_password &&
-                    profileFormik.errors.confirm_password
-                  }
+                  error={Boolean(profileFormik.touched.confirm_password && profileFormik.errors.confirm_password)}
+                  helperText={profileFormik.touched.confirm_password && profileFormik.errors.confirm_password}
                   touched={profileFormik.touched.confirm_password && "true"}
                   InputProps={{
                     endAdornment: (
@@ -600,12 +579,6 @@ const BasicInformationForm = ({
               reset={t("Reset")}
               submit={t("Update Profile")}
             />
-            {/*<ResetButton variant="outlined" onClick={handleReset}>*/}
-            {/*  {t("Reset")}*/}
-            {/*</ResetButton>*/}
-            {/*<SaveButton variant="contained" type="submit" loading={isLoading}>*/}
-            {/*  {t("Update Profile")}*/}
-            {/*</SaveButton>*/}
           </Grid>
         </Grid>
       </form>

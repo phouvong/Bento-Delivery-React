@@ -6,7 +6,7 @@ export const OrderApi = {
     return MainApi.post("/api/v1/customer/order/place", formData);
   },
   prescriptionPlaceOrder: (orderData) => {
-    console.log({orderData})
+
     const {
       store_id,
       distance,

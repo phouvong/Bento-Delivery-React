@@ -21,7 +21,7 @@ import fire_image from "../../../assets/fire.svg";
 import StoreCard from "components/cards/StoreCard";
 import Link from "next/link";
 
-const TopOffersNearMe = ({ title }) => {
+const TopOffersNearMe = ({ title}) => {
   const { t } = useTranslation();
   const type=""
   const sortBy=""
@@ -32,9 +32,9 @@ const TopOffersNearMe = ({ title }) => {
 
   const [isHover, setIsHover] = useState(false);
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
-  useEffect(() => {
-    refetch();
-  }, []);
+  // useEffect(() => {
+  //   refetch();
+  // }, []);
   const settings = {
     dots: false,
     infinite: data?.stores?.length > 3 ? true : false,
@@ -163,7 +163,7 @@ const TopOffersNearMe = ({ title }) => {
                     <H2 text={title ? title : t("Special Offer")} />
                   </Stack>
                 )}
-                {isFetching ? (
+                {isFetching  ? (
                   <Skeleton width="100px" variant="80px" />
                 ) : (
                   <Link
@@ -197,7 +197,7 @@ const TopOffersNearMe = ({ title }) => {
                 }}
               >
                 <>
-                  {isFetching ? (
+                  {isFetching  ? (
                     <Slider {...settings}>
                       {[...Array(5)].map((item, index) => {
                         return <SpecialOfferCardShimmer key={index} />;

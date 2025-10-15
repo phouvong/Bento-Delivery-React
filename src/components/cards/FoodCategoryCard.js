@@ -83,6 +83,7 @@ const FoodCategoryCard = (props) => {
                     height={isSmall?56:120}
                     width={isSmall?56:120}
                     borderRadius="50%"
+                    objectFit="cover"
 
                     //loading="loading"
                     bg="#ddd"

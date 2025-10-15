@@ -29,15 +29,15 @@ import AllStores from "./AllStores";
 import MobileMenus from "./MobileMenus";
 
 const menus = [
-  { label: "All", value: "all" },
-  { label: "Newly Joined", value: "newly_joined" },
-  { label: "Popular", value: "popular" },
-  { label: "Top Rated", value: "top_rated" },
+  { label: t("All"), value: "all" },
+  { label: t("Newly Joined"), value: "newly_joined" },
+  { label: t("Popular"), value: "popular" },
+  { label: t("Top Rated"), value: "top_rated" },
 ];
 const filterLabels = [
-  { label: "All", value: "all" },
-  { label: "Delivery", value: "delivery" },
-  { label: "Take Away", value: "take_away" },
+  { label: t("All"), value: "all" },
+  { label: t("Delivery"), value: "delivery" },
+  { label: t("Take Away"), value: "take_away" },
 ];
 const Filter = (props) => {
   const { selectedFilterValue, setSelectedFilterValue } = props;

@@ -1,8 +1,8 @@
 import MainApi from "../../../MainApi";
 import { track_order_api } from "../../../ApiRoutes";
 import { useQuery } from "react-query";
-import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
-import { getToken } from "../../../../helper-functions/getToken";
+import {handleTokenExpire, onErrorResponse} from "../../../api-error-response/ErrorResponses";
+import { getToken } from "helper-functions/getToken";
 
 const getData = async (order_id, phone, guestId) => {
   const userToken = getToken();
@@ -21,12 +21,18 @@ export default function useGetTrackOrderData(
   order_id,
   phone,
   guestId,
+  setShowOrderDetails,
   handleSuccess
 ) {
   return useQuery("track-order-data", () => getData(order_id, phone, guestId), {
     onSuccess: handleSuccess,
     enabled: false,
     retry: 1,
-    onError: onErrorResponse,
+    onError: (error)=>{
+      setShowOrderDetails(false)
+      error?.response?.data?.errors?.forEach((item) => {
+        handleTokenExpire(item);
+      });
+    },
   });
 }

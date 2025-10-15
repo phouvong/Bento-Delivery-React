@@ -147,3 +147,4 @@ export const recommended_provider="api/v1/stores/recommended";
 export const tax_api = "api/v1/customer/order/get-Tax";
 export const surge_price="/api/v1/customer/order/get-surge-price"
 export const item_details_api = "/api/v1/items/details";
+export const confirm_return_parcel="api/v1/customer/order/parcel-return"

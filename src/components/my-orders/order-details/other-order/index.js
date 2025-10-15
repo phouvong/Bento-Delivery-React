@@ -247,7 +247,7 @@ const OtherOrder = (props) => {
         onClose={() => setOpenModal(false)}
         // reasons={reasonsData?.refund_reasons}
         formSubmit={formSubmitHandler}
-        // refundIsLoading={refundIsLoading}
+         refundIsLoading={refundIsLoading}
       />
       {sideDrawerOpen && trackOrderData && (
         <TrackParcelOrderDrawer

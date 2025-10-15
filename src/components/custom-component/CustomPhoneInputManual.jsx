@@ -118,6 +118,7 @@ const CustomPhoneInputManual = ({
   lanDirection,
   height,
   borderRadius,
+                                  id
 }) => {
   const theme = useTheme();
   const { configData } = useSelector((state) => state.configData);
@@ -158,6 +159,7 @@ const CustomPhoneInputManual = ({
               })}
             />
             <input
+              id={id||""}
               style={{
                 backgroundColor: "transparent",
                 position: "absolute",

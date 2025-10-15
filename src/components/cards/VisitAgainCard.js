@@ -214,7 +214,9 @@ const VisitAgainCard = (props) => {
 					width: "100%",
 					img:{
 						width:"100%",
-						height: "100%",}
+						height: "100%",
+						objectFit:"cover",
+					}
 
 				}}
 			>
@@ -223,7 +225,7 @@ const VisitAgainCard = (props) => {
 					alt={item?.name}
 					height={isSmall ? 100 : 132}
 					width={261}
-					obejctfit="contain"
+					obejctFit="cover"
 					borderRadius="10px"
 				/>
 				{getCurrentModuleType() !== ModuleTypes.FOOD && (

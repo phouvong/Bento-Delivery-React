@@ -3,7 +3,7 @@ import { useFormik } from "formik";
 import { Grid, Stack } from "@mui/material";
 import {
   CustomColouredTypography,
-  CustomStackFullWidth,
+  CustomStackFullWidth, CustomTextArea,
   CustomTypographyBold,
   CustomTypographyGray,
 } from "../../styled-components/CustomStyles.style";
@@ -133,16 +133,16 @@ const ItemForm = ({ data }) => {
                 {t("Share your opinion")}
               </CustomTypographyGray>
 
-              <CustomTextFieldWithFormik
-                type="textarea"
+              <CustomTextArea
+                sx={{ width: "100%", minHeight: "100px" }}
                 label={t("Comment")}
                 touched={formik.touched.comment}
                 errors={formik.errors.comment}
-                fieldProps={formik.getFieldProps("comment")}
                 multiline
                 rows={4}
-                // onChangeHandler={RestaurantNameHandler}
                 value={formik.values.comment}
+                onChange={formik.handleChange}  // ✅ Add this
+                name="comment"                  // ✅ Add this too
               />
             </Stack>
           </Grid>

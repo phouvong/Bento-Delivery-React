@@ -8,29 +8,53 @@ import StoreRegPaymentCard from "components/store-resgistration/StoreRegPaymentC
 import { useSelector } from "react-redux";
 import { ResetButton } from "components/profile/basic-information/BasicInformationForm";
 import { SaveButton } from "components/profile/basic-information/Profile.style";
+import {useRouter} from "next/router";
 
 const PaymentSelect = ({ submitBusiness, resData, isLoading }) => {
+  const router = useRouter();
+   const {plan, package: packageId} = router.query
   const [selectType, setSelectType] = useState("pay_now");
   const [selectedMethod, setSelectedMethod] = useState(null);
   const { configData } = useSelector((state) => state.configData);
   const { allData, activeStep } = useSelector((state) => state.storeRegData);
   const theme = useTheme();
 
+  let bPlan;
+  let storeIdd;
+  let packageIdd;
+
+  if (typeof window !== "undefined") {
+    bPlan = localStorage.getItem("business_plan");
+    storeIdd = localStorage.getItem("store_id");
+    packageIdd = localStorage.getItem("package_id");
+  }
+
   const submitPayment = () => {
-    submitBusiness({
-      business_plan: resData?.type ?? allData?.values?.business_plan,
-      store_id: resData?.store_id ?? allData?.values?.store_id,
-      package_id: resData?.package_id ?? allData?.values?.package_id,
-      payment: selectedMethod ?? selectType,
-      payment_gateway: selectedMethod ?? selectType,
-      callback:
-        selectType === "free_trial"
-          ? null
-          : `${window.location.origin}/store-registration`,
-      payment_platform: "web",
-      type: "new_join",
-    });
-  };
+
+      // Save values to localStorage
+      const businessPlan = resData?.type ?? allData?.values?.business_plan ?? bPlan;
+      const storeId = resData?.store_id ?? allData?.values?.store_id ?? storeIdd;
+      const packageId = resData?.package_id ?? allData?.values?.package_id ?? packageIdd;
+
+      localStorage.setItem('business_plan', businessPlan);
+      localStorage.setItem('store_id', storeId);
+      localStorage.setItem('package_id', packageId);
+
+      submitBusiness({
+        business_plan: businessPlan,
+        store_id: storeId,
+        package_id: packageId,
+        payment: selectedMethod ?? selectType,
+        payment_gateway: selectedMethod ?? selectType,
+        callback:
+          selectType === "free_trial"
+            ? null
+            : `${window.location.origin}/store-registration`,
+        payment_platform: "web",
+        type: "new_join",
+      });
+    };
+
   return (
     <CustomStackFullWidth
       sx={{

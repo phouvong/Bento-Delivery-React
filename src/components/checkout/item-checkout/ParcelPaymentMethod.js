@@ -180,7 +180,7 @@ const ParcelPaymentMethod = (props) => {
                       </CustomStackFullWidth>
                     )}
                 </Grid>
-                <Grid item spacing={3} xs={12} sm={6}>
+                <Grid item spacing={3} xs={12} sm={getParcelPayment()[0]?.cash_on_delivery?6:12}>
                   {configData?.customer_wallet_status === 1 &&
                     token &&
                     paidBy !== "receiver" &&

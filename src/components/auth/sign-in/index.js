@@ -539,7 +539,7 @@ const onlyOtp=centralize_login?.otp_login_status && !centralize_login?.manual_lo
           return (
             <Stack width="100%">
               <SignInForm {...commonSignInFormProps} only handleSignUp={handleSignUp} />
-              {signUpFooter}
+              
             </Stack>
           );
 

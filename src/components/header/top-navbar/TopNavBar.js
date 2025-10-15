@@ -21,7 +21,6 @@ const TopNavBar = () => {
 		location = localStorage.getItem("location");
 	}
 	const isSmall = useMediaQuery("(max-width:1180px)");
-
 	return (
 		<>
 			<NoSsr>

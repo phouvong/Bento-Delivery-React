@@ -6,7 +6,7 @@ export const WrapperForCustomDialogConfirm = styled(Paper)(
     paddingLeft: ".5rem",
     paddingRight: ".5rem",
     paddingBottom: "1.40rem",
-    paddingTop: "1.75rem",
+    paddingTop: "1.2rem",
     width: smwidth ?? "auto",
     [theme.breakpoints.up("md")]: {
       width: width ? width : "34.313rem",

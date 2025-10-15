@@ -38,6 +38,7 @@ const Index = () => {
         title={configData ? `Store registration` : "Loading..."}
         image={configData?.fav_icon_full_url}
         businessName={configData?.business_name}
+        configData={configData}
       />
       <MainLayout configData={configData} landingPageData={landingPageData}>
         <NoSsr>

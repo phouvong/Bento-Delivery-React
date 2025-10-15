@@ -31,9 +31,9 @@ const SpecialFoodOffers = ({ title }) => {
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
   const router =useRouter()
 
-  useEffect(() => {
-    refetch();
-  }, []);
+  // useEffect(() => {
+  //   refetch();
+  // }, []);
 
   const settings = {
     dots: false,

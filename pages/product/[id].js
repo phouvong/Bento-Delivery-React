@@ -6,12 +6,14 @@ import { useSelector } from "react-redux";
 import SEO from "../../src/components/seo";
 import CustomContainer from "../../src/components/container";
 import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
+import {NoSsr} from "@mui/material";
 
 const Index = ({ configData, productDetailsData, landingPageData }) => {
-  useScrollToTop();
   const { cartList, campaignItem } = useSelector((state) => state.cart);
   const [productDetails, setProductDetails] = useState([]);
-
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
   useEffect(() => {
     handleProductDetails();
   }, [productDetailsData, cartList]);
@@ -57,10 +59,12 @@ const Index = ({ configData, productDetailsData, landingPageData }) => {
       <MainLayout configData={configData} landingPageData={landingPageData}>
         <CustomContainer>
           {productDetails.length > 0 && (
+            <NoSsr>
             <ProductDetails
               productDetailsData={productDetails[0]}
               configData={configData}
             />
+            </NoSsr>
           )}
         </CustomContainer>
       </MainLayout>

@@ -612,7 +612,7 @@ function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
 }
 
 export const handleDistance = (distance, origin, destination) => {
-  console.log({distance})
+
   if (typeof distance?.distanceMeters === 'number') {
     return Number(distance?.distanceMeters) / 1000;
   } else if (distance?.status === "ZERO_RESULTS") {
@@ -1127,7 +1127,7 @@ export function capitalizeText(text) {
 }
 export function formatPhoneNumber(number) {
   const str = number?.toString();
-  if (str.startsWith("+")) {
+  if (str?.startsWith("+")) {
     return str;
   } else {
     return `+${str}`;
@@ -1165,4 +1165,14 @@ export function maskSensitiveInfo(input) {
       return input.slice(0, 4) + maskedSection + input.slice(-3);
     }
   }
+}
+// utils/debounce.js
+export function debounce(func, delay = 500) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
 }

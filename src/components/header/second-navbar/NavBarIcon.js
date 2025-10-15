@@ -13,6 +13,7 @@ const NavBarIcon = ({ icon, label, user, handleClick, badgeCount }) => {
         spacing={1}
         justifyContent="center"
         alignItems="center"
+        id="navbar-icon"
       >
         <IconButton
           sx={{

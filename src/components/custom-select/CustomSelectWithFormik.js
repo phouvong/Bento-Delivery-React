@@ -11,7 +11,6 @@ import {
 import FormHelperText from "@mui/material/FormHelperText";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@mui/material/styles";
-import WorkIcon from "@mui/icons-material/Work"; // Example icon
 
 const CustomSelectWithFormik = (props) => {
   const {
@@ -23,8 +22,8 @@ const CustomSelectWithFormik = (props) => {
     fieldProps,
     required,
     value,
-    startIcon, // Adding startIcon prop
-    placeholder, // Adding placeholder prop
+    startIcon,
+    placeholder,
   } = props;
   const [age, setAge] = React.useState(value);
   const theme = useTheme();
@@ -46,15 +45,14 @@ const CustomSelectWithFormik = (props) => {
           alignItems: "start !important",
           fontSize: "13px",
           fontWeight: "500",
+          "& .MuiFormLabel-asterisk": {
+            color: theme.palette.error.main, // <-- makes * red
+          },
         }}
       >
-        {/*{startIcon && (*/}
-        {/*  <InputAdornment position="start" sx={{ mr: 1 }}>*/}
-        {/*    {startIcon}*/}
-        {/*  </InputAdornment>*/}
-        {/*)}*/}
         {inputLabel}
       </InputLabel>
+
       <Select
         variant="outlined"
         labelId="demo-simple-select-label"
@@ -63,7 +61,6 @@ const CustomSelectWithFormik = (props) => {
         label={inputLabel}
         onChange={handleChange}
         error={Boolean(touched && errors)}
-        helperText={touched && errors}
         placeholder={placeholder}
         displayEmpty
         renderValue={value !== "" ? undefined : () => placeholder}
@@ -71,13 +68,12 @@ const CustomSelectWithFormik = (props) => {
         sx={{
           height: "45px",
           "& .MuiSelect-select": {
-            height: "45px",
+            height: "40px",
             display: "flex",
             alignItems: "center",
           },
         }}
       >
-        {/* Dynamic options */}
         {selectFieldData?.length > 0 &&
           selectFieldData.map((item, index) => (
             <MenuItem
@@ -94,6 +90,7 @@ const CustomSelectWithFormik = (props) => {
             </MenuItem>
           ))}
       </Select>
+
       {touched && errors && (
         <FormHelperText sx={{ color: theme.palette.error.main }}>
           {t(errors)}
@@ -107,8 +104,8 @@ CustomSelectWithFormik.propTypes = {
   inputLabel: PropTypes.string.isRequired,
   selectFieldData: PropTypes.array.isRequired,
   passSelectedValue: PropTypes.func.isRequired,
-  startIcon: PropTypes.node, // Adding propType for startIcon
-  placeholder: PropTypes.string, // Adding propType for placeholder
+  startIcon: PropTypes.node,
+  placeholder: PropTypes.string,
 };
 
 export default CustomSelectWithFormik;

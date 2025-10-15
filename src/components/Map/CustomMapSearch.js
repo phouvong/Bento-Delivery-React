@@ -43,7 +43,7 @@ const CustomMapSearch = ({
         <Autocomplete
           fullWidth
           options={predictions}
-          getOptionLabel={(option) => option.description}
+          getOptionLabel={(option) => option?.description}
           onChange={(event, value) => handleChange(event, value)}
           value={currentLocationValue}
           clearOnBlur={false}
@@ -78,7 +78,7 @@ const CustomMapSearch = ({
               placeholder={t("Search location here...")}
               isLanding
               isXSmall
-              onChange={(event) => HandleChangeForSearch(event)}
+              onChange={(event) => HandleChangeForSearch?.(event)}
               InputProps={{
                 ...params.InputProps,
                 endAdornment:
@@ -105,7 +105,7 @@ const CustomMapSearch = ({
                           cursor: "pointer",
                           height: "20px",
                         }}
-                        onClick={() => handleCloseLocation()}
+                        onClick={() => handleCloseLocation?.()}
                       />
                     </IconButton>
                   ) : (
@@ -117,7 +117,7 @@ const CustomMapSearch = ({
                             padding: "5px",
                             display: fromparcel !== "true" && "none",
                           }}
-                          onClick={() => handleAgreeLocation()}
+                          onClick={() => handleAgreeLocation?.()}
                         >
                           <GpsFixedIcon color="primary" />
                         </IconButton>

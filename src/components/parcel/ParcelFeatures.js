@@ -193,15 +193,15 @@ const ParcelFeatures = () => {
 										display="flex !important"
 										spacing={{ xs: 1, sm: 2, md: 3 }}
 										sx={{img:{
-											width:"100%",
-												height:"100%",
+											width:"100%", height:"100%",
+												aspectRatio:"1"
 												}}}
 									>
 										<NextImage
 											src={item?.image_full_url}
 											width={140}
 											height={122}
-											objectFit="contain"
+											objectFit="cover"
 											smWidth="64px"
 											smHeight="56px"
 										/>

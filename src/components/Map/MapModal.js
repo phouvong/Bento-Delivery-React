@@ -48,7 +48,6 @@ import ModalExtendShrink from "./ModalExtendShrink";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { useGetWishList } from "api-manage/hooks/react-query/rental-wishlist/useGetWishlist";
 
-
 const MapModal = ({
   open,
   handleClose,
@@ -185,7 +184,6 @@ const MapModal = ({
     setLocation(values);
   };
 
-
   // get module from localstorage
   const moduleType = getCurrentModuleType();
   const onSuccessHandler = (response) => {
@@ -194,7 +192,6 @@ const MapModal = ({
   const { refetch: wishlistRefetch } = useWishListGet(onSuccessHandler);
   const { refetch: rentalWishlistRefetch } = useGetWishList(onSuccessHandler);
   const handlePickLocationOnClick = () => {
-    
     if (zoneId && geoCodeResults && location) {
       if (getToken()) {
         if (moduleType === "rental") {
@@ -203,10 +200,10 @@ const MapModal = ({
           wishlistRefetch();
         }
       }
-      if (fromReceiver !== "1" && toparcel!=="1") {
+      if (fromReceiver !== "1" && toparcel !== "1") {
         localStorage.setItem("zoneid", zoneId);
       }
-      if (fromReceiver !== "1" && toparcel!=="1") {
+      if (fromReceiver !== "1" && toparcel !== "1") {
         localStorage.setItem(
           "location",
           geoCodeResults?.results[0]?.formatted_address
@@ -221,16 +218,15 @@ const MapModal = ({
         handleClose();
       } else {
         if (fromStore) {
-          handleClose();
-        }else if(location && selectedModule){
           window.location.reload();
           handleClose();
-        }
-        else {
+        } else if (location && selectedModule) {
+          window.location.reload();
+          handleClose();
+        } else {
           setOpenModuleSelection(true);
         }
       }
-      
     }
   };
 
@@ -418,7 +414,15 @@ const MapModal = ({
                   />
                 </WrapperCurrentLocationPick>
               </CustomBoxFullWidth>
-              <CustomStackFullWidth justifyCenter="center" alignItems="center">
+              <CustomStackFullWidth
+                justifyCenter="center"
+                alignItems="center"
+                sx={{
+                  position: "sticky",
+                  bottom: 0,
+                  zIndex: 9,
+                }}
+              >
                 {errorLocation?.response?.data ? (
                   <Button
                     aria-label="picklocation"

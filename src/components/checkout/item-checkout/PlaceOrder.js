@@ -10,6 +10,9 @@ import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { setOfflineInfoStep } from "../../../redux/slices/offlinePaymentData";
 import { CustomTypography } from "../../landing-page/hero-section/HeroSection.style";
+import {getInfoFromZoneData} from "utils/CustomFunctions";
+import {toast} from "react-hot-toast";
+import {cod_exceeds_message} from "utils/toasterMessages";
 
 const PlaceOrder = (props) => {
 	const {
@@ -22,6 +25,7 @@ const PlaceOrder = (props) => {
 		page,
 		storeCloseToast,
 		isLoading,
+		totalAmount
 	} = props;
 
 	const [disabled, setDisabled] = useState(true);
@@ -37,21 +41,30 @@ const PlaceOrder = (props) => {
 	};
 	const handleOffline = (e) => {
 		if (storeData?.active) {
-			//checking restaurant or shop open or not
-			if (isSchedules()) {
-				setChecked(e.target.checked);
-				dispatch(setOfflineInfoStep(2));
-				router.push(
-					{
-						pathname: "/checkout",
-						query: { page: page, method: "offline" },
-					},
-					undefined,
-					{ shallow: true }
-				);
-			} else {
-				storeCloseToast();
+			const codLimit = getInfoFromZoneData(zoneData)?.pivot?.maximum_cod_order_amount;
+			if(totalAmount <= codLimit){
+				if (isSchedules()) {
+					setChecked(e.target.checked);
+					dispatch(setOfflineInfoStep(2));
+					router.push(
+						{
+							pathname: "/checkout",
+							query: { page: page, method: "offline" },
+						},
+						undefined,
+						{ shallow: true }
+					);
+				} else {
+					storeCloseToast();
+				}
+			}else{
+				toast.error(t(cod_exceeds_message), {
+					duration: 5000,
+				});
 			}
+
+			//checking restaurant or shop open or not
+
 		} else {
 			storeCloseToast();
 		}

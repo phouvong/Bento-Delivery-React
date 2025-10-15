@@ -14,7 +14,7 @@ const SEO = ({
   const router = useRouter();
   const { asPath } = router;
 
-  const siteName = businessName; // Replace with your website's name
+  const siteName = configData? businessName:"Loading"; // Replace with your website's name
   const siteUrl = "we"; // Replace with your website's URL
 
   // Concatenate the current page URL with the site URL

@@ -110,7 +110,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
     } else {
       return (
         <CustomContainer>
-          <CustomStackFullWidth spacing={3}>
+          <CustomStackFullWidth spacing={3} mt="1rem">
             {storeDetails?.announcement === 1 && (
               <StoreCustomMessage
                 storeAnnouncement={storeDetails?.announcement_message}

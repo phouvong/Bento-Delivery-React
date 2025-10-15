@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid, Skeleton } from "@mui/material";
 import useGetNewArrivalStores from "api-manage/hooks/react-query/store/useGetNewArrivalStores";
 import { useGetVisitAgain } from "api-manage/hooks/react-query/useGetVisitAgain";
 import PaidAds from "components/home/paid-ads";
@@ -6,6 +6,7 @@ import { getModuleId } from "helper-functions/getModuleId";
 import { getToken } from "helper-functions/getToken";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useIntersectionObserver } from "api-manage/hooks/custom-hooks/useIntersectionObserver";
 import useGetOtherBanners from "../../../../api-manage/hooks/react-query/useGetOtherBanners";
 import CustomContainer from "../../../container";
 import OrderDetailsModal from "../../../order-details-modal/OrderDetailsModal";
@@ -28,6 +29,12 @@ const Pharmacy = ({ configData }) => {
   const [isVisited, setIsVisited] = useState(false);
   const { orderDetailsModalOpen } = useSelector((state) => state.utilsData);
   const [storeData, setStoreData] = React.useState([]);
+  
+  // Use custom intersection observer hook
+  const { ref: triggerRef, hasTriggered: loadMore } = useIntersectionObserver({
+    threshold: 0.2,
+    triggerOnce: true,
+  });
   const { data, refetch, isLoading } = useGetOtherBanners();
   const {
     data: visitedStores,
@@ -41,21 +48,7 @@ const Pharmacy = ({ configData }) => {
   } = useGetNewArrivalStores({
     type: "all",
   });
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await refetch();
-        if (token) {
-          await refetchVisitAgain();
-        }
-        newStoreRefetch();
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
-    };
-
-    fetchData();
-  }, [token]);
+  
   useEffect(() => {
     if (visitedStores?.length > 0 || newStore?.stores?.length > 0) {
       if (visitedStores?.length > 0 && visitedStores) {
@@ -102,6 +95,7 @@ const Pharmacy = ({ configData }) => {
           <PaidAds />
         </CustomContainer>
       </Grid>
+    
       <Grid item xs={12}>
         <CustomContainer>
           <BestReviewedItems
@@ -112,36 +106,37 @@ const Pharmacy = ({ configData }) => {
           />
         </CustomContainer>
       </Grid>
+      
       <Grid item xs={12}>
         <CustomContainer>
-          <TopOffersNearMe title="Top offers near me" />
+          <TopOffersNearMe title="Top offers near me"  />
         </CustomContainer>
       </Grid>
+      
       <Grid item xs={12}>
         <CustomContainer>
           <Banners />
         </CustomContainer>
       </Grid>
+      
       <Grid item xs={12}>
         <CustomContainer>
           <FeaturedStores title="Featured Store" configData={configData} />
         </CustomContainer>
       </Grid>
+      
       <Grid item xs={12}>
         <CustomContainer>
           <RunningCampaigns />
         </CustomContainer>
       </Grid>
+      
       <Grid item xs={12}>
         <CustomContainer>
           <CommonConditions title="Common Conditions" />
         </CustomContainer>
       </Grid>
-      {/*<Grid item xs={12}>*/}
-      {/*  <CustomContainer>*/}
-      {/*    <RedirectBanner />*/}
-      {/*  </CustomContainer>*/}
-      {/*</Grid>*/}
+   
       <Grid
         item
         xs={12}
@@ -155,6 +150,7 @@ const Pharmacy = ({ configData }) => {
           <Stores />
         </CustomContainer>
       </Grid>
+       
       {orderDetailsModalOpen && !token && (
         <OrderDetailsModal orderDetailsModalOpen={orderDetailsModalOpen} />
       )}

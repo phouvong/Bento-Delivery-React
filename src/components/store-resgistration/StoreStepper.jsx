@@ -54,6 +54,11 @@ const steps = ["General Information", "Business Plan", "Complete Registration"];
 const CustomStepper = ({ activeStep, flag }) => {
   const theme = useTheme();
   const isSmallSize = useMediaQuery(theme.breakpoints.down("md"));
+  let lanDirection = undefined;
+  if (typeof window !== "undefined") {
+    lanDirection = JSON.parse(localStorage.getItem("settings"));
+  }
+
   return (
     <Stepper
       sx={{
@@ -104,7 +109,7 @@ const CustomStepper = ({ activeStep, flag }) => {
                       ? theme.palette.primary.main
                       : theme.palette.neutral[400]
                   }`,
-                  transform: "translateY(-50%) rotate(135deg)",
+                  transform:lanDirection?.direction === "rtl" ? "translateY(-50%) rotate(230deg)":"translateY(-50%) rotate(135deg)",
                 }}
               ></Box>
             )}

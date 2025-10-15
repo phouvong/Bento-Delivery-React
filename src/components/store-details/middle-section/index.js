@@ -306,7 +306,6 @@ const MiddleSection = (props) => {
       refetch();
     }
   }, [state.categoryId, state.type, id,pageParams?.filterData,ratingCount]);
-
   useEffect(() => {
     if (state.searchKey) {
       if (searchData?.pages?.length > 0) {
@@ -523,7 +522,7 @@ const MiddleSection = (props) => {
                     textAlign="start"
                     fontWeight="600"
                   >
-                    {t("All Products")}
+                    {t("All Products")}{data?.pages[0]?.total_size &&` (${data?.pages[0]?.total_size})`}
                   </Typography>
                 )}
               </Grid>
@@ -756,4 +755,4 @@ const MiddleSection = (props) => {
   );
 };
 
-export default React.memo(MiddleSection);
+export default  React.memo(MiddleSection);

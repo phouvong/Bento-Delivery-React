@@ -60,7 +60,7 @@ const Grocery = (props) => {
                 alt={item?.title}
                 height={190}
                 width={200}
-                objectfit="cover"
+                objectFit="cover"
               />
             </ImageContainer>
           </Grid>

@@ -59,16 +59,16 @@ const Banners = ({feature}) => {
   const [openModal, setOpenModal] = useState(false);
   const { configData } = useSelector((state) => state.configData);
   const dispatch = useDispatch();
-  useEffect(() => {
-    if (banners.banners.length === 0) {
-      refetchBannerData();
-    }
-  }, [banners]);
-  useEffect(() => {
-    if (data) {
-      dispatch(setBanners(data));
-    }
-  }, [data]);
+  // useEffect(() => {
+  //   if (banners.banners.length === 0) {
+  //     refetchBannerData();
+  //   }
+  // }, [banners]);
+  // useEffect(() => {
+  //   if (data) {
+  //     dispatch(setBanners(data));
+  //   }
+  // }, [data]);
   useEffect(() => {
     if (banners) {
       handleBannersData();

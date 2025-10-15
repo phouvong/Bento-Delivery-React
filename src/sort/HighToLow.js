@@ -34,9 +34,10 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
   const id = open ? "simple-popover" : undefined;
 
   const sortOptions = [
-    { name: "High to Low", value: "high" },
-    { name: "Low to High", value: "low" },
+    { name: t("High to Low"), value: "high" },
+    { name: t("Low to High"), value: "low" },
   ];
+  const Sort_by=t("Sort by:")
 
   const getContent = (label, showArrow) => {
     return (
@@ -56,7 +57,7 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
           fontSize="13px"
           sx={{ color: (theme) => theme.palette.neutral[600] }}
         >
-          {t(`Sort by: ${label}`)}
+          {`${Sort_by} ${label}`}
         </Typography>
         {showArrow === "true" &&
           (open ? (
@@ -77,7 +78,7 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
       <Wrapper border="true" onClick={handleClick}>
         {getContent(
           sortOptions.find((option) => option.value === sortBy)?.name ||
-            "Default",
+            t("Default"),
           "true"
         )}
       </Wrapper>

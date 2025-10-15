@@ -32,7 +32,7 @@ const Filter = ({ filterTypeItems, setFilterData ,setRatingCount,ratingCount,key
       checked: false,
     }));
     setFilters(resetFilters);
-    setFilterData([]);
+   // setFilterData([]);
     setRatingCount(0)
   }, [key]);
 

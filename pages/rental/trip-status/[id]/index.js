@@ -9,6 +9,7 @@ import { useGetConfigData } from "../../../../src/api-manage/hooks/useGetConfigD
 import { setConfigData } from "../../../../src/redux/slices/configData";
 import { useEffect } from "react";
 import TripStatusPage from "../../../../src/components/home/module-wise-components/rental/components/trip-status/TripStatusPage";
+import PushNotificationLayout from "../../../../src/components/PushNotificationLayout";
 
 const index = () => {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -41,7 +42,9 @@ const index = () => {
         configData={configData}
       />
       <MainLayout configData={configData} landingPageData={landingPageData}>
-        <TripStatusPage />
+        <PushNotificationLayout>
+           <TripStatusPage />
+        </PushNotificationLayout>
       </MainLayout>
     </>
   );

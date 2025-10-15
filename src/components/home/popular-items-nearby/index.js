@@ -41,11 +41,11 @@ const PopularItemsNearby = ({ title, subTitle }) => {
     isLoading: flashSalesIsLoading,
   } = useGetFlashSales({ limit, offset });
   const dispatch = useDispatch();
-  useEffect(() => {
-    if (popularItemsNearby.products.length === 0) {
-      refetch();
-    }
-  }, [popularItemsNearby]);
+  // useEffect(() => {
+  //   if (popularItemsNearby.products.length === 0) {
+  //     refetch();
+  //   }
+  // }, [popularItemsNearby]);
 
   useEffect(() => {
     flashSalesRefetch();
@@ -161,7 +161,7 @@ const PopularItemsNearby = ({ title, subTitle }) => {
   };
   return (
     <HomeComponentsWrapper>
-      {popularItemsNearby && popularItemsNearby?.products?.length > 0 && (
+      {data && data?.products?.length > 0 && (
         <>
           <CustomStackFullWidth
             alignItems="center"
@@ -169,19 +169,19 @@ const PopularItemsNearby = ({ title, subTitle }) => {
             mt={{ xs: "10x", md: "16px" }}
             spacing={1}
           >
-            {isFetching ? (
+            {isLoading ? (
               <Skeleton varient="text" width="110px" />
             ) : (
               <H2 text={title} component="h2" />
             )}
-            {isFetching ? (
+            {isLoading ? (
               <Skeleton varient="text" width="310px" />
             ) : (
               <Subtitle1 text={t(subTitle)} component="p" />
             )}
             <CustomBoxFullWidth>
               <Grid container spacing={2} sx={{ marginTop: "1px" }}>
-                {isFetching ? (
+                {isLoading ? (
                   <Grid item xs={12} sm={12} md={9}>
                     <SliderCustom
                       nopadding="true"
@@ -209,7 +209,7 @@ const PopularItemsNearby = ({ title, subTitle }) => {
                       }}
                     >
                       <Slider currentSlide={0} {...settings}>
-                        {popularItemsNearby?.products?.map((item, index) => {
+                        {data?.products?.map((item, index) => {
                           return (
                             <ProductCard
                               key={index}

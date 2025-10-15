@@ -78,6 +78,7 @@ const UserInfo = ({
             <Grid container spacing={3}>
               <Grid item xs={12} sm={6}>
                 <CustomTextFieldWithFormik
+                  required
                   placeholder={t("First name")}
                   type="text"
                   label={t("First name")}
@@ -107,6 +108,7 @@ const UserInfo = ({
               </Grid>
               <Grid item xs={12} sm={6}>
                 <CustomTextFieldWithFormik
+                  required
                   placeholder={t("Last name")}
                   type="text"
                   label={t("Last name")}
@@ -136,6 +138,7 @@ const UserInfo = ({
               </Grid>
               <Grid item xs={12} sm={6}>
                 <CustomTextFieldWithFormik
+                  required
                   placeholder={t("Email")}
                   type="email"
                   label={t("Email")}
@@ -165,6 +168,7 @@ const UserInfo = ({
               </Grid>
               <Grid item xs={12} sm={6}>
                 <CustomSelectWithFormik
+                  required
                   selectFieldData={DELIVERY_MAN_TYPE}
                   inputLabel={t("Deliveryman Type")}
                   passSelectedValue={(value) => {
@@ -189,6 +193,7 @@ const UserInfo = ({
               </Grid>
               <Grid item xs={12} sm={6}>
                 <CustomSelectWithFormik
+                  required
                   selectFieldData={zoneListOptions}
                   inputLabel={t("Select Zone")}
                   passSelectedValue={(value) => {
@@ -213,6 +218,7 @@ const UserInfo = ({
               </Grid>
               <Grid item xs={12} sm={6}>
                 <CustomSelectWithFormik
+                  required
                   selectFieldData={vehicleListOptions}
                   inputLabel={t("Select Vehicle Type")}
                   passSelectedValue={(value) => {

@@ -90,7 +90,7 @@ const NavPopover = ({
       <Popover
         disableScrollLock={true}
         id={popoverDivId}
-        open={popoverFor==="category"?categories?.length>0 ?open:false:open}
+        open={popoverFor==="category"?categories?.length>0 || rentalCategories?.length>0 ?open:false:open}
         anchorEl={anchorEl}
         anchorOrigin={{
           vertical: "bottom",

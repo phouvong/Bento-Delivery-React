@@ -103,6 +103,7 @@ const ModuleSelect = ({
                   item?.module_type === selectedModule?.module_type &&
                   item?.id === selectedModule?.id
                 }
+                id={item?.id}
                 onClick={() => handleModuleSelect(item)}
               >
                 <CustomImageContainer

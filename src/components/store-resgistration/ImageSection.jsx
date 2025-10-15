@@ -28,7 +28,7 @@ const ImageSection = ({
 						color: (theme) => theme.palette.neutral[1000],
 					}}
 				>
-					{t("Cover Photo")}
+					{t("Cover Photo")}<span style={{ color: "red" }}>*</span>
 				</InputLabel>
 				<Typography fontSize="12px">
 					{t("JPG, JPEG, PNG Less Than 1MB (Ratio 2:1)")}
@@ -56,7 +56,7 @@ const ImageSection = ({
 								ml: "10px",
 								fontWeight: "inherit",
 								color: (theme) => theme.palette.error.main,
-								
+
 							}}
 						>
 							{t("Cover photo is required")}
@@ -70,7 +70,7 @@ const ImageSection = ({
 						color: (theme) => theme.palette.neutral[1000],
 					}}
 				>
-					{t("Logo")}
+					{t("Logo")}<span style={{color: "red"}}>*</span>
 				</InputLabel>
 				<Typography fontSize="12px">
 					{t("JPG, JPEG, PNG Less Than 1MB (Ratio 1:1)")}

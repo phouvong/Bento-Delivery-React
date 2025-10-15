@@ -1,4 +1,4 @@
-import {alpha, useMediaQuery, useTheme} from "@mui/material";
+import { alpha, useMediaQuery, useTheme, Card, Skeleton, Box, Grid, Typography } from "@mui/material";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { getToken } from "helper-functions/getToken";
 import { ModuleTypes } from "helper-functions/moduleTypes";
@@ -6,6 +6,7 @@ import Slider from "react-slick";
 import {
   CustomStackFullWidth,
   SliderCustom,
+  CustomBoxFullWidth,
 } from "styled-components/CustomStyles.style";
 import VisitAgainCard from "../../cards/VisitAgainCard";
 import CustomContainer from "../../container";
@@ -13,7 +14,49 @@ import H1 from "../../typographies/H1";
 import Subtitle1 from "../../typographies/Subtitle1";
 import { settings } from "./SliderSettings";
 
-const VisitAgain = ({ configData, visitedStores, isVisited }) => {
+const VisitAgainShimmerCard = () => {
+  const theme = useTheme();
+  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+
+  return (
+    <Card
+      sx={{
+        background: theme.palette.neutral[100],
+        padding: "10px",
+        width: { xs: "220px", md: "280px" },
+      }}
+    >
+      <Box
+        sx={{
+          borderRadius: "10px",
+          position: "relative",
+          height: { xs: "100px", md: "132px" },
+          width: "100%",
+        }}
+      >
+        <Skeleton
+          variant="rectangular"
+          height="100%"
+          width="100%"
+          sx={{ borderRadius: "10px" }}
+        />
+      </Box>
+      <CustomBoxFullWidth sx={{ mt: "10px" }}>
+        <Grid container spacing={1.5}>
+          <Grid item xs={8.5} md={9}>
+            <Skeleton variant="text" width="80%" height={20} />
+            <Skeleton variant="text" width="100%" height={40} />
+          </Grid>
+          <Grid item xs={3.5} md={3}>
+            <Skeleton variant="text" width="100%" height={20} />
+          </Grid>
+        </Grid>
+      </CustomBoxFullWidth>
+    </Card>
+  );
+};
+
+const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
   const theme = useTheme();
   const token = getToken();
   const isSmallScreen = useMediaQuery('(min-width:600px)');
@@ -66,14 +109,19 @@ const VisitAgain = ({ configData, visitedStores, isVisited }) => {
         };
     }
   };
+  // Don't render the section if not loading and no visited stores
+  if (!isLoading && (!visitedStores || visitedStores.length === 0) && !token) {
+    return null;
+  }
+
   return (
     <>
-      {visitedStores?.length > 0 && token && (
-        <CustomStackFullWidth
+      <CustomStackFullWidth
           alignItems={getModuleWiseData?.()?.mainPosition}
           justyfyContent={getModuleWiseData?.()?.mainPosition}
           mt={isSmallScreen ? "2px" : "16px"}
           spacing={{ xs: 2, md: 1 }}
+         
         >
           {isSmallScreen ? (
             <CustomContainer>
@@ -109,24 +157,29 @@ const VisitAgain = ({ configData, visitedStores, isVisited }) => {
             sx={{
               backgroundColor: getModuleWiseData?.()?.bgColor,
               padding: { xs: "0px", md: "17px" },
+               minHeight:"200px"
             }}
           >
             <Slider {...settings}>
-              {visitedStores?.map((item, index) => {
-                return (
-                  <VisitAgainCard
-                    key={index}
-                    item={item}
-                    onlyshimmer
-                    configData={configData}
-                    isVisited={isVisited}
-                  />
-                );
-              })}
+              {isLoading ? (
+                [...Array(5)].map((_, index) => (
+                  <VisitAgainShimmerCard key={index} />
+                ))
+              ) : (
+                visitedStores?.map((item, index) => {
+                  return (
+                    <VisitAgainCard
+                      key={index}
+                      item={item}
+                      configData={configData}
+                      isVisited={isVisited}
+                    />
+                  );
+                })
+              )}
             </Slider>
           </SliderCustom>
         </CustomStackFullWidth>
-      )}
     </>
   );
 };

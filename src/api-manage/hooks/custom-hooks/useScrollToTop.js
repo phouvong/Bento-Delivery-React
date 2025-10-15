@@ -5,13 +5,19 @@ const useScrollToTop = () => {
   const router = useRouter();
 
   useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+  }, []);
+
+  useEffect(() => {
     const handleRouteChange = () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     };
 
     router.events.on("routeChangeComplete", handleRouteChange);
 
-    // Cleanup the event listener on unmount
+// Cleanup the event listener on unmount
     return () => {
       router.events.off("routeChangeComplete", handleRouteChange);
     };

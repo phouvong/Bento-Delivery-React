@@ -22,6 +22,6 @@ const fetchGetTripDetails = async (id) => {
 export const useGetTripDetails = (id) => {
   return useQuery(["trip-details"], () => fetchGetTripDetails(id), {
     onError: onSingleErrorResponse, // Prevent refetching when the window regains focus
-    enabled: !!id,
+    enabled: false,
   });
 };

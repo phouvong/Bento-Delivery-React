@@ -29,7 +29,7 @@ const TrackOrderDetails = ({
 	};
 	return (
 		<CustomStackFullWidth paddingTop="30px" spacing={2}>
-			<Stack direction="row" justifyContent="space-between">
+			<Stack direction="row" justifyContent="space-between" px="1rem">
 				<Typography fontSize="18px" fontWeight="600">
 					{t("order")}{" "}
 					<Typography
@@ -52,6 +52,7 @@ const TrackOrderDetails = ({
 				//paddingX={{ xs: "10px", md: "90px" }}
 				paddingTop="20px"
 				justifyContent="space-between"
+				paddingX="20px"
 			>
 				<Stack
 					direction="row"

@@ -55,6 +55,9 @@ const RouteLinks = (props) => {
   return (
     <CustomStackFullWidth spacing={2} alignItems={{ xs: "start" }}>
       {RouteLinksData.map((item, index) => {
+        if((!configData?.toggle_dm_registration && item.value==="delivery_man") || (!configData?.toggle_dm_registration && item?.value==="restaurant_owner") )
+          return null
+
         return (
           <Typography
             key={index}

@@ -10,7 +10,7 @@ const getData = async (pageParams) => {
 }
 
 export default function useGetMostReviewed(pageParams) {
-    return useQuery('best-reviewed-items',()=> getData(pageParams),{
+    return useQuery(['best-reviewed-items'],()=> getData(pageParams),{
         enabled:false,
         onError:onErrorResponse,
     })

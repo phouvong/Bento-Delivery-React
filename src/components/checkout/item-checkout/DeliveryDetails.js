@@ -221,7 +221,7 @@ const DeliveryDetails = (props) => {
 						<Stack>
 							<FormControlLabel
 								onChange={(e) => handleCheckbox(e)}
-								control={<Checkbox />}
+								control={<Checkbox checked={check} />}
 								label={
 									<Typography
 										fontWeight="500"

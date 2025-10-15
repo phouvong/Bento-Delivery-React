@@ -87,6 +87,7 @@ const AvailableZoneSection = ({ landingPageData }) => {
 							fontWeight={{ xs: "400", md: "500" }}
 							color={theme.palette.neutral[400]}
 							paddingTop={isSmall ? "10px" : "0rem"}
+							textAlign="left"
 						>
 							{landingPageData?.available_zone_short_description}
 						</Typography>

@@ -462,6 +462,7 @@ const OrderSummery = (props) => {
           </Grid>
 
           <Grid item xs={12} md={4} pl={{ xs: "0px", sm: "15px", md: "20px" }}>
+
             {data?.prescription_order ? (
               <PrescriptionOrderCalculation
                 data={data}

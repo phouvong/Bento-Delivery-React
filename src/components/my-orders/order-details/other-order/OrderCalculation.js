@@ -53,6 +53,17 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
     trackOrderData?.order_amount - trackOrderData?.partially_paid_amount;
   return (
     <OrderSummaryCalculationCard spacing={1.5}>
+      <CustomStackFullWidth
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        spacing={2}
+        backgroundColor="primary.light"
+        padding="10px 15px"
+        borderRadius="8px"
+      >
+        <Typography fontSize="14px">{t(`Please bring ${getAmountWithSign(trackOrderData?.bring_change_amount)} in change when making the delivery.`)}</Typography>
+      </CustomStackFullWidth>
       <Typography fontWeight="500">{t("Summary")}</Typography>
       <CustomStackFullWidth
         direction="row"
@@ -195,7 +206,11 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
           justifyContent="space-between"
           spacing={2}
         >
-          <Typography fontSize="14px">
+          <Typography fontSize="14px" sx={{
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap", // ensures single line
+          }}>
             {configData?.additional_charge_name}
           </Typography>
           <Typography fontSize="14px">

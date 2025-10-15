@@ -15,6 +15,7 @@ const DollarSignHighlighter = ({ theme, text }) => {
               style={{
                 color: isMatch ? theme.palette.primary.main : "inherit",
                 marginLeft: index !== 0 && "3px",
+                textAlign:"left"
               }}
             >
               {index !== 0 && " "}

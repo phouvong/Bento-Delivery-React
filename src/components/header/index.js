@@ -11,8 +11,7 @@ import { Box } from "@mui/system";
 import { useSelector } from "react-redux";
 import SecondNavBar from "./second-navbar/SecondNavbar";
 import TopNavBar from "./top-navbar/TopNavBar";
-import { useEffect } from "react";
-import cookie from "js-cookie";
+
 
 const HeaderComponent = () => {
   const { configData } = useSelector((state) => state.configData);

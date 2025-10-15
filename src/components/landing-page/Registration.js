@@ -164,7 +164,7 @@ const Card = ({
   );
 };
 
-const CenterCards = ({ data, isSmall }) => {
+const CenterCards = ({ data, isSmall ,configData}) => {
   return (
     <CustomStackFullWidth
       direction={{ xs: "column", md: "row" }}
@@ -172,7 +172,7 @@ const CenterCards = ({ data, isSmall }) => {
       justifyContent="space-between"
       alignItems="stretch"
     >
-      {data?.earning_seller_status ? (
+      {data?.earning_seller_status && configData?.toggle_dm_registration ? (
         <Card
           image={seller}
           headingText={data?.earning_seller_title}
@@ -183,7 +183,7 @@ const CenterCards = ({ data, isSmall }) => {
         />
       ) : null}
 
-      {data?.earning_dm_status ? (
+      {data?.earning_dm_status && configData?.toggle_store_registration ? (
         <Card
           image={deliveryMan}
           headingText={data?.earning_dm_title}
@@ -205,7 +205,7 @@ const Registration = ({ data, isSmall, configData }) => {
         height="100%"
       >
         <TopText data={data} />
-        <CenterCards data={data} isSmall={isSmall} />
+        <CenterCards configData={configData} data={data} isSmall={isSmall} />
       </CustomStackFullWidth>
     </CustomContainer>
   );

@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, {useEffect, useMemo, useReducer, useState} from "react";
 import { Scrollbar } from "../../srollbar";
 import {
   Drawer,
@@ -30,6 +30,7 @@ import { useSelector } from "react-redux";
 import Funnel from "components/svg-components/Funnel";
 import StoreFilter from "components/store-details/middle-section/StoreFilter";
 import {filterTypeItems} from "components/search/filterTypes";
+import {debounce} from "utils/CustomFunctions";
 
 export const CustomPaperBox = styled(Box)(({ theme }) => ({
   backgroundColor: "paper.default",
@@ -186,14 +187,7 @@ const Sidebar = (props) => {
   useEffect(() => {
     refetch();
   }, [storeId]);
-  // useEffect(() => {
-  //   handleFilter();
-  // }, [minMax]);
 
-  const handleCategoriesClick = (id) => {
-    dispatch({ type: ACTION.setIsSelected, payload: id });
-    handleCategoryId?.(id);
-  };
   const handleMinMax = (value) => {
     if (value[0] === 0) {
       value[0] = priceFilterRange?.[0]?.min_price;
@@ -202,9 +196,26 @@ const Sidebar = (props) => {
     handleChangePrice(value);
   };
 
-  const handleFilter = () => {
-    handleChangePrice(minMax);
-  };
+  const handleMinChange = useMemo(
+    () =>
+      debounce((value) => {
+        setMinMax([+value, minMax[1]]);
+      }, 200),
+    [minMax]
+  );
+
+  const handleMaxChange = useMemo(
+    () =>
+      debounce((value) => {
+        setMinMax([minMax[0], +value]);
+      }, 200),
+    [minMax]
+  );
+  useEffect(() => {
+    if(minMax[1]>0){
+      handleChangePrice(minMax);
+    }
+  }, [minMax]);
   const categoriesCheckBoxHandler = (data) => {
     handleCategoryId?.(data);
   };
@@ -289,50 +300,71 @@ const Sidebar = (props) => {
               alignItems="center"
               spacing={2}
               pt=".5rem"
-              //flexWrap='wrap'
             >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  backgroundColor: theme=>theme.palette.primary.light,
-                  padding: "12px 12px",
-                  borderRadius: "5px",
-                  fontWeight: 500,
-                  fontSize: "14px",
-                  width: "fit-content",
-                  minWidth:"100px",
-                  justifyContent: "center",
-                  border:"1px solid",
-                    borderColor: (theme) => theme.palette.primary.main,
+              {/* Min Value Input */}
+              <TextField
+                type="number"
+                value={minMax[0] <= 0 ? "" : minMax[0]}
+                onChange={(e) => handleMinChange(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <Box component="span" sx={{ mr: 1 }}>
+                      {configData?.currency_symbol}
+                    </Box>
+                  ),
                 }}
-              >
-                {configData?.currency_symbol} {minMax[0] <= 0 ? "0" : minMax[0]}
-              </Box>
+                sx={{
+                  "& input[type=number]": {
+                    MozAppearance: "textfield", // for Firefox
+                  },
+                  "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button": {
+                    WebkitAppearance: "none",
+                    margin: 0,
+                  },
+                  "& .MuiOutlinedInput-root": {
+
+                    borderRadius: "5px",
+                    fontWeight: 500,
+                    fontSize: "14px",
+                    minWidth: "100px",
+                  },
+                }}
+              />
+
 
               <Typography>-</Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  backgroundColor: theme=>theme.palette.primary.light,
-                  padding: "12px 12px",
-                  borderRadius: "5px",
-                  fontWeight: 500,
-                  fontSize: "14px",
-                  width: "fit-content",
-                  minWidth:"100px",
-                  justifyContent: "center",
-                  border:"1px solid",
-                  borderColor: (theme) => theme.palette.primary.main,
+
+              {/* Max Value Input */}
+              <TextField
+                type="number"
+                value={minMax[1] === 0 ? "" : minMax[1]}
+                onChange={(e) => handleMaxChange(e.target.value)}
+                InputProps={{
+                  startAdornment: (
+                    <Box component="span" sx={{ mr: 1 }}>
+                      {configData?.currency_symbol}
+                    </Box>
+                  ),
                 }}
-              >
-                <Box component="span" sx={{ marginRight: "4px" }}>
-                  {configData?.currency_symbol}
-                </Box>
-                {minMax[1] === 0 ? "" : minMax[1]}
-              </Box>
+                sx={{
+                  "& input[type=number]": {
+                    MozAppearance: "textfield", // for Firefox
+                  },
+                  "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button": {
+                    WebkitAppearance: "none",
+                    margin: 0,
+                  },
+                  "& .MuiOutlinedInput-root": {
+
+                    borderRadius: "5px",
+                    fontWeight: 500,
+                    fontSize: "14px",
+                    minWidth: "100px",
+                  },
+                }}
+              />
             </CustomStackFullWidth>
+
           </CustomStackFullWidth>
         </CustomPaperBox>
       </CustomStackFullWidth>

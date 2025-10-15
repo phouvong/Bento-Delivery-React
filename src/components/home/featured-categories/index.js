@@ -54,14 +54,14 @@ const FeaturedCategories = () => {
           <CustomBoxFullWidth
             sx={{
               "& .slick-slider": {
-                paddingTop: {
-                  xs: "22px",
-                  md: "30px",
-                },
-                paddingBottom: {
-                  xs: "4px",
-                  md: "30px",
-                },
+                // paddingTop: {
+                //   xs: "22px",
+                //   md: "30px",
+                // },
+                // paddingBottom: {
+                //   xs: "4px",
+                //   md: "30px",
+                // },
               },
             }}
           >
@@ -136,18 +136,18 @@ const FeaturedCategories = () => {
       case ModuleTypes.GROCERY:
         return (
           <CustomBoxFullWidth
-              sx={{
-                "& .slick-slider": {
-                  paddingTop: {
-                    xs: "22px",
-                    md: "30px",
-                  },
-                  paddingBottom: {
-                    xs: "4px",
-                    md: "30px",
-                  },
-                },
-              }}
+              // sx={{
+              //   "& .slick-slider": {
+              //     paddingTop: {
+              //       xs: "22px",
+              //       md: "30px",
+              //     },
+              //     paddingBottom: {
+              //       xs: "4px",
+              //       md: "30px",
+              //     },
+              //   },
+              // }}
           >
             <Slider {...settings} ref={slider}>
               {[...Array(10)]?.map((item, index) => {

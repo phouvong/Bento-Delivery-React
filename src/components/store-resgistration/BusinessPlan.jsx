@@ -200,7 +200,7 @@ const BusinessPlan = ({ formSubmit, isLoading }) => {
 
               <Typography fontSize="13px" color={theme.palette.neutral[400]}>
                 {t(
-                  "Run restaurant by puchasing subsciption  packages. You will have access the features of in restaurant panel , app and interaction with user according to the subscription packages."
+                  "Run store by purchasing subsciption  packages. You will have access the features of in store panel , app and interaction with user according to the subscription packages."
                 )}
               </Typography>
             </Stack>

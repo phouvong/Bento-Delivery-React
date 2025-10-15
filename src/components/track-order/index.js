@@ -168,7 +168,7 @@ const TrackOrder = ({ configData, trackOrderData }) => {
   ];
 
   const handleStepper = () => {
-    if (trackOrderData?.order_status === "panding") {
+    if (trackOrderData?.order_status === "pending") {
       setActStep(1);
     } else if (trackOrderData?.order_status === "confirmed") {
       setActStep(2);
@@ -179,7 +179,7 @@ const TrackOrder = ({ configData, trackOrderData }) => {
       setActStep(3);
     } else if (trackOrderData?.order_status === "picked_up") {
       setActStep(4);
-    } else if (trackOrderData?.order_status === "delivered") {
+    } else if (trackOrderData?.order_status === "delivered" || trackOrderData?.order_status==="returned") {
       setActStep(5);
     }
   };

@@ -37,7 +37,6 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
   const handleOrderDetailsClose = () => {
     dispatch(setOrderDetailsModalOpen(false));
   };
-
   const handleClickToRoute = (href) => {
     dispatch(setOrderDetailsModalOpen(false));
     router.push(href, undefined, { shallow: true });
@@ -155,7 +154,7 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
                     {`${t("Order")} #`}
                   </ModalCustomTypography>
                   <Typography sx={{ wordWrap: "break-word" }}>
-                    :&nbsp;&nbsp;{guestUserOrderId}
+                    :&nbsp;&nbsp;{guestUserOrderId || order_id}
                   </Typography>
                 </ItemWrapper>
                 <ItemWrapper>

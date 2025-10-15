@@ -3,7 +3,7 @@ import {
   CustomPaperBigCard,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
-import { Grid, Typography } from "@mui/material";
+import {Grid, Stack, Typography} from "@mui/material";
 import { t } from "i18next";
 import CustomTextFieldWithFormik from "../form-fields/CustomTextFieldWithFormik";
 import CustomPhoneInput from "../custom-component/CustomPhoneInput";
@@ -23,6 +23,7 @@ const TrackOrderInput = ({ configData }) => {
   const dispatch = useDispatch();
   const [showOrderDetails, setShowOrderDetails] = useState(false);
   const { selectedModule } = useSelector((state) => state.utilsData);
+
 
   const trackOrderFormik = useFormik({
     initialValues: {
@@ -49,6 +50,9 @@ const TrackOrderInput = ({ configData }) => {
     trackOrderFormik.setFieldValue("contact_person_number", `+${value}`);
   };
   const guestId = getGuestId();
+  const handleSuccess=()=>{
+    setShowOrderDetails(true)
+  }
   const {
     refetch: refetchTrackOrder,
     data: trackOrderData,
@@ -56,7 +60,9 @@ const TrackOrderInput = ({ configData }) => {
   } = useGetTrackOrderData(
     trackOrderFormik?.values?.order_id,
     trackOrderFormik?.values?.contact_person_number,
-    guestId
+    guestId,
+    setShowOrderDetails,
+    handleSuccess
   );
   const {
     data: tripDetails,
@@ -70,13 +76,18 @@ const TrackOrderInput = ({ configData }) => {
   }, [tripDetails]);
 
   return (
-    <CustomStackFullWidth pt="40px" spacing={2}>
-      <CustomPaperBigCard>
+    <CustomStackFullWidth pt="40px" spacing={2} >
+      <Stack sx={{minHeight:"262px",justifyContent:"center",
+        width:"100%",
+        background:theme=>theme.palette.neutral[100],
+        borderRadius:"8px",padding:"20px 0"
+      }}>
         <Typography
           align="center"
           paddingBottom="30px"
           fontSize="20px"
           fontWeight="600"
+
         >
           {selectedModule?.module_type==="rental"?t("Track Your Trip"):t("Track Your Order")}
         </Typography>
@@ -105,6 +116,7 @@ const TrackOrderInput = ({ configData }) => {
                 rtlChange="true"
                 lanDirection={lanDirection}
                 height="45px"
+                borderRadius="8px"
               />
             </Grid>
             <Grid item xs={12} md={2}>
@@ -112,14 +124,14 @@ const TrackOrderInput = ({ configData }) => {
             </Grid>
           </Grid>
         </form>
-        {trackOrderData && (
+        {trackOrderData && showOrderDetails && (
           <TrackOrderDetails
             trackOrderFormik={trackOrderFormik}
             showOrderDetails={setShowOrderDetails}
             trackOrderData={trackOrderData}
           />
         )}
-      </CustomPaperBigCard>
+      </Stack>
     </CustomStackFullWidth>
   );
 };

@@ -10,7 +10,7 @@ import useGetLandingPage from "../src/api-manage/hooks/react-query/useGetLanding
 import { useGetConfigData } from "../src/api-manage/hooks/useGetConfigData";
 
 const Root = (props) => {
-	const { configData } = props;
+	const { configData,landingPageData } = props;
 	const { data, refetch } = useGetLandingPage();
 	const dispatch = useDispatch();
 	const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
@@ -37,11 +37,11 @@ const Root = (props) => {
 			<CssBaseline />
 			{/* <DynamicFavicon configData={configData} /> */}
 			<SEO
-				image={configData?.fav_icon_full_url}
+				image={landingPageData?.meta_image||configData?.fav_icon_full_url}
 				businessName={configData?.business_name}
 				configData={configData}
-				title={configData?.business_name}
-				description="add description here"
+				title={landingPageData?.meta_title||configData?.business_name}
+				description={landingPageData?.meta_description||configData?.meta_description}
 			/>
 			{data && (
 				<LandingLayout configData={dataConfig} landingPageData={data}>
@@ -72,6 +72,19 @@ export const getServerSideProps = async (context) => {
 		}
 	);
 	const config = await configRes.json();
+	const landingPageRes = await fetch(
+		`${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/react-landing-page`,
+		{
+			method: "GET",
+			headers: {
+				"X-software-id": 33571750,
+				"X-server": "server",
+				"X-localization": language,
+				origin: process.env.NEXT_CLIENT_HOST_URL,
+			},
+		}
+	);
+	const landingPageData = await landingPageRes.json();
 	// Set cache control headers for 1 hour (3600 seconds)
 	res.setHeader(
 		"Cache-Control",
@@ -81,6 +94,7 @@ export const getServerSideProps = async (context) => {
 	return {
 		props: {
 			configData: config,
+			landingPageData:landingPageData
 		},
 	};
 };

@@ -11,7 +11,10 @@ import CustomPhoneInput from "../../custom-component/CustomPhoneInput";
 import { getLanguage } from "helper-functions/getLanguage";
 import { getToken } from "helper-functions/getToken";
 import dynamic from "next/dynamic";
+import CustomModal from "components/modal";
 const MapModal = dynamic(() => import("../../Map/MapModal"));
+import { IconButton, } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 
 const SenderInfoForm = ({
   addAddressFormik,
@@ -30,6 +33,7 @@ const SenderInfoForm = ({
 }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [openSave,setOpenSave]=useState(false)
   const [currentLocationValue, setCurrentLactionValue] = useState({
     description: null,
   });
@@ -117,16 +121,7 @@ const SenderInfoForm = ({
                 height="45px"
                 borderRadius="8px"
               />
-              {/*<CustomTextFieldWithFormik*/}
-              {/*  required="true"*/}
-              {/*  type="number"*/}
-              {/*  label={t("Sender Phone")}*/}
-              {/*  touched={addAddressFormik.touched.senderPhone}*/}
-              {/*  errors={addAddressFormik.errors.senderPhone}*/}
-              {/*  fieldProps={addAddressFormik.getFieldProps("senderPhone")}*/}
-              {/*  onChangeHandler={senderPhoneHandler}*/}
-              {/*  value={addAddressFormik.values.senderPhone}*/}
-              {/*/>*/}
+
             </CustomStackFullWidth>
             <CustomStackFullWidth>
               <CustomStackFullWidth
@@ -136,25 +131,32 @@ const SenderInfoForm = ({
                 pb="5px"
               >
                 <Typography>{t("Pickup Address")}</Typography>
-                <Button onClick={handleOpen}>
-                  <Stack
-                    gap="5px"
-                    alignItems="center"
-                    justifyContent="center"
-                    direction="row"
-                  >
-                    <Typography
-                      color={theme.palette.primary.main}
-                      fontSize="12px"
+                {getToken() ? (
+                  <Button onClick={()=>setOpenSave(true)}>
+                    {t("Save Addresses")}
+                  </Button>
+                ):(
+                  <Button onClick={handleOpen}>
+                    <Stack
+                      gap="5px"
+                      alignItems="center"
+                      justifyContent="center"
+                      direction="row"
                     >
-                      {t("Set from map")}
-                    </Typography>
-                    <PinDropIcon
-                      sx={{ width: "20px", height: "20px" }}
-                      color="primary"
-                    />
-                  </Stack>
-                </Button>
+                      <Typography
+                        color={theme.palette.primary.main}
+                        fontSize="12px"
+                      >
+                        {t("Set from map")}
+                      </Typography>
+                      <PinDropIcon
+                        sx={{ width: "20px", height: "20px" }}
+                        color="primary"
+                      />
+                    </Stack>
+                  </Button>
+                )}
+
               </CustomStackFullWidth>
               <GetLocationFrom
                 handleLocation={handleLocation}
@@ -195,20 +197,7 @@ const SenderInfoForm = ({
                 value={addAddressFormik.values.floor}
               />
             </CustomStackFullWidth>
-            {getToken() && (
-              <CustomStackFullWidth>
-                <Card sx={{ padding: ".5rem" }} elevation={9}>
-                  <SaveAddress
-                    handleLocation={handleLocation}
-                    configData={configData}
-                    setSenderFormattedAddress={setSenderFormattedAddress}
-                    setSenderLocation={setSenderLocation}
-                    setSenderOptionalAddress={setSenderOptionalAddress}
-                    sender="true"
-                  />
-                </Card>
-              </CustomStackFullWidth>
-            )}
+
 
           </CustomStackFullWidth>
         </CustomStackFullWidth>
@@ -223,6 +212,39 @@ const SenderInfoForm = ({
           handleLocation={handleLocation}
           toparcel="1"
         />
+      )}
+      {openSave && (
+        <CustomModal openModal={openSave} handleClose={() => setOpenSave(false)}>
+          <CustomStackFullWidth sx={{ minWidth: "350px", position: "relative" }}>
+            {/* Close Icon */}
+            <IconButton
+              onClick={() => setOpenSave(false)}
+              sx={{
+                position: "absolute",
+                top: -2,
+                right: 0,
+                zIndex: 2,
+                backgroundColor: (theme) => theme.palette.background.paper,
+                "&:hover": {
+                  backgroundColor: (theme) => theme.palette.action.hover,
+                },
+              }}
+            >
+              <CloseIcon sx={{fontSize:"1rem"}}  />
+            </IconButton>
+
+            <Card sx={{ padding: ".5rem" }} elevation={9}>
+              <SaveAddress
+                handleLocation={handleLocation}
+                configData={configData}
+                setSenderFormattedAddress={setSenderFormattedAddress}
+                setSenderLocation={setSenderLocation}
+                setSenderOptionalAddress={setSenderOptionalAddress}
+                sender="true"
+              />
+            </Card>
+          </CustomStackFullWidth>
+        </CustomModal>
       )}
     </CustomStackFullWidth>
   );

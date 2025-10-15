@@ -242,33 +242,36 @@ const WalletBoxComponent = (props) => {
               </Typography>
             </Stack>
           </Stack>
-          <Button
-            sx={{
-              position: "absolute",
-              color: "#fff",
-              cursor: "pointer",
-              direction: "row",
-              alignItems: "center",
-              right: getLanguage() !== "rtl" && "-5px",
-              top: "-15px",
-              left: getLanguage() === "rtl" && "-5px",
-              gap: 1,
-              zIndex: "1",
-              border: "1px solid transparent",
-              "&:active": {
-                borderColor: theme.palette.divider,
-              },
-            }}
-            onClick={() => setOpen(!open)}
-          >
-            <Typography
-              component="span"
-              sx={{ fontSize: "14px", fontWeight: 500 }}
+          {configData?.active_payment_method_list?.length>0 && configData?.add_fund_status ?  (
+            <Button
+              sx={{
+                position: "absolute",
+                color: "#fff",
+                cursor: "pointer",
+                direction: "row",
+                alignItems: "center",
+                right: getLanguage() !== "rtl" && "-5px",
+                top: "-15px",
+                left: getLanguage() === "rtl" && "-5px",
+                gap: 1,
+                zIndex: "1",
+                border: "1px solid transparent",
+                "&:active": {
+                  borderColor: theme.palette.divider,
+                },
+              }}
+              onClick={() => setOpen(!open)}
             >
-              {t("Add fund")}
-            </Typography>
-            <AddCircle />
-          </Button>
+              <Typography
+                component="span"
+                sx={{ fontSize: "14px", fontWeight: 500 }}
+              >
+                {t("Add fund")}
+              </Typography>
+              <AddCircle />
+            </Button>
+          ):null}
+
         </Stack>
       </CustomWalletStack>
       <CustomModal openModal={open} handleClose={handleClose}>

@@ -28,6 +28,7 @@ MainApi.interceptors.request.use(function (config) {
   if (hostname) config.headers["origin"] = hostname;
   config.headers["X-software-id"] = software_id;
   config.headers["Accept"] = 'application/json'
+  config.headers["ngrok-skip-browser-warning"] = true;
   return config;
 });
 // MainApi.interceptors.response.use(

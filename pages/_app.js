@@ -19,12 +19,13 @@ import nProgress from "nprogress";
 import Router from "next/router";
 import { persistStore } from "redux-persist";
 import { useTranslation } from "react-i18next";
+import useScrollToTop from "../src/api-manage/hooks/custom-hooks/useScrollToTop";
 import { useEffect } from "react";
-import useScrollRestoration from "api-manage/hooks/custom-hooks/useSCrollRestoration";
 
 Router.events.on("routeChangeStart", nProgress.start);
 Router.events.on("routeChangeError", nProgress.done);
 Router.events.on("routeChangeComplete", nProgress.done);
+
 export const currentVersion = process.env.NEXT_PUBLIC_SITE_VERSION;
 const clientSideEmotionCache = createEmotionCache();
 const queryClient = new QueryClient({
@@ -45,24 +46,24 @@ function MyApp(props) {
   const getLayout = Component.getLayout ?? ((page) => page);
   const { t } = useTranslation();
 
-  //storing persisted data
+  // Persist store
   let persistor = persistStore(store);
 
+  // Version check
   useEffect(() => {
     const storedVersion = localStorage.getItem("appVersion");
-
     if (storedVersion !== currentVersion) {
-      localStorage.clear(); // Clear local storage
-      localStorage.setItem("appVersion", currentVersion); // Update stored version
+      localStorage.clear();
+      localStorage.setItem("appVersion", currentVersion);
     }
   }, [currentVersion]);
-  useScrollRestoration();
+
   return (
     <>
+      {useScrollToTop()}
       <CacheProvider value={emotionCache}>
         <QueryClientProvider client={queryClient}>
           <ReduxProvider store={store}>
-            {/*<PersistGate loading={null} persistor={persistor}>*/}
             <SettingsProvider>
               <SettingsConsumer>
                 {(value) => (
@@ -76,17 +77,12 @@ function MyApp(props) {
                     <RTL direction={value?.settings?.direction}>
                       <CssBaseline />
                       <Toaster position="top-center" />
-                      {/* <DynamicFavicon configData={configData}/> */}
-                      {/* <Head>
-                                                <title>{t('Loading...')}</title>
-                                            </Head> */}
                       {getLayout(<Component {...pageProps} />)}
                     </RTL>
                   </ThemeProvider>
                 )}
               </SettingsConsumer>
             </SettingsProvider>
-            {/*</PersistGate>*/}
           </ReduxProvider>
           <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
         </QueryClientProvider>
