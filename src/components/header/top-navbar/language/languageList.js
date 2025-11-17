@@ -27,7 +27,7 @@ export const languageList = [
   //  languageCode: "ar",
   //  countryCode: "SA",
   //  countryFlag: arabicFlag.src,
-  },
+  //},
   // {
   //   languageName: "Bengali",
   //   languageCode: "bn",
