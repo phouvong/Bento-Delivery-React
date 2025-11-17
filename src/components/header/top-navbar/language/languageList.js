@@ -11,10 +11,10 @@ export const languageList = [
     countryFlag: usFlag.src,
   },
   {
-    languageName: "ພາສາລາວ",
+    languageName: "Lao",
     languageCode: "lo",
     countryCode: "LA",
-    countryFlag: lo.src,
+    countryFlag: loFlag.src,
   },
   // {
   //   languageName: "Spanish",
