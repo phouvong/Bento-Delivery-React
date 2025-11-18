@@ -76,7 +76,7 @@ const CustomSearch = ({
             onChange={(e) => handleChange(e.target.value)}
             onKeyPress={(e) => handleKeyPress(e)}
             language_direction={language_direction}
-            // onFocus={() => handleOnFocus?.(value)}
+          // onFocus={() => handleOnFocus?.(value)}
           />
         </>
       );
@@ -84,13 +84,13 @@ const CustomSearch = ({
       return (
         <>
           <StyledInputBase
-          id="search-input"
+            id="search-input"
             placeholder={t(label)}
             value={value}
             onChange={(e) => handleChange(e.target.value)}
             onKeyPress={(e) => handleKeyPress(e)}
             language_direction={language_direction}
-            // onFocus={() => handleOnFocus?.(value)}
+          // onFocus={() => handleOnFocus?.(value)}
           />
           {value === "" ? (
             <SearchIcon sx={{ marginInlineEnd: "12px" }} />

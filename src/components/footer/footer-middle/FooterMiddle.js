@@ -37,7 +37,7 @@ const FooterMiddle = (props) => {
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   let token;
   const businessLogo = configData?.logo_full_url;
-
+  // console.log("landingPageData", landingPageData);
   return (
     <CustomStackFullWidth sx={{ py: { xs: "10px", sm: "3rem" } }}>
       <Grid container spacing={{ xs: 3, md: 4 }} justifyContent="flex-start">
@@ -72,18 +72,12 @@ const FooterMiddle = (props) => {
               configData={configData}
               landingPageData={landingPageData}
             />
-            {(Number.parseInt(
-              landingPageData?.download_user_app_links?.playstore_url_status
-            ) === 1 ||
-              Number.parseInt(
-                landingPageData?.download_user_app_links?.apple_store_url_status
-              ) === 1) && (
-              <AppLinks
-                configData={configData}
-                changeSingle
-                landingPageData={landingPageData}
-              />
-            )}
+            <AppLinks landingPageData={{
+              app_store_link: landingPageData?.user_app_download_section?.download_user_app_links?.apple_store_url,
+              play_store_link: landingPageData?.user_app_download_section?.download_user_app_links?.playstore_url,
+              app_status: landingPageData?.user_app_download_section?.download_user_app_links?.apple_store_url_status,
+              play_status: landingPageData?.user_app_download_section?.download_user_app_links?.playstore_url_status
+            }} />
           </CustomStackFullWidth>
         </Grid>
         <Grid item xs={12} sm={6} md={7.8}>

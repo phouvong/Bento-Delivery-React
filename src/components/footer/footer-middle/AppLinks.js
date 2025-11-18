@@ -14,8 +14,8 @@ import CustomImageContainer from "../../CustomImageContainer";
 import NextImage from "components/NextImage";
 
 export const CustomButton = styled(Button)(({ theme, graybackground }) => ({
-  height: "50px",
-  padding: "8px 15px",
+  height: "40px",
+  padding: "px 16px",
   borderRadius: "5px",
   cursor: "pointer",
   backgroundColor:
@@ -27,12 +27,13 @@ export const CustomButton = styled(Button)(({ theme, graybackground }) => ({
   },
   [theme.breakpoints.down("md")]: {
     maxWidth: "140px",
-    height: "50px",
+    height: "40px",
   },
 }));
 const AppLinks = (props) => {
   const { graybackground, landingPageData } = props;
   const theme = useTheme();
+  console.log({ landingPageData });
 
   let language_direction;
   if (typeof window !== "undefined") {
@@ -45,7 +46,7 @@ const AppLinks = (props) => {
   const googlePlay = () => (
     <CustomButton
       onClick={() =>
-        goToApp(landingPageData?.download_user_app_links?.playstore_url)
+        goToApp(landingPageData?.play_store_link)
       }
       variant="contained"
       graybackground={graybackground ? "true" : "false"}
@@ -54,28 +55,29 @@ const AppLinks = (props) => {
         direction="row"
         alignItems="center"
         justifyContent="space-between"
-        spacing={0.5}
+        spacing={.5}
       >
         <NextImage
           src={playstoreicon?.src}
           alt="GooglePlay"
           objectFit="cover"
-          height={24}
-          width={24}
+          height={20}
+          width={20}
         />
         <Stack alignItems="flex-start" justifyContent="center">
           <Typography
             sx={{
-              fontSize: { xs: "8px", sm: "10px", md: "12px" },
+              fontSize: { xs: "8px", sm: "10px", md: "11px" },
               color: theme.palette.whiteContainer.main,
+              lineHeight: { xs: "10px", sm: "13px", md: "10px" },
             }}
           >
             {t("GET IT ON")}
           </Typography>
           <Typography
             sx={{
-              fontWeight: 700,
-              fontSize: { xs: "10px", sm: "13px", md: "15px" },
+              fontWeight: 600,
+              fontSize: { xs: "10px", sm: "13px", md: "12px" },
             }}
             color={theme.palette.whiteContainer.main}
           >
@@ -88,7 +90,7 @@ const AppLinks = (props) => {
   const appleStore = () => (
     <CustomButton
       onClick={() =>
-        goToApp(landingPageData?.download_user_app_links?.apple_store_url)
+        goToApp(landingPageData?.app_store_link)
       }
       variant="contained"
       graybackground={graybackground ? "true" : "false"}
@@ -103,14 +105,15 @@ const AppLinks = (props) => {
           src={appleicon?.src}
           alt="GooglePlay"
           objectFit="cover"
-          height={30}
-          width={30}
+          height={20}
+          width={20}
         />
         <Stack alignItems="flex-start" justifyContent="center">
           <Typography
             sx={{
-              fontSize: { xs: "8px", sm: "10px", md: "12px" },
+              fontSize: { xs: "8px", sm: "10px", md: "11px" },
               color: theme.palette.whiteContainer.main,
+              lineHeight: { xs: "10px", sm: "13px", md: "10px" },
             }}
           >
             {t("Download ON")}
@@ -118,7 +121,7 @@ const AppLinks = (props) => {
           <Typography
             sx={{
               fontWeight: 700,
-              fontSize: { xs: "10px", sm: "13px", md: "15px" },
+              fontSize: { xs: "10px", sm: "12px", md: "12px" },
             }}
             color={theme.palette.whiteContainer.main}
           >
@@ -128,6 +131,10 @@ const AppLinks = (props) => {
       </Stack>
     </CustomButton>
   );
+  const showPlayStore = Number(landingPageData?.play_status) === 1;
+  const showAppStore = Number(landingPageData?.app_status) === 1;
+
+  // console.log({ showPlayStore, showAppStore });
   return (
     <Stack
       direction="row"
@@ -135,12 +142,8 @@ const AppLinks = (props) => {
       gap={language_direction === "rtl" && "10px"}
       justifyContent="center"
     >
-      {Number.parseInt(
-        landingPageData?.download_user_app_links?.playstore_url_status
-      ) === 1 && googlePlay()}
-      {Number.parseInt(
-        landingPageData?.download_user_app_links?.apple_store_url_status
-      ) === 1 && appleStore()}
+      {showPlayStore && googlePlay()}
+      {showAppStore && appleStore()}
     </Stack>
   );
 };

@@ -61,11 +61,13 @@ const TopNavBar = () => {
 										alignItems="center"
 									>
 										<ThemeSwitches />
-										{configData?.phone && (<CallToAdmin configData={configData}/>)}
+										{configData?.phone && (<CallToAdmin configData={configData} />)}
+
 										<CustomLanguage
 											countryCode={countryCode}
 											language={language}
 										/>
+
 									</Stack>
 								</Stack>
 							</Box>
@@ -85,7 +87,7 @@ const TopNavBar = () => {
 								>
 									<Stack
 										alignItems="center"
-										justifyContent="center"
+										justifyContent="flex-start"
 									>
 										<LogoSide
 											width="126px"

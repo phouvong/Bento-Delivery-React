@@ -7,8 +7,9 @@ import { Grid, Skeleton, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import SearchIcon from "@mui/icons-material/Search";
 import { Scrollbar } from "../../srollbar";
+import { highlightMatchingText } from "../../../utils/highlightText";
 
-const SuggestedSearches = ({ t, data, handleKeyPress, isRefetching }) => {
+const SuggestedSearches = ({ t, data, handleKeyPress, isRefetching, searchValue }) => {
   return (
     <>
       {isRefetching ? (
@@ -43,10 +44,10 @@ const SuggestedSearches = ({ t, data, handleKeyPress, isRefetching }) => {
                               <SearchIcon />
                               <Typography
                                 sx={{
-                                  color: (theme) => theme.palette.neutral[700],
+                                  color: (theme) => theme.palette.neutral[600],
                                 }}
                               >
-                                {item?.name}
+                                {highlightMatchingText(item?.name, searchValue)}
                               </Typography>
                             </Stack>
                           );
@@ -76,7 +77,7 @@ const SuggestedSearches = ({ t, data, handleKeyPress, isRefetching }) => {
                                   color: (theme) => theme.palette.neutral[700],
                                 }}
                               >
-                                {item?.name}
+                                {highlightMatchingText(item?.name, searchValue)}
                               </Typography>
                             </Stack>
                           );

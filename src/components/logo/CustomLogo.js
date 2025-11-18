@@ -1,17 +1,18 @@
 import { useRouter } from "next/router";
 import { styled } from "@mui/material";
 import CustomImageContainer from "../CustomImageContainer";
+import NextImage from "components/NextImage";
 
-export const Logo = styled("div")(({ theme, height, width }) => ({
-  width: width,
+export const Logo = styled("div")(({ height, width }) => ({
+  maxWidth: width,
   height: height,
-  justifyContent: "center",
+
   position: "relative",
   cursor: "pointer",
   "& img": {
     width: "100%",
     height: "100%",
-    objectFit: "contained",
+    objectFit: "contain",
   },
 }));
 const CustomLogo = ({ logoImg, atlText, height, width, objectFit }) => {
@@ -32,12 +33,15 @@ const CustomLogo = ({ logoImg, atlText, height, width, objectFit }) => {
     }
   };
   return (
+
     <Logo height={height} width={width} onClick={() => handleClick()}>
-      <CustomImageContainer
+      <NextImage
         src={logoImg}
         alt={atlText}
-        objectfit={objectFit ? objectFit : "contain"}
+        objectFit={objectFit ? objectFit : "contain"}
         loading="eager"
+        width={100}
+        height={70}
       />
     </Logo>
   );

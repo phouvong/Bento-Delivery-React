@@ -1,317 +1,289 @@
-/* eslint-disable @next/next/no-img-element */
-import { styled, Typography, useMediaQuery, useTheme } from "@mui/material";
-import { Box, Stack } from "@mui/system";
-import { useEffect, useState } from "react";
+import React, { useRef, useState } from 'react';
+import {
+	Box,
+	Container,
+	Typography,
+	Grid,
+	Card,
+	CardContent,
+	Avatar,
+	IconButton,
+	useTheme,
+	Button,
+	alpha
+} from '@mui/material';
+import { ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import Slider from "react-slick";
-import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
-import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import CustomImageContainer from "../CustomImageContainer";
+import "slick-carousel/slick/slick-theme.css";
+import FormatQuoteOutlinedIcon from '@mui/icons-material/FormatQuoteOutlined';
+import MapModal from "components/Map/MapModal";
+import { useGeolocated } from "react-geolocated";
+import DollarSignHighlighter from 'components/DollarSignHighlighter';
 
-import { RTL } from "components/rtl";
-import { getLanguage } from "helper-functions/getLanguage";
-import CustomContainer from "../container";
-import DollarSignHighlighter from "../DollarSignHighlighter";
-import NextIcon from "../icons/NextIcon";
-import PrevIcon from "../icons/PrevIcon";
+const testimonialData = [
+	{
+		id: 1,
+		name: "John Smith",
+		role: "Customer",
+		rating: 5,
+		comment: "Amazing service! Fast delivery and great food quality. Highly recommended!",
+		avatar: "/images/avatar1.jpg"
+	},
+	{
+		id: 2,
+		name: "Sarah Johnson",
+		role: "Regular Customer",
+		rating: 5,
+		comment: "The app is so easy to use and the delivery is always on time. Love it!",
+		avatar: "/images/avatar2.jpg"
+	},
+	{
+		id: 3,
+		name: "Mike Wilson",
+		role: "Food Lover",
+		rating: 4,
+		comment: "Great variety of restaurants and quick service. Very satisfied!",
+		avatar: "/images/avatar3.jpg"
+	},
+	{
+		id: 4,
+		name: "Emma Davis",
+		role: "Busy Professional",
+		rating: 5,
+		comment: "Perfect for my busy schedule. Reliable and convenient food delivery.",
+		avatar: "/images/avatar4.jpg"
+	}
+];
 
-const PrevWrapper = styled(Box)(({ theme }) => ({
-	zIndex: 1,
-	[theme.breakpoints.down("lg")]: {
-		left: -5,
-	},
-	[theme.breakpoints.down("sm")]: {
-		left: -10,
-		display: "none",
-	},
-}));
-const NextWrapper = styled(Box)(({ theme }) => ({
-	zIndex: 1,
-	[theme.breakpoints.down("lg")]: {
-		right: -5,
-	},
-	[theme.breakpoints.down("sm")]: {
-		right: -5,
-		display: "none",
-	},
-}));
-const Next = ({ onClick, className }) => {
-	return (
-		<NextWrapper
-			className={`client-nav client-next ${className}`}
-			onClick={onClick}
-		>
-			<NextIcon />
-		</NextWrapper>
-	);
-};
-const Prev = ({ onClick, className }) => {
-	return (
-		<PrevWrapper
-			className={`client-nav client-prev ${className}`}
-			onClick={onClick}
-		>
-			<PrevIcon />
-		</PrevWrapper>
-	);
-};
-const Testimonials = ({ isSmall, landingPageData }) => {
+const TestimonialCard = ({ testimonial, }) => {
+	const [open, setOpen] = useState(false)
+
 	const theme = useTheme();
+	const { coords } =
+		useGeolocated({
+			positionOptions: {
+				enableHighAccuracy: false,
+			},
+			userDecisionTimeout: 5000,
+			isGeolocationEnabled: true,
+		});
 
-	const [testimonials, setTestimonials] = useState([]);
-	const lanDirection = getLanguage() ? getLanguage() : "ltr";
+	return (
+		<Card
+			sx={{
+				height: '100%',
+				p: 2,
+				borderRadius: '12px',
+				boxShadow: '0px 0px 80px 0px #CDCDCD40',
+				//border: `1px solid ${theme.palette.divider}`,
+				minHeight: '200px'
+			}}
+		>
+			<CardContent sx={{ textAlign: 'center', padding: "18px" }}>
+				<Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+					<FormatQuoteOutlinedIcon
+						sx={{
+							fontSize: 40,
+							color: theme.palette.primary.main,
+							opacity: 0.7
+						}}
+					/>
+				</Box>
 
-	useEffect(() => {
-		// Filter the testimonial_list based on the status property
-		const filteredTestimonials = landingPageData?.testimonial_list?.filter(
-			(item) => item?.status === 1
-		);
+				<Typography
+					variant="body2"
+					color="text.secondary"
+					sx={{
+						lineHeight: 1.6,
+						mb: 2,
+						display: '-webkit-box',
+						WebkitLineClamp: 2,
+						WebkitBoxOrient: 'vertical',
+						overflow: 'hidden',
+						textOverflow: 'ellipsis'
+					}}
+				>
+					{testimonial.review}
+				</Typography>
 
-		// Set the filtered testimonials in the state
-		setTestimonials(filteredTestimonials);
-	}, [landingPageData]);
+				<Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+					<Avatar
+						src={testimonial.reviewer_image_full_url}
+						sx={{ width: 50, height: 50, mb: 1 }}
+					>
+						{testimonial.name.charAt(0)}
+					</Avatar>
+					<Box>
+						<Typography variant="h6" sx={{ fontWeight: 600, fontSize: '16px' }}>
+							{testimonial.name}
+						</Typography>
+						<Typography variant="body2" color="text.secondary">
+							{testimonial.designation}
+						</Typography>
+					</Box>
+				</Box>
+			</CardContent>
+		</Card>
+	);
+};
 
-	const [nav1, setNav1] = useState(null);
-	const [nav2, setNav2] = useState(null);
-	const [indexState, setIndexState] = useState({
-		oldSlide: 0,
-		activeSlide: 0,
-		activeSlide2: 0,
-	});
-	const setting = {
-		autoplay: true,
+const Testimonials = ({ testimonial_section, handleOrderNow }) => {
+	const theme = useTheme();
+	const sliderRef = useRef(null);
+	const data = testimonial_section?.testimonial_list || testimonialData;
+
+	const handleNext = () => {
+		sliderRef.current?.slickNext();
+	};
+
+	const handlePrev = () => {
+		sliderRef.current?.slickPrev();
+	};
+
+	const sliderSettings = {
 		dots: false,
-		arrow: true,
-		infinite: testimonials.length > 1 ? true : false,
-		slidesToShow: testimonials.length > 4 ? 3 : 1,
-		focusOnSelect: true,
-		className: "center",
-		centerMode: true,
-		centerPadding: "200px",
-		speed: testimonials.length > 4 ? 1000 : 2000,
+		infinite: true,
+		speed: 500,
+		slidesToShow: 2,
+		slidesToScroll: 1,
+		arrows: false,
+		autoplay: true,
 		autoplaySpeed: 4000,
-		beforeChange: (current, next) =>
-			setIndexState({ oldSlide: current, activeSlide: next }),
-		afterChange: (current) => setIndexState({ activeSlide2: current }),
-		prevArrow: testimonials.length > 1 && <Prev />,
-		nextArrow: testimonials.length > 1 && <Next />,
+		pauseOnHover: true,
 		responsive: [
 			{
-				breakpoint: 1023,
+				breakpoint: 1024,
 				settings: {
-					slidesToShow: testimonials.length > 3 ? 3 : 1,
-					centerPadding: "64px",
-				},
-			},
-			{
-				breakpoint: 767,
-				settings: {
-					slidesToShow: testimonials.length > 3 ? 3 : 1,
-					centerPadding: "0",
-				},
+					slidesToShow: 1,
+					slidesToScroll: 1,
+					infinite: true,
+					dots: true
+				}
 			},
 			{
 				breakpoint: 600,
 				settings: {
-					slidesToShow: testimonials.length > 3 ? 3 : 1,
-					initialSlide: 2,
-					centerPadding: "0",
-				},
+					slidesToShow: 1,
+					slidesToScroll: 1,
+					initialSlide: 1
+				}
 			},
-		],
+			{
+				breakpoint: 480,
+				settings: {
+					slidesToShow: 1,
+					slidesToScroll: 1
+				}
+			}
+		]
 	};
-	const textSliderSettings = {
-		fade: true,
-	};
-	if (!testimonials?.length) {
-		return;
-	}
-	return (
-		<RTL direction={lanDirection}>
-			{landingPageData && testimonials?.length > 0 && (
-				<CustomContainer>
-					<CustomStackFullWidth
-						py={{ xs: "30px", md: "3.35rem" }}
-						spacing={4}
-					>
-						<Typography
-							textAlign="center"
-							variant={isSmall ? "h7" : "h4"}
-							fontSize={{ xs: "17px", sm: "24px", md: "30px" }}
-							fontWeight={500}
-							sx={{ opacity: ".9" }}
-							component="h2"
-						>
-							<DollarSignHighlighter
-								theme={theme}
-								text={landingPageData?.testimonial_title}
-							/>
-						</Typography>
-					</CustomStackFullWidth>
-					<CustomStackFullWidth
-						pb={{ xs: "0px", md: "45px" }}
-						sx={{
-							marginTop: "5px",
-							textAlign: "center",
-						}}
-					>
-						<Box
-							sx={{ display: "block", position: "relative" }}
-							className={"testimonials-slider"}
-						>
-							<Box sx={{ gap: "35px" }}>
-								<Box className="slider-wrapper">
-									<Slider
-										asNavFor={nav2}
-										ref={(e) => setNav1(e)}
-										{...setting}
-										rtl={landingPageData?.direction === "rtl"}
-									>
-										{testimonials?.map((item, i) => (
-											<>
-												{item?.status === 1 && (
-													<TestimonialSlideImage
-														img={item?.reviewer_image_full_url}
-														key={i}
-														indexState={indexState}
-														currentIndex={i}
-														lanDirection={lanDirection}
-													/>
-												)}
-											</>
-										))}
-									</Slider>
-								</Box>
-								<Slider
-									asNavFor={nav1}
-									ref={(e) => setNav2(e)}
-									{...textSliderSettings}
-									rtl={landingPageData?.direction === "rtl"}
-								>
-									{testimonials.map((item, i) => (
-										<TestimonialSlideText
-											{...item}
-											key={i}
-											lanDirection={lanDirection}
-										/>
-									))}
-								</Slider>
-							</Box>
-						</Box>
-					</CustomStackFullWidth>
-				</CustomContainer>
-			)}
-		</RTL>
-	);
-};
-export const TestimonialSlideImage = (props) => {
-	const { img, indexState, currentIndex, lanDirection } = props;
-	const theme = useTheme();
-	const primary = theme.palette.primary.main;
-	return (
-		<>
-			<Stack
-				p="4px"
-				sx={{
-					position: "relative",
-					width: "100%",
-					maxWidth: "140px",
-					aspectRatio: "1",
-					margin: "2px auto",
-					direction: lanDirection,
-				}}
-			>
-				<Box
-					sx={{
-						position: "absolute",
-						inset: "0",
-						background:
-							currentIndex === indexState?.activeSlide2 && primary,
-						width: "100%",
-						height: "100%",
-						aspectRatio: "1",
-						borderRadius: "50%",
-						overflow: "hidden", // Ensure content inside is not visible outside the circle
-						padding: "5px",
-						transition: "background-color ease-in-out 0.3s", // Smoother background color transition
-						transform: `scale(${
-							currentIndex === indexState?.activeSlide2 ? 1.01 : 1
-						})`, // Scale effect for smoother transition
-					}}
-				>
-					<CustomImageContainer
-						src={img}
-						alt=""
-						width="100%"
-						objectFit="cover"
-						borderRadius="50%"
-					/>
-				</Box>
-			</Stack>
-		</>
-	);
-};
 
-export const TestimonialSlideText = (props) => {
-	const theme = useTheme();
-	const { name, designation, review, activeState, index, lanDirection } =
-		props;
-	const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 	return (
-		<Box
-			className={`slide-item ${
-				index > activeState
-					? "next-slide"
-					: index == activeState
-					? "active"
-					: "prev-slide"
-			}`}
-			sx={{ marginTop: "30px" }}
-		>
-			<Stack
-				className="content"
-				spacing={3}
-				alignItems="center"
-				sx={{ direction: lanDirection }}
-			>
-				{review && (
-					<Typography
-						fontSize={{ xs: "12px", md: "18px" }}
-						fontWeight="400"
-						color={theme.palette.primary.main}
-						lineHeight="2"
-						fontStyle="italic"
-						sx={{ maxWidth: { xs: "280px", sm: "400px", md: "580px" } }}
-					>
-						“{review}”
-					</Typography>
-				)}
-				<Stack spacing={1}>
-					{name && (
+		<Container maxWidth="lg" sx={{ py: { xs: 2, md: 4 } }}>
+			<Grid container spacing={4} alignItems="center">
+				{/* Left side - Title and Subtitle */}
+				<Grid item xs={12} md={4}>
+					<Box sx={{ pr: { md: 3 }, textAlign: { xs: 'center', md: 'left' } }}>
 						<Typography
-							variant={isSmall ? "subtitle2" : "h6"}
-							fontWeight="600"
-							component="h3"
+							variant="h3"
+							sx={{
+								fontWeight: 600,
+								fontSize: { xs: '18px', md: '30px' },
+								mb: 2,
+								color: theme.palette.text.primary
+							}}
 						>
-							{name}
+							<DollarSignHighlighter text={testimonial_section?.testimonial_title} theme={theme} />
+
 						</Typography>
-					)}
-					{designation && (
 						<Typography
-							variant={isSmall ? "body2" : "body1"}
-							fontSize={{ xs: "12px", sm: "14px", md: "16px" }}
-							fontWeight={400}
-							className="designation"
-							color="text.secondary"
+							variant="body1"
+							sx={{
+								color: theme.palette.text.secondary,
+								fontSize: '16px',
+								lineHeight: 1.6
+							}}
 						>
-							{designation}
+							{testimonial_section?.testimonial_sub_title}
 						</Typography>
-					)}
-				</Stack>
-			</Stack>
-		</Box>
+						<Button onClick={handleOrderNow} variant='contained' sx={{ mt: { xs: "10px", md: "1rem" } }}>
+							{testimonial_section?.testimonial_button_title}
+						</Button>
+					</Box>
+				</Grid>
+
+				{/* Right side - React Slick Slider */}
+				<Grid item xs={12} md={8}>
+					<Box sx={{ position: 'relative' }}>
+						{/* Left Navigation Button */}
+						<IconButton
+							onClick={handlePrev}
+							sx={{
+								position: 'absolute',
+								left: { xs: -11, md: -20 },
+								top: '50%',
+								transform: 'translateY(-50%)',
+								zIndex: 2,
+								backgroundColor: '#f5f5f5',
+								color: '#666',
+								borderRadius: '50%',
+								'&:hover': {
+									backgroundColor: '#e0e0e0',
+								},
+								width: "33px",
+								height: "33px"
+							}}
+						>
+							{theme.direction === 'rtl' ? (
+								<ArrowForwardIos sx={{ fontSize: "18px" }} />
+							) : (
+								<ArrowBackIos sx={{ fontSize: "18px", marginLeft: "6px" }} />
+							)}
+						</IconButton>
+
+						{/* React Slick Slider */}
+						<Box sx={{ background: { xs: "transparent", md: alpha(theme.palette.neutral[200], .1) }, paddingTop: "10px", pb: "5px", borderRadius: "10px" }} >
+							<Slider ref={sliderRef} {...sliderSettings}>
+								{data.map((testimonial) => (
+									<Box key={testimonial.id} sx={{ px: 1 }}>
+										<TestimonialCard testimonial={testimonial} />
+									</Box>
+								))}
+							</Slider>
+						</Box>
+
+						{/* Right Navigation Button */}
+						<IconButton
+							onClick={handleNext}
+							sx={{
+								position: 'absolute',
+								right: { xs: -11, md: -20 },
+								top: '50%',
+								transform: 'translateY(-50%)',
+								zIndex: 2,
+								backgroundColor: '#f5f5f5',
+								color: '#666',
+								borderRadius: '50%',
+								'&:hover': {
+									backgroundColor: '#e0e0e0',
+								},
+								width: 30,
+								height: 30
+							}}
+						>
+							{theme.direction === 'rtl' ? (
+								<ArrowBackIos sx={{ fontSize: "18px", marginInlineEnd: "6px" }} />
+							) : (
+								<ArrowForwardIos sx={{ fontSize: "18px" }} />
+							)}
+						</IconButton>
+					</Box>
+				</Grid>
+			</Grid>
+
+		</Container>
 	);
 };
-Testimonials.propTypes = {};
 
 export default Testimonials;

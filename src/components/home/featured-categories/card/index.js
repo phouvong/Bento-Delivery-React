@@ -70,7 +70,7 @@ const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
           borderRadius: "10px",
           "&:hover": {
             boxShadow: "0px 10px 20px 0px rgba(88, 110, 125, 0.10)",
-            border: "0px",
+            border: (theme) => `1px solid ${theme.palette.primary.main}`,
             img: {
               transform: "scale(1.04)",
             },
@@ -86,25 +86,26 @@ const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
             position: "relative",
             height: { xs: "95px", md: "110px" },
             width: "100%",
-            img:{
-              width:"100%",
-              height: "100%",}
+            img: {
+              width: "100%",
+              height: "100%",
+            }
           }}
         >
           {onlyshimmer ? (
-              <Skeleton
-                  width="100%"
-                  height="100%"
-                  variant="rectangle"
-                />
-          ) : (<NextImage
-              src={image}
-              alt={title}
-              height={110}
-              width={106}
-              objectFit="cover"
-              bg="#ddd"
+            <Skeleton
+              width="100%"
+              height="100%"
+              variant="rectangle"
             />
+          ) : (<NextImage
+            src={image}
+            alt={title}
+            height={110}
+            width={106}
+            objectFit="cover"
+            bg="#ddd"
+          />
           )}
         </Stack>
         <Tooltip
@@ -130,7 +131,7 @@ const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
               color={hover && "primary.main"}
               component="h4"
             >
-              {onlyshimmer ? <Skeleton width="70px" variant="text" sx={{mx: "auto"}} /> : title}
+              {onlyshimmer ? <Skeleton width="70px" variant="text" sx={{ mx: "auto" }} /> : title}
             </Typography>
           </CustomBoxFullWidth>
         </Tooltip>

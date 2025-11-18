@@ -5,7 +5,7 @@ import { setSelectedModule } from "redux/slices/utils";
 import CustomImageContainer from "../CustomImageContainer";
 import { useSelector } from "react-redux";
 import { useRouter } from "next/router";
-import {setFeaturedCategories, setRecommendedStores} from "redux/slices/storedData";
+import { setFeaturedCategories, setRecommendedStores } from "redux/slices/storedData";
 
 const Container = styled(Stack)(({ theme }) => ({
   position: "fixed",
@@ -82,7 +82,7 @@ const ModuleSelect = ({
     if (
       interestId?.length > 0 &&
       !isModuleExist &&
-      item.module_type !== "parcel"
+      item.module_type !== "parcel" && item?.module !== "rental"
     ) {
       router.push("/interest", undefined, { shallow: true });
     }

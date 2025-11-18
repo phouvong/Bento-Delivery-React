@@ -1344,6 +1344,10 @@ export const arabic = {
 	'Top offers near me':"أفضل العروض بالقرب مني",
 	"Select Payment Method":"اختر طريقة الدفع",
 	'Add To cart':"أضف إلى السلة",
-	"Select a Payment Method to Proceed":"اختر طريقة دفع للمتابعة"
+	"Select a Payment Method to Proceed":"اختر طريقة دفع للمتابعة",
+	"* By login I Agree with all the": "* بتسجيل الدخول أوافق على جميع",
+	"Return fee": "رسوم الإرجاع",
+	"Grand Total Amount": "المبلغ الإجمالي الكلي",
+	"You will  pay return fee": "ستدفع رسوم الإرجاع"
 
 };

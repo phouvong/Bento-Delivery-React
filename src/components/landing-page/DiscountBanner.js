@@ -33,9 +33,10 @@ const DiscountBanner = ({ bannerImage, isSmall }) => {
           <Box
             sx={{
               width: "100%",
-              // height: "250px",
+              height: "150px",
               borderRadius: "5px",
               marginBottom: "40px ",
+              marginTop: "45px",
             }}
           >
             <CustomImageContainer
@@ -44,6 +45,7 @@ const DiscountBanner = ({ bannerImage, isSmall }) => {
               height="100%"
               width="100%"
               obejctfit="contained"
+              borderRadius="15px"
             />
           </Box>
         </CustomContainer>

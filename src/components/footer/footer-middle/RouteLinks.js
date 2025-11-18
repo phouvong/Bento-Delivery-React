@@ -63,6 +63,7 @@ const RouteLinks = (props) => {
             key={index}
             onClick={() => handleClick(item.link, item.value)}
             sx={{
+              textAlign:"left",
               cursor: "pointer",
               "&:hover": {
                 color: theme.palette.primary.main,

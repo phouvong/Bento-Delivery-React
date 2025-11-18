@@ -220,45 +220,6 @@ const RestaurantDetailsForm = ({
               </Grid>
             )}
 
-            {/*<Grid item xs={12} sm={12} md={12}>*/}
-            {/*	<CustomTextFieldWithFormik*/}
-            {/*	labelColor={alpha(theme.palette.neutral[1000],0.8)}*/}
-            {/*		required="true"*/}
-            {/*		type="number"*/}
-            {/*		label={t("VAT/TAX")}*/}
-            {/*		placeholder={t("VAT/TAX")}*/}
-            {/*		maxLength={100} // HTML attribute to limit input*/}
-            {/*		touched={RestaurantJoinFormik.touched.vat}*/}
-            {/*		errors={RestaurantJoinFormik.errors.vat}*/}
-            {/*		fieldProps={RestaurantJoinFormik.getFieldProps(*/}
-            {/*			"vat"*/}
-            {/*		)}*/}
-            {/*		onChangeHandler={restaurantNameHandler}*/}
-            {/*		value={RestaurantJoinFormik.values.vat}*/}
-            {/*		fontSize="12px"*/}
-            {/*		startIcon={*/}
-            {/*			<InputAdornment position="start">*/}
-            {/*				<PaidIcon*/}
-            {/*					sx={{*/}
-            {/*						color:*/}
-            {/*							RestaurantJoinFormik.touched*/}
-            {/*								.vat &&*/}
-            {/*							!RestaurantJoinFormik.errors*/}
-            {/*								.vat*/}
-            {/*								? theme.palette.primary*/}
-            {/*										.main*/}
-            {/*								: alpha(*/}
-            {/*										theme.palette*/}
-            {/*											.neutral[400],*/}
-            {/*										0.7*/}
-            {/*								  ),*/}
-            {/*						fontSize: "18px",*/}
-            {/*					}}*/}
-            {/*				/>*/}
-            {/*			</InputAdornment>*/}
-            {/*		}*/}
-            {/*	/>*/}
-            {/*</Grid>*/}
             <Grid item container xs={12} sm={12} md={12} spacing={2}>
               <Grid item md={4} xs={12}>
                 <CustomTextFieldWithFormik

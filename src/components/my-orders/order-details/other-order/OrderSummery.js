@@ -118,7 +118,7 @@ const OrderSummery = (props) => {
             <Grid item xs={12} sm={12} md={12}>
               {!data?.prescription_order &&
                 trackOrderData?.module_type === "pharmacy" &&
-                trackOrderData?.order_attachment_full_url && (
+                trackOrderData?.order_attachment_full_url && trackOrderData?.attachment && (
                   <SingleOrderAttachment
                     title="Prescription"
                     trackOrderData={trackOrderData}
@@ -177,7 +177,7 @@ const OrderSummery = (props) => {
                             <Stack flexDirection={"row"} gap={"4px"}>
                               {t(product?.item_details?.name)}
                               {product?.item_details?.halal_tag_status &&
-                              product?.item_details?.is_halal ? (
+                                product?.item_details?.is_halal ? (
                                 <FoodHalalHaram
                                   position="relative"
                                   width={23}
@@ -305,29 +305,29 @@ const OrderSummery = (props) => {
                     </Stack>
                     {(trackOrderData?.payment_method === "offline_payment" ||
                       partialWithOffline) && (
-                      <Stack alignItems="flex-end" gap="5px">
-                        <Typography
-                          component="span"
-                          fontSize="12px"
-                          sx={{
-                            textTransform: "capitalize",
-                            padding: "4px",
-                            marginLeft: "15px",
-                            borderRadius: "3px",
-                            backgroundColor: buttonBackgroundColor(),
-                            color: theme.palette.whiteContainer.main,
-                            fontWeight: "600",
-                          }}
-                        >
-                          {/* {trackData?.order_status.replace("_", " ")} */}
-                          {trackOrderData?.offline_payment?.data?.status}
-                        </Typography>
-                        <ExpandMoreIcon
-                          onClick={handleClickOffline}
-                          sx={{ cursor: "pointer" }}
-                        />
-                      </Stack>
-                    )}
+                        <Stack alignItems="flex-end" gap="5px">
+                          <Typography
+                            component="span"
+                            fontSize="12px"
+                            sx={{
+                              textTransform: "capitalize",
+                              padding: "4px",
+                              marginLeft: "15px",
+                              borderRadius: "3px",
+                              backgroundColor: buttonBackgroundColor(),
+                              color: theme.palette.whiteContainer.main,
+                              fontWeight: "600",
+                            }}
+                          >
+                            {/* {trackData?.order_status.replace("_", " ")} */}
+                            {trackOrderData?.offline_payment?.data?.status}
+                          </Typography>
+                          <ExpandMoreIcon
+                            onClick={handleClickOffline}
+                            sx={{ cursor: "pointer" }}
+                          />
+                        </Stack>
+                      )}
                   </Stack>
                   {openOfflineDetails &&
                     (trackOrderData?.payment_method === "offline_payment" ||
@@ -339,8 +339,8 @@ const OrderSummery = (props) => {
                     )}
                   {trackOrderData?.offline_payment?.data?.status ===
                     "denied" && (
-                    <OfflineOrderDenied trackOrderData={trackOrderData} />
-                  )}
+                      <OfflineOrderDenied trackOrderData={trackOrderData} />
+                    )}
                   {openOfflineModal && (
                     <CustomModal
                       openModal={openOfflineModal}
@@ -455,7 +455,7 @@ const OrderSummery = (props) => {
               {trackOrderData?.order_status === "canceled" && (
                 <InstructionBox
                   title="cancellation note"
-                  note={trackOrderData?.cancellation_reason}
+                  note={trackOrderData?.cancellation_note}
                 />
               )}
             </Grid>

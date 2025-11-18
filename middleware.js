@@ -6,9 +6,10 @@ const protectedRoutes = ["/rental/cart"];
 export function middleware(request) {
   const { pathname } = request.nextUrl;
   if (protectedRoutes.includes(pathname)) {
-    const cartListValue = request.cookies.get("cart-list");
+    const cartListCookie = request.cookies.get("cart-list");
+    const cartListValue = cartListCookie?.value;
 
-    if (!cartListValue || cartListValue == "0") {
+    if (!cartListValue || cartListValue === "0") {
       const url = new URL("/home", request.url);
       return NextResponse.redirect(url);
     }

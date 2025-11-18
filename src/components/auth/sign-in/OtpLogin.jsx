@@ -22,7 +22,7 @@ const OtpLogin = ({
   fireBaseId,
   configData,
   isRemember,
-                    getActiveLoginType,
+  getActiveLoginType,
   onlyOtp
 }) => {
   const theme = useTheme();
@@ -51,7 +51,7 @@ const OtpLogin = ({
                 value="remember"
                 color="primary"
                 onChange={rememberMeHandleChange}
-                isRemember={isRemember|| false}
+                isRemember={isRemember || false}
 
               />
             }
@@ -86,7 +86,7 @@ const OtpLogin = ({
                   fontSize: "12px",
                 }}
               >
-                {t(" Terms & Conditions")}
+                {" "}  {t(" Terms & Conditions")}
               </Typography>
             </CustomColouredTypography>
           </CustomStackFullWidth>
@@ -108,7 +108,7 @@ const OtpLogin = ({
         </CustomStackFullWidth>
       </form>
       {!onlyOtp && (
-        <Typography onClick={getActiveLoginType} mt="1rem" sx={{textDecoration:"underLine",cursor:'pointer',color:theme=>theme=>theme.palette.primary.main}} textAlign="center">{("Go Back")}</Typography>
+        <Typography onClick={getActiveLoginType} mt="1rem" sx={{ textDecoration: "underLine", cursor: 'pointer', color: theme => theme => theme.palette.primary.main }} textAlign="center">{("Go Back")}</Typography>
       )}
 
     </CustomStackFullWidth>

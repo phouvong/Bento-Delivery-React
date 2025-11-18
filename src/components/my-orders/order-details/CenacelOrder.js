@@ -201,9 +201,12 @@ const CancelOrder = ({
         <DialogContent sx={{ padding: "10px 24px" }}>
           <CustomStackFullWidth>
             <FormControl component="fieldset">
-              <Typography fontWeight="600" variant="h6" paddingY=".5rem">
-                {t("Cancel Reason")}
-              </Typography>
+              {cancelReasonsData?.data?.length > 0 && (
+                <Typography fontWeight="600" variant="h6" paddingY=".5rem">
+                  {t("Cancel Reason")}
+                </Typography>
+              )}
+
               <RadioGroup
                 aria-label="gender"
                 name="gender1"
@@ -228,6 +231,19 @@ const CancelOrder = ({
                   })}
               </RadioGroup>
             </FormControl>
+            <Typography mt="10px" fontWeight="600" fontSize="14px">{t("Comments")}</Typography>
+            <TextField
+              sx={{marginTop:".5rem"}}
+              id="outlined-multiline-static"
+              label="Type here your cancel reason..."
+              multiline
+              fullWidth
+              rows={4}
+              variant="outlined"
+              value={additionalInfo}
+              onChange={(e) => setAdditionalInfo(e.target.value)}
+            />
+
           </CustomStackFullWidth>
         </DialogContent>
         <DialogActions sx={{ paddingX: "20px" }}>

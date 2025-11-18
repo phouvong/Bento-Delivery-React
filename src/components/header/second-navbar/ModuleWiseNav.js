@@ -95,18 +95,24 @@ const ModuleWiseNav = (props) => {
 				height: "40px",
 				position: "relative",
 				cursor: "pointer",
+				display: "flex",
+				justifyContent: "flex-start", // aligns left
+				alignItems: "center",
+				p: 0, // remove padding
+				m: 0, // remove margin
 				"& img": {
 					maxHeight: "100%",
+					display: "block",
 				},
 			}}
 		>
 			<CustomLogo
 				atlText="logo"
 				logoImg={favIcon}
-				//height="1.5rem"
-				width={"100%"}
-				height={"40px"}
-				objectFit={"contain"}
+				width="150px"
+				height="40px"
+				objectFit="contain"
+				style={{ marginLeft: 0 }} // force left if needed
 			/>
 		</Box>
 	);
@@ -129,7 +135,7 @@ const ModuleWiseNav = (props) => {
 						<CustomBoxFullWidth>
 							<Grid
 								container
-								justifyContent="center"
+								justifyContent={{ xs: "flex-start", md: "center" }}
 								alignItems="center"
 								spacing={1}
 							>
@@ -138,9 +144,10 @@ const ModuleWiseNav = (props) => {
 									xs={router.pathname === "/home" ? 2 : 4}
 									sm={4}
 									align="left"
+									justifyItems="flex-start"
 								>
 									{router.pathname === "/home" &&
-									!router.query.search ? (
+										!router.query.search ? (
 										modules.length >= 2 ? (
 											<MobileModuleSelection />
 										) : (

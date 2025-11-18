@@ -13,13 +13,13 @@ import { ModuleTypes } from "../../helper-functions/moduleTypes";
 
 const CustomPaper = styled(Paper)(({ theme, display, padding }) => ({
   position: "absolute",
-  top: getCurrentModuleType() === ModuleTypes.FOOD ? 77 : 32,
+  top: getCurrentModuleType() === ModuleTypes.FOOD ? 77 : 42,
   width: "100%",
   padding: "1.5rem 1.5rem 2rem 1.5rem",
   zIndex: 999,
   display: display ? display : "inherit",
-  borderTopLeftRadius: "0px",
-  borderTopRightRadius: "0px",
+  borderTopLeftRadius: "5px",
+  borderTopRightRadius: "5px",
 }));
 const SearchSuggestionsBottom = (props) => {
   const {
@@ -114,8 +114,8 @@ const SearchSuggestionsBottom = (props) => {
               ? "inherit"
               : "none"
             : list.length > 0 || itemOrStoreSuggestionData
-            ? "inherit"
-            : "none"
+              ? "inherit"
+              : "none"
         }
       >
         <CustomStackFullWidth spacing={1}>
@@ -142,13 +142,14 @@ const SearchSuggestionsBottom = (props) => {
             <>
               {(itemOrStoreSuggestionData?.items?.length > 0 ||
                 itemOrStoreSuggestionData?.stores?.length > 0) && (
-                <SuggestedSearches
-                  t={t}
-                  data={itemOrStoreSuggestionData}
-                  handleKeyPress={handleKeyPress}
-                  isRefetching={isRefetchingItemOrStoreSuggestion}
-                />
-              )}
+                  <SuggestedSearches
+                    t={t}
+                    data={itemOrStoreSuggestionData}
+                    handleKeyPress={handleKeyPress}
+                    isRefetching={isRefetchingItemOrStoreSuggestion}
+                    searchValue={searchValue}
+                  />
+                )}
             </>
           )}
 

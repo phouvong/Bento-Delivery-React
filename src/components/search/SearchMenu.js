@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { CustomBoxFullWidth } from "styled-components/CustomStyles.style";
 import { Grid, Skeleton, styled, useMediaQuery, useTheme } from "@mui/material";
 import H1 from "../typographies/H1";
@@ -50,6 +50,8 @@ const SearchMenu = (props) => {
 	} = props;
 	const total = 1000;
 	const [showView, setShowView] = useState(true);
+	const [isSticky, setIsSticky] = useState(false);
+	const stickyRef = useRef(null);
 	const theme = useTheme();
 	const isSmallSize = useMediaQuery(theme.breakpoints.down("sm"));
 	useEffect(() => {
@@ -59,13 +61,42 @@ const SearchMenu = (props) => {
 			setShowView(false);
 		}
 	}, [currentTab]);
+
+	useEffect(() => {
+		const handleScroll = () => {
+			if (stickyRef.current) {
+				const rect = stickyRef.current.getBoundingClientRect();
+				// Element is sticky when it's at the top position (63px from viewport top)
+				setIsSticky(rect.top <= 63);
+			}
+		};
+
+		window.addEventListener('scroll', handleScroll);
+		handleScroll(); // Check initial state
+
+		return () => {
+			window.removeEventListener('scroll', handleScroll);
+		};
+	}, []);
 	const found = t("Found");
 	const textHandler = () => {
 		return `${totalDataCount ?? 0} ${tabs[currentTab]?.value} ${found}`;
 	};
 
 	return (
-		<CustomBoxFullWidth sx={{ marginBottom: "20px" }}>
+		<CustomBoxFullWidth
+			ref={stickyRef}
+			sx={{
+				marginBottom: "20px",
+				position: "sticky",
+				top: {xs:"55px",sm:"63px"},
+				zIndex: 10,
+				backgroundColor: isSticky ? "background.paper" : "transparent",
+				paddingY: isSticky ? "10px" : "0px",
+				paddingX: isSticky ? "10px" : "0px",
+				transition: "all 0.2s ease"
+			}}
+		>
 			<Grid container alignItems="center" justifyContent="center">
 				<Grid item xs={9} md={6}>
 					{isFetchingNextPage ? (

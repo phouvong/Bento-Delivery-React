@@ -234,6 +234,8 @@ const OtherModulePayment = (props) => {
   useEffect(() => {
     if (paymentMethod === "cash_on_delivery") {
       setExpanded(true);
+    }else {
+      setExpanded(false)
     }
   }, [paymentMethod]);
   return (

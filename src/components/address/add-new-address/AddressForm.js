@@ -62,44 +62,44 @@ const AddressForm = ({
           ? email
           : ""
         : guestUserInfo
-        ? guestUserInfo.contact_person_email
-        : "",
+          ? guestUserInfo.contact_person_email
+          : "",
       address: "",
       address_type: token
         ? addressType
           ? addressType
           : ""
         : guestUserInfo
-        ? guestUserInfo.address_type
-        : "",
+          ? guestUserInfo.address_type
+          : "",
       address_label: token
         ? ""
         : guestUserInfo
-        ? guestUserInfo.address_label
-        : "",
+          ? guestUserInfo.address_label
+          : "",
       contact_person_name: token
         ? personName
           ? personName
           : ""
         : guestUserInfo
-        ? guestUserInfo.contact_person_name
-        : "",
+          ? guestUserInfo.contact_person_name
+          : "",
       contact_person_number: token
         ? editAddress
           ? editAddress?.contact_person_number
           : phone
-          ? phone
-          : ""
+            ? phone
+            : ""
         : guestUserInfo
-        ? guestUserInfo.contact_person_number
-        : "",
+          ? guestUserInfo.contact_person_number
+          : "",
       additional_information: token
         ? editAddress
           ? editAddress?.additional_information
           : ""
         : guestUserInfo
-        ? guestUserInfo.additional_information
-        : "",
+          ? guestUserInfo.additional_information
+          : "",
       latitude: lat,
       longitude: lng,
       road: token
@@ -107,22 +107,22 @@ const AddressForm = ({
           ? editAddress?.road
           : ""
         : guestUserInfo
-        ? guestUserInfo.road
-        : "",
+          ? guestUserInfo.road
+          : "",
       house: token
         ? editAddress
           ? editAddress?.house
           : ""
         : guestUserInfo
-        ? guestUserInfo.house
-        : "",
+          ? guestUserInfo.house
+          : "",
       floor: token
         ? editAddress
           ? editAddress?.floor
           : ""
         : guestUserInfo
-        ? guestUserInfo.floor
-        : "",
+          ? guestUserInfo.floor
+          : "",
     },
     validationSchema: ValidationSchemaForAddAddress(),
     onSubmit: async (values, helpers) => {
@@ -135,7 +135,7 @@ const AddressForm = ({
               : values.address_type,
         };
         formSubmitOnSuccess(newData);
-      } catch (err) {}
+      } catch (err) { }
     },
   });
 
@@ -281,6 +281,7 @@ const AddressForm = ({
           {!token && (
             <Grid item xs={12} md={6}>
               <CustomTextFieldWithFormik
+                required
                 label={t("Email")}
                 touched={addAddressFormik.touched.contact_person_email}
                 errors={addAddressFormik.errors.contact_person_email}
@@ -357,8 +358,8 @@ const AddressForm = ({
                     ? t("Update Address")
                     : t("Add Address")
                   : guestUserInfo
-                  ? t("Update Address")
-                  : t("Add Address")
+                    ? t("Update Address")
+                    : t("Add Address")
               }
             />
           </Grid>

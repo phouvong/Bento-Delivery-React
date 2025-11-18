@@ -267,17 +267,17 @@ const HeroLocationForm = () => {
   return (
     <>
       <CustomStackFullWidth
-        backgroundColor={alpha(theme.palette.primary.main, 0.5)}
+        backgroundColor={theme.palette.neutral[100]}
         padding={{ xs: ".7rem", md: "1.2rem" }}
-        borderRadius="5px"
+        borderRadius="10px"
       >
         <CustomStackFullWidth
           direction="row"
           alignItems="center"
           sx={{ position: "relative", zIndex: 999 }}
         >
-          <Grid container spacing={isXSmall && 1}>
-            <Grid item xs={10} sm={9.9}>
+          <Grid container >
+            <Grid item xs={9} sm={9.9}>
               <HeroFormInputWrapper>
                 <CustomMapSearch
                   isLoading={isLoadingGeoCode}
@@ -294,22 +294,25 @@ const HeroLocationForm = () => {
                   fromparcel="false"
                   isLanding={true}
                   isRefetching={isRefetching}
+                  handleOpen={handleOpen}
                 />
                 <HeroFormItem ref={excludedDivRef}>
                   <Box
-                    onClick={handlePickLocation}
                     sx={{
-                      backgroundColor: (theme) => theme.palette.neutral[100],
+                      backgroundColor: (theme) => theme.palette.neutral[300],
                       // width: "100%",
-                      height: "56px",
                       alignItems: "center",
                       justifyContent: "center",
                       display: "flex",
                       padding: {
-                        xs: "0rem",
-                        sm: lanDirection === "rtl" ? "0rem" : "12px",
+                        xs: "8px",
+                        sm: lanDirection === "rtl" ? "0rem" : "8px",
                       },
                       position: "relative",
+                      top: {
+                        xs: "6px",
+                        md: lanDirection === "rtl" ? "9px" : "2px"
+                      },
                       cursor: "pointer",
                       boxShadow:
                         pickLocation && "0px 4px 4px 0px rgba(0, 0, 0, 0.10)",
@@ -325,8 +328,7 @@ const HeroLocationForm = () => {
                       direction="row"
                       gap="10px"
                       sx={{
-                        paddingLeft: "5px",
-                        marginInlineEnd: "5px",
+
                         color: !pickLocation && "primary.main",
                         "&:hover": {
                           color: "primary.main",
@@ -334,167 +336,45 @@ const HeroLocationForm = () => {
                       }}
                     >
                       {!isSelectedByGps && (
-                        <>
-                          <GpsFixedIcon
-                            id="gps-locate-icon"
-                            onClick={handleAgreeLocation}
-                            sx={{ fontSize: { xs: "20px", sm: "18px" } }}
-                          />
 
-                          {!isXSmall && (
-                            <Typography
-                              id="locate-me-text"
-                              variant={isXSmall ? "body3" : "body1"}
-                              onClick={handleAgreeLocation}
-                              sx={{
-                                cursor: "pointer",
-                                "&:hover": {
-                                  textDecoration: "underline",
-                                },
-                              }}
-                            >
-                              {t("Locate me")}
-                            </Typography>
-                          )}
-                        </>
+                        <GpsFixedIcon
+                          id="gps-locate-icon"
+                          onClick={handleAgreeLocation}
+                          sx={{
+                            fontSize: { xs: "20px", sm: "24px" },
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center"
+                          }}
+                        />
+
                       )}
-                      <>
-                        {isXSmall ? (
-                          <Stack
-                            sx={{
-                              borderRadius: "5px",
-                              backgroundColor: theme.palette.primary.main,
-                            }}
-                          >
-                            <IconButton
-                              disabled={!location?.lat || isLoadingGeoCode}
-                              sx={{
-                                borderRadius: "5px",
-                                backgroundColor: theme.palette.primary.main,
-                                height: "100%",
-                                width: "100%",
-                                "&:disabled": {
-                                  cursor: "not-allowed",
-                                  pointerEvents: "all !important",
-                                },
-                              }}
-                              onClick={() => setLocationEnable()}
-                            >
-                              <SearchIcon
-                                sx={{
-                                  fontSize: "22px",
-                                  color:
-                                    !location?.lat || isLoadingGeoCode
-                                      ? theme.palette.neutral[1100]
-                                      : "white",
-                                }}
-                              />
-                            </IconButton>
-                          </Stack>
-                        ) : (
-                          <>
-                            {pickLocation ? (
-                              <KeyboardArrowUpIcon
-                                id={`${divId}-Locate-me`}
-                                sx={{ fontSize: { xs: "14px", sm: "18px" } }}
-                              />
-                            ) : (
-                              <KeyboardArrowDownIcon
-                                id={`${divId}-Locate-me`}
-                                sx={{ fontSize: { xs: "14px", sm: "18px" } }}
-                              />
-                            )}
-                          </>
-                        )}
-                      </>
+
                     </CustomStackFullWidth>
                   </Box>
-                  {pickLocation && !isXSmall && (
-                    <Box
-                      onClick={handleOpen}
-                      sx={{
-                        backgroundColor: (theme) => theme.palette.neutral[100],
-                        top: "56px",
-                        width: { xs: "125px", sm: "100%" },
-                        minWidth: { xs: "125px", sm: "155px" },
-                        height: "55px",
-                        right: 0,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        display: "flex",
-                        p: "1rem",
-                        position: "absolute",
-                        zIndex: 999,
-                        cursor: "pointer",
-                        boxShadow: "0px 4px 4px rgba(0, 0, 0, 0.1)",
-                        borderRadius: "0px 0px 5px 5px",
-                        "&:hover": {
-                          color: "primary.main",
-                        },
-                      }}
-                    >
-                      <CustomStackFullWidth
-                        alignItems="center"
-                        direction="row"
-                        spacing={1}
-                        sx={{
-                          width: "150px",
-                        }}
-                      >
-                        <MapIcon id="pick-from-map-icon" sx={{ fontSize: "18px" }} />
-                        <Typography
-                          id={`${divId}-pick-from-map`}
-                          variant={isXSmall ? "body3" : "body1"}
-                          sx={{
-                            cursor: "pointer",
-                          }}
-                        >
-                          {t("Pick from map")}
-                        </Typography>
-                      </CustomStackFullWidth>
-                    </Box>
-                  )}
+
                 </HeroFormItem>
               </HeroFormInputWrapper>
             </Grid>
-            <Grid item xs={2} sm={2.1}>
-              {isXSmall ? (
-                <IconButton
-                  id="hero-location-icon"
-                  onClick={handleOpen}
-                  sx={{
-                    borderRadius: "5px",
-                    backgroundColor: theme.palette.primary.main,
-                    height: "100%",
-                    width: "100%",
-                    "&:disabled": {
-                      cursor: "not-allowed",
-                      pointerEvents: "all !important",
-                    },
-                  }}
-                >
-                  <MapMarkerIcon />
-                </IconButton>
-              ) : (
-                <StyledButton
-                  id="hero-explore-button"
-                  sx={{
-                    height: "100%",
-                    width: "100%",
-                    borderRadius: "0px 8px 8px 0px",
-                    // cursor: (!location?.lat || isLoadingGeoCode) ? "not-allowed" : "pointer"
-                    "&:disabled": {
-                      cursor: "not-allowed",
-                      pointerEvents: "all !important",
-                    },
-                  }}
-                  onClick={() => setLocationEnable()}
-                  radiuschange={isXSmall ? "false" : "true"}
-                  disabled={!location?.lat || isLoadingGeoCode}
-                >
-                  {t("Explore")}
-                </StyledButton>
-              )}
+            <Grid item xs={3} sm={2.1}>
+              <StyledButton
+                id="hero-explore-button"
+                sx={{
+                  height: "100%",
+                  width: "100%",
+                  borderRadius: "0px 8px 8px 0px",
+                  // cursor: (!location?.lat || isLoadingGeoCode) ? "not-allowed" : "pointer"
+                  "&:disabled": {
+                    cursor: "not-allowed",
+                    pointerEvents: "all !important",
+                  },
+                }}
+                onClick={() => setLocationEnable()}
+                radiuschange={isXSmall ? "false" : "true"}
+                disabled={!location?.lat || isLoadingGeoCode}
+              >
+                {t("Discover")}
+              </StyledButton>
             </Grid>
           </Grid>
         </CustomStackFullWidth>

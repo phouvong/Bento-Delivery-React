@@ -26,7 +26,7 @@ const Menu = ({ onClose, cartListRefetch }) => {
   const router = useRouter();
   const [openModal, setOpenModal] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
-  const { configData ,modules} = useSelector((state) => state.configData);
+  const { configData, modules } = useSelector((state) => state.configData);
 
   const handleLogout = async () => {
     setIsLogoutLoading(true);
@@ -39,17 +39,19 @@ const Menu = ({ onClose, cartListRefetch }) => {
         onClose?.();
         toast.success(t(logoutSuccessFull));
 
-        router.push("/home");
+        if (router.pathname === "/profile" || router.pathname === "/interest") {
+          router.push("/home");
+        }
         setOpenModal(false);
 
-      
+
       }, 500);
     } catch (err) {
       //   toast.error('Unable to logout.');
     }
   };
 
-  
+
   const handleClick = (item) => {
     if (item?.id === 10) {
       router.push({
@@ -72,7 +74,7 @@ const Menu = ({ onClose, cartListRefetch }) => {
             (configData?.customer_wallet_status === 0 && item.id === 4) ||
             (configData?.loyalty_point_status === 0 && item.id === 5) ||
             (configData?.ref_earning_status === 0 && item.id === 6) || (
-            (!modules?.find((item) => item?.module_type === 'rental') && item.id === 3) || (modules?.find((item) => item?.module_type === 'rental')?.status === 0 && item.id === 3)
+              (!modules?.find((item) => item?.module_type === 'rental') && item.id === 3) || (modules?.find((item) => item?.module_type === 'rental')?.status === 0 && item.id === 3)
             )
           ) {
             return null;

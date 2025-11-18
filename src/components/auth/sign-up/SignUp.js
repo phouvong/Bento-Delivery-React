@@ -60,7 +60,7 @@ const SignUp = ({
     onSubmit: async (values, helpers) => {
       try {
         formSubmitHandler(values);
-      } catch (err) {}
+      } catch (err) { }
     },
   });
   const handleCloseOtp = () => {
@@ -116,7 +116,7 @@ const SignUp = ({
       dispatch(setWelcomeModal(true));
       const zoneSelected = JSON.parse(localStorage.getItem("zoneid"));
       if (zoneSelected && getCurrentModuleType()) {
-        if (getCurrentModuleType() !== "parcel") {
+        if (getCurrentModuleType() !== "parcel" && getCurrentModuleType() !== "rental") {
           router.push("/interest", undefined, { shallow: true });
         } else {
           router.push("/home", undefined, { shallow: true });
@@ -136,10 +136,10 @@ const SignUp = ({
         dispatch(setWelcomeModal(true));
       }
 
-      if (item.module_type !== "parcel") {
+      if (item.module_type !== "parcel" && item?.module_type !== "rental") {
         router.push("/interest", undefined, { shallow: true });
       } else {
-        router.push("/home", undefined, { shallow: true });
+        //router.push("/home", undefined, { shallow: true });
       }
     }
 

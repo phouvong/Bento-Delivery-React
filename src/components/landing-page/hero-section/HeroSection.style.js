@@ -16,11 +16,12 @@ export const SearchLocationTextField = styled(TextField)(
     margin_top,
     isLanding,
     isXSmall,
-    searchHeight
+    searchHeight,
+    showCurrentLocation
   }) => ({
     width: "100%",
-    backgroundColor: theme.palette.neutral[100],
-    height: searchHeight??"56px",
+    backgroundColor: theme.palette.neutral[300],
+    // height: searchHeight??"44px",
     borderRadius: isXSmall && isLanding ? "4px" : "0 0 4px 4px",
     border: "none",
     "& .MuiOutlinedInput-notchedOutline": {
@@ -28,22 +29,22 @@ export const SearchLocationTextField = styled(TextField)(
     },
     "& .MuiOutlinedInput-root": {
       //color: theme.palette.primary.main,
-      fontSize: fromparcel === "true" && "12px",
+      fontSize: fromparcel === "true" ? "12px" : { xs: "14px", sm: "16px" },
       padding: fromparcel === "true" && "5px",
       height: fromparcel === "true" && "45px",
-      marginTop: margin_top === "true" && "8px",
+
       paddingRight: "0px",
       borderTopRightRadius:
-        frommap === "true" ? "0px" : fromparcel === "false" ? "0px" : "8px",
+        frommap === "true" ? "0px" : fromparcel === "false" ? "0px" : "5px",
       borderBottomRightRadius:
-        frommap === "true" ? "0px" : fromparcel === "false" ? "0px" : "8px",
+        frommap === "true" ? "0px" : fromparcel === "false" ? "0px" : "5px",
       borderTopLeftRadius: frommap === "true" && "0px",
       borderBottomLeftRadius: frommap === "true" && "0px",
-      border: frommap === "true" ? "1px solid" : "1px solid",
+      border: "1px solid",
       borderColor:
         fromparcel === "true"
           ? alpha(theme.palette.neutral[400], 0.4)
-          : theme.palette.neutral[100],
+          : alpha(theme.palette.neutral[400], 0.4),
       "& fieldset": {
         borderColor: theme.palette.primary.main,
       },
@@ -54,12 +55,14 @@ export const SearchLocationTextField = styled(TextField)(
         borderColor: theme.palette.primary.main,
       },
       [theme.breakpoints.down("sm")]: {
-        borderRadius: "4px",
+        // borderRadius: "4px",
       },
-      // "& .MuiAutocomplete-input": {
-      //   border: "1px solid red",
-      //   paddingRight: isLanding && "110px"
-      // },
+      "& .MuiAutocomplete-input": {
+        padding: "2.5px 4px 2.5px 6px",
+      },
+      "& .MuiInputBase-input": {
+        padding: showCurrentLocation && "11.5px 14px",
+      },
       "& .MuiInputBase-input::placeholder": {
         opacity: theme.palette.mode === "dark" ? ".8" : ".9",
       },

@@ -36,7 +36,7 @@ const GuestUserInforForm = ({
       try {
         dispatch(setGuestUserInfo(values));
         handleClose();
-      } catch (err) {}
+      } catch (err) { }
     },
   });
 
@@ -136,10 +136,10 @@ const GuestUserInforForm = ({
               borderRadius="10px"
             />
           </Grid>
-      
+
           <Grid item xs={12} md={12} sx={{ marginTop: "8px" }}>
             <CustomTextFieldWithFormik
-              required="true"
+              required
               type="text"
               label={t("Contact Person Email")}
               touched={addAddressFormik.touched.contact_person_email}

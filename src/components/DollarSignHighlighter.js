@@ -1,21 +1,24 @@
+
 import React from "react";
 
 const DollarSignHighlighter = ({ theme, text }) => {
-  const regex = /\$\w+\$/g;
-  const matches = text?.match(regex);
+  // console.log({ text });
+
   return (
     <>
       {text &&
         text.split(/\s+/).map((part, index) => {
-          const isMatch = matches && matches.includes(part);
-          const normalizedPart = part.replaceAll("$", " ");
+          // Check if the word contains at least one dollar sign
+          const isMatch = part.includes("$");
+          // console.log({ part, isMatch });
+
+          const normalizedPart = part.replaceAll("$", "");
           return (
             <span
               key={index}
               style={{
                 color: isMatch ? theme.palette.primary.main : "inherit",
-                marginLeft: index !== 0 && "3px",
-                textAlign:"left"
+                textAlign: "left"
               }}
             >
               {index !== 0 && " "}

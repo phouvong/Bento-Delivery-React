@@ -1,6 +1,5 @@
 import { alpha, Button, Skeleton } from "@mui/material";
-import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import Slider from "react-slick";
 import useGetDiscountedItems from "../../../api-manage/hooks/react-query/product-details/useGetDiscountedItems";
@@ -14,7 +13,7 @@ import ProductCard from "../../cards/ProductCard";
 import { RTL } from "../../rtl";
 import SpecialOfferCardShimmer from "../../Shimmer/SpecialOfferCardSimmer";
 import H2 from "../../typographies/H2";
-import { NextFood, PrevFood } from "../best-reviewed-items/SliderSettings";
+import { createEnhancedArrows } from "../../common/EnhancedSliderArrows";
 import { HomeComponentsWrapper } from "../HomePageComponents";
 import {useRouter} from "next/router";
 
@@ -44,8 +43,11 @@ const SpecialFoodOffers = ({ title }) => {
     speed: 800,
     autoplaySpeed: 4000,
     variableHeight: true,
-    prevArrow: isHover && <PrevFood displayNoneOnMobile />,
-    nextArrow: isHover && <NextFood displayNoneOnMobile />,
+    ...createEnhancedArrows(isHover, { 
+      displayNoneOnMobile: true,
+      variant: "primary",
+      noBackground: true
+    }),
     responsive: [
       {
         breakpoint: 1200,

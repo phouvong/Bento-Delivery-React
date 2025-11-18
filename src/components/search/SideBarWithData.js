@@ -3,7 +3,7 @@ import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
-import { Grid, Skeleton, Stack } from "@mui/material";
+import { Grid, Skeleton, Stack, Box } from "@mui/material";
 import SearchFilter from "./search-filter";
 import ProductCard, { CardWrapper } from "../cards/ProductCard";
 import StoreCard from "../cards/StoreCard";
@@ -14,6 +14,8 @@ import DotSpin from "components/DotSpin";
 // eslint-disable-next-line react/display-name
 const SideBarWithData = forwardRef((props, ref) => {
   const {
+    sidebarRef,
+    sidebarScrollEnabled,
     searchValue,
     pageData,
     id,
@@ -142,17 +144,28 @@ const SideBarWithData = forwardRef((props, ref) => {
   return (
     <CustomBoxFullWidth sx={{ marginTop: "20px" }}>
       <Grid container>
-        <Grid item xs={0} sm={0} md={0} lg={3}>
-          <SearchFilter
-            searchValue={searchValue}
-            id={id}
-            brand_id={brand_id}
-            selectedCategoriesHandler={selectedCategoriesHandler}
-            fromNav={fromNav}
-            selectedBrandsHandler={selectedBrandsHandler}
-            currentTab={currentTab}
-            linkRouteTo={linkRouteTo}
-          />
+        <Grid item xs={0} sm={0} md={0} lg={3} sx={{ display: { xs: 'none', lg: 'block' } }}>
+          <CustomBoxFullWidth
+            ref={sidebarRef}
+            sx={{
+              position: 'sticky',
+              top: '80px',
+              height: 'calc(100vh - 100px)',
+            
+            
+            }}
+          >
+            <SearchFilter
+              searchValue={searchValue}
+              id={id}
+              brand_id={brand_id}
+              selectedCategoriesHandler={selectedCategoriesHandler}
+              fromNav={fromNav}
+              selectedBrandsHandler={selectedBrandsHandler}
+              currentTab={currentTab}
+              linkRouteTo={linkRouteTo}
+            />
+          </CustomBoxFullWidth>
         </Grid>
         <Grid item xs={12} sm={12} md={12} lg={9} spacing={2.5}>
           <CustomStackFullWidth spacing={2} sx={{ paddingTop: "1rem" }}>
@@ -160,8 +173,8 @@ const SideBarWithData = forwardRef((props, ref) => {
               filterData={filterData}
               //setFilterData={setFilterData}
             />
-            <CustomBoxFullWidth>
-              <Grid container spacing={2} ref={ref}>
+            <CustomBoxFullWidth ref={ref}>
+              <Grid container spacing={2}>
                 {getLayoutHandler()}
                 {isFetchingNextPage && (
                   <Grid

@@ -8,9 +8,10 @@ import Router from "next/router";
 import SEO from "../src/components/seo";
 import useGetLandingPage from "../src/api-manage/hooks/react-query/useGetLandingPage";
 import { useGetConfigData } from "../src/api-manage/hooks/useGetConfigData";
+import { RTL } from "components/rtl";
 
 const Root = (props) => {
-	const { configData,landingPageData } = props;
+	const { configData, landingPageData } = props;
 	const { data, refetch } = useGetLandingPage();
 	const dispatch = useDispatch();
 	const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
@@ -31,24 +32,32 @@ const Root = (props) => {
 		} else {
 		}
 	}, [dataConfig, data]);
+	let lanDirection = undefined;
 
+	if (typeof window !== "undefined") {
+		lanDirection = JSON.parse(localStorage.getItem("settings"));
+		// languageSetting = JSON.parse(localStorage.getItem("language-setting"));
+	}
+	// console.log({ lanDirection })
 	return (
 		<>
 			<CssBaseline />
 			{/* <DynamicFavicon configData={configData} /> */}
 			<SEO
-				image={landingPageData?.meta_image||configData?.fav_icon_full_url}
+				image={landingPageData?.meta_image || configData?.fav_icon_full_url}
 				businessName={configData?.business_name}
 				configData={configData}
-				title={landingPageData?.meta_title||configData?.business_name}
-				description={landingPageData?.meta_description||configData?.meta_description}
+				title={landingPageData?.meta_title || configData?.business_name}
+				description={landingPageData?.meta_description || configData?.meta_description}
 			/>
 			{data && (
 				<LandingLayout configData={dataConfig} landingPageData={data}>
+
 					<LandingPage
 						configData={dataConfig}
 						landingPageData={data}
 					/>
+
 				</LandingLayout>
 			)}
 		</>
@@ -94,7 +103,7 @@ export const getServerSideProps = async (context) => {
 	return {
 		props: {
 			configData: config,
-			landingPageData:landingPageData
+			landingPageData: landingPageData
 		},
 	};
 };

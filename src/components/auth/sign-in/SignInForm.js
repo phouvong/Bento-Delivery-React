@@ -29,19 +29,19 @@ import { useDispatch } from "react-redux";
 import { setOpenForgotPasswordModal } from "redux/slices/utils";
 
 const SignInForm = ({
-                      loginFormik,
-                      configData,
-                      handleOnChange,
-                      passwordHandler,
-                      rememberMeHandleChange,
-                      isApiCalling,
-                      isLoading,
-                      handleSignUp,
-                      only,
-                      handleClick,
-                      handleClose,
-                      isRemember,
-                    }) => {
+  loginFormik,
+  configData,
+  handleOnChange,
+  passwordHandler,
+  rememberMeHandleChange,
+  isApiCalling,
+  isLoading,
+  handleSignUp,
+  only,
+  handleClick,
+  handleClose,
+  isRemember,
+}) => {
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
 
   const theme = useTheme();
@@ -98,7 +98,7 @@ const SignInForm = ({
                     sx={{
                       color:
                         loginFormik.touched.email_or_phone &&
-                        !loginFormik.errors.email_or_phone
+                          !loginFormik.errors.email_or_phone
                           ? theme.palette.primary.main
                           : alpha(theme.palette.neutral[500], 0.4),
                     }}
@@ -107,7 +107,7 @@ const SignInForm = ({
               }
             />
           )}
-  {/* <TextField
+          {/* <TextField
         id="email-input" // 👈 unique id
         label="Email"
         variant="outlined"
@@ -131,7 +131,7 @@ const SignInForm = ({
                   sx={{
                     color:
                       loginFormik.touched.password &&
-                      !loginFormik.errors.password
+                        !loginFormik.errors.password
                         ? theme.palette.primary.main
                         : alpha(theme.palette.neutral[500], 0.6),
                   }}
@@ -197,7 +197,7 @@ const SignInForm = ({
                   fontSize: "12px",
                 }}
               >
-                {t(" Terms & Conditions")}
+                {" "} {t("Terms & Conditions")}
               </Typography>
             </CustomColouredTypography>
           </CustomStackFullWidth>

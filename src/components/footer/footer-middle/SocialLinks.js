@@ -4,6 +4,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
 import { Facebook, Instragram, LinkedIn, Pinterest, Twitter } from "./Icon";
+
 const SocialLinks = (props) => {
   const { configData, landingPageData } = props;
   const { t } = useTranslation();
@@ -27,6 +28,8 @@ const SocialLinks = (props) => {
         return <Twitter />;
     }
   };
+  // console.log({ landingPageData });
+
   return (
     <CustomStackFullWidth>
       <Typography
@@ -37,7 +40,7 @@ const SocialLinks = (props) => {
           color: (theme) => alpha(theme.palette.neutral[500], 0.8),
         }}
       >
-        {landingPageData?.fixed_footer_description}
+        {landingPageData?.footer_section?.fixed_footer_description}
       </Typography>
       <CustomStackFullWidth
         direction="row"

@@ -32,7 +32,7 @@ const HeroTitleSection = ({ landingPageData }) => {
       return <ModuleSelectionRaw />;
     } else {
       return (
-        <CustomStackFullWidth mt="15px">
+        <CustomStackFullWidth mt="15px" mb={{ xs: ".5rem", md: "1.5rem" }} sx={{ maxWidth: currentLocation ? "100%" : "666px", mx: "auto" }}>
           <HeroLocationForm />
         </CustomStackFullWidth>
       );
@@ -41,68 +41,7 @@ const HeroTitleSection = ({ landingPageData }) => {
 
   return (
     <CustomStackFullWidth>
-      <CustomStackFullWidth spacing={0.4}>
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="flex-start"
-          spacing={0.5}
-          flexWrap="wrap"
-        >
-          <Typography
-            sx={{
-              color: (theme) => theme.palette.primary.main,
-              fontSize: isXSmall ? "20px" : "54px",
-              lineHeight: isXSmall ? "24px" : "58px",
-              fontWeight: "bold",
-            }}
-            component="h1"
-          >
-            <DollarSignHighlighter
-              theme={theme}
-              text={landingPageData?.header_title}
-            />
-          </Typography>
-        </Stack>
-        <Typography
-          color={alpha(theme.palette.neutral[700], 0.8)}
-          fontSize={isXSmall ? "16px" : "35px"}
-          lineHeight={isXSmall ? "22px" : "58px"}
-          fontWeight="400"
-          component="h2"
-        >
-          <DollarSignHighlighter
-            theme={theme}
-            text={landingPageData?.header_sub_title}
-          />
-        </Typography>
-      </CustomStackFullWidth>
-      <CustomStackFullWidth
-        flexDirection="row"
-        spacing={2}
-        justifyContent="space-between"
-        mt="14px"
-        sx={{ position: "relative" }}
-      >
-        <Typography
-          sx={{
-            fontSize: { xs: "12px", md: "20px" },
-            color: (theme) => alpha(theme.palette.neutral[500], 0.5),
-          }}
-          fontWeight="400"
-        >
-          <DollarSignHighlighter
-            theme={theme}
-            text={landingPageData?.header_tag_line}
-          />
-        </Typography>
-        {!getCurrentModuleType() && !isXSmall && (
-          <Stack sx={{}}>
-            {lanDirection === "rtl" ? <DownArrowRTL /> : <DownArrow />}
-          </Stack>
-        )}
-      </CustomStackFullWidth>
-      {!isXSmall && getSearchOrModulesBySelectedModules()}
+      {getSearchOrModulesBySelectedModules()}
     </CustomStackFullWidth>
   );
 };

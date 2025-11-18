@@ -2,6 +2,7 @@ import { alpha, useMediaQuery, useTheme, Card, Skeleton, Box, Grid, Typography }
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { getToken } from "helper-functions/getToken";
 import { ModuleTypes } from "helper-functions/moduleTypes";
+import React, { useState } from "react";
 import Slider from "react-slick";
 import {
   CustomStackFullWidth,
@@ -12,7 +13,7 @@ import VisitAgainCard from "../../cards/VisitAgainCard";
 import CustomContainer from "../../container";
 import H1 from "../../typographies/H1";
 import Subtitle1 from "../../typographies/Subtitle1";
-import { settings } from "./SliderSettings";
+import { createEnhancedArrows } from "../../common/EnhancedSliderArrows";
 
 const VisitAgainShimmerCard = () => {
   const theme = useTheme();
@@ -60,6 +61,7 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
   const theme = useTheme();
   const token = getToken();
   const isSmallScreen = useMediaQuery('(min-width:600px)');
+  const [isSliderHovered, setIsSliderHovered] = useState(false);
 
   const getModuleWiseData = () => {
     switch (getCurrentModuleType()) {
@@ -114,6 +116,111 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
     return null;
   }
 
+  // Enhanced slider settings with hover arrows
+  const enhancedSettings = {
+    dots: false,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    ...createEnhancedArrows(isSliderHovered, { 
+      displayNoneOnMobile: true,
+      variant: "white"
+    }),
+    responsive: [
+      {
+        breakpoint: 1450,
+        settings: {
+          slidesToShow: 4,
+          slidesToScroll: 3,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 1250,
+        settings: {
+          slidesToShow: 3.5,
+          slidesToScroll: 2,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 1150,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 2,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 800,
+        settings: {
+          slidesToShow: 2.7,
+          slidesToScroll: 2,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 700,
+        settings: {
+          slidesToShow: 2.5,
+          slidesToScroll: 2,
+          initialSlide: 2,
+        },
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 2.1,
+          slidesToScroll: 2,
+          initialSlide: 2,
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 479,
+        settings: {
+          slidesToShow: 1.8,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 450,
+        settings: {
+          slidesToShow: 1.8,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 400,
+        settings: {
+          slidesToShow: 1.6,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 350,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        },
+      },
+      {
+        breakpoint: 310,
+        settings: {
+          slidesToShow: 1,
+          slidesToScroll: 1,
+        },
+      },
+    ],
+  };
+
   return (
     <>
       <CustomStackFullWidth
@@ -159,8 +266,10 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
               padding: { xs: "0px", md: "17px" },
                minHeight:"200px"
             }}
+            onMouseEnter={() => setIsSliderHovered(true)}
+            onMouseLeave={() => setIsSliderHovered(false)}
           >
-            <Slider {...settings}>
+            <Slider {...enhancedSettings}>
               {isLoading ? (
                 [...Array(5)].map((_, index) => (
                   <VisitAgainShimmerCard key={index} />

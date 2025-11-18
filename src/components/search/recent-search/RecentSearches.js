@@ -3,6 +3,7 @@ import { Button, IconButton, Stack, Typography } from "@mui/material";
 import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
 import SearchIcon from "@mui/icons-material/Search";
 import CloseIcon from "@mui/icons-material/Close";
+import HistoryIcon from '@mui/icons-material/History';
 
 const RecentSearches = ({
   list,
@@ -23,7 +24,7 @@ const RecentSearches = ({
         >
           {t("Recent Searches")}
         </Typography>
-        <Button onClick={clearAll}>{t("Clear All")}</Button>
+        <Button onClick={clearAll} sx={{color:theme=>theme.palette.error.main,fontWeight:"400"}}>{t("Clear All")}</Button>
       </Stack>
       <CustomStackFullWidth>
         {list
@@ -44,7 +45,7 @@ const RecentSearches = ({
                   sx={{ cursor: "pointer" }}
                   spacing={0.5}
                 >
-                  <SearchIcon sx={{ fontSize: "18px" }} />
+                  <HistoryIcon sx={{ fontSize: "18px" }} />
                   <Typography
                     sx={{ color: (theme) => theme.palette.neutral[700] }}
                   >

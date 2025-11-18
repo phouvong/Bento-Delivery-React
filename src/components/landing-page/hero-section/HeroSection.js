@@ -1,38 +1,33 @@
 import {
   Box,
-  Grid,
+  Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import { Stack } from "@mui/system";
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
 import CustomContainer from "../../container";
-import MobileFrame from "../assets/MobileFrame";
 import HeroLocationForm from "./HeroLocationForm";
 import HeroTitleSection from "./HeroTitleSection";
-import HeroBgSvg from "components/landing-page/HeroBgSvg";
-import NextImage from "components/NextImage";
+import DollarSignHighlighter from "components/DollarSignHighlighter";
 
 const DynamicModuleSelection = dynamic(() =>
   import("./module-selection/ModuleSelectionRaw")
 );
-const HeroSection = ({ landingPageData }) => {
+const HeroSection = ({ landingPageDataheroSection }) => {
   const theme = useTheme();
   const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
-  const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-  const { t } = useTranslation();
   const [currentLocation, setCurrentLocation] = useState(null);
   useEffect(() => {
     if (typeof window !== "undefined") {
       setCurrentLocation(window.localStorage.getItem("location"));
     }
   }, []);
+
 
   const calculateTopMargin = () => {
     if (currentLocation) {
@@ -57,93 +52,66 @@ const HeroSection = ({ landingPageData }) => {
           marginTop: calculateTopMargin(),
           borderRadius: "20px",
           position: "relative",
-          overflow: "hidden",
-          ".shape img": {
-            transition: "all ease-in 1s",
+          background: `linear-gradient(1.02deg, rgba(3, 157, 85, 0.1) -12.87%, rgba(3, 157, 85, 0.02) 99.13%)`,
+          padding: { xs: "13px", md: "30px" },
+          display: "flex",
+          alignItems: {
+            xs: "flex-start",
+            sm: "center"
           },
         }}
       >
-        <Box
-          sx={{ position: "absolute", pointerEvents: "none" }}
-          className="shape"
-        >
-          <HeroBgSvg />
-        </Box>
-        <Grid container>
-          <Grid
-            item
-            xs={8}
-            md={7}
-            sx={{ padding: { xs: "1rem", sm: "2rem", md: "3rem" } }}
-          >
-            <HeroTitleSection
-              landingPageData={landingPageData}
-            />
-          </Grid>
-          <Grid item xs={4} md={5} align="right">
-            <CustomStackFullWidth
-              height="100%"
-              alignItems="flex-start"
-              justifyContent="flex-end"
-              paddingTop={{ xs: "2rem", md: "3rem" }}
+        <Box sx={{ position: "relative", zIndex: 1, width: "100%" }}>
+          <CustomStackFullWidth spacing={2} sx={{ mb: 3, maxWidth: "780px", margin: "0 auto" }}>
+
+            <Typography
+              variant="h1"
+              sx={{
+                fontSize: { xs: "18px", sm: "30px", md: "40px" },
+                fontWeight: "bold",
+                color: theme.palette.neutral[1000],
+                textAlign: "center",
+                lineHeight: 1.2,
+              }}
             >
-              <Box
-                sx={{
-                  height: { xs: "125px", sm: "350px", md: "420px" },
-                  width: { xs: "78px", sm: "210px", md: "240px" },
-                  borderRadius: isXSmall ? "5px 5px 0 0" : "16px 16px 0 0",
-                  position: "relative",
-                  zIndex: "99",
-                  backgroundImage: `url(${landingPageData?.header_banner_full_url})`,
-                  backgroundSize: "cover",
-                  backgroundRepeat: "no-repeat",
-                  marginInline: "auto",
-                  padding: "0",
-                }}
-              >
-                {landingPageData?.header_banner_full_url && (
-                  <Stack margin={isXSmall ? "-5px 0 0 -3px" : "-5px 0 0 -3px"}>
-                    <MobileFrame
-                      width={isXSmall ? "85" : isSmall ? "215" : "246"}
-                      height={isXSmall ? "148" : isSmall ? "370" : "427"}
-                    />
-                  </Stack>
-                )}
-              </Box>
-              <Box
-                sx={{
-                  position: "absolute",
-                  width: { xs: "50px", sm: "120px", md: "210px" },
-                  height: { xs: "50px", sm: "110px", md: "190px" },
-                  bottom: isXSmall ? 5 : 16,
-                  right: { xs: 7, sm: 10, md: 30 },
-                  zIndex: 100,
-                }}
-              >
-                <NextImage
-                  src={landingPageData?.header_icon_full_url}
-                  alt={t("icon")}
-                  width={210}
-                  height={190}
-                  objectFit="cover"
-                  priority
-                />
-              </Box>
-            </CustomStackFullWidth>
-          </Grid>
-        </Grid>
+              <DollarSignHighlighter theme={theme} text={landingPageDataheroSection?.header_title} />
+
+            </Typography>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: "12px", sm: "16px" },
+                fontWeight: "400",
+                color: theme.palette.text.secondary,
+                textAlign: "center",
+                lineHeight: 1.2,
+              }}
+            >
+              {landingPageDataheroSection?.header_sub_title}
+            </Typography>
+          </CustomStackFullWidth>
+          <Box sx={{ marginTop: { xs: "1rem", md: "1.5rem" }, width: "100%", marginInline: "auto" }}>
+            <Typography
+              variant="h2"
+              sx={{
+                fontSize: { xs: "14px", sm: "16px", md: "20px" },
+                fontWeight: "500",
+                color: theme.palette.neutral[500],
+                textAlign: "center",
+                lineHeight: 1.2,
+                marginBottom: { xs: "10px", md: "1rem" },
+
+              }}
+            >
+              {landingPageDataheroSection?.header_tag_line}
+            </Typography>
+            <HeroTitleSection
+              landingPageData={landingPageDataheroSection}
+            />
+          </Box>
+        </Box>
       </CustomBoxFullWidth>
-      {isXSmall && (
-        <>
-          {currentLocation ? (
-            <DynamicModuleSelection isSmall />
-          ) : (
-            <CustomStackFullWidth mt="10px">
-              <HeroLocationForm />
-            </CustomStackFullWidth>
-          )}
-        </>
-      )}
+
     </CustomContainer>
   );
 };

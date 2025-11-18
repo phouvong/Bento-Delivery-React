@@ -75,7 +75,7 @@ const BusinessTin = ({
         setPreview(null);
       }
     } else {
-      alert(t("File must be less than 1MB"));
+      // alert(t("File must be less than 1MB"));
     }
   };
 
@@ -244,7 +244,7 @@ const BusinessTin = ({
               {/* Label and Info */}
               <Stack direction="row" spacing={1} alignItems="center">
                 <InputLabel
-                  required
+
                   sx={{
                     fontWeight: 600,
                     fontSize: "14px",

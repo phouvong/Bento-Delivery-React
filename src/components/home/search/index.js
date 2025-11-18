@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import CustomContainer from "../../container";
 import {
   CustomBoxFullWidth,
@@ -50,6 +50,11 @@ const SearchResult = (props) => {
   const [newSort, setNewSort] = useState("");
   const [isEmpty, setIsEmpty] = useState(false);
   const [linkRouteTo, setLinkRouteTo] = useState(routeTo);
+  const [sidebarScrollEnabled, setSidebarScrollEnabled] = useState(false);
+  const [itemsContainerHeight, setItemsContainerHeight] = useState(0);
+  const itemsContainerRef = useRef(null);
+  const sidebarRef = useRef(null);
+  const scrollTimeoutRef = useRef(null);
   const { ref, inView } = useInView({
     rootMargin: "0px 0px 38% 0px",
   });
@@ -59,12 +64,58 @@ const SearchResult = (props) => {
     dispatch(setSelectedBrands(data_type === "brand" ? [brand_id] : []));
     dispatch(setSelectedCategories(data_type === "category" ? [id] : []));
   }, []);
+
+  // Handle scroll behavior for independent sidebar scrolling
+  // The sidebar remains fixed until the main content area has mostly scrolled past,
+  // then it becomes scrollable to enhance UX by preventing sidebar content from 
+  // interfering with main content navigation
+  const handleScroll = useCallback(() => {
+    if (!itemsContainerRef.current || !sidebarRef.current || isSmall) return;
+
+    const itemsContainer = itemsContainerRef.current;
+    const itemsRect = itemsContainer.getBoundingClientRect();
+    const scrollY = window.scrollY;
+    const windowHeight = window.innerHeight;
+
+    // Calculate scroll positions
+    const itemsContainerBottom = itemsRect.bottom + scrollY;
+    const currentScrollPosition = scrollY + windowHeight;
+
+    // Enable sidebar scrolling when user has scrolled past 70% of the items container
+    // This ensures the main content gets priority during initial scrolling
+    const scrollThreshold = itemsContainerBottom - (windowHeight * 0.3);
+    const shouldEnableSidebarScroll = currentScrollPosition >= scrollThreshold;
+
+    if (shouldEnableSidebarScroll !== sidebarScrollEnabled) {
+      setSidebarScrollEnabled(shouldEnableSidebarScroll);
+    }
+  }, [sidebarScrollEnabled, isSmall]);
+
+  useEffect(() => {
+    const throttledScroll = () => {
+      if (scrollTimeoutRef.current) return;
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        handleScroll();
+        scrollTimeoutRef.current = null;
+      }, 16); // ~60fps
+    };
+
+    window.addEventListener('scroll', throttledScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', throttledScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [handleScroll]);
+
   const page_limit = 12;
 
-  const selectedCategoriesHandler = (dataArray,isAllSelected) => {
+  const selectedCategoriesHandler = (dataArray, isAllSelected) => {
     if (dataArray?.length > 0) {
       setLinkRouteTo("");
-      dispatch(setSelectedCategories(isAllSelected?[]:[...new Set(dataArray)]));
+      dispatch(setSelectedCategories(isAllSelected ? [] : [...new Set(dataArray)]));
     } else {
       dispatch(setSelectedCategories([]));
     }
@@ -89,10 +140,10 @@ const SearchResult = (props) => {
         getCurrentModuleType() === "food"
           ? "Foods"
           : getCurrentModuleType() === "ecommerce"
-          ? "Items"
-          : getCurrentModuleType() === "pharmacy"
-          ? "Medicines"
-          : "Groceries",
+            ? "Items"
+            : getCurrentModuleType() === "pharmacy"
+              ? "Medicines"
+              : "Groceries",
       value: "items",
     },
     {
@@ -140,6 +191,14 @@ const SearchResult = (props) => {
     isFetchingNextPage,
     isLoading: isLoadingSearch,
   } = useGetSearchPageData(pageParams, handleSuccess);
+
+  // Update items container height when data changes
+  useEffect(() => {
+    if (itemsContainerRef.current) {
+      const height = itemsContainerRef.current.scrollHeight;
+      setItemsContainerHeight(height);
+    }
+  }, [searchData]);
 
   const prevSelectedCategoriesIds = useRef(pageParams.selectedCategoriesIds);
   const prevBrands = useRef(pageParams.selectedBrands);
@@ -361,6 +420,9 @@ const SearchResult = (props) => {
         ></CustomBoxFullWidth>
         <CustomBoxFullWidth>
           <SideBarWithData
+            ref={itemsContainerRef}
+            sidebarRef={sidebarRef}
+            sidebarScrollEnabled={sidebarScrollEnabled}
             searchValue={searchValue}
             id={id}
             brand_id={brand_id}

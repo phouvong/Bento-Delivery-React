@@ -62,7 +62,12 @@ const CustomTextFieldWithFormik = (props) => {
 						onChange={onChangeHandlerForField}
 						onBlur={onBlurHandler}
 						type={showPassword ? "text" : type}
-						kout
+
+					sx={{
+						"& .MuiFormLabel-asterisk": {
+							color: "red",
+						},
+					}}
 						InputProps={{
 							inputProps: { min: 0, id: id }, // <-- add id to input
 							style: {

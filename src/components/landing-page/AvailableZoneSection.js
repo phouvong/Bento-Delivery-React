@@ -10,10 +10,8 @@ import {
 } from "@mui/material";
 import { Stack } from "@mui/system";
 import CustomContainer from "components/container";
-import CustomImageContainer from "components/CustomImageContainer";
-
+import DollarSignHighlighter from "components/DollarSignHighlighter";
 import { t } from "i18next";
-import NextImage from "components/NextImage";
 
 const ComponentTwoContainer = styled(Box)(
 	({ theme, paddingTop, paddingBottom }) => ({
@@ -23,7 +21,7 @@ const ComponentTwoContainer = styled(Box)(
 		background: theme.palette.background.default,
 	})
 );
-const AvailableZoneSection = ({ landingPageData }) => {
+const AvailableZoneSection = ({ zoneSection }) => {
 	const theme = useTheme();
 	const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 	const toolTipsContent = (zone) => {
@@ -58,15 +56,15 @@ const AvailableZoneSection = ({ landingPageData }) => {
 	return (
 		<ComponentTwoContainer
 			background
-			paddingTop={isSmall ? "2rem" : "3rem"}
-			paddingBottom="2rem"
+			paddingTop={isSmall ? "0rem" : "1rem"}
+			paddingBottom={{ xs: "0rem", md: "3rem" }}
 		>
 			<CustomContainer>
 				<Grid
 					container
 					alignItems="center"
 					justifyContent="center"
-					spacing={{ xs: 2, md: 4 }}
+					spacing={{ xs: 2, md: 3 }}
 				>
 					<Grid
 						item
@@ -75,23 +73,62 @@ const AvailableZoneSection = ({ landingPageData }) => {
 						md={6}
 						align={isSmall ? "center" : "left"}
 					>
-						<Typography
-							fontSize={{ xs: "1.2rem", md: "30px" }}
-							fontWeight={{ xs: "600", md: "700" }}
-							component="h2"
+						<Box
+							sx={{
+								paddingTop: "1rem",
+								maxHeight: "270px",
+								overflowY: "auto",
+								"&::-webkit-scrollbar": {
+									width: "3px",
+								},
+								"&::-webkit-scrollbar-track": {
+									backgroundColor: "#f0f0f0",
+								},
+								"&::-webkit-scrollbar-thumb": {
+									backgroundColor: "#c1c1c1",
+									borderRadius: "3px",
+								},
+								"&::-webkit-scrollbar-thumb:hover": {
+									backgroundColor: "#003638",
+								},
+							}}
 						>
-							{landingPageData?.available_zone_title}
-						</Typography>
-						<Typography
-							fontSize={{ xs: "14px", md: "16px" }}
-							fontWeight={{ xs: "400", md: "500" }}
-							color={theme.palette.neutral[400]}
-							paddingTop={isSmall ? "10px" : "0rem"}
-							textAlign="left"
-						>
-							{landingPageData?.available_zone_short_description}
-						</Typography>
-						<Box sx={{ position: "relative", marginTop: "35px" }}>
+							<Typography
+								fontSize={{ xs: "18px", md: "30px" }}
+								fontWeight={{ xs: "600", md: "700" }}
+								component="h2"
+								align={isSmall ? "center" : "left"}
+							>
+								<DollarSignHighlighter text={zoneSection?.available_zone_title} theme={theme} />
+							</Typography>
+							<Typography
+								fontSize={{ xs: "12px", md: "16px" }}
+								fontWeight={{ xs: "400", }}
+								color={theme.palette.neutral[400]}
+								paddingTop={isSmall ? "10px" : "0rem"}
+								align={isSmall ? "center" : "left"}
+								dangerouslySetInnerHTML={{ __html: zoneSection?.available_zone_short_description }}
+							/>
+						</Box>
+					</Grid>
+					<Grid
+						item
+						xs={12}
+						sm={12}
+						md={6}
+						align={isSmall ? "center" : "right"}
+					>
+						<Box sx={{
+							position: "relative",
+							marginTop: { xs: "10px", md: "35px" },
+							backgroundColor: theme => theme.palette.neutral[100],
+							padding: { xs: ".5rem", md: "1rem" },
+							borderRadius: "10px",
+							boxShadow: "0px 3px 10px 0px #0000000F",
+
+
+
+						}}>
 							<Box
 								sx={{
 									height: 200,
@@ -110,6 +147,9 @@ const AvailableZoneSection = ({ landingPageData }) => {
 									"&::-webkit-scrollbar-thumb:hover": {
 										backgroundColor: "#003638",
 									},
+									alignItems: "center",
+									justifyContent: "center",
+									display: "flex",
 								}}
 							>
 								<Box
@@ -118,10 +158,11 @@ const AvailableZoneSection = ({ landingPageData }) => {
 										flexWrap: "wrap",
 										gap: "12px",
 										maxWidth: "543px",
-										paddingBottom: "35px",
+										justifyContent: { xs: "center", md: "flex-start" },
+
 									}}
 								>
-									{landingPageData?.available_zone_list
+									{zoneSection?.available_zone_list
 										?.filter((item) => item?.modules?.length > 0)
 										.map((zone, index) => (
 											<Tooltip
@@ -136,26 +177,22 @@ const AvailableZoneSection = ({ landingPageData }) => {
 														border: "1px solid",
 														borderColor: alpha(
 															theme.palette.neutral[400],
-															0.5
+															0.2
 														),
 														backgroundColor: (theme) =>
 															theme.palette.neutral[100],
-														padding: "15px 30px",
+														padding: { xs: "10px 15px", md: "10px 20px" },
 														cursor: "pointer",
-														fontSize: "20px",
-														fontWeight: 700,
+														fontSize: { xs: "16px", md: "18px" },
+														fontWeight: 400,
 														textAlign: "center",
 														textDecoration: "none",
 														"&:hover": {
-															boxShadow: `0px 4px 12px 0px ${theme.palette.neutral[100]}`,
-															color: "#039d55",
+															boxShadow: `0px 4px 12px 0px #0000001A;`,
+															color: theme.palette.neutral[1000],
+															fontWeight: 500,
 														},
 													}}
-													data-bs-toggle="popover"
-													data-bs-trigger="hover"
-													data-bs-placement="top"
-													title="Popover title"
-													data-bs-content="And here's some amazing content. It's very engaging. Right?"
 												>
 													{zone?.display_name}
 												</Box>
@@ -166,7 +203,7 @@ const AvailableZoneSection = ({ landingPageData }) => {
 
 							{/* The gradient overlay at the bottom */}
 
-							<Box
+							{/* <Box
 								sx={{
 									position: "absolute",
 									height: "62px",
@@ -185,38 +222,12 @@ const AvailableZoneSection = ({ landingPageData }) => {
 									)} 100%)`,
 									pointerEvents: "none",
 								}}
-							/>
-						</Box>
-					</Grid>
-					<Grid
-						item
-						xs={12}
-						sm={12}
-						md={6}
-						align={isSmall ? "center" : "right"}
-					>
-						<Box
-							sx={{
-								position: "relative",
-								width: { xs: "223px", md: "440px" },
-								height: { xs: "150px", md: "380px" },
-                "img": {
-                  width: "100%",
-                  height: "100%",
-                }
-							}}
-						>
-							<NextImage
-								src={landingPageData?.available_zone_image_full_url}
-                width={440}
-                height={380}
-                objectFit="cover"
-							/>
+							/> */}
 						</Box>
 					</Grid>
 				</Grid>
 			</CustomContainer>
-		</ComponentTwoContainer>
+		</ComponentTwoContainer >
 	);
 };
 

@@ -74,7 +74,7 @@ const FooterTop = (props) => {
                     fontSize={{ xs: "1rem", md: "2.25rem" }}
                     component="h2"
                   >
-                    {landingPageData?.fixed_newsletter_title}
+                    {landingPageData?.footer_section?.fixed_newsletter_title}
                   </Typography>
                   <Typography
                     variant="h7"
@@ -86,7 +86,7 @@ const FooterTop = (props) => {
                     }}
                     component="p"
                   >
-                    {landingPageData?.fixed_newsletter_sub_title}
+                    {landingPageData?.footer_section?.fixed_newsletter_sub_title}
                   </Typography>
                 </Stack>
               </Grid>

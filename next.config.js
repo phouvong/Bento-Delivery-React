@@ -1,5 +1,13 @@
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    swcPlugins: [],
+  },
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'], // Keep error and warn, remove log, info, debug, etc.
+    } : false,
+  },
   images: {
     remotePatterns: [
       {
