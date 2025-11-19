@@ -41,7 +41,7 @@ export const lao = {
 		"ລາຄາທັງໝົດຂອງທ່ານຕ້ອງຫຼາຍກວ່າຈຳນວນຄູປອງ",
 	"You can use this ID to track your order later":
 		"ທ່ານສາມາດໃຊ້ ID ນີ້ເພື່ອຕິດຕາມການສັ່ງຊື້ຂອງທ່ານໃນພາຍຫຼັງ",
-	"Cart item remove successfully": "ລຶບລາຍການກະຕ່າສຳເລັດແລ້ວ": "ລຶບລາຍການກະຕ່າສຳເລັດແລ້ວ",
+	"Cart item remove successfully": "ລຶບລາຍການກະຕ່າສຳເລັດແລ້ວ",
 	"Theme Mode": "ໂໝດຮູບແບບ",
 	"Search for products or store...": "ຄົ້ນຫາຜະລິດຕະພັນ ຫຼື ຮ້ານ...",
 	"not now": "ບໍ່ແມ່ນດຽວນີ້",
@@ -295,7 +295,7 @@ export const lao = {
 	"Business Information": "ຂໍ້ມູນທຸລະກິດ",
 	"Select Identity Type": "ເລືອກປະເພດຕົວຕົນ",
 	"Contact Person": "ຜູ້ຕິດຕໍ່",
-	"Same as general information": "ຄືກັນກັບຂໍ້ມູນທົ່ວໄປ"",
+	"Same as general information": "ຄືກັນກັບຂໍ້ມູນທົ່ວໄປ",
 	"Please upload your prescription image":
 		"ກະລຸນາອັບໂຫຼດຮູບພາບໃບສັ່ງຢາຂອງທ່ານ",
 	"Account Information": "ຂໍ້ມູນບັນຊີ",
