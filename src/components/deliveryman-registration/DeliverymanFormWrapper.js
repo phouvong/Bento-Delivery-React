@@ -12,21 +12,18 @@ const DeliverymanFormWrapper = ({ title, component }) => {
         sx={{
           bgcolor: (theme) => theme.palette.neutral[100],
           mb: "30px",
-          pb: "30px",
-          pt: "20px",
           borderRadius: "10px",
         }}
       >
         <TitleTopSection
           sx={{
             borderBottom: `1px solid ${theme.palette.neutral[200]}`,
-            pl: "20px",
-            pb: "11px",
+            padding: "1rem",
           }}
         >
-          <H4 text={title} sx={{ fontWeight: "500" }} />
+          <H4 text={title} sx={{ fontWeight: "500", fontSize: "18px" }} />
         </TitleTopSection>
-        <Box sx={{ mt: "20px", mx: "20px" }}>{component}</Box>
+        <Box p={3} pt={4}>{component}</Box>
       </CustomBoxFullWidth>
     </>
   );

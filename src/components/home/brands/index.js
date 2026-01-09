@@ -46,7 +46,7 @@ const Brands = ({ viewAll }) => {
 
 	useEffect(() => {
 		refetch();
-	}, [data,getModuleId()]);
+	}, [data, getModuleId()]);
 
 	const baseUrl = configData?.base_urls?.brand_image_url;
 

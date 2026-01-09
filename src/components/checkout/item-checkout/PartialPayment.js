@@ -8,7 +8,7 @@ import { t } from "i18next";
 import { useTheme } from "@emotion/react";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { getAmountWithSign } from "../../../helper-functions/CardHelpers";
-import {PayButton} from "components/checkout/item-checkout/OtherModulePayment";
+import { PayButton } from "components/checkout/item-checkout/OtherModulePayment";
 
 const PartialPayment = ({
   handlePartialPayment,
@@ -20,6 +20,7 @@ const PartialPayment = ({
   remainingBalance,
   payableAmount,
   margin,
+  failed,
 }) => {
   const theme = useTheme();
   return (
@@ -29,7 +30,7 @@ const PartialPayment = ({
 
         <Stack>
           <Typography fontSize="10px" color={theme.palette.neutral[500]}>
-            {   paymentMethod === 'wallet' && switchToWallet ? t('Remaining Balance') : t('Wallet Balance')}
+            {paymentMethod === 'wallet' && switchToWallet ? t('Remaining Balance') : t('Wallet Balance')}
           </Typography>
           <Typography
             fontSize="20px"
@@ -48,7 +49,11 @@ const PartialPayment = ({
 
         </Stack>
       </CustomStackFullWidth>
-      {!usePartialPayment && !switchToWallet ? (
+      {failed && paymentMethod === "wallet" ? (
+        <Button variant="outlined" onClick={handlePartialPayment}>
+          {t("Applied")}
+        </Button>
+      ) : !usePartialPayment && !switchToWallet ? (
         <Button variant="outlined" onClick={handlePartialPayment}>
           {t("Apply")}
         </Button>
@@ -62,7 +67,8 @@ const PartialPayment = ({
         </Button>
       )}
 
-</PayButton>
+
+    </PayButton>
   );
 };
 

@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import CloseIcon from "@mui/icons-material/Close";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { useTheme } from "@emotion/react";
-import {useGetItemDetails} from "api-manage/hooks/react-query/product-details/useGetItemDetails";
+import { useGetItemDetails } from "api-manage/hooks/react-query/product-details/useGetItemDetails";
 
 const ModuleModal = (props) => {
   const theme = useTheme();
@@ -24,10 +24,10 @@ const ModuleModal = (props) => {
 
   const handleSuccess = (resData) => {
   }
-  const params={
-    id:productDetailsData?.id
+  const params = {
+    id: productDetailsData?.id
   }
-  const {data}=useGetItemDetails(params, handleSuccess,productUpdate)
+  const { data } = useGetItemDetails(params, handleSuccess, productUpdate)
 
   return (
 
@@ -58,9 +58,9 @@ const ModuleModal = (props) => {
               <CloseIcon sx={{ fontSize: "16px", fontWeight: "700" }} />
             </IconButton>
           </CustomStackFullWidth>
-          <Scrollbar style={{ maxHeight: "calc(100vh - 120px)" }}>
+          <Scrollbar style={{ maxHeight: "calc(100vh - 160px)" }}>
             <ProductDetailsSection
-              productDetailsData={productUpdate?productDetailsData:data}
+              productDetailsData={productUpdate ? productDetailsData : data}
               configData={configData}
               modalmanage="true"
               handleModalClose={handleModalClose}

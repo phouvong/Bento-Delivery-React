@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 import { getModuleId } from "helper-functions/getModuleId";
 import CustomImageContainer from "../CustomImageContainer";
 import NextImage from "components/NextImage";
+import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
 
 const FeatureImageBox = styled(Stack)(({ theme }) => ({
   width: "100%",
@@ -29,8 +30,9 @@ const FoodCategoryCard = (props) => {
     slug,
   } = props;
   const router = useRouter();
-  const theme=useTheme()
+  const theme = useTheme()
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
+  const { ref: textRef, isEllipsed } = useTextEllipsis(name);
 
   const handleClick = () => {
     router.push({
@@ -74,25 +76,25 @@ const FoodCategoryCard = (props) => {
               },
             }}
           >
-            {onlyshimmer ? (<Stack sx={{ height: {xs: "56px", sm: "120px"}, width: {xs: "56px", sm: "120px"} }}>
-                <Skeleton variant="circular" width="100%" height="100%" />
+            {onlyshimmer ? (<Stack sx={{ height: { xs: "56px", sm: "120px" }, width: { xs: "56px", sm: "120px" } }}>
+              <Skeleton variant="circular" width="100%" height="100%" />
             </Stack>) : (
-                <NextImage
-                    src={categoryImageUrl}
-                    alt={name}
-                    height={isSmall?56:120}
-                    width={isSmall?56:120}
-                    borderRadius="50%"
-                    objectFit="cover"
+              <NextImage
+                src={categoryImageUrl}
+                alt={name}
+                height={isSmall ? 56 : 120}
+                width={isSmall ? 56 : 120}
+                borderRadius="50%"
+                objectFit="cover"
 
-                    //loading="loading"
-                    bg="#ddd"
-                />
+                //loading="loading"
+                bg="#ddd"
+              />
             )}
           </Box>
         </Box>
         <Tooltip
-          title={name}
+          title={isEllipsed ? name : ""}
           placement="bottom"
           arrow
           componentsProps={{
@@ -107,6 +109,7 @@ const FoodCategoryCard = (props) => {
           }}
         >
           <Typography
+            ref={textRef}
             sx={{
               color: (theme) => theme.palette.neutral[1000],
               overflow: "hidden",

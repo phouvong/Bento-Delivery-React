@@ -28,8 +28,8 @@ import emptyImage from "../../../../assets/empty.png";
 import { CustomCloseIconButton } from "../../../added-cart-view/Cart.style";
 import ClearIcon from "@mui/icons-material/Clear";
 import { useRouter } from "next/router";
-import {setGuestUserInfo} from "redux/slices/guestUserInfo";
-import {useDispatch} from "react-redux";
+import { setGuestUserInfo } from "redux/slices/guestUserInfo";
+import { useDispatch } from "react-redux";
 
 const CustomLine = styled(Box)(({ theme }) => ({
   borderLeft: "1px dashed",
@@ -41,7 +41,7 @@ const CustomLine = styled(Box)(({ theme }) => ({
 const TrackParcelOrderDrawer = (props) => {
   const theme = useTheme();
   const router = useRouter();
-const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const [orderData, setOrderData] = useState(null);
   const { sideDrawerOpen, orderId, setSideDrawerOpen, phoneOrEmail } = props;
@@ -50,6 +50,7 @@ const dispatch = useDispatch();
   const phone = phoneOrEmail;
 
   const handleSuccess = (res) => {
+    console.log({ res });
     setOrderData(res);
   };
   const {
@@ -64,6 +65,12 @@ const dispatch = useDispatch();
       refetch();
     }
   }, [orderId]);
+  useEffect(() => {
+    if (trackOrderData) {
+      setOrderData(trackOrderData);
+    }
+
+  }, [trackOrderData, orderId]);
   useEffect(() => {
     const interval = setInterval(() => {
       if (orderId && orderData && orderData?.order_status !== "delivered") {
@@ -112,16 +119,19 @@ const dispatch = useDispatch();
     setSideDrawerOpen(false);
   };
   const handleClick = () => {
-    dispatch(setGuestUserInfo({contact_person_number: phone}));
+    dispatch(setGuestUserInfo({ contact_person_number: phone }));
     router.push(
       {
         pathname: "/profile",
-        query: { orderId: trackOrderData?.id, page: "my-orders",phone:phone },
+        query: { orderId: trackOrderData?.id, page: "my-orders", phone: phone },
       },
       undefined,
       { shallow: true }
     );
   };
+  console.log({ orderData });
+
+
   return (
     <CustomSideDrawer
       anchor="right"

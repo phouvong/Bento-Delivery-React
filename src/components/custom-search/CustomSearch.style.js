@@ -8,23 +8,23 @@ export const Search = styled(CustomStackFullWidth)(({ theme, type2 }) => ({
   color: theme.palette.neutral[600],
   height: "40px",
   border:
-    type2 &&
-    `1px solid ${alpha(
-      getCurrentModuleType() === ModuleTypes.FOOD
-        ? theme.palette.moduleTheme.food
-        : theme.palette.primary.main,
-      0.4
-    )}`,
+    type2
+      ? `1px solid ${alpha(
+        getCurrentModuleType() === ModuleTypes.FOOD
+          ? theme.palette.moduleTheme.food
+          : theme.palette.primary.main,
+        0.4
+      )}`
+      : `1px solid ${alpha(theme.palette.neutral[500], .4)}`,
   borderRadius: "5px",
   transition: theme.transitions.create(['box-shadow', 'border-color'], {
     duration: theme.transitions.duration.short,
   }),
   "&:focus-within": {
-    border: `1px solid ${
-      getCurrentModuleType() === ModuleTypes.FOOD
-        ? theme.palette.moduleTheme.food
-        : theme.palette.primary.main
-    }`,
+    border: `1px solid ${getCurrentModuleType() === ModuleTypes.FOOD
+      ? theme.palette.moduleTheme.food
+      : theme.palette.primary.main
+      }`,
     boxShadow: `0 4px 12px ${alpha(
       getCurrentModuleType() === ModuleTypes.FOOD
         ? theme.palette.moduleTheme.food

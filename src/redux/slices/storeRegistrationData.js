@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   allData: {},
   activeStep: null,
+  inZone: null,
 };
 
 // Action creators are generated for each case reducer function
@@ -16,9 +17,12 @@ export const storedResDataSlice = createSlice({
     setActiveStep: (state, action) => {
       state.activeStep = action.payload;
     },
+    setInZone: (state, action) => {
+      state.inZone = action.payload;
+    },
   },
 });
 
-export const { setAllData, setActiveStep } = storedResDataSlice.actions;
+export const { setAllData, setActiveStep, setInZone } = storedResDataSlice.actions;
 
 export default storedResDataSlice.reducer;

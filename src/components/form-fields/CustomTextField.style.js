@@ -12,7 +12,7 @@ export const CustomTextFieldStyle = styled(TextField)(
     labelColor
   }) => ({
     border: borderColor && `1px solid ${borderColor}`,
-    borderRadius: borderColor && "10px",
+    borderRadius: "8px",
     backgroundColor: backgroundColor ? theme.palette.neutral[100] : "none",
     "& .MuiInputLabel-root": {
       color: labelColor ? labelColor : theme.palette.neutral[400], // Default or custom label color
@@ -29,32 +29,33 @@ export const CustomTextFieldStyle = styled(TextField)(
           ? "row-reverse"
           : "row",
       "& input[type=number]": {
-        "-moz-appearance": "text-field",
+        MozAppearance: "text-field",
       },
       "& input[type=number]::-webkit-outer-spin-button": {
-        "-webkit-appearance": "none",
+        WebkitAppearance: "none",
         margin: 0,
       },
       "& input[type=number]::-webkit-inner-spin-button": {
-        "-webkit-appearance": "none",
+        WebkitAppearance: "none",
         margin: 0,
       },
     },
     "& .MuiFormHelperText-root": {
       marginLeft: "0px",
       marginTop: "5px",
+      whiteSpace: "pre-line",
     },
     "& .MuiOutlinedInput-input": {
       fontSize: "14px",
       fontWeight: 400,
       height: !multiline && ".8em !important",
       "&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus":
-        {
-          filter: "none",
-          WebkitTextFillColor: theme.palette.neutral[1000],
-          WebkitBoxShadow:
-            "0 0 0px 40rem " + theme.palette.neutral[200] + " inset",
-        },
+      {
+        filter: "none",
+        WebkitTextFillColor: theme.palette.neutral[1000],
+        WebkitBoxShadow:
+          "0 0 0px 40rem " + theme.palette.neutral[200] + " inset",
+      },
     },
   })
 );

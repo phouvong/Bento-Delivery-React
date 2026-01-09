@@ -1,5 +1,5 @@
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import { alpha, Grid, Stack, styled, Typography } from "@mui/material";
+import { alpha, Grid, Stack, styled, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useAddStoreToWishlist } from "api-manage/hooks/react-query/wish-list/useAddStoreToWishLists";
 import { useWishListStoreDelete } from "api-manage/hooks/react-query/wish-list/useWishListStoreDelete";
@@ -26,6 +26,7 @@ import GradeRoundedIcon from "@mui/icons-material/GradeRounded";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import ClosedNow from "components/closed-now";
 import NextImage from "components/NextImage";
+import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
 const ContentSection = styled(Box)(({ theme }) => ({
   background: "",
   marginTop: "10px",
@@ -52,7 +53,9 @@ const Wrapper = styled(CustomStackFullWidth)(({ theme }) => ({
     transition: "all ease 0.5s",
   },
   "&:hover": {
-    transform: "scale(1.03)",
+    //transform: "scale(1.03)",
+    border: `1px solid ${alpha(theme.palette.primary.main, 0.4)}`,
+    boxShadow: theme.shadows[6],
     img: { transform: "scale(1.05)" },
     ".MuiTypography-subtitle2": {
       color: theme.palette.primary.main,
@@ -66,9 +69,10 @@ const ImageWrapper = styled(CustomBoxFullWidth)(({ theme }) => ({
   borderRadius: "10px",
   height: "130px",
   overflow: "hidden",
-  "img": { width:"100%",
+  "img": {
+    width: "100%",
     height: "100%",
-    },
+  },
   [theme.breakpoints.down("sm")]: {
     height: "140px",
   },
@@ -91,6 +95,9 @@ const StoreCard = (props) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const router = useRouter();
+  const { ref: textRef, isEllipsed } = useTextEllipsis(item?.name);
+  const { ref: textRef2, isEllipsed: isEllipsed2 } = useTextEllipsis(item?.name);
+
   useEffect(() => {
     wishlistItemExistHandler();
   }, [wishLists]);
@@ -172,18 +179,18 @@ const StoreCard = (props) => {
           objectFit="cover"
         />
         {getCurrentModuleType() === "rental" && (
-           <Box sx={{ position: "absolute", bottom: 0, left: 10 }}>
-           <NextImage
-            src={item?.logo_full_url}
-            alt={t("Background")}
-            height={60}
-            width={60}
-            borderRadius="10px"
-            objectFit="cover"/>
+          <Box sx={{ position: "absolute", bottom: 0, left: 10 }}>
+            <NextImage
+              src={item?.logo_full_url}
+              alt={t("Background")}
+              height={60}
+              width={60}
+              borderRadius="10px"
+              objectFit="cover" />
           </Box>
         )}
-        
-        
+
+
         {/*{isWishlisted && (*/}
         {/*  <Box sx={{ position: "absolute", top: 10, right: 10 }}>*/}
         {/*    <FavoriteWrapper>*/}
@@ -217,19 +224,48 @@ const StoreCard = (props) => {
               marginBottom: "8px",
             }}
           >
-            <PrimaryToolTip text={item?.name} placement="bottom" arrow="false">
-              <Typography
+            <Tooltip
+              title={item?.name || ""}
+              arrow
+              placement="bottom"
+              disableHoverListener={!isEllipsed}
+              componentsProps={{
+                tooltip: {
+                  sx: {
+                    bgcolor: (theme) => theme.palette.toolTipColor,
+                    "& .MuiTooltip-arrow": {
+                      color: (theme) => theme.palette.toolTipColor,
+                    },
+                  },
+                },
+              }}
+            >
+              <CustomBoxFullWidth
                 sx={{
-                  fontWeight: "600",
-
-                  color: (theme) => theme.palette.text.custom,
-                  fontSize: { xs: "13px", sm: "16px" },
+                  px: "10px",
+                  width: "100%",
+                  // Ensu"100%",
+                  // Ensure wrapper in flex can shrink and give a constrained width
+                  minWidth: 0,
                 }}
-                component="h3"
               >
-                {item?.name}
-              </Typography>
-            </PrimaryToolTip>
+                <Typography
+                  ref={textRef}
+                  sx={{
+                    fontWeight: "600",
+                    color: (theme) => theme.palette.text.custom,
+                    fontSize: { xs: "13px", sm: "16px" },
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    width: "100%",
+                  }}
+                  component="h3"
+                >
+                  {item?.name}
+                </Typography>
+              </CustomBoxFullWidth>
+            </Tooltip>
 
             <Typography
               sx={{
@@ -315,12 +351,24 @@ const StoreCard = (props) => {
         <CustomBoxFullWidth>
           <Grid container>
             <Grid item xs={9.5}>
-              <PrimaryToolTip
-                text={item?.name}
+              <Tooltip
+                title={item?.name || ""}
                 placement="bottom"
-                arrow="false"
+                arrow
+                disableHoverListener={!isEllipsed2}
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      bgcolor: (theme) => theme.palette.toolTipColor,
+                      "& .MuiTooltip-arrow": {
+                        color: (theme) => theme.palette.toolTipColor,
+                      },
+                    },
+                  },
+                }}
               >
                 <Typography
+                  ref={textRef2}
                   className={classes.singleLineEllipsis}
                   fontSize={{ xs: "12px", md: "14px" }}
                   fontWeight="500"
@@ -328,7 +376,7 @@ const StoreCard = (props) => {
                 >
                   {item?.name}
                 </Typography>
-              </PrimaryToolTip>
+              </Tooltip>
               {/*<H4 text={item?.name} />*/}
             </Grid>
             <Grid item xs={2.5}>

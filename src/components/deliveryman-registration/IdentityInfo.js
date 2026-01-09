@@ -36,6 +36,7 @@ const supportedFormatMultiImages = [
   "doc",
   "docx",
   "deb",
+  "webp",
 ];
 const IdentityInfo = ({
   deliveryManFormik,
@@ -55,142 +56,96 @@ const IdentityInfo = ({
   return (
     <>
       <CustomBoxFullWidth>
-        <Grid container spacing={2}>
-          <Grid item xs={12} lg={6}>
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <CustomSelectWithFormik
-                  required
-                  selectFieldData={IDENTITY_TYPE}
-                  inputLabel={t("Identity Type")}
-                  passSelectedValue={(value) => {
-                    handleFieldChange("identity_type", value);
-                  }}
-                  touched={deliveryManFormik.touched.identity_type}
-                  errors={deliveryManFormik.errors.identity_type}
-                  fieldProps={deliveryManFormik.getFieldProps("identity_type")}
-                  startIcon={
-                    <BadgeIcon
-                      sx={{
-                        color:
-                          deliveryManFormik.touched.identity_type &&
-                          !deliveryManFormik.errors.identity_type
-                            ? theme.palette.primary.main
-                            : alpha(theme.palette.neutral[400], 0.7),
-                        fontSize: "18px",
-                      }}
-                    />
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <CustomTextFieldWithFormik
-                  required
-                  placeholder={t("Identity Number")}
-                  type="number"
-                  label={t("Identity Number")}
-                  touched={deliveryManFormik.touched.identity_number}
-                  errors={deliveryManFormik.errors.identity_number}
-                  fieldProps={deliveryManFormik.getFieldProps(
-                    "identity_number"
-                  )}
-                  onChangeHandler={(value) => {
-                    handleFieldChange("identity_number", value);
-                  }}
-                  value={deliveryManFormik.values.identity_number}
-                  fontSize="12px"
-                  startIcon={
-                    <InputAdornment position="start">
-                      <BadgeIcon
-                        sx={{
-                          color:
-                            deliveryManFormik.touched.identity_number &&
-                            !deliveryManFormik.errors.identity_number
-                              ? theme.palette.primary.main
-                              : alpha(theme.palette.neutral[400], 0.7),
-                          fontSize: "18px",
-                        }}
-                      />
-                    </InputAdornment>
-                  }
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={12} lg={6}>
-            <CustomStackFullWidth spacing={2.5}>
-              <Stack
-                direction="row"
-                width="100%"
-                spacing={1}
-                alignItems="center"
-              >
-                <InputLabel
+        <Grid container columnSpacing={3}>
+          <Grid item xs={12} md={6} sx={{ minHeight: "5rem" }}>
+            <CustomSelectWithFormik
+              required
+              selectFieldData={IDENTITY_TYPE}
+              inputLabel={t("Identity Type")}
+              passSelectedValue={(value) => {
+                handleFieldChange("identity_type", value);
+              }}
+              touched={deliveryManFormik.touched.identity_type}
+              errors={deliveryManFormik.errors.identity_type}
+              fieldProps={deliveryManFormik.getFieldProps("identity_type")}
+              placeholder={t("Select Identity Type")}
+              startIcon={
+                <BadgeIcon
                   sx={{
-                    fontWeight: "600",
-                    color: (theme) => theme.palette.neutral[1000],
+                    color:
+                      deliveryManFormik.touched.identity_type &&
+                        !deliveryManFormik.errors.identity_type
+                        ? theme.palette.primary.main
+                        : alpha(theme.palette.neutral[400], 0.7),
+                    fontSize: "18px",
                   }}
-                >
-                  {t("Identity Image")}
-                </InputLabel>
-                <Typography fontSize="12px">
-                  {t("JPG, JPEG, PNG Less Than 1MB (Ratio 1:1)")}
-                </Typography>
-              </Stack>
-
-              <MultiFileUploader
-                fileImagesHandler={fileImagesHandler}
-                totalFiles={identityImage}
-                maxFileSize={20000000}
-                supportedFileFormats={supportedFormatMultiImages}
-                acceptedFileInputFormat={acceptedFileInputFormat}
-                gridControl="true"
-              />
-            </CustomStackFullWidth>
-            {/*<Stack alignItems="start" justifyContent="flex-start" spacing={2}>*/}
-            {/*  <Stack*/}
-            {/*    direction="row"*/}
-            {/*    width="100%"*/}
-            {/*    spacing={1}*/}
-            {/*    alignItems="center"*/}
-            {/*  >*/}
-            {/*    <InputLabel*/}
-            {/*      sx={{*/}
-            {/*        fontWeight: "600",*/}
-            {/*        color: (theme) => theme.palette.neutral[1000],*/}
-            {/*      }}*/}
-            {/*    >*/}
-            {/*      {t("Identity Image")}*/}
-            {/*    </InputLabel>*/}
-            {/*    <Typography fontSize="12px">*/}
-            {/*      {t("JPG, JPEG, PNG Less Than 1MB (Ratio 2:1)")}*/}
-            {/*    </Typography>*/}
-            {/*  </Stack>*/}
-
-            {/*  <MultiFileUploader*/}
-            {/*    fileImagesHandler={fileImagesHandler}*/}
-            {/*    totalFiles={identityImage}*/}
-            {/*    maxFileSize={20000000}*/}
-            {/*    supportedFileFormats={supportedFormatMultiImages}*/}
-            {/*    acceptedFileInputFormat={acceptedFileInputFormat}*/}
-            {/*    labelText={t("Identity Image")}*/}
-            {/*    width="10rem"*/}
-            {/*  />*/}
-            {/*  <ImageUploaderWithPreview*/}
-            {/*    type="file"*/}
-            {/*    labelText={t("Identity Image")}*/}
-            {/*    hintText="Image format - jpg, png, jpeg, gif Image Size - maximum size 2 MB Image Ratio - 1:1"*/}
-            {/*    file={identityImage}*/}
-            {/*    onChange={singleFileUploadHandlerForImage}*/}
-            {/*    imageOnChange={imageOnchangeHandlerForImage}*/}
-            {/*    width="8.75rem"*/}
-            {/*    marginLeft="0px"*/}
-            {/*    error={deliveryManFormik.errors.identity_image}*/}
-            {/*    // borderRadius={borderRadius ?? "50%"}*/}
-            {/*  />*/}
-            {/*</Stack>*/}
+                />
+              }
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <CustomTextFieldWithFormik
+              required
+              type="number"
+              label={t("Identity Number")}
+              touched={deliveryManFormik.touched.identity_number}
+              errors={deliveryManFormik.errors.identity_number}
+              fieldProps={deliveryManFormik.getFieldProps(
+                "identity_number"
+              )}
+              onChangeHandler={(value) => {
+                handleFieldChange("identity_number", value);
+              }}
+              value={deliveryManFormik.values.identity_number}
+              placeholder={t("Enter Identity Number")}
+              fontSize="12px"
+              startIcon={
+                <InputAdornment position="start">
+                  <BadgeIcon
+                    sx={{
+                      color:
+                        deliveryManFormik.touched.identity_number &&
+                          !deliveryManFormik.errors.identity_number
+                          ? theme.palette.primary.main
+                          : alpha(theme.palette.neutral[400], 0.7),
+                      fontSize: "18px",
+                    }}
+                  />
+                </InputAdornment>
+              }
+            />
           </Grid>
         </Grid>
+
+        <CustomStackFullWidth spacing={2}>
+          <Stack
+            direction="row"
+            flexWrap="wrap"
+            width="100%"
+            spacing={1}
+            alignItems="center"
+          >
+            <InputLabel
+              sx={{
+                fontWeight: "500",
+                color: (theme) => theme.palette.neutral[1000],
+              }}
+            >
+              {t("Identity Image")}
+            </InputLabel>
+            <Typography fontSize="10px">
+              ({t("JPG, JPEG, PNG ,WEBP Less Than 1MB Ratio 1:1")})
+            </Typography>
+          </Stack>
+
+          <MultiFileUploader
+            fileImagesHandler={fileImagesHandler}
+            totalFiles={identityImage}
+            maxFileSize={1024 * 1024}
+            supportedFileFormats={supportedFormatMultiImages}
+            acceptedFileInputFormat={acceptedFileInputFormat}
+          />
+        </CustomStackFullWidth>
       </CustomBoxFullWidth>
     </>
   );

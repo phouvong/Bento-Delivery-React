@@ -23,18 +23,22 @@ export const FilePreviewerWrapper = styled(ImageContainer)(
 );
 
 export const IconButtonImagePreviewer = styled(IconButton)(({ theme }) => ({
-  color: theme.palette.error.light,
+  color: theme.palette.neutral[100],
   position: "absolute",
-  borderRadius: "5px",
-  top: "10px",
-  right: "5px",
-  padding: "6px",
-  background: theme.palette.neutral[100],
-  border: "2px solid",
-  borderColor: theme.palette.error.back,
+  borderRadius: "100rem",
+  width: "22px",
+  height: "22px",
+  top: "-7px",
+  right: "-7px",
+  padding: "4px",
+  backgroundColor: theme.palette.error.main,
+  zIndex: 1,
+  "&:hover": {
+    backgroundColor: theme.palette.error.dark,
+  }
 }));
 export const CustomBoxForFilePreviewer = styled(Box)(({ theme, width }) => ({
-  width: width ? width : "100%",
+  width: "100%",
   position: "relative",
   height: "7.75rem",
   // justifyContent:"center"

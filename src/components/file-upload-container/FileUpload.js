@@ -1,8 +1,6 @@
 import React from "react";
-// import { DashedBox } from '../../gurbage/admin/components/forms/FormWithFormik.style'
 import { Stack, Tooltip, useTheme } from "@mui/material";
-// import cloudIcon from '../../assets/images/icons/cloud-upload.png'
-// import FileFormatInfo from '../file-format-text/FileFormatInfo'
+import emptyImage from "/public/static/empty_img.png";
 import {
   DashedBox,
   FileUploadHeader,
@@ -47,16 +45,19 @@ const FileUpload = (props) => {
           errorStatus={errorStatus}
         >
           <Stack alignItems="center" justifyContent="center" spacing={1.5}>
-            <ImageContainerFileUpload>
-              <AddPhotoAlternateIcon sx={{ width: "40px", height: "40px", color: theme.palette.neutral[1100] }} />
-              {/*<img src={cloudIcon.src} alt="cloudIcon" />*/}
+            <ImageContainerFileUpload sx={{ img: {width: "36px", height: "36px"} }}>
+              <img src={emptyImage.src} alt="emptyImage" />
             </ImageContainerFileUpload>
             <Tooltip title={labelText}>
               <FileUploadTextContainer>
                 <CustomTypographyEllipsis
-                  sx={{ fontSize: "13px", fontWeight: "400" }}
+                  sx={{
+                    fontSize: "12px",
+                    fontWeight: "400",
+                    color: (theme) => theme.palette.primary.main,
+                  }}
                 >
-                  {labelText ? labelText : t("File upload")}
+                  {labelText ? labelText : t("Add Image")}
                 </CustomTypographyEllipsis>
               </FileUploadTextContainer>
             </Tooltip>

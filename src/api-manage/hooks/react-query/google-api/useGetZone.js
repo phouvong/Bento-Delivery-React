@@ -17,6 +17,7 @@ const getZoneId = async (location, zoneIdEnabled) => {
 export default function useGetZoneId(location, zoneIdEnabled) {
   return useQuery(["zoneId", location], () => getZoneId(location), {
     enabled: zoneIdEnabled,
-    onError: onErrorResponse,
+    //onError: onErrorResponse,
+    retry: 0
   });
 }

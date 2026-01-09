@@ -49,8 +49,9 @@ const StoreRegPaymentCard = ({ method, selectedMethod, setSelectedMethod }) => {
         </Stack>
         <CustomImageContainer
           src={method?.gateway_image_full_url}
-          width="31px"
+          width="100px"
           alignItems="center"
+          objectfit="cover"
         />
       </Stack>
     </CustomStackFullWidth>

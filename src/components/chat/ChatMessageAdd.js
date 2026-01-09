@@ -224,9 +224,9 @@ const ChatMessageAdd = ({
 								}
 							/>
 							{body?.text ||
-							body?.file?.length !== 0 ||
-							channelId !== "admin" ||
-							!orderId ? (
+								body?.file?.length !== 0 ||
+								channelId !== "admin" ||
+								!orderId ? (
 								<Tooltip title={t("Send")}>
 									<AttachmentBox>
 										{isLoadingMessageSend ? (
@@ -245,7 +245,7 @@ const ChatMessageAdd = ({
 													padding: "0px",
 													transform:
 														getLanguage() ===
-															"rtl" &&
+														"rtl" &&
 														"rotate(180deg)",
 												}}
 												onClick={handleSend}
@@ -270,43 +270,43 @@ const ChatMessageAdd = ({
 								<>
 									{automateMessageData?.data?.length !==
 										0 && (
-										<Tooltip
-											title={
-												<CustomMessagesBox
-													selected={selected}
-													handleClick={handleClick}
-													automateMessageData={
-														automateMessageData?.data
-													}
-												/>
-											}
-											arrow
-											placement="top-start"
-											componentsProps={{
-												tooltip: {
-													sx: {
-														maxWidth: "none",
-														width: {
-															xs: "300px",
-															md: "500px",
-														}, // Set the width here
-														backgroundColor: (
-															theme
-														) =>
-															theme.palette
-																.neutral[100],
-														"& .MuiTooltip-arrow": {
-															bgColor: (theme) =>
+											<Tooltip
+												title={
+													<CustomMessagesBox
+														selected={selected}
+														handleClick={handleClick}
+														automateMessageData={
+															automateMessageData?.data
+														}
+													/>
+												}
+												arrow
+												placement="top-start"
+												componentsProps={{
+													tooltip: {
+														sx: {
+															maxWidth: "none",
+															width: {
+																xs: "300px",
+																md: "500px",
+															}, // Set the width here
+															backgroundColor: (
+																theme
+															) =>
 																theme.palette
 																	.neutral[100],
+															"& .MuiTooltip-arrow": {
+																bgColor: (theme) =>
+																	theme.palette
+																		.neutral[100],
+															},
 														},
 													},
-												},
-											}}
-										>
-											<MessageIcon />
-										</Tooltip>
-									)}
+												}}
+											>
+												<MessageIcon />
+											</Tooltip>
+										)}
 								</>
 							)}
 						</Stack>

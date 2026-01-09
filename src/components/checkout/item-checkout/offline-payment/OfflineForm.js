@@ -12,6 +12,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import FormHelperText from "@mui/material/FormHelperText";
 import { LoadingButton } from "@mui/lab";
 import * as Yup from "yup";
@@ -32,6 +33,7 @@ import { getAmountWithSign } from "../../../../helper-functions/CardHelpers";
 import { useRouter } from "next/router";
 import { setOrderInformation } from "../../../../redux/slices/utils";
 import { CustomButtonStack } from "components/checkout/CheckOut.style";
+import { setClearCart } from "redux/slices/cart";
 
 const OfflineForm = ({
   offlinePaymentOptions,
@@ -39,6 +41,8 @@ const OfflineForm = ({
   total_order_amount,
   offlinePaymentLoading,
   usePartialPayment,
+  handleOffineOrder,
+  setOfflineCheck
 }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -84,8 +88,8 @@ const OfflineForm = ({
         };
         if (values) {
           dispatch(setOfflinePaymentInfo(newData));
-          placeOrder();
           dispatch(setOrderInformation({ ...orderInformation, ...newData }));
+          handleOffineOrder(newData);
         }
       } catch (err) {
         // console.log(error);
@@ -101,113 +105,166 @@ const OfflineForm = ({
     dispatch(setOfflineMethod(newMethod));
   };
   const handleCancel = () => {
-    router.back();
+    dispatch(setClearCart());
+    router.push("/home");
   };
 
   return (
     <CustomStackFullWidth
       justifyContent="center"
       alignItems="center"
-      paddingInline={{ xs: "0px", sm: "60px" }}
-      gap="20px"
+    // padding={{ xs: ".75rem", sm: "1.25rem" }}
+    // gap={1}
     >
       <CustomImageContainer width="120px" src={OfflinePaymentImage.src} />
-      <Subtitle1 text="Pay your bill using any of the payment method below and input the required information in the form" />
-      <CustomStackFullWidth>
+      <Typography variant="body1" color={theme.palette.neutral[600]} mb={1}>{t("Pay your bill using any of the payment method below and input the required information in the form")}</Typography>
+      <Stack direction="row" alignItems="center" gap="10px">
+        <Typography variant="subtitle1">Total order price: </Typography>
+        <Typography variant="subtitle1" color={theme.palette.primary.main}>{getAmountWithSign(total_order_amount)}</Typography>
+      </Stack>
+      <CustomStackFullWidth mt={4}>
         <form onSubmit={formik.handleSubmit}>
           <Stack spacing={2}>
-            <FormControl fullWidth>
-              <InputLabel
-                // required={required}
-                id="demo-simple-select-label"
-                sx={{ color: (theme) => theme.palette.neutral[1000] }}
-              >
-                {t("Payment Method")}
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={offlineMethod?.method_name}
-                label={t("Payment Method")}
-                onChange={paymentMethodHandler}
-                error={Boolean(
-                  formik.touched.payment_method && formik.errors.payment_method
-                )}
-                helperText={
-                  formik.touched.payment_method && formik.errors.payment_method
-                }
-                ieldProps={formik.getFieldProps("payment_method")}
-              >
-                {offlinePaymentOptions?.length > 0 &&
-                  offlinePaymentOptions?.map((item, index) => {
-                    return (
-                      <MenuItem
-                        key={index}
-                        value={item.method_name}
+            <Stack direction={{ xs: "column", sm: "row" }} justifyContent="center" flexWrap="wrap" gap={2} sx={{ marginBottom: "20px" }}>
+              {offlinePaymentOptions?.length > 0 &&
+                offlinePaymentOptions?.map((item, index) => {
+                  const isSelected =
+                    offlineMethod?.method_name === item.method_name;
+                  return (
+                    <Stack flexGrow={1} maxWidth="340px" key={index}>
+                      <Stack
+                        flexGrow={1}
+                        onClick={() => {
+                          formik.setFieldValue(
+                            "payment_method",
+                            item.method_name
+                          );
+                          const newMethod = offlinePaymentOptions?.filter(
+                            (method) => method.method_name === item.method_name
+                          )[0];
+                          dispatch(setOfflineMethod(newMethod));
+                        }}
                         sx={{
+                          border: isSelected
+                            ? `1px solid ${theme.palette.primary.main}`
+                            : `1px solid ${theme.palette.neutral[200]}`,
+                          borderRadius: "10px",
+                          padding: "15px",
+                          cursor: "pointer",
+                          position: "relative",
+                          height: "100%",
+                          // backgroundColor: isSelected
+                          //   ? alpha(theme.palette.primary.main, 0.05)
+                          //   : theme.palette.neutral[100],
+                          transition: "all 0.3s ease-in-out",
+                          backgroundColor: theme.palette.neutral[100],
+                          boxShadow: isSelected ? "0px 10px 20px rgba(0, 0, 0, 0.10)" : "0px 10px 20px rgba(0, 0, 0, 0.0)",
                           "&:hover": {
-                            backgroundColor: "primary.main",
+                            boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.10)",
+                            // borderColor: theme.palette.primary.main,
                           },
                         }}
                       >
-                        {t(item.method_name)}
-                      </MenuItem>
-                    );
-                  })}
-              </Select>
-              {formik.touched.payment_method &&
-                formik.errors.payment_method &&
-                !value && (
-                  <FormHelperText
-                    sx={{ color: (theme) => theme.palette.error.main }}
-                  >
-                    {t("Please select an option.")}
-                  </FormHelperText>
-                )}
-            </FormControl>
-            <CustomStackFullWidth
-              padding="15px"
-              borderRadius="10px"
-              gap="15px"
-              backgroundColor={alpha(theme.palette.primary.main, 0.1)}
-            >
-              <Typography fontWeight={500} color={theme.palette.primary.main}>
-                {t("Payment Info")}
-              </Typography>
-              <CustomStackFullWidth>
-                <Grid container spacing={1}>
-                  {offlinePaymentOptions
-                    ?.filter(
-                      (item) => item.method_name === offlineMethod?.method_name
-                    )[0]
-                    ?.method_fields?.map((item, index) => (
-                      <Grid item xs={12} md={6} key={index}>
-                        <Typography sx={{ textTransform: "capitalize" }}>
-                          {item.input_name.replaceAll("_", " ")}
-                          &nbsp;&nbsp;:&nbsp;&nbsp;
-                          <Typography component="span">
-                            {item.input_data}
-                          </Typography>
+                        {isSelected && (
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            gap="5px"
+                            sx={{
+                              position: "absolute",
+                              top: 10,
+                              right: 10,
+                              backgroundColor: alpha(
+                                theme.palette.primary.main,
+                                0.1
+                              ),
+                              padding: "2px 8px",
+                              borderRadius: "5px",
+                            }}
+                          >
+                            <Typography
+                              fontSize="10px"
+                              color="primary.main"
+                              fontWeight="600"
+                            >
+                              {t("Pay on this account")}
+                            </Typography>
+                            <CheckCircleIcon
+                              sx={{
+                                fontSize: 16,
+                                color: theme.palette.primary.main,
+                              }}
+                            />
+                          </Stack>
+                        )}
+
+                        <Typography
+                          fontWeight={700}
+                          fontSize="14px"
+                          textTransform="capitalize"
+                          color={theme.palette.neutral[1000]}
+                          mb={2}
+                        >
+                          {item.method_name}{" "}
+                          {t("Info")}
                         </Typography>
-                      </Grid>
-                    ))}
-                </Grid>
-              </CustomStackFullWidth>
-            </CustomStackFullWidth>
+
+                        <Stack gap="5px">
+                          {item.method_fields?.map((field, i) => (
+                            <Grid container key={i}>
+                              <Grid item xs={4}>
+                                <Typography
+                                  fontSize="12px"
+                                  color={theme.palette.neutral[500]}
+                                >
+                                  {field.input_name.replaceAll("_", " ")}
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={1}>
+                                <Typography
+                                  fontSize="12px"
+                                  color={theme.palette.neutral[1000]}
+                                >
+                                  :
+                                </Typography>
+                              </Grid>
+                              <Grid item xs={7}>
+                                <Typography
+                                  fontSize="12px"
+                                  fontWeight={600}
+                                  color={theme.palette.neutral[1000]}
+                                  sx={{ wordBreak: "break-all" }}
+                                >
+                                  {field.input_data}
+                                </Typography>
+                              </Grid>
+                            </Grid>
+                          ))}
+                        </Stack>
+                      </Stack>
+                    </Stack>
+                  );
+                })}
+            </Stack>
+            {formik.touched.payment_method &&
+              formik.errors.payment_method &&
+              !offlineMethod && (
+                <FormHelperText
+                  sx={{ color: (theme) => theme.palette.error.main }}
+                >
+                  {t("Please select an option.")}
+                </FormHelperText>
+              )}
             <Typography
-              padding="20px"
-              varient="h3"
-              fontSize="18px"
-              fontWeight="700"
-              textAlign="center"
+              fontWeight={700}
+              fontSize="16px"
+              color={theme.palette.neutral[1000]}
+              mt="3rem !important"
+              mb="1rem !important"
             >
-              {`Amount: ${getAmountWithSign(
-                usePartialPayment
-                  ? total_order_amount - profileInfo?.wallet_balance
-                  : total_order_amount
-              )}`}
+              {t("Payment Info")}
             </Typography>
-            <Grid container spacing={1}>
+            <Grid container spacing={3} sx={{ marginTop: "-24px !important", marginLeft: "-24px !important" }}>
               {offlinePaymentOptions
                 ?.filter(
                   (item) => item.method_name === offlineMethod?.method_name
@@ -215,6 +272,7 @@ const OfflineForm = ({
                 ?.method_informations?.map((item, index) => (
                   <Grid item xs={12} md={6} key={index}>
                     <TextField
+                      required
                       fullWidth
                       label={item?.customer_input
                         .replaceAll("_", " ")
@@ -259,7 +317,7 @@ const OfflineForm = ({
                   value={formik.values["customer_note"]}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                  // defaultValue="Default Value"
+                // defaultValue="Default Value"
                 />
               </Grid>
             </Grid>
@@ -293,7 +351,7 @@ const OfflineForm = ({
                   width: "100%",
                 }}
               >
-                {t("Place Order")}
+                {t("Complete Order")}
               </LoadingButton>
             </Stack>
           </CustomButtonStack>

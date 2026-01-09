@@ -15,20 +15,21 @@ const OfflineOrderDenied = ({ trackOrderData }) => {
                 padding: "15px ",
                 borderRadius: "5px",
                 maxWidth: "335px",
-                gap: "15px"
+                gap: "1px",
+                backgroundColor: alpha(theme.palette.error.light, 0.2),
             }}
         >
             <CustomStackFullWidth
                 sx={{
                     flexDirection: "row",
-                    gap: "20px",
+                    gap: "0px",
                     // justifyContent: "center",
                     alignItems: "center",
                 }}
             >
-                <OfflinePaymentDenied />
-                <Typography fontSize="16px" fontWeight={500} color={theme.palette.text.primary}>
-                    {t("Payment Denied")}
+                {/* <OfflinePaymentDenied /> */}
+                <Typography fontSize="16px" fontWeight={500} color={alpha(theme.palette.error.main, 0.9)}>
+                    #{t("Denied Note")}
                 </Typography>
                 {/* <InfoOutlinedIcon /> */}
             </CustomStackFullWidth>

@@ -33,7 +33,7 @@ const PercelDelivery = ({ configData }) => {
   const [receiverLocation, setReceiverLocation] = useState(
     parcelInfo ? parcelInfo?.receiverLocations : {}
   );
-  const [receiverFormattedAddress, setReceiverFormattedAddress] = useState(parcelInfo? parcelInfo?.receiverAddress : "");
+  const [receiverFormattedAddress, setReceiverFormattedAddress] = useState(parcelInfo ? parcelInfo?.receiverAddress : "");
   const [open, setOpen] = useState(false);
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
   let token = getToken();
@@ -47,6 +47,7 @@ const PercelDelivery = ({ configData }) => {
       userDecisionTimeout: 5000,
       isGeolocationEnabled: true,
     });
+  console.log("parcelInfo", parcelInfo);
   const addAddressFormik = useFormik({
     initialValues: {
       senderName: token
@@ -54,16 +55,16 @@ const PercelDelivery = ({ configData }) => {
           ? profileInfo?.f_name
           : ""
         : parcelInfo?.senderName
-        ? parcelInfo?.senderName
-        : "",
+          ? parcelInfo?.senderName
+          : "",
       senderPhone: token
         ? profileInfo?.phone
           ? formatPhoneNumber(profileInfo?.phone)
-          : ""
+          : null
         : parcelInfo?.senderPhone
-        ? formatPhoneNumber(parcelInfo?.senderPhone)
-        : "",
-      senderEmail: profileInfo? profileInfo?.email:parcelInfo?.senderEmail ? parcelInfo?.senderEmail : "",
+          ? formatPhoneNumber(parcelInfo?.senderPhone)
+          : null,
+      senderEmail: profileInfo ? profileInfo?.email : parcelInfo?.senderEmail ? parcelInfo?.senderEmail : "",
       receiverName: parcelInfo?.receiverName ? parcelInfo?.receiverName : "",
       receiverPhone: parcelInfo?.receiverPhone ? formatPhoneNumber(parcelInfo?.receiverPhone) : "",
       receiverEmail: parcelInfo?.receiverEmail ? parcelInfo?.receiverEmail : "",
@@ -79,6 +80,7 @@ const PercelDelivery = ({ configData }) => {
       await formSubmitHandler(values);
     },
   });
+  console.log({ parcelInfo });
   useEffect(() => {
     const currentLocationLatLng = JSON.parse(
       localStorage.getItem("currentLatLng")
@@ -133,6 +135,7 @@ const PercelDelivery = ({ configData }) => {
     setSenderFormattedAddress(currentLocation);
   };
   const handleReceiverLocation = (location, currentLocation) => {
+
     setReceiverLocation(location);
     setReceiverFormattedAddress(currentLocation);
   };
@@ -143,7 +146,7 @@ const PercelDelivery = ({ configData }) => {
   const handleRoute = () => {
     router.push("/checkout?page=parcel", undefined, { shallow: true });
   };
-
+  console.log("location", receiverLocation, parcelInfo?.receiverLocations);
   const formSubmitHandler = (values) => {
     const tempValue = {
       ...values,
@@ -155,7 +158,8 @@ const PercelDelivery = ({ configData }) => {
       image: parcelCategories?.image_full_url,
       description: parcelCategories?.description,
     };
-    if (senderLocation && receiverLocation) {
+    console.log("tempValue", receiverLocation);
+    if ((senderLocation || parcelInfo?.senderLocations) && (receiverLocation || parcelInfo?.receiverLocations)) {
       dispatch(setParcelData(tempValue));
       if (!token && configData?.guest_checkout_status === 1) {
         setOpen(true);
@@ -228,7 +232,7 @@ const PercelDelivery = ({ configData }) => {
             />
           </Grid>
           <Grid item xs={12} sm={12} md={4}>
-            <ParcelInfo parcelCategories={parcelCategories} />
+            <ParcelInfo setReceiverLocation={setReceiverLocation} parcelCategories={parcelCategories} />
           </Grid>
         </Grid>
       </form>

@@ -3,10 +3,11 @@ import { useTranslation } from "react-i18next";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   CustomBoxForTips,
+  CustomFormControlLabel,
   CustomStackFullWidth,
   CustomTextField,
 } from "../../styled-components/CustomStyles.style";
-import { Grid, Typography } from "@mui/material";
+import { Checkbox, FormControlLabel, Grid, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { CouponTitle, DeliveryCaption, RoundButton } from "./CheckOut.style";
 import { useTheme } from "@emotion/react";
@@ -62,81 +63,101 @@ const DeliveryManTip = ({
   };
   return (
     <CustomStackFullWidth>
-      <Grid container rowGap="14px" spacing={1}>
+      <Grid container spacing={1}>
         <Grid item xs={12} md={12}>
           <DeliveryCaption>{t(`Delivery Man Tips`)}</DeliveryCaption>
         </Grid>
         {!show && (
           <Grid item xs={12}>
             <CustomStackFullWidth
-              direction="row"
-              alignItems={!isSmall && "center"}
               gap="10px"
               flexWrap="wrap"
+              backgroundColor={theme.palette.background.paper}
+              borderRadius=".5rem"
+              padding="1rem"
             >
-              {deliveryTips.map((item, index) => {
-                return (
-                  <Stack key={index} alignItems="flex-start">
-                    <CustomBoxForTips
-                      onClick={() => handleClickOnTips(item)}
-                      active={item === deliveryTip}
-                    >
-                      <Typography
-                        fontSize={item === deliveryTip ? "14px" : "12px"}
-                        textTransform="capitalize"
-                        fontWeight="600"
-                        color={
-                          item === deliveryTip
-                            ? theme.palette.whiteContainer.main
-                            : theme.palette.primary.main
-                        }
-                      >
-                        {index === 0 ? t("not now") : getAmountWithSign(item)}
-                      </Typography>
-                      {tripsData?.most_tips_amount === item && !isSmall && (
-                        <Stack
-                          position="absolute"
-                          bottom="0px"
-                          alignItems="center"
-                          width="100%"
-                          backgroundColor={theme.palette.primary.main}
-                        >
-                          <Typography
-                            color={theme.palette.whiteContainer.main}
-                            fontSize="10px"
-                          >
-                            {t("Most Tipped")}
-                          </Typography>
-                        </Stack>
-                      )}
-                    </CustomBoxForTips>
-                    {tripsData?.most_tips_amount === item && isSmall && (
-                      <Typography
-                        color={theme.palette.primary.main}
-                        fontSize="10px"
-                      >
-                        {t("Most Tipped")}
-                      </Typography>
-                    )}
-                  </Stack>
-                );
-              })}
-              <CustomBoxForTips
-                sx={{ borderColor: (theme) => theme.palette.primary.main }}
-                onClick={handleShow}
-                active={isCustom}
+              <CustomStackFullWidth
+                direction="row"
+                alignItems={!isSmall && "center"}
+                gap="10px"
+                flexWrap="wrap"
               >
-                <Typography
-                  color={
-                    isCustom
-                      ? theme.palette.neutral[100]
-                      : theme.palette.primary.main
-                  }
-                  fontSize="12px"
+                {deliveryTips.map((item, index) => {
+                  return (
+                    <Stack key={index} alignItems="flex-start">
+                      <CustomBoxForTips
+                        onClick={() => handleClickOnTips(item)}
+                        active={item === deliveryTip}
+                      >
+                        <Typography
+                          fontSize={item === deliveryTip ? "14px" : "12px"}
+                          textTransform="capitalize"
+                          fontWeight="600"
+                          color={
+                            item === deliveryTip
+                              ? theme.palette.whiteContainer.main
+                              : theme.palette.primary.main
+                          }
+                        >
+                          {index === 0 ? t("not now") : getAmountWithSign(item)}
+                        </Typography>
+                        {tripsData?.most_tips_amount === item && !isSmall && (
+                          <Stack
+                            position="absolute"
+                            bottom="0px"
+                            alignItems="center"
+                            width="100%"
+                            backgroundColor={theme.palette.primary.main}
+                          >
+                            <Typography
+                              color={theme.palette.whiteContainer.main}
+                              fontSize="10px"
+                            >
+                              {t("Most Tipped")}
+                            </Typography>
+                          </Stack>
+                        )}
+                      </CustomBoxForTips>
+                      {tripsData?.most_tips_amount === item && isSmall && (
+                        <Typography
+                          color={theme.palette.primary.main}
+                          fontSize="10px"
+                        >
+                          {t("Most Tipped")}
+                        </Typography>
+                      )}
+                    </Stack>
+                  );
+                })}
+                <CustomBoxForTips
+                  sx={{ borderColor: (theme) => theme.palette.primary.main }}
+                  onClick={handleShow}
+                  active={isCustom}
                 >
-                  {t("Custom")}
-                </Typography>
-              </CustomBoxForTips>
+                  <Typography
+                    color={
+                      isCustom
+                        ? theme.palette.neutral[100]
+                        : theme.palette.primary.main
+                    }
+                    fontSize="12px"
+                    fontWeight="600"
+                  >
+                    {t("Custom")}
+                  </Typography>
+                </CustomBoxForTips>
+              </CustomStackFullWidth>
+              {/*<Stack>*/}
+              {/*  <CustomFormControlLabel*/}
+              {/*    // onChange={(e) => handleCheckbox(e)}*/}
+              {/*    control={<Checkbox />}*/}
+              {/*    label={*/}
+              {/*      <Typography fontSize="14px">*/}
+              {/*        {t("Save for your next order")}*/}
+              {/*      </Typography>*/}
+              {/*    }*/}
+              {/*  />*/}
+              {/*</Stack>*/}
             </CustomStackFullWidth>
           </Grid>
         )}

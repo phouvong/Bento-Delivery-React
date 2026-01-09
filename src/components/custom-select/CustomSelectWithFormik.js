@@ -12,6 +12,10 @@ import FormHelperText from "@mui/material/FormHelperText";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@mui/material/styles";
 import WorkIcon from "@mui/icons-material/Work"; // Example icon
+import Tooltip from "@mui/material/Tooltip";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import CheckIcon from "@mui/icons-material/Check";
+
 
 const CustomSelectWithFormik = (props) => {
   const {
@@ -64,6 +68,13 @@ const CustomSelectWithFormik = (props) => {
         error={Boolean(touched && errors)}
         helperText={touched && errors}
         displayEmpty={true} // Allow empty value to show placeholder
+        startAdornment={
+          startIcon ? (
+            <InputAdornment position="start">
+              {startIcon}
+            </InputAdornment>
+          ) : null
+        }
         renderValue={(selected) => {
           if (!selected || selected === "") {
             return (
@@ -100,13 +111,26 @@ const CustomSelectWithFormik = (props) => {
               key={index}
               value={item.value}
               sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
                 "&:not(.Mui-selected):hover": {
                   backgroundColor: "primary.main",
                   color: "#fff",
                 },
+                "&:not(.Mui-selected) > svg": {
+                  display: "none",
+                },
               }}
             >
               {t(item.label)}
+              <CheckIcon
+                sx={{
+                  color: theme.palette.primary.main,
+                  fontSize: "20px",
+                  ml: 1
+                }}
+              />
             </MenuItem>
           ))}
       </Select>

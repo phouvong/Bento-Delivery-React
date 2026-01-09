@@ -123,7 +123,7 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
     speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
-    ...createEnhancedArrows(isSliderHovered, { 
+    ...createEnhancedArrows(isSliderHovered, {
       displayNoneOnMobile: true,
       variant: "white"
     }),
@@ -193,14 +193,14 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
       {
         breakpoint: 450,
         settings: {
-          slidesToShow: 1.8,
+          slidesToShow: 1.6,
           slidesToScroll: 1,
         },
       },
       {
         breakpoint: 400,
         settings: {
-          slidesToShow: 1.6,
+          slidesToShow: 1.5,
           slidesToScroll: 1,
         },
       },
@@ -224,71 +224,72 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
   return (
     <>
       <CustomStackFullWidth
-          alignItems={getModuleWiseData?.()?.mainPosition}
-          justyfyContent={getModuleWiseData?.()?.mainPosition}
-          mt={isSmallScreen ? "2px" : "16px"}
-          spacing={{ xs: 2, md: 1 }}
-         
-        >
-          {isSmallScreen ? (
-            <CustomContainer>
-              <CustomStackFullWidth
-                alignItems={getModuleWiseData?.()?.mainPosition}
-                justyfyContent={getModuleWiseData?.()?.mainPosition}
-                mt="10px"
-                spacing={1}
-              >
-                <H1 text={getModuleWiseData?.()?.heading} component="h2" />
-                {isVisited && (
-                  <Subtitle1
-                    textAlign={getModuleWiseData?.()?.mainPosition}
-                    text={getModuleWiseData?.()?.subHeading}
-                    component="p"
-                  />
-                )}
-              </CustomStackFullWidth>
-            </CustomContainer>
-          ) : (
-            <>
+        alignItems={getModuleWiseData?.()?.mainPosition}
+        justyfyContent={getModuleWiseData?.()?.mainPosition}
+        mt={isSmallScreen ? "2px" : "16px"}
+        spacing={{ xs: 2, md: 1 }}
+        paddingX={{ xs: 2, md: 0 }}
+
+      >
+        {isSmallScreen ? (
+          <CustomContainer>
+            <CustomStackFullWidth
+              alignItems={getModuleWiseData?.()?.mainPosition}
+              justyfyContent={getModuleWiseData?.()?.mainPosition}
+              mt="10px"
+              spacing={1}
+            >
               <H1 text={getModuleWiseData?.()?.heading} component="h2" />
               {isVisited && (
                 <Subtitle1
+                  textAlign={getModuleWiseData?.()?.mainPosition}
                   text={getModuleWiseData?.()?.subHeading}
                   component="p"
                 />
               )}
-            </>
-          )}
-          <SliderCustom
-            nopadding="true"
-            sx={{
-              backgroundColor: getModuleWiseData?.()?.bgColor,
-              padding: { xs: "0px", md: "17px" },
-               minHeight:"200px"
-            }}
-            onMouseEnter={() => setIsSliderHovered(true)}
-            onMouseLeave={() => setIsSliderHovered(false)}
-          >
-            <Slider {...enhancedSettings}>
-              {isLoading ? (
-                [...Array(5)].map((_, index) => (
-                  <VisitAgainShimmerCard key={index} />
-                ))
-              ) : (
-                visitedStores?.map((item, index) => {
-                  return (
-                    <VisitAgainCard
-                      key={index}
-                      item={item}
-                      configData={configData}
-                      isVisited={isVisited}
-                    />
-                  );
-                })
-              )}
-            </Slider>
-          </SliderCustom>
-        </CustomStackFullWidth>
+            </CustomStackFullWidth>
+          </CustomContainer>
+        ) : (
+          <>
+            <H1 text={getModuleWiseData?.()?.heading} component="h2" />
+            {isVisited && (
+              <Subtitle1
+                text={getModuleWiseData?.()?.subHeading}
+                component="p"
+              />
+            )}
+          </>
+        )}
+        <SliderCustom
+          nopadding="true"
+          sx={{
+            backgroundColor: getModuleWiseData?.()?.bgColor,
+            padding: { xs: "0px", md: "17px" },
+            minHeight: "200px"
+          }}
+          onMouseEnter={() => setIsSliderHovered(true)}
+          onMouseLeave={() => setIsSliderHovered(false)}
+        >
+          <Slider {...enhancedSettings}>
+            {isLoading ? (
+              [...Array(5)].map((_, index) => (
+                <VisitAgainShimmerCard key={index} />
+              ))
+            ) : (
+              visitedStores?.map((item, index) => {
+                return (
+                  <VisitAgainCard
+                    key={index}
+                    item={item}
+                    configData={configData}
+                    isVisited={isVisited}
+                  />
+                );
+              })
+            )}
+          </Slider>
+        </SliderCustom>
+      </CustomStackFullWidth>
     </>
   );
 };

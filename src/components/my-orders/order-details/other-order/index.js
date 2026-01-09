@@ -28,12 +28,16 @@ import RefundModal from "./RefundModal";
 import StoreDetails from "./StoreDetails";
 import { useSelector } from "react-redux";
 import { getGuestId } from "helper-functions/getToken";
+import { useUpdatePaymentMethod } from "api-manage/hooks/react-query/payment-method/useUpdatePaymentMethod";
+import { useGetFailedPayment } from "api-manage/hooks/react-query/useGetFailedPayment";
+import { cod_exceeds_message } from "utils/toasterMessages";
 
 const OtherOrder = (props) => {
   const { configData, data, refetch, id, dataIsLoading, page } = props;
   const [openModal, setOpenModal] = useState(false);
   const [currentTab, setCurrentTab] = useState(orderDetailsMenuData[0]?.name);
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
+  const [openPaymentMethod, setOpenPaymentMethod] = useState(false);
   const router = useRouter();
   const { tab } = router.query;
   const { t } = useTranslation();
@@ -42,13 +46,28 @@ const OtherOrder = (props) => {
   const guestId = getGuestId();
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
   const phone = guestUserInfo?.contact_person_number;
-
+  const [paymentFailedData, setPaymentFailedData] = useState(null);
+  const { mutate: paymentMethodUpdateMutation, isLoading: repayOrderLoading } =
+    useUpdatePaymentMethod();
   const {
     refetch: refetchTrackOrder,
     data: trackOrderData,
     isLoading: trackDataIsLoading,
     isFetching: trackDataIsFetching,
   } = useGetTrackOrderData(id, phone, guestId);
+  const { refetch: refetchFailedPayment, data: failPayment } = useGetFailedPayment(
+    trackOrderData?.id,
+    (res) => {
+      if (res) {
+        setPaymentFailedData?.(res);
+      }
+    }
+  );
+  useEffect(() => {
+    if (trackOrderData?.id) {
+      refetchFailedPayment();
+    }
+  }, [trackOrderData?.id]);
   useEffect(() => {
     refetchTrackOrder();
   }, []);
@@ -99,6 +118,28 @@ const OtherOrder = (props) => {
       setCurrentTab(tab);
     }
   }, [tab]);
+  const handlePayment = () => {
+    const handleSuccess = (response) => {
+      toast.success(response.message);
+      refetchTrackOrder();
+      refetch();
+      //setOpenPaymentMethod(false);
+    };
+
+    const formData = {
+      order_id: trackOrderData?.id,
+      _method: "put",
+    };
+    if (paymentFailedData?.maximum_cod_order_amount > trackOrderData?.order_amount) {
+      paymentMethodUpdateMutation(formData, {
+        onSuccess: handleSuccess,
+        onError: onErrorResponse,
+      });
+    } else {
+      toast.error(cod_exceeds_message);
+    }
+  };
+  console.log({ paymentFailedData });
   const activeTabPanel = () => {
     switch (currentTab) {
       case "order-summary":
@@ -111,6 +152,10 @@ const OtherOrder = (props) => {
             data={data}
             isLoading={trackDataIsLoading}
             dataIsLoading={dataIsLoading}
+            openPaymentMethod={openPaymentMethod}
+            setOpenPaymentMethod={setOpenPaymentMethod}
+            handlePayment={handlePayment}
+            repayOrderLoading={repayOrderLoading}
           />
         );
         break;
@@ -181,7 +226,12 @@ const OtherOrder = (props) => {
             refetchOrderDetails={refetch}
             refetchTrackData={refetchTrackOrder}
             dataIsLoading={dataIsLoading}
+            openPaymentMethod={openPaymentMethod}
+            setOpenPaymentMethod={setOpenPaymentMethod}
             page={page}
+            paymentMethodUpdateMutation={paymentMethodUpdateMutation}
+            paymentFailedData={paymentFailedData}
+            setPaymentFailedData={setPaymentFailedData}
           />
           <CustomDivider border="1px" />
           {trackDataIsLoading ? null : (
@@ -190,8 +240,8 @@ const OtherOrder = (props) => {
                 data && data.module_type === "parcel"
                   ? orderDetailsMenuDataForParcel
                   : trackOrderData?.order_type === "take_away"
-                  ? orderDetailsMenuDataTakeAway
-                  : orderDetailsMenuData
+                    ? orderDetailsMenuDataTakeAway
+                    : orderDetailsMenuData
               }
               marginright="20px"
               fontSize="14px"
@@ -219,6 +269,12 @@ const OtherOrder = (props) => {
             refetchTrackData={refetchTrackOrder}
             dataIsLoading={dataIsLoading}
             page={page}
+            openPaymentMethod={openPaymentMethod}
+            setOpenPaymentMethod={setOpenPaymentMethod}
+            paymentMethodUpdateMutation={paymentMethodUpdateMutation}
+            paymentFailedData={paymentFailedData}
+            setPaymentFailedData={setPaymentFailedData}
+          // parcel={trackOrderData?.module_type === "parcel"}
           />
           <CustomDivider />
           {trackDataIsLoading ? null : (
@@ -227,8 +283,8 @@ const OtherOrder = (props) => {
                 data && data.module_type === "parcel"
                   ? orderDetailsMenuDataForParcel
                   : trackOrderData?.order_type === "take_away"
-                  ? orderDetailsMenuDataTakeAway
-                  : orderDetailsMenuData
+                    ? orderDetailsMenuDataTakeAway
+                    : orderDetailsMenuData
               }
               marginright="20px"
               fontSize="14px"

@@ -6,9 +6,9 @@ import FullscreenExitIcon from "@mui/icons-material/FullscreenExit";
 
 const Wrapper = styled(IconButton)(({ theme, isXSmall }) => ({
   boxShadow: "0px 4.48276px 11.2069px rgba(0, 0, 0, 0.1)",
-  borderRadius: "3.36207px",
-  width: isXSmall ? "28px" : "35px",
-  height: isXSmall ? "28px" : "35px",
+  borderRadius: "5.36207px",
+  width: isXSmall ? "38px" : "35px",
+  height: isXSmall ? "38px" : "35px",
   position: "relative",
   color: theme.palette.primary.main,
   backgroundColor: theme.palette.background.paper,
@@ -16,6 +16,7 @@ const Wrapper = styled(IconButton)(({ theme, isXSmall }) => ({
   alignItems: "center",
   justifyContent: "center",
   cursor: "pointer",
+  maxWidth: "38px",
 }));
 const ModalExtendShrink = (props) => {
   const { isModalExpand, setIsModalExpand, t } = props;
@@ -25,11 +26,11 @@ const ModalExtendShrink = (props) => {
     <Wrapper isXSmall={isXSmall} onClick={() => setIsModalExpand((prev) => !prev)}>
       {isModalExpand ? (
         <Tooltip title={t("Close fullscreen")} arrow placement="top">
-          <FullscreenExitIcon sx={{ fontSize: { xs: "18px", md: "24px" } }} />
+          <FullscreenExitIcon sx={{ fontSize: { xs: "24px", md: "24px" } }} />
         </Tooltip>
       ) : (
         <Tooltip title={t("Fullscreen")} arrow placement="top">
-          <FullscreenIcon sx={{ fontSize: { xs: "18px", md: "24px" } }} />
+          <FullscreenIcon sx={{ fontSize: { xs: "24px", md: "24px" } }} />
         </Tooltip>
       )}
     </Wrapper>

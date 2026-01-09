@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import {Grid, Tooltip, Typography, useMediaQuery, useTheme} from "@mui/material";
+import { Grid, Tooltip, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { Box, Stack, styled } from "@mui/system";
 import { t } from "i18next";
 import { useState } from "react";
@@ -20,6 +20,7 @@ import AddWithIncrementDecrement from "./AddWithIncrementDecrement";
 import { CustomOverLay } from "./Card.style";
 import QuickView, { PrimaryToolTip } from "./QuickView";
 import NextImage from "components/NextImage";
+import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
 
 const VegNonVegFlag = styled(Box)(({ theme, veg, rounded }) => ({
   height: "14px",
@@ -96,15 +97,31 @@ const SpecialCard = (props) => {
 
   const classes = textWithEllipsis();
   const [isHover, setIsHover] = useState(false);
-  const theme=useTheme()
+  const theme = useTheme()
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
+  const { ref: textRef, isEllipsed } = useTextEllipsis(item?.name);
 
   const getModuleWiseItemName = () => {
     if (getCurrentModuleType() === ModuleTypes.FOOD) {
       return (
         <Stack direction="row" alignItems="center" spacing={0.8}>
-          <PrimaryToolTip text={item?.name} placement="bottom" arrow="false">
+          {isEllipsed ? (
+            <PrimaryToolTip text={item?.name} placement="bottom" arrow="false">
+              <Typography
+                ref={textRef}
+                className={classes.singleLineEllipsis}
+                fontSize={{ xs: "12px", md: "14px" }}
+                fontWeight="500"
+                width={0}
+                flexGrow={1}
+                component="h3"
+              >
+                {item?.name}
+              </Typography>
+            </PrimaryToolTip>
+          ) : (
             <Typography
+              ref={textRef}
               className={classes.singleLineEllipsis}
               fontSize={{ xs: "12px", md: "14px" }}
               fontWeight="500"
@@ -114,7 +131,7 @@ const SpecialCard = (props) => {
             >
               {item?.name}
             </Typography>
-          </PrimaryToolTip>
+          )}
           {configData?.configData?.toggle_veg_non_veg ? (
             <FoodVegNonVegFlag veg={item?.veg == 0 ? false : true} />
           ) : null}
@@ -122,8 +139,21 @@ const SpecialCard = (props) => {
       );
     } else {
       return (
-        <PrimaryToolTip text={item?.name} placement="bottom" arrow="false">
+        isEllipsed ? (
+          <PrimaryToolTip text={item?.name} placement="bottom" arrow="false">
+            <Typography
+              ref={textRef}
+              className={classes.singleLineEllipsis}
+              fontSize={{ xs: "12px", md: "14px" }}
+              fontWeight="500"
+              component="h3"
+            >
+              {item?.name}
+            </Typography>
+          </PrimaryToolTip>
+        ) : (
           <Typography
+            ref={textRef}
             className={classes.singleLineEllipsis}
             fontSize={{ xs: "12px", md: "14px" }}
             fontWeight="500"
@@ -131,7 +161,7 @@ const SpecialCard = (props) => {
           >
             {item?.name}
           </Typography>
-        </PrimaryToolTip>
+        )
       );
     }
   };
@@ -146,6 +176,7 @@ const SpecialCard = (props) => {
         width: { xs: "auto", md: "230px" },
         height: "100%",
         "&:hover": {
+          boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.15)",
           img: {
             transform: "scale(1.05)",
           },
@@ -166,13 +197,15 @@ const SpecialCard = (props) => {
         )}
         {<OrganicTag status={item?.organic} top="40px" />}
         {handleBadge()}
-        <Box borderRadius="8px" overflow="hidden" height="100%" sx={ {img:{
-          width:"100%",
-          height: "100%",}
+        <Box borderRadius="8px" overflow="hidden" height="100%" sx={{
+          img: {
+            width: "100%",
+            height: "100%",
+          }
         }}>
           <NextImage
             src={item?.image_full_url}
-            height={isSmall?140:180}
+            height={isSmall ? 140 : 180}
             alt={item?.name}
             width={210}
             objectFit="cover"

@@ -12,7 +12,7 @@ import ParcelCategoryShimmer from "./ParcelCategoryShimmer";
 const ParcelCategory = () => {
   const theme = useTheme();
 
-  const { data, refetch, isFetched,isLoading} = useGetParcelCategory();
+  const { data, refetch, isFetched, isLoading } = useGetParcelCategory();
   useEffect(() => {
     refetch();
   }, []);
@@ -21,7 +21,7 @@ const ParcelCategory = () => {
       spacing={2.5}
       sx={{
         paddingBottom: { xs: "20px", sm: "30px", md: "50px" },
-        marginTop: "30px",
+        marginTop: "80px",
       }}
     >
       <Stack justifyContent="center" spacing={{ xs: 1, md: 0 }}>

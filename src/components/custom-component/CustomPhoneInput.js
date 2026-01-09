@@ -5,19 +5,19 @@ import { useTranslation } from "react-i18next";
 
 import { CustomTypography } from "../landing-page/hero-section/HeroSection.style";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import {alpha, NoSsr} from "@mui/material";
+import { alpha, NoSsr } from "@mui/material";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { useSelector } from "react-redux";
 
 const CustomPhoneNumberInputStyled = styled(PhoneInput)(
-  ({ theme, languageDirection, borderRadius,background }) => ({
+  ({ theme, languageDirection, borderRadius, background }) => ({
     "&.react-tel-input .special-label": {
       fontSize: "12px !important",
       fontWeight: "500 !important",
-      color: alpha(theme.palette.neutral[1000],.7),
+      color: alpha(theme.palette.neutral[1000], .7),
       left: languageDirection === "rtl" ? "80%" : "10px",
-      backgroundColor:background|| theme.palette.background.paper,
+      backgroundColor: background || theme.palette.background.paper,
       zIndex: "999",
       display: "inline-block",
     },
@@ -93,12 +93,12 @@ const CustomPhoneNumberInputStyled = styled(PhoneInput)(
         unicodeBidi: "plaintext",
       }),
       "&:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus":
-        {
-          filter: "none",
-          WebkitTextFillColor: theme.palette.neutral[1000],
-          WebkitBoxShadow:
-            "0 0 0px 40rem " + theme.palette.neutral[200] + " inset",
-        },
+      {
+        filter: "none",
+        WebkitTextFillColor: theme.palette.neutral[1000],
+        WebkitBoxShadow:
+          "0 0 0px 40rem " + theme.palette.neutral[200] + " inset",
+      },
     },
     "&.react-tel-input .iti__flag-container": {
       left: languageDirection === "rtl" ? "unset" : 0,
@@ -123,8 +123,9 @@ const CustomPhoneInput = ({
   lanDirection,
   height,
   borderRadius,
-                            background,
-                            removeLabel
+  background,
+  removeLabel,
+  required
 }) => {
   const changeHandler = (e) => {
     onHandleChange(e);
@@ -149,7 +150,16 @@ const CustomPhoneInput = ({
               required: true,
               autoFocus: false,
             }}
-            specialLabel={t("Phone")}
+            specialLabel={
+              required ? (
+                <span>
+                  {t("Phone")}
+                  <span style={{ color: "#d32f2f", marginLeft: "2px" }}>*</span>
+                </span>
+              ) : (
+                t("Phone")
+              )
+            }
             country={defaultCountry}
             searchStyle={{ margin: "0", width: "95%", height: "50px" }}
             inputStyle={{

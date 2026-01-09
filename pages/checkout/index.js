@@ -25,7 +25,7 @@ const CheckOutPage = () => {
     (state) => state.configData
   );
   const router = useRouter();
-  const { page, store_id, id } = router.query;
+  const { page, store_id, id, incomplete_payment } = router.query;
   const {
     cartList: aliasCartList,
     campaignItemList,
@@ -100,12 +100,14 @@ const CheckOutPage = () => {
                 totalAmount={totalAmount}
               />
             )}
-            <RedirectWhenCartEmpty
-              page={page}
-              cartList={aliasCartList}
-              campaignItemList={campaignItemList}
-              buyNowItemList={buyNowItemList}
-            />
+            {!incomplete_payment && (
+              <RedirectWhenCartEmpty
+                page={page}
+                cartList={aliasCartList}
+                campaignItemList={campaignItemList}
+                buyNowItemList={buyNowItemList}
+              />
+            )}
           </AuthGuard>
         </CustomContainer>
       </MainLayout>

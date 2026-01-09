@@ -1,5 +1,5 @@
 import { useTheme } from "@emotion/react";
-import { Card, Grid, Typography } from "@mui/material";
+import { Card, Box, Tooltip, Typography } from "@mui/material";
 import { Stack, styled } from "@mui/system";
 import { PrimaryToolTip } from "components/cards/QuickView";
 import { useRouter } from "next/router";
@@ -9,6 +9,7 @@ import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { textWithEllipsis } from "styled-components/TextWithEllipsis";
 import CustomImageContainer from "../../CustomImageContainer";
 import NextImage from "components/NextImage";
+import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
 
 const ParcelCard = styled(Card)(({ theme }) => ({
 	padding: "20px",
@@ -38,37 +39,65 @@ const ParcelCategoryCard = (props) => {
 	const router = useRouter();
 
 	const handleClick = () => {
-		dispatch(setParcelCategories(data));
-		router.push("/parcel-delivery-info", undefined, { shallow: true });
+        if(props.onClick){
+            props.onClick(data)
+        }else{
+            dispatch(setParcelCategories(data));
+			router.push("/parcel-delivery-info", undefined, { shallow: true });
+        }
 	};
 	const classes = textWithEllipsis();
+	const { ref: textRef, isEllipsed } = useTextEllipsis(data?.name);
 	return (
-		<CustomStackFullWidth>
-			<ParcelCard {...props} onClick={handleClick}>
-				<Grid container spacing={3}>
-					<Grid item xs={3} sm={4} md={4} alignSelf="center"
-					sx={{img:{
-						width:"100%",
-						height:"100%",
-						}}}>
-						<NextImage
-							width={100}
-							src={data?.image_full_url}
-							height={100}
-							objectFit="cover"
-						/>
-					</Grid>
-					<Grid item xs={9} sm={8} md={8} alignSelf="center">
+    <CustomStackFullWidth>
+			<ParcelCard {...props} onClick={handleClick} sx={{borderColor:props?.selected ? theme.palette.primary.main : ""}}>
+				<Stack direction="row" alignItems="center" gap={3}>
+					<Box
+						sx={{
+							img: {
+								width: "72px",
+								height: "72px",
+							}
+						}}>
+							<NextImage
+								width={72}
+								height={72}
+								src={data?.image_full_url}
+								objectFit="contain"
+							/>
+						</Box>
 						<Stack width="100%">
-							<PrimaryToolTip text={data?.name} placement="bottom">
+							<Tooltip
+								title={data?.name || ""}
+								placement="bottom"
+								arrow
+								disableHoverListener={!isEllipsed}
+								componentsProps={{
+									tooltip: {
+										sx: {
+											bgcolor: (theme) => theme.palette.toolTipColor,
+											"& .MuiTooltip-arrow": {
+												color: (theme) => theme.palette.toolTipColor,
+											},
+										},
+									},
+								}}
+							>
 								<Typography
+									ref={textRef}
 									fontSize={{ xs: "14px", sm: "18px", md: "18px" }}
 									fontWeight="500"
 									component="h3"
+									sx={{
+										overflow: "hidden",
+										textOverflow: "ellipsis",
+										whiteSpace: "nowrap",
+										width: "100%",
+									}}
 								>
 									{data?.name}
 								</Typography>
-							</PrimaryToolTip>
+							</Tooltip>
 							<Typography
 								fontSize={{ xs: "12px", sm: "14px", md: "14px" }}
 								color={theme.palette.neutral[400]}
@@ -78,8 +107,7 @@ const ParcelCategoryCard = (props) => {
 								{data?.description}
 							</Typography>
 						</Stack>
-					</Grid>
-				</Grid>
+				</Stack>
 			</ParcelCard>
 		</CustomStackFullWidth>
 	);

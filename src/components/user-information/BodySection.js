@@ -40,9 +40,10 @@ const BodySection = ({
       undefined,
       { shallow: true }
     );
+
   };
   return (
-    <CustomStackFullWidth spacing={4}>
+    <CustomStackFullWidth spacing={4} >
       <CustomPaperBigCard
         padding={page === "my-orders" || page === "inbox" ? "0px" : "10px"}
         noboxshadow={
@@ -73,6 +74,7 @@ const BodySection = ({
         {!isSmall && <Divider />}
 
         <ProfileBody
+          key={`${page}-${orderId || 'no-order'}`}
           page={page}
           configData={configData}
           orderId={orderId}

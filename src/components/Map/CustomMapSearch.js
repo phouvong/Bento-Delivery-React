@@ -35,10 +35,12 @@ const CustomMapSearch = ({
   testLocation,
   borderRadius,
   toReceiver,
+  sender,
   isLanding = false,
   isRefetching,
   searchHeight,
-  handleOpen
+  handleOpen,
+  setOpen,
 }) => {
   const theme = useTheme();
   const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
@@ -47,8 +49,8 @@ const CustomMapSearch = ({
       {!showCurrentLocation ? (
         <Autocomplete
           fullWidth
-          options={predictions}
-          getOptionLabel={(option) => option?.description}
+          options={predictions || []}
+          getOptionLabel={(option) => option?.description || ""}
           onChange={(event, value) => handleChange(event, value)}
           value={currentLocationValue}
           clearOnBlur={false}
@@ -90,13 +92,14 @@ const CustomMapSearch = ({
                   }}
                 >
                   <MapIcon />
-                  <Typography variant="body1" color={theme.palette.text.main}>{t("Set from map")}</Typography>
+                  <Typography variant="body1" onClick={() => setOpen(true)} color={theme.palette.text.main}>{t("Set from map")}</Typography>
                 </Button>
               </Box>
             </Paper>
           )}
           renderInput={(params) => (
             <SearchLocationTextField
+              toReceiver={toReceiver}
               searchHeight={searchHeight}
               noleftborder={noleftborder}
               frommap={frommap}
@@ -107,6 +110,7 @@ const CustomMapSearch = ({
               isLanding
               isXSmall
               onChange={(event) => HandleChangeForSearch?.(event)}
+              backgroundColor
               InputProps={{
                 ...params.InputProps,
                 endAdornment:
@@ -138,7 +142,7 @@ const CustomMapSearch = ({
                     </IconButton>
                   ) : (
                     <>
-                      {toReceiver === "true" ? null : (
+                      {toReceiver === "true" || sender === "true" ? null : (
                         <IconButton
                           sx={{
                             mr: fromparcel === "true" ? "-61px" : "-31px",

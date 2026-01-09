@@ -25,7 +25,7 @@ const VariationsManager = ({ productDetailsData, handleChoices }) => {
       type: i?.title,
       value:
         i?.options[
-          getSelectedIndex(i?.options, productDetailsData?.selectedOption?.[0])
+        getSelectedIndex(i?.options, productDetailsData?.selectedOption?.[0])
         ],
     }))
   );
@@ -80,7 +80,7 @@ const VariationsManager = ({ productDetailsData, handleChoices }) => {
         </CustomStackFullWidth>
       ))}
       {productDetailsData?.selectedOption?.length > 0 &&
-      productDetailsData?.selectedOption?.[0]?.stock == 0 ? (
+        productDetailsData?.selectedOption?.[0]?.stock == 0 ? (
         <Typography color="red">
           *{t("This variation is out of stock")}
         </Typography>

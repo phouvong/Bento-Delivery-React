@@ -17,10 +17,13 @@ export const SearchLocationTextField = styled(TextField)(
     isLanding,
     isXSmall,
     searchHeight,
-    showCurrentLocation
+    showCurrentLocation,
+    backgroundColor,
+    toReceiver
   }) => ({
+
     width: "100%",
-    backgroundColor: theme.palette.neutral[300],
+    backgroundColor: backgroundColor ? theme.palette.neutral[100] : theme.palette.neutral[300],
     // height: searchHeight??"44px",
     borderRadius: isXSmall && isLanding ? "4px" : "0 0 4px 4px",
     border: "none",

@@ -6,85 +6,84 @@ import {
   Stack,
   Typography,
   alpha,
-  useTheme,
+  useTheme, Box
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { t } from "i18next";
 
-import { CustomStackFullWidth } from "../../../../styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import DotSpin from "../../../DotSpin";
 import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
 import {
   ItemWrapper,
   ModalCustomTypography,
 } from "../../../order-details-modal/OrderDetailsModal.style";
-
+import CheckoutFailedCard from "components/checkout/CheckoutFailedCard";
+import { useRouter } from "next/router";
+import { CustomBox } from "styled-components/CustomStyles.style";
 const OfflineOrderDetailsModal = ({
   trackData,
   handleOfflineClose,
   trackDataIsLoading,
   trackDataIsFetching,
   page,
+  setOpenPaymentMethod,
+  setPaymentFailedData,
+  refetchTrackData
 }) => {
   const theme = useTheme();
+  const router = useRouter();
+  console.log({ trackDataIsFetching });
+
   return (
     <CustomStackFullWidth
       padding={{ xs: "30px 15px", md: "60px 45px 40px" }}
       alignItems="center"
       gap="20px"
     >
-      <CheckCircleIcon
-        sx={{
-          height: "45px",
-          width: "45px",
-          color: theme.palette.primary.main,
-        }}
-      />
-      <Typography fontSize="16px" fontWeight="700" textAlign="center">
-        {`${t("Order Placed Successfully")} !`}
-      </Typography>
-      <CustomStackFullWidth
-        padding={{ xs: "0px 20px", md: "0px 145px" }}
-        textAlign="center"
-      >
-        {trackDataIsLoading ? (
-          <Stack
-            minWidth={{ xs: "270px", sm: "370px" }}
-            width="100%"
-            padding="15px 0px"
-          >
-            <DotSpin />
-          </Stack>
-        ) : (
-          <Typography fontSize="14px" fontWeight="400">
-            {page === "my-orders?flag=cancel" ? (
-              <Typography color={theme.palette.error.main}>
-                {t("Your payment has been cancel, and your order ")}
-              </Typography>
-            ) : page === "my-orders?flag=fail" ? (
-              <Typography color={theme.palette.error.main}>
-                {t("Your payment has failed, and your order ")}
-              </Typography>
-            ) : (
-              `${t(
-                "Your payment has been successfully processed, and your order "
-              )} !`
-            )}
+      {(trackDataIsLoading || trackDataIsFetching) ? (
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1rem", maxWidth: "540px", width: "100%", minWidth: "340px", minHeight: "340px" }}>
+          <DotSpin />
+        </Box>
+      ) : (
+        <Typography fontSize="14px" fontWeight="400">
+          {(page === "my-orders?flag=fail" || page === "my-orders?flag=cancel" || trackData?.order_status === "failed") ? (
+            <CheckoutFailedCard
+              handleOrderDetailsClose={handleOfflineClose}
+              id={trackData?.id}
+              setOpenPaymentMethod={setOpenPaymentMethod}
+              amount={trackData?.order_amount}
+              setPaymentFailedData={setPaymentFailedData}
+              refetchTrackData={refetchTrackData}
+            />
+          ) : (
+            <Stack sx={{ alignItems: "center", justifyContent: "center", gap: "1rem", maxWidth: "540px" }}>
+              <CheckCircleIcon
+                sx={{ color: theme.palette.success.main, fontSize: "50px" }}
+              />
 
-            <Typography
-              component="span"
-              fontWeight="600"
-              sx={{ color: theme.palette.primary.main }}
-            >
-              {" "}
-              #{trackData?.id}{" "}
-            </Typography>
-            <Typography component="span" fontWeight="400">{`${t(
-              "has been placed."
-            )} !`}</Typography>
-          </Typography>
-        )}
-      </CustomStackFullWidth>
+              <Typography fontSize="20px" textAlign="center" fontWeight="500" >
+                {t("Order Payment Details submitted successfully")}!
+              </Typography>
+
+              <Typography
+                component="span"
+                fontWeight="600"
+                textAlign="center"
+              >
+                <Typography >
+                  {t("We will begin processing your order shortly. Your Order ID is")}
+                  <Typography component="span" fontWeight="bold" color="primary.main">
+                    #{trackData?.id}
+                  </Typography>
+                  {t(", Please keep this Order ID handy for tracking")}
+                </Typography>
+              </Typography>
+            </Stack>
+          )}
+        </Typography>
+      )}
+
       {trackData?.offline_payment && (
         <>
           <CustomStackFullWidth
@@ -99,13 +98,14 @@ const OfflineOrderDetailsModal = ({
               alignItems="center"
               gap="20px"
               borderRadius="10px"
+
             >
-              {trackDataIsLoading && trackDataIsFetching ? (
+              {trackDataIsLoading ? (
                 <Grid container padding="40px">
                   <DotSpin />
                 </Grid>
               ) : (
-                <Stack width="max-content">
+                <Stack>
                   <ItemWrapper container>
                     <ModalCustomTypography>
                       {`${t("Order")} #`}
@@ -166,7 +166,7 @@ const OfflineOrderDetailsModal = ({
               )}
             </CustomStackFullWidth>
           </CustomStackFullWidth>
-          <Typography color={theme.palette.text.secondary}>
+          <Typography color={theme.palette.text.secondary} padding="0px 0px">
             <Typography
               component="span"
               color={theme.palette.error.main}
@@ -181,14 +181,14 @@ const OfflineOrderDetailsModal = ({
           </Typography>
         </>
       )}
-      <Button
-        onClick={handleOfflineClose}
+      {/* <Button
         variant="contained"
-        // maxWidth="150px"
-        // fullWidth
+        color="primary"
+        // onClick={handleOfflineClose}
+        onClick={() => router.push("/home")}
       >
-        {t("Ok")}
-      </Button>
+        {t("Back to Home")}
+      </Button> */}
     </CustomStackFullWidth>
   );
 };

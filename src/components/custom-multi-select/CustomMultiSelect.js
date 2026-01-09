@@ -5,13 +5,14 @@ import TextField from "@mui/material/TextField";
 import InputAdornment from "@mui/material/InputAdornment";
 import { t } from "i18next";
 import ClearIcon from '@mui/icons-material/Clear';
+import CheckIcon from "@mui/icons-material/Check";
 
 const CustomMultiSelect = ({
 	touched,
 	errors,
 	options,
 	height,
-	handleChange = () => {},
+	handleChange = () => { },
 	value,
 	icon,
 	placeholder = "Select options",
@@ -31,17 +32,42 @@ const CustomMultiSelect = ({
 			id="tags-outlined"
 			options={zoneOption}
 			getOptionLabel={(option) => option.label}
-			filterSelectedOptions
 			value={selectedChips}
-			sx={{paddingY:"0px"}}
+			getOptionDisabled={(option) => selectedChips.some(chip => chip.value === option.value)}
+			isOptionEqualToValue={(option, value) => option.value === value.value}
+			sx={{ paddingY: "0px" }}
 			onChange={(event, value) => setSelectedChips(value)}
+			renderOption={(props, option) => {
+				const isSelected = selectedChips.some(chip => chip.value === option.value);
+				return (
+					<li
+						{...props}
+						style={{
+							...props.style,
+							display: 'flex',
+							justifyContent: 'space-between',
+							alignItems: 'center',
+						}}
+					>
+						<span>{option.label}</span>
+						<CheckIcon
+							sx={{
+								color: (theme) => theme.palette.primary.main,
+								fontSize: "20px",
+								ml: 1,
+								visibility: isSelected ? 'visible' : 'hidden'
+							}}
+						/>
+					</li>
+				);
+			}}
 			renderTags={(value, getTagProps) =>
 				value?.slice(0, 3).map((option, index) => (
 					<Chip
 						sx={{
 							height: "24px",
 							pr: "3px",
-              fontWeight:"400",
+							fontWeight: "400",
 							backgroundColor: (theme) =>
 								theme.palette.primary.main,
 							color: (theme) => theme.palette.neutral[500],
@@ -53,7 +79,7 @@ const CustomMultiSelect = ({
 						label={option.label}
 						deleteIcon={
 
-								<ClearIcon sx={{width:"14px",height:"14px",fontWeight:"600"}}/>
+							<ClearIcon sx={{ width: "14px", height: "14px", fontWeight: "600" }} />
 
 						} // Add custom cross icon
 						{...getTagProps({ index })}
@@ -81,8 +107,8 @@ const CustomMultiSelect = ({
 										sx={{
 											position: "absolute",
 											right: {
-												xs:"30px",
-												md:"35px"
+												xs: "30px",
+												md: "35px"
 											},
 											top: "50%",
 											transform: "translateY(-50%)", // Vertically center the chip
@@ -109,8 +135,8 @@ const CustomMultiSelect = ({
 							alignItems: "center", // Center content vertically
 						},
 						"& .MuiAutocomplete-inputRoot": {
-							paddingTop:{xs:"10px",md:"0px"},
-							paddingBottom:{xs:"10px",md:"0px"},
+							paddingTop: { xs: "10px", md: "0px" },
+							paddingBottom: { xs: "10px", md: "0px" },
 						},
 						"& .MuiInputBase-input": {
 							padding: "10px 6px", // Adjust padding for text

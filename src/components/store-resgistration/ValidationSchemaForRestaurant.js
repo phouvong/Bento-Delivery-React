@@ -8,21 +8,35 @@ const IMAGE_SUPPORTED_FORMATS = [
 	"image/jpeg",
 	"image/gif",
 	"image/png",
+	"image/webp",
 ];
 
 const ValidationSchemaForRestaurant = () => {
 	const { t } = useTranslation();
 
-	const FILE_SIZE = 20000000;
+	const FILE_SIZE = 1048576;
 
 	return Yup.object({
-		restaurant_name: Yup.object().required(t("restaurant name required")),
-		restaurant_address: Yup.object().required(
-			t("restaurant address required")
+		restaurant_name: Yup.object().test(
+			"required",
+			t("Restaurant name required"),
+			(value) =>
+				value &&
+				Object.values(value).some((val) => val && val.trim().length > 0)
 		),
+		restaurant_address: Yup.mixed()
+			.nullable()
+			.test(
+				"required",
+				t("Restaurant address required"),
+				(value) =>
+					value &&
+					Object.values(value).some((val) => val && val.trim().length > 0)
+			),
+		module_id: Yup.string().required(t("Module is required")),
 		f_name: Yup.string().required(t("Name is required")),
-		l_name: Yup.string().required(t("last name required")),
-		phone: Yup.string().required(t("phone number required")),
+		l_name: Yup.string().required(t("Last name required")),
+		phone: Yup.string().required(t("Phone number required")),
 		min_delivery_time: Yup.string().required(t("Minimum Delivery Time")),
 		max_delivery_time: Yup.string().required(t("Maximum Delivery Time")),
 		delivery_time_type: Yup.string().required(
@@ -61,19 +75,38 @@ const ValidationSchemaForRestaurant = () => {
 
 		password: Yup.string()
 			.required("No password provided.")
-			.min(8, "Password is too short - should be 8 characters minimum.")
-			.matches(/[0-9]/, "Password must contain at least one number.")
-			.matches(
-				/[A-Z]/,
-				"Password must contain at least one uppercase letter."
-			)
-			.matches(
-				/[a-z]/,
-				"Password must contain at least one lowercase letter."
-			)
-			.matches(
-				/[!@#$%^&*(),.?":{}|<>]/,
-				"Password must contain at least one special character."
+			.test(
+				"password-requirements",
+				"Password requirements not met",
+				function (value) {
+					if (!value) return true; // Handled by required()
+
+					const errors = [];
+					if (value.length < 8) {
+						errors.push(
+							"Password is too short - should be 8 characters minimum."
+						);
+					}
+					if (!/[0-9]/.test(value)) {
+						errors.push("one number.");
+					}
+					if (!/[A-Z]/.test(value)) {
+						errors.push("one uppercase letter.");
+					}
+					if (!/[a-z]/.test(value)) {
+						errors.push("one lowercase letter.");
+					}
+					if (!/[!@#$%^&*(),.?":{}|<>+_=]/.test(value)) {
+						errors.push(
+							"one special character."
+						);
+					}
+
+					if (errors.length > 0) {
+						return this.createError({ message: errors.join(" ") });
+					}
+					return true;
+				}
 			),
 		confirm_password: Yup.string()
 			.required(t("Confirm Password required"))

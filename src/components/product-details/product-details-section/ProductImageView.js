@@ -56,7 +56,7 @@ const ProductImageView = ({
   };
   const borderColor = theme.palette.primary.main;
   return (
-    <Stack justifyContent="flex-start" spacing={2} width="100%">
+    <Stack justifyContent="flex-start" spacing={2} width="100%" sx={{ }}>
       <NoSsr>
         <Stack sx={{ position: "relative" }}>
           <Stack
@@ -104,6 +104,7 @@ const ProductImageView = ({
                 alt: "image",
                 isFluidWidth: true,
                 src: preViewImage,
+                objectFit: "cover",
                 //sizes: "(min-width: 480px) 30vw, 80vw",
                 // width: tem,
                 // height: hs,
@@ -114,6 +115,7 @@ const ProductImageView = ({
                 src: preViewImage,
                 width: 1200,
                 height: 1800,
+                objectFit: "cover",
               },
               enlargedImageContainerStyle: {
                 backgroundColor: theme.palette.neutral[100],
@@ -129,7 +131,7 @@ const ProductImageView = ({
             }}
           />
           {productDetailsData?.halal_tag_status &&
-          productDetailsData?.is_halal ? (
+            productDetailsData?.is_halal ? (
             <FoodHalalHaram width={30} />
           ) : (
             ""

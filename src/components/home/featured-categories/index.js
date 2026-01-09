@@ -55,14 +55,7 @@ const FeaturedCategories = () => {
           <CustomBoxFullWidth
             sx={{
               "& .slick-slider": {
-                // paddingTop: {
-                //   xs: "22px",
-                //   md: "30px",
-                // },
-                // paddingBottom: {
-                //   xs: "4px",
-                //   md: "30px",
-                // },
+
               },
             }}
             onMouseEnter={() => setIsSliderHovered(true)}
@@ -332,7 +325,7 @@ const FeaturedCategories = () => {
       {
         breakpoint: 374,
         settings: {
-          slidesToShow: 1.2,
+          slidesToShow: 1.4,
           slidesToScroll: 1,
         },
       },

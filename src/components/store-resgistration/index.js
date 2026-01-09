@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CustomContainer from "components/container";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import { NoSsr, Typography } from "@mui/material";
+import { NoSsr, Typography, useMediaQuery } from "@mui/material";
 import { t } from "i18next";
 import StoreStepper from "components/store-resgistration/StoreStepper";
 import StoreRegistrationForm from "components/store-resgistration/StoreRegistrationForm";
@@ -14,15 +14,18 @@ import PaymentSelect from "components/store-resgistration/PaymentSelect";
 import { usePostBusiness } from "api-manage/hooks/react-query/store-registration/usePostBusiness";
 import { useRouter } from "next/router";
 import SuccessStoreRegistration from "components/store-resgistration/SuccessStoreRegistration";
-import { setActiveStep, setAllData } from "redux/slices/storeRegistrationData";
+import { setActiveStep, setAllData, setInZone } from "redux/slices/storeRegistrationData";
 import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
+import { useTheme } from "@mui/styles";
 
 const StoreRegistration = () => {
   useScrollToTop();
+  const theme = useTheme();
   const dispatch = useDispatch();
   const router = useRouter();
   const [resData, setResData] = useState({});
-  const { flag, active ,plan,package:pa} = router.query;
+  const isSmallSize = useMediaQuery(theme.breakpoints.down("md"));
+  const { flag, active, plan, package: pa } = router.query;
 
   const { allData, activeStep } = useSelector((state) => state.storeRegData);
   const [formValues, setFormValues] = useState({});
@@ -49,6 +52,7 @@ const StoreRegistration = () => {
             { shallow: true }
           );
           dispatch(setAllData(null));
+          dispatch(setInZone(null));
         } else {
           dispatch(setActiveStep(2));
         }
@@ -67,6 +71,7 @@ const StoreRegistration = () => {
             const redirect_url = `${res?.redirect_link}`;
             dispatch(setActiveStep(3));
             dispatch(setAllData(null));
+            dispatch(setInZone(null));
             router.push(redirect_url);
           } else {
             const currentQuery = router.query;
@@ -85,17 +90,20 @@ const StoreRegistration = () => {
             );
             dispatch(setActiveStep(3));
             dispatch(setAllData(null));
+            dispatch(setInZone(null));
           }
         }
       },
       onError: onErrorResponse,
     });
   };
+
   useEffect(() => {
     if (flag === "success") {
       dispatch(setActiveStep(3));
     }
   }, [flag]);
+
   useEffect(() => {
     if (active === "active") {
       dispatch(setActiveStep(0));
@@ -133,11 +141,12 @@ const StoreRegistration = () => {
       );
     }
   };
+
   return (
     <NoSsr>
       <CustomContainer>
         <CustomStackFullWidth justify="center" mt={{ xs: "1rem", md: "1rem" }}>
-          <Typography fontSize="36px" fontWeight="700" textAlign="center">
+          <Typography fontSize={isSmallSize ? "18px" : "36px"} fontWeight="700" textAlign="center">
             {t("Vendor Application")}
           </Typography>
           <StoreStepper flag={flag} activeStep={activeStep} />

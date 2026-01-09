@@ -74,6 +74,7 @@ const BusinessPlan = ({ formSubmit, isLoading }) => {
       },
     ],
   };
+  console.log({ configData });
   const handleSubmit = () => {
     const tempValues = {
       business_plan: selectedPlan,
@@ -271,7 +272,7 @@ const BusinessPlan = ({ formSubmit, isLoading }) => {
             // Fixing the syntax for applying marginTop on xs breakpoint
             variant="contained"
             loading={isLoading}
-            // disabled={!disable}
+          // disabled={!disable}
           >
             {t("Next")}
           </SaveButton>

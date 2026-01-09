@@ -3,9 +3,10 @@ import { Box } from "@mui/system";
 import { getModuleId } from "helper-functions/getModuleId";
 import Link from "next/link";
 import { useState } from "react";
-import { textWithEllipsis } from "styled-components/TextWithEllipsis";
-import CustomImageContainer from "../CustomImageContainer";
 import NextImage from "components/NextImage";
+import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
+
+/* ===================== STYLES ===================== */
 
 const Wrapper = styled(Box)(({ theme }) => ({
   cursor: "pointer",
@@ -13,45 +14,61 @@ const Wrapper = styled(Box)(({ theme }) => ({
   height: "183px",
   backgroundColor: theme.palette.background.default,
   borderRadius: "60px",
-  transition: "all ease 0.5s",
+  transition: "all ease 0.3s",
+  overflow: "hidden",
+
   "&:hover": {
     boxShadow: "0px 10px 20px rgba(88, 110, 125, 0.1)",
     img: {
-      transform: "scale(1.1)",
+      transform: "scale(1.05)",
     },
-    borderRadius: "60px 60px 55px 55px",
   },
+
   [theme.breakpoints.down("md")]: {
     width: "100px",
-    height: "140px",
-    boxShadow: "0px 10px 20px rgba(88, 110, 125, 0.1)",
+    height: "150px",
+    borderRadius: "45px",
   },
+
   [theme.breakpoints.down("sm")]: {
-    boxShadow: "0px 10px 20px rgba(88, 110, 125, 0.1)",
+    width: "90px",
+    height: "140px",
+    borderRadius: "40px",
   },
 }));
+
 const ImageWrapper = styled(Box)(({ theme }) => ({
   position: "relative",
-  borderRadius: "60px 60px 0px 0px",
+  width: "100%",
+  height: "122px",
+  overflow: "hidden",
+  borderRadius: "60px 60px 0 0",
 
   [theme.breakpoints.down("md")]: {
     height: "80px",
+    borderRadius: "45px 45px 0 0",
   },
-}));
-const TextWrapper = styled(Box)(({ theme }) => ({
-  width: "100%",
-  padding: "3px 12px",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  flexWrap: "wrap",
-  [theme.breakpoints.down("md")]: {
-    padding: "10px 12px",
+
+  [theme.breakpoints.down("sm")]: {
+    height: "70px",
+    borderRadius: "40px 40px 0 0",
   },
 }));
 
+const TextWrapper = styled(Box)(({ theme }) => ({
+  width: "100%",
+  minHeight: "40px",
+  padding: "6px 8px",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+}));
+
+/* ===================== COMPONENT ===================== */
+
 const PharmacyCategoryCard = ({ image, title, id, onlyshimmer }) => {
   const [hover, setHover] = useState(false);
+  const { ref: textRef, isEllipsed } = useTextEllipsis(title);
 
   return (
     <Link
@@ -59,70 +76,71 @@ const PharmacyCategoryCard = ({ image, title, id, onlyshimmer }) => {
         pathname: "/home",
         query: {
           search: "category",
-          id: id,
+          id,
           module_id: `${getModuleId()}`,
-          name: title && (title),
+          name: title,
           data_type: "category",
         },
       }}
+      passHref
+      legacyBehavior
     >
-      <Wrapper
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
-      >
-        <ImageWrapper>
-          {onlyshimmer ? (
-            <Skeleton
-              width="100%"
-              height={122}
-              variant="rectangular"
-            />
-          ) : (
+      <a style={{ textDecoration: "none" }}>
+        <Wrapper
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+        >
+          <ImageWrapper>
+            {onlyshimmer ? (
+              <Skeleton variant="rectangular" width="100%" height="100%" />
+            ) : (
               <NextImage
-                  src={image}
-                  alt={title}
-                  height={122}
-                  width={122}
-                  borderRadius="60px 60px 0px 0px"
-                  objectFit="cover"
-                  loading="eager"
-                  bg="#ddd"
+                src={image}
+                alt={title}
+                fill
+                style={{ objectFit: "cover" }}
+                sizes="(max-width: 600px) 90px, 122px"
+                bg="#ddd"
               />
-          )}
-        </ImageWrapper>
-        <Tooltip
-          title={title}
-          placement="bottom"
-          arrow
-          componentsProps={{
-            tooltip: {
-              sx: {
-                bgcolor: (theme) => theme.palette.toolTipColor,
-                "& .MuiTooltip-arrow": {
-                  color: (theme) => theme.palette.toolTipColor,
+            )}
+          </ImageWrapper>
+
+          <Tooltip
+            title={isEllipsed ? title : ""}
+            placement="bottom"
+            arrow
+            componentsProps={{
+              tooltip: {
+                sx: {
+                  bgcolor: (theme) => theme.palette.toolTipColor,
+                  "& .MuiTooltip-arrow": {
+                    color: (theme) => theme.palette.toolTipColor,
+                  },
                 },
               },
-            },
-          }}
-        >
-          <TextWrapper>
-            <Typography
-              textAlign="center"
-              // className={classes.multiLineEllipsis}
-              maxHeight="20px"
-              color={hover && "primary.main"}
-              noWrap
-              component="h4"
-            >
-              {onlyshimmer ? (<Skeleton width="70px" variant="text" />) : title}
-            </Typography>
-          </TextWrapper>
-        </Tooltip>
-      </Wrapper>
+            }}
+          >
+            <TextWrapper>
+              <Typography
+                ref={textRef}
+                textAlign="center"
+                component="h4"
+                noWrap
+                sx={{
+                  fontSize: { xs: "12px", md: "14px" },
+                  lineHeight: "1.2",
+                  maxWidth: "100%",
+                  color: hover ? "primary.main" : "text.primary",
+                }}
+              >
+                {onlyshimmer ? <Skeleton width="70px" /> : title}
+              </Typography>
+            </TextWrapper>
+          </Tooltip>
+        </Wrapper>
+      </a>
     </Link>
   );
 };
-
-PharmacyCategoryCard.propTypes = {};
 
 export default PharmacyCategoryCard;

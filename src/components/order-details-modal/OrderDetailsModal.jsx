@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import CustomModal from "../modal";
 import {
   alpha,
@@ -13,12 +14,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import { setOrderDetailsModalOpen } from "../../redux/slices/utils";
 import { getGuestId } from "../../helper-functions/getToken";
-import CheckCircleOutlineOutlinedIcon from "@mui/icons-material/CheckCircleOutlineOutlined";
-import { ItemWrapper, ModalCustomTypography } from "./OrderDetailsModal.style";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import jwt from "base-64";
 import CheckoutFailed from "../checkout/CheckoutFailed";
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { setOrderDetailsModal } from "redux/slices/offlinePaymentData";
 
 const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
   const dispatch = useDispatch();
@@ -33,15 +34,19 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
   const { guestUserOrderId, guestUserInfo } = useSelector(
     (state) => state.guestUserInfo
   );
+  const { orderDetailsModal, offlineInfoStep } = useSelector(
+    (state) => state.offlinePayment
+  );
   const { orderInformation } = useSelector((state) => state.utilsData);
   const handleOrderDetailsClose = () => {
+    dispatch(setOrderDetailsModal(false));
     dispatch(setOrderDetailsModalOpen(false));
   };
   const handleClickToRoute = (href) => {
     dispatch(setOrderDetailsModalOpen(false));
     router.push(href, undefined, { shallow: true });
   };
-
+  console.log({orderDetailsModal});
   useEffect(() => {
     if (token) {
       try {
@@ -71,7 +76,6 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
       console.error("Token is missing.");
     }
   }, [token]);
-
   return (
     <CustomModal
       openModal={orderDetailsModalOpen}
@@ -113,17 +117,17 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
           alignItems="center"
           gap="20px"
         >
-          <CheckCircleOutlineOutlinedIcon
+          <CheckCircleIcon
             sx={{
-              height: "46px",
-              width: "46px",
-              color: alpha(theme.palette.primary.main, 0.7),
+              height: "56px",
+              width: "56px",
+              color: alpha(theme.palette.primary.main, .9),
             }}
           />
-          <Typography fontSize="16px" fontWeight="700">
-            {`${t("Order Placed Successfully")} !`}
+          <Typography fontSize="18px" fontWeight="700">
+            {`${t("Order Placed Successfully")}`}
           </Typography>
-          <CustomStackFullWidth
+          {/* <CustomStackFullWidth
             padding={{ xs: "0px 20px", md: "0px 38px" }}
             textAlign="center"
           >
@@ -138,8 +142,54 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
                 )}`}
               </Typography>
             </Typography>
-          </CustomStackFullWidth>
-          <CustomStackFullWidth
+          </CustomStackFullWidth> */}
+          <Typography fontWeight="400" textAlign="center" maxWidth="380px">
+            We will begin processing your order shortly. Your Order ID is
+              <Typography component="span" fontWeight={600}>{ " " }{guestUserOrderId || order_id}</Typography>,
+              placed using the phone number
+              <Typography component="span" fontWeight={600}>{" "}{guestUserInfo?.phone || orderInformation?.phone || "+880170987654"}</Typography>.
+          </Typography>
+          <Typography fontWeight="400" textAlign="center" maxWidth="380px">
+            Please keep this Order ID handy for track your order in future We’ve also emailed the details to you
+          </Typography>
+
+
+
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            width="100%"
+            maxWidth="370px"
+            padding=".25rem .25rem .25rem .75rem"
+            marginBlock="15px"
+            borderRadius="999rem"
+            sx={{
+              border: `1px dashed ${theme.palette.neutral[400]}`,
+            }}
+          >
+            <Typography fontWeight={700}>
+              {t("Order ID")} #{guestUserOrderId || order_id}
+            </Typography>
+            <Button
+              variant="contained"
+              sx={{
+                borderRadius: "999rem",
+                padding: "6px 20px",
+                textTransform: "capitalize",
+                minWidth: "auto",
+              }}
+              onClick={() => {
+                navigator.clipboard.writeText(guestUserOrderId || order_id);
+                toast.success(t("Order ID copied!"));
+              }}
+            >
+              {t("Copy")}
+            </Button>
+          </Stack>
+
+
+          {/* <CustomStackFullWidth
             padding="20px 10px 20px 10px"
             backgroundColor={alpha(theme.palette.neutral[400], 0.09)}
             alignItems="center"
@@ -175,12 +225,12 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
                 </ItemWrapper>
               </Stack>
             </Stack>
-          </CustomStackFullWidth>
+          </CustomStackFullWidth> */}
           <Button
             onClick={() => handleClickToRoute("/track-order")}
             variant="contained"
-            // maxWidth="150px"
-            // fullWidth
+          // maxWidth="150px"
+          // fullWidth
           >
             {t("Track Order")}
           </Button>

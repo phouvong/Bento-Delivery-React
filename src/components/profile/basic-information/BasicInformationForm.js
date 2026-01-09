@@ -129,7 +129,7 @@ const BasicInformationForm = ({
     onSubmit: async (values, helpers) => {
       try {
         formSubmitOnSuccess(values);
-      } catch (err) {}
+      } catch (err) { }
     },
   });
   const { mutate: fireBaseOtpMutation, isLoading: fireIsLoading } =
@@ -257,10 +257,10 @@ const BasicInformationForm = ({
     mutate();
   };
   const handleReset = () => {
-    const name= f_name ? `${f_name} ${l_name ? l_name : ""}` : "";
-    profileFormik.setFieldValue("name", name?name:"");
-    profileFormik.setFieldValue("l_name", name?name:"");
-    profileFormik.setFieldValue("email", email? email : "");
+    const name = f_name ? `${f_name} ${l_name ? l_name : ""}` : "";
+    profileFormik.setFieldValue("name", name ? name : "");
+    profileFormik.setFieldValue("l_name", name ? name : "");
+    profileFormik.setFieldValue("email", email ? email : "");
     profileFormik.setFieldValue("phone", phone ? phone : "");
     profileFormik.setFieldValue("password", "");
     profileFormik.setFieldValue("confirm_password", "");
@@ -329,7 +329,7 @@ const BasicInformationForm = ({
                 // imageUrl={customerImageUrl}
                 borderRadius="50%"
                 objectFit
-                //height='140px'
+              //height='140px'
               />
               {image_full_url && (
                 <ImageAddIcon
@@ -400,21 +400,21 @@ const BasicInformationForm = ({
                   {email && (
                     <>
                       {data?.is_email_verified === "1" &&
-                      email === profileFormik?.values.email ? (
+                        email === profileFormik?.values.email ? (
                         <VerifiedIcon />
                       ) : (
                         <>
                           {configData?.centralize_login
                             ?.email_verification_status === 1 && (
-                            <ReportProblemIcon
-                              onClick={() => handleVerified("email")}
-                              sx={{
-                                color: (theme) => theme.palette.error.main,
-                                width: "1.2rem",
-                                cursor: "pointer",
-                              }}
-                            />
-                          )}
+                              <ReportProblemIcon
+                                onClick={() => handleVerified("email")}
+                                sx={{
+                                  color: (theme) => theme.palette.error.main,
+                                  width: "1.2rem",
+                                  cursor: "pointer",
+                                }}
+                              />
+                            )}
                         </>
                       )}
                     </>
@@ -476,15 +476,15 @@ const BasicInformationForm = ({
                   <>
                     {configData?.centralize_login?.phone_verification_status ===
                       1 && (
-                      <ReportProblemIcon
-                        onClick={() => handleVerified("phone")}
-                        sx={{
-                          color: (theme) => theme.palette.error.main,
-                          width: "1.2rem",
-                          cursor: "pointer",
-                        }}
-                      />
-                    )}
+                        <ReportProblemIcon
+                          onClick={() => handleVerified("phone")}
+                          sx={{
+                            color: (theme) => theme.palette.error.main,
+                            width: "1.2rem",
+                            cursor: "pointer",
+                          }}
+                        />
+                      )}
                   </>
                 )}
               </Stack>

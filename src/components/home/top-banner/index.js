@@ -67,9 +67,9 @@ const TopBanner = () => {
         minHeight: {
           xs: moduleType === "parcel" ? "250px" : "160px",
           sm: "270px",
-          md:"270px"
+          md: "270px"
         },
-        backgroundColor: getBGColor(),
+        backgroundColor: theme.palette.neutral[100],
         position: "relative",
         overflow: "hidden",
       }}

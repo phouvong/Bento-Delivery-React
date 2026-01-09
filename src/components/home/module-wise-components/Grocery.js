@@ -1,4 +1,4 @@
-import {Grid, useMediaQuery} from "@mui/material";
+import { Grid, useMediaQuery } from "@mui/material";
 import useGetNewArrivalStores from "api-manage/hooks/react-query/store/useGetNewArrivalStores";
 import { useGetVisitAgain } from "api-manage/hooks/react-query/useGetVisitAgain";
 import PaidAds from "components/home/paid-ads";
@@ -39,13 +39,13 @@ const Grocery = (props) => {
     data: visitedStores,
     refetch: refetchVisitAgain,
     isFetching: visitIsFetching,
-    isLoading:visitIsLoading
+    isLoading: visitIsLoading
   } = useGetVisitAgain();
   const {
     data: newStore,
     refetch: newStoreRefetch,
     isFetching,
-    isLoading:newStoreIsLoading
+    isLoading: newStoreIsLoading
   } = useGetNewArrivalStores({
     type: "all",
   });
@@ -62,8 +62,8 @@ const Grocery = (props) => {
     }
   }, [visitedStores, newStore?.stores, getModuleId()]);
 
-    const isSmallScreen = useMediaQuery('(max-width:600px)');
-
+  const isSmallScreen = useMediaQuery('(max-width:600px)');
+  console.log({orderDetailsModalOpen});
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} sx={{ marginTop: { xs: "-10px", sm: "10px" } }}>
@@ -73,31 +73,31 @@ const Grocery = (props) => {
       </Grid>
       <Grid item xs={12}>
         <CustomContainer>
-          <RecommendedStore/>
+          <RecommendedStore />
         </CustomContainer>
       </Grid>
-        {token && (<Grid item xs={12} mb={3}>
-            {isSmallScreen ? (
-                <VisitAgain
-                    configData={configData}
-                    isVisited={isVisited}
-                    visitedStores={storeData}
-                    isLoading={visitIsLoading || newStoreIsLoading}
-                    
+      {token && (<Grid item xs={12} mb={3}>
+        {isSmallScreen ? (
+          <VisitAgain
+            configData={configData}
+            isVisited={isVisited}
+            visitedStores={storeData}
+            isLoading={visitIsLoading || newStoreIsLoading}
 
-                />
-            ) : (
-                <CustomContainer>
-                    <VisitAgain
-                        configData={configData}
-                        isVisited={isVisited}
-                        visitedStores={storeData}
-                        isFetching={isFetching || visitIsFetching}
-                         isLoading={visitIsLoading || newStoreIsLoading}
-                    />
-                </CustomContainer>
-            )}
-        </Grid>)}
+
+          />
+        ) : (
+          <CustomContainer>
+            <VisitAgain
+              configData={configData}
+              isVisited={isVisited}
+              visitedStores={storeData}
+              isFetching={isFetching || visitIsFetching}
+              isLoading={visitIsLoading || newStoreIsLoading}
+            />
+          </CustomContainer>
+        )}
+      </Grid>)}
       <Grid item xs={12} mb={3}>
         <CustomContainer>
           <PaidAds />

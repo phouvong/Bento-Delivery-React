@@ -70,7 +70,7 @@ const ProductDetails = ({ productDetailsData, configData }) => {
 
 	return (
 		<CustomStackFullWidth
-			spacing={5}
+
 			paddingTop={{ xs: "1.25rem", md: "2.5rem" }}
 			paddingBottom="2.5rem"
 			sx={{ minHeight: "100vh" }}

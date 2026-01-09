@@ -1,4 +1,4 @@
-import { alpha } from "@mui/system";
+import { alpha, Box } from "@mui/material";
 import H1 from "components/typographies/H1";
 import { CustomButton } from "styled-components/CustomStyles.style";
 import { useTranslation } from "react-i18next";
@@ -37,6 +37,7 @@ const DeliveryManComponent = ({ configData }) => {
       l_name: "",
       email: "",
       earning: "",
+      referral_code: "",
       zone_id: "",
       vehicle_id: "",
       identity_type: "",
@@ -45,7 +46,10 @@ const DeliveryManComponent = ({ configData }) => {
       password: "",
       confirm_password: "",
     },
-    validationSchema: deliveryManValidationSchema,
+    validationSchema: deliveryManValidationSchema(),
+    validationOptions: {
+      abortEarly: false, // ✅ THIS IS THE KEY
+    },
     onSubmit: async (values, helpers) => {
       try {
         const { confirm_password, ...modifiedValues } = values;
@@ -90,7 +94,7 @@ const DeliveryManComponent = ({ configData }) => {
       </TitleTopSection>
 
       <form onSubmit={deliveryManFormik.handleSubmit}>
-        <RegistrationCardWrapper>
+        <Box mt={4}>
           <FormSection>
             <DeliverymanFormWrapper
               title={FORM_TITLE.userInfo}
@@ -164,7 +168,7 @@ const DeliveryManComponent = ({ configData }) => {
               {t(isLoading ? "Submitting..." : "Submit Information")}
             </CustomButton>
           </ActonButtonsSection>
-        </RegistrationCardWrapper>
+        </Box>
       </form>
     </>
   );

@@ -4,17 +4,18 @@ import {
   Stack,
   styled,
   Tooltip,
-  Typography, useMediaQuery, useTheme,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import { Box } from "@mui/system";
 import { useState } from "react";
-import CustomImageContainer from "../../../CustomImageContainer";
-
 import { getModuleId } from "helper-functions/getModuleId";
 import Link from "next/link";
 import { CustomBoxFullWidth } from "styled-components/CustomStyles.style";
 import { textWithEllipsis } from "styled-components/TextWithEllipsis";
 import NextImage from "components/NextImage";
+import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
 
 export const Card = styled(Box)(({ theme }) => ({
   display: "flex",
@@ -36,10 +37,12 @@ export const Card = styled(Box)(({ theme }) => ({
 
 const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
   const [hover, setHover] = useState(false);
+  const { ref: textRef, isEllipsed } = useTextEllipsis(title);
   const classes = textWithEllipsis();
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isExtraSmallScreen = useMediaQuery(theme.breakpoints.down("xs"));
+
   return (
     <Link
       href={{
@@ -48,10 +51,11 @@ const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
           search: "category",
           id: id,
           module_id: `${getModuleId()}`,
-          name: title && (title),
+          name: title && title,
           data_type: "category",
         },
       }}
+      passHref
     >
       <Stack
         alignItems="center"
@@ -70,14 +74,14 @@ const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
           borderRadius: "10px",
           "&:hover": {
             boxShadow: "0px 10px 20px 0px rgba(88, 110, 125, 0.10)",
-            border: (theme) => `1px solid ${theme.palette.primary.main}`,
+            border: (theme) => `.5px solid ${theme.palette.primary.main}`,
             img: {
               transform: "scale(1.04)",
             },
           },
-          div: {
-            borderRadius: "8px",
-            overflow: "hidden",
+          // ensure flex items can shrink inside
+          "& > div": {
+            minWidth: 0,
           },
         }}
       >
@@ -89,27 +93,25 @@ const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
             img: {
               width: "100%",
               height: "100%",
-            }
+            },
           }}
         >
           {onlyshimmer ? (
-            <Skeleton
-              width="100%"
-              height="100%"
-              variant="rectangle"
+            <Skeleton width="100%" height="100%" variant="rectangle" />
+          ) : (
+            <NextImage
+              src={image}
+              alt={title}
+              height={110}
+              width={106}
+              objectFit="cover"
+              bg="#ddd"
             />
-          ) : (<NextImage
-            src={image}
-            alt={title}
-            height={110}
-            width={106}
-            objectFit="cover"
-            bg="#ddd"
-          />
           )}
         </Stack>
+
         <Tooltip
-          title={title}
+          title={isEllipsed ? title : ""}
           placement="bottom"
           arrow
           componentsProps={{
@@ -123,15 +125,37 @@ const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
             },
           }}
         >
-          <CustomBoxFullWidth sx={{ px: "10px" }}>
+          <CustomBoxFullWidth
+            sx={{
+              px: "10px",
+              width: "100%",
+              // Ensu"100%",
+              // Ensure wrapper in flex can shrink and give a constrained width
+              minWidth: 0,
+            }}
+          >
             <Typography
+              // put ref on the exact element that holds the text
+              ref={textRef}
+              component="h4"
               textAlign="center"
               className={classes.singleLineEllipsis}
+              sx={{
+                // Force the single-line ellipsis CSS here to be sure
+                display: "block",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                width: "100%",
+              }}
               maxHeight="20px"
-              color={hover && "primary.main"}
-              component="h4"
+              color={hover ? "primary.main" : "text.primary"}
             >
-              {onlyshimmer ? <Skeleton width="70px" variant="text" sx={{ mx: "auto" }} /> : title}
+              {onlyshimmer ? (
+                <Skeleton width="70px" variant="text" sx={{ mx: "auto" }} />
+              ) : (
+                title
+              )}
             </Typography>
           </CustomBoxFullWidth>
         </Tooltip>

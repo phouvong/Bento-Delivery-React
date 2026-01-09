@@ -15,6 +15,7 @@ import CustomModal from "components/modal";
 const MapModal = dynamic(() => import("../../Map/MapModal"));
 import { IconButton, } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import MapIcon from '@mui/icons-material/Map';
 
 const SenderInfoForm = ({
   addAddressFormik,
@@ -33,7 +34,7 @@ const SenderInfoForm = ({
 }) => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [openSave,setOpenSave]=useState(false)
+  const [openSave, setOpenSave] = useState(false)
   const [currentLocationValue, setCurrentLactionValue] = useState({
     description: null,
   });
@@ -79,14 +80,14 @@ const SenderInfoForm = ({
 
   return (
     <CustomStackFullWidth height="100%">
-      <Card sx={{ padding: "1.2rem", height: "100%" }}>
-        <CustomStackFullWidth spacing={2}>
+      <Card sx={{ padding: "1.2rem", height: "100%", backgroundColor: theme.palette.background.paper, border: `1px solid rgba(0, 0, 0, 0.05)` }}>
+        <CustomStackFullWidth gap={1}>
           <Stack align="center" width="100%">
             <Typography fontWeight={500} fontSize="16px">
               {t("Sender Information")}
             </Typography>
           </Stack>
-          <CustomStackFullWidth alignItems="center" spacing={3}>
+          <CustomStackFullWidth alignItems="center" gap={1}>
             <CustomStackFullWidth alignItems="center">
               <CustomTextFieldWithFormik
                 required="true"
@@ -97,6 +98,7 @@ const SenderInfoForm = ({
                 fieldProps={addAddressFormik.getFieldProps("senderName")}
                 onChangeHandler={senderNameHandler}
                 value={addAddressFormik.values.senderName}
+                backgroundColor
               />
             </CustomStackFullWidth>
             <CustomTextFieldWithFormik
@@ -107,6 +109,7 @@ const SenderInfoForm = ({
               fieldProps={addAddressFormik.getFieldProps("senderEmail")}
               onChangeHandler={senderEmailHandler}
               value={addAddressFormik.values.senderEmail}
+              backgroundColor
             />
             <CustomStackFullWidth alignItems="center">
               <CustomPhoneInput
@@ -120,6 +123,7 @@ const SenderInfoForm = ({
                 lanDirection={lanDirection}
                 height="45px"
                 borderRadius="8px"
+                required
               />
 
             </CustomStackFullWidth>
@@ -130,13 +134,29 @@ const SenderInfoForm = ({
                 alignItems="center"
                 pb="5px"
               >
-                <Typography>{t("Pickup Address")}</Typography>
+                <Typography></Typography>
                 {getToken() ? (
-                  <Button onClick={()=>setOpenSave(true)}>
-                    {t("Save Addresses")}
+                  <Button onClick={() => setOpenSave(true)} sx={{ p: 0 }}>
+                    <Stack
+                      gap="5px"
+                      alignItems="center"
+                      justifyContent="center"
+                      direction="row"
+                    >
+                      <Typography
+                        color={theme.palette.primary.main}
+                        fontSize="12px"
+                      >
+                        {t("Save Address")}
+                      </Typography>
+                      <PinDropIcon
+                        sx={{ width: "20px", height: "20px" }}
+                        color="primary"
+                      />
+                    </Stack>
                   </Button>
-                ):(
-                  <Button onClick={handleOpen}>
+                ) : (
+                  <Button onClick={handleOpen} sx={{ p: 0 }}>
                     <Stack
                       gap="5px"
                       alignItems="center"
@@ -149,7 +169,7 @@ const SenderInfoForm = ({
                       >
                         {t("Set from map")}
                       </Typography>
-                      <PinDropIcon
+                      <MapIcon
                         sx={{ width: "20px", height: "20px" }}
                         color="primary"
                       />
@@ -158,15 +178,18 @@ const SenderInfoForm = ({
                 )}
 
               </CustomStackFullWidth>
-              <GetLocationFrom
-                handleLocation={handleLocation}
-                sender="true"
-                fromparcel="true"
-                formattedAddress={senderFormattedAddress}
-                currentLocationValue={currentLocationValue}
-                testLocation={testLocation}
-                setCurrentLactionValue={setCurrentLactionValue}
-              />
+              <CustomStackFullWidth sx={{ marginBottom: "1.5rem" }}>
+                <GetLocationFrom
+                  handleLocation={handleLocation}
+                  sender="true"
+                  fromparcel="true"
+                  formattedAddress={senderFormattedAddress}
+                  currentLocationValue={currentLocationValue}
+                  testLocation={testLocation}
+                  setCurrentLactionValue={setCurrentLactionValue}
+                  setOpen={setOpen}
+                />
+              </CustomStackFullWidth>
             </CustomStackFullWidth>
             <CustomTextFieldWithFormik
               type="text"
@@ -176,6 +199,7 @@ const SenderInfoForm = ({
               fieldProps={addAddressFormik.getFieldProps("senderRoad")}
               onChangeHandler={senderRoadHandler}
               value={addAddressFormik.values.road}
+              backgroundColor
             />
             <CustomStackFullWidth direction="row" spacing={1.3}>
               <CustomTextFieldWithFormik
@@ -186,6 +210,7 @@ const SenderInfoForm = ({
                 fieldProps={addAddressFormik.getFieldProps("senderHouse")}
                 onChangeHandler={senderHouseHandler}
                 value={addAddressFormik.values.senderPhone}
+                backgroundColor
               />
               <CustomTextFieldWithFormik
                 type="text"
@@ -195,10 +220,9 @@ const SenderInfoForm = ({
                 fieldProps={addAddressFormik.getFieldProps("senderFloor")}
                 onChangeHandler={senderFloorHandler}
                 value={addAddressFormik.values.floor}
+                backgroundColor
               />
             </CustomStackFullWidth>
-
-
           </CustomStackFullWidth>
         </CustomStackFullWidth>
       </Card>
@@ -230,7 +254,7 @@ const SenderInfoForm = ({
                 },
               }}
             >
-              <CloseIcon sx={{fontSize:"1rem"}}  />
+              <CloseIcon sx={{ fontSize: "1rem" }} />
             </IconButton>
 
             <Card sx={{ padding: ".5rem" }} elevation={9}>

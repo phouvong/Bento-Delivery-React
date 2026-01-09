@@ -29,6 +29,8 @@ import ChatWithAdmin from "components/my-orders/order-details/other-order/ChatWi
 import { getToken } from "helper-functions/getToken";
 import adminImage from "../../../../public/static/profile/fi_4460756 (1).png";
 import InstructionBox from "./other-order/InstructionBox";
+import Button from "@mui/material/Button";
+import LoadingButton from "@mui/lab/LoadingButton";
 
 export const ParcelOrderSummaryBox = styled(CustomStackFullWidth)(
   ({ theme }) => ({
@@ -48,6 +50,10 @@ const ParcelOrderSummery = ({
   trackOrderData,
   configData,
   refetchTrackOrder,
+  isPaymentFailed,
+  repayOrderLoading,
+  setOpenPaymentMethod,
+  handlePayment
 }) => {
   const theme = useTheme();
   const [openAdmin, setOpenAdmin] = useState(false);
@@ -121,12 +127,15 @@ const ParcelOrderSummery = ({
           <Box flexGrow="1" width="0">
             <Stack flexDirection="row" justifyContent="space-between">
               <Stack>
-                <Typography
-                  fontSize={{ xs: "14px", md: "16px" }}
-                  fontWeight="500"
-                >
-                  {t("Payment")}
-                </Typography>
+                <Stack direction="row" justifyContent="space-between">
+                  <Typography
+                    fontSize={{ xs: "14px", md: "16px" }}
+                    fontWeight="500"
+                  >
+                    {t("Payment")}
+                  </Typography>
+
+                </Stack>
                 {trackOrderData?.payment_method ? (
                   <Typography
                     fontSize={{ xs: "12px", md: "14px" }}
@@ -141,7 +150,16 @@ const ParcelOrderSummery = ({
                 ) : (
                   <Skeleton width="100px" variant="text" />
                 )}
+                <>
+                  {isPaymentFailed() && (
+                    <Typography sx={{ maxWidth: "336px" }} fontSize={{ xs: "12px", md: "14px" }} fontWeight="400" color={theme.palette.neutral[500]}>
+                      {t("Your payment was incomplete. Please choose an option below to complete your transaction.")}
+                    </Typography>
+                  )}
+
+                </>
               </Stack>
+
               {trackOrderData?.payment_method === "offline_payment" && (
                 <Stack alignItems="flex-end" gap="5px">
                   <Typography
@@ -172,11 +190,34 @@ const ParcelOrderSummery = ({
                 <OfflineOrderDetails
                   trackOrderData={trackOrderData}
                   setOpenOfflineModal={setOpenOfflineModal}
+                  setOpenPaymentMethod={() => { }}
+                  refetchTrackOrder={refetchTrackOrder}
                 />
               )}
             {trackOrderData?.offline_payment?.data?.status === "denied" && (
               <OfflineOrderDenied trackOrderData={trackOrderData} />
             )}
+            {trackOrderData?.offline_payment?.data?.status ===
+              "denied" && (trackOrderData?.payment_method === "offline_payment") && getToken() && (
+                <Stack direction="row" spacing={1} width="100%" marginTop="15px">
+                  <LoadingButton
+                    variant="outlined"
+                    fullWidth
+                    loading={repayOrderLoading}
+                    onClick={handlePayment}
+                  >
+                    {t("Switch to COD")}
+                  </LoadingButton>
+                  <Button
+                    variant="contained"
+                    fullWidth
+                    onClick={() => setOpenPaymentMethod(true)}
+                  >
+                    {t("Update Payment")}
+                  </Button>
+                </Stack>
+              )}
+
             {openOfflineModal && (
               <CustomModal
                 openModal={openOfflineModal}
@@ -248,77 +289,116 @@ const ParcelOrderSummery = ({
               <Skeleton width="100px" variant="text" />
             )}
           </Box>
+
         </CustomStackFullWidth>
+        {isPaymentFailed() && (
+          <Stack direction="row" spacing={1} width="100%" mt="1rem" maxWidth={{ xs: "100%", md: "300px" }}>
+            {getToken() && <Button variant="contained" fullWidth onClick={() => setOpenPaymentMethod(true)}>
+              {t("Pay Now")}
+            </Button>}
+            <LoadingButton variant="outlined" loading={repayOrderLoading} fullWidth onClick={handlePayment}>
+              {t("Switch to COD")}
+            </LoadingButton>
+          </Stack>
+        )}
 
         {(trackOrderData?.order_status === "canceled" ||
           trackOrderData?.order_status === "returned") && (
-          <Stack
-            sx={{
-              padding: ".7rem",
-              border: "1px solid #E5E7EB",
-              borderRadius: "10px",
-              marginTop: "1rem",
-            }}
-          >
             <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              padding=".5rem"
-              backgroundColor={alpha(theme.palette.error.light, 0.2)}
-              borderRadius="5px"
+              sx={{
+                padding: ".7rem",
+                border: "1px solid #E5E7EB",
+                borderRadius: "10px",
+                marginTop: "1rem",
+              }}
             >
-              <Typography
-                fontSize={{ xs: "14px", md: "14px" }}
-                fontWeight="400"
-                color={theme.palette.error.main}
+              <Stack
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+                padding=".5rem"
+                backgroundColor={alpha(theme.palette.error.light, 0.2)}
+                borderRadius="5px"
               >
-                {t("Cancel By")}
-              </Typography>
-              <Typography
-                fontSize={{
-                  xs: "12px",
-                  md: "14px",
-                  textTransform: "capitalize",
-                }}
-                fontWeight="400"
-                color={theme.palette.neutral[1000]}
-              >
-                {trackOrderData?.canceled_by.replaceAll("_", " ")}
-              </Typography>
-            </Stack>
-            {(() => {
-              let reasonData = trackOrderData?.parcel_cancellation?.reason;
-              let reasons = [];
-              // 🧠 Handle multiple possible formats
-              if (Array.isArray(reasonData)) {
-                // Already an array
-                reasons = reasonData;
-              } else if (typeof reasonData === "string") {
-                try {
-                  const parsed = JSON.parse(reasonData);
+                <Typography
+                  fontSize={{ xs: "14px", md: "14px" }}
+                  fontWeight="400"
+                  color={theme.palette.error.main}
+                >
+                  {t("Cancel By")}
+                </Typography>
+                <Typography
+                  fontSize={{
+                    xs: "12px",
+                    md: "14px",
+                    textTransform: "capitalize",
+                  }}
+                  fontWeight="400"
+                  color={theme.palette.neutral[1000]}
+                >
+                  {trackOrderData?.canceled_by.replaceAll("_", " ")}
+                </Typography>
+              </Stack>
+              {(() => {
+                let reasonData = trackOrderData?.parcel_cancellation?.reason;
+                let reasons = [];
+                // 🧠 Handle multiple possible formats
+                if (Array.isArray(reasonData)) {
+                  // Already an array
+                  reasons = reasonData;
+                } else if (typeof reasonData === "string") {
+                  try {
+                    const parsed = JSON.parse(reasonData);
 
-                  if (Array.isArray(parsed)) {
-                    // If it’s a JSON array string like '["Late Delivery"]'
-                    reasons = parsed;
-                  } else if (reasonData.trim() !== "[]" && reasonData.trim() !== "") {
-                    // If it’s just plain text string like "Late delivery"
-                    reasons = [reasonData.replace(/[\[\]"]/g, "").trim()];
-                  }
-                } catch {
-                  // 🧩 If JSON.parse fails (invalid JSON), handle as plain string
-                  if (reasonData.trim() !== "") {
-                    reasons = [reasonData.replace(/[\[\]"]/g, "").trim()];
+                    if (Array.isArray(parsed)) {
+                      // If it’s a JSON array string like '["Late Delivery"]'
+                      reasons = parsed;
+                    } else if (reasonData.trim() !== "[]" && reasonData.trim() !== "") {
+                      // If it’s just plain text string like "Late delivery"
+                      reasons = [reasonData.replace(/[\[\]"]/g, "").trim()];
+                    }
+                  } catch {
+                    // 🧩 If JSON.parse fails (invalid JSON), handle as plain string
+                    if (reasonData.trim() !== "") {
+                      reasons = [reasonData.replace(/[\[\]"]/g, "").trim()];
+                    }
                   }
                 }
-              }
 
-              // 🛑 Nothing to show — return null
-              if (!reasons || reasons.length === 0) return null;
+                // 🛑 Nothing to show — return null
+                if (!reasons || reasons.length === 0) return null;
 
-              // ✅ Render section if reason exists
-              return (
-                <>
+                // ✅ Render section if reason exists
+                return (
+                  <>
+                    <Typography
+                      mt=".5rem"
+                      mb=".5rem"
+                      fontSize={{ xs: "12px", md: "14px" }}
+                      fontWeight="500"
+                      color={theme.palette.neutral[1000]}
+                    >
+                      {t("Cancellation Reason")}
+                    </Typography>
+
+                    <Stack spacing={0.5}>
+                      {reasons.map((reason, index) => (
+                        <Typography
+                          key={index}
+                          fontSize={{ xs: "12px", md: "14px" }}
+                          fontWeight="400"
+                          color={theme.palette.neutral[1000]}
+                        >
+                          • {reason}
+                        </Typography>
+                      ))}
+                    </Stack>
+                  </>
+                );
+              })()}
+
+              {trackOrderData?.parcel_cancellation?.note && (
+                <Stack mt=".5rem">
                   <Typography
                     mt=".5rem"
                     mb=".5rem"
@@ -326,43 +406,15 @@ const ParcelOrderSummery = ({
                     fontWeight="500"
                     color={theme.palette.neutral[1000]}
                   >
-                    {t("Cancellation Reason")}
+                    {t("Comments")}
                   </Typography>
-
-                  <Stack spacing={0.5}>
-                    {reasons.map((reason, index) => (
-                      <Typography
-                        key={index}
-                        fontSize={{ xs: "12px", md: "14px" }}
-                        fontWeight="400"
-                        color={theme.palette.neutral[1000]}
-                      >
-                        • {reason}
-                      </Typography>
-                    ))}
-                  </Stack>
-                </>
-              );
-            })()}
-
-            {trackOrderData?.parcel_cancellation?.note && (
-              <Stack mt=".5rem">
-                <Typography
-                  mt=".5rem"
-                  mb=".5rem"
-                  fontSize={{ xs: "12px", md: "14px" }}
-                  fontWeight="500"
-                  color={theme.palette.neutral[1000]}
-                >
-                  {t("Comments")}
-                </Typography>
-                <Typography>
-                  {trackOrderData?.parcel_cancellation?.note}
-                </Typography>
-              </Stack>
-            )}
-          </Stack>
-        )}
+                  <Typography>
+                    {trackOrderData?.parcel_cancellation?.note}
+                  </Typography>
+                </Stack>
+              )}
+            </Stack>
+          )}
         {trackOrderData?.delivery_instruction && (
           <Stack spacing={1} pt={{ xs: "0px", md: "20px" }}>
             <Typography fontSize={{ xs: "14px", md: "16px" }} fontWeight="500">
@@ -450,30 +502,30 @@ const ParcelOrderSummery = ({
                 </Typography>
                 {(data?.delivery_charge !== null ||
                   data?.delivery_charge !== 0) && (
-                  <CustomStackFullWidth
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    spacing={2}
-                  >
-                    <Typography
-                      fontSize="14px"
-                      color={theme.palette.neutral[400]}
+                    <CustomStackFullWidth
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      spacing={2}
                     >
-                      {t("Delivery Fee")}
-                    </Typography>
-                    {data ? (
                       <Typography
                         fontSize="14px"
                         color={theme.palette.neutral[400]}
                       >
-                        {data && getAmountWithSign(data?.delivery_charge)}
+                        {t("Delivery Fee")}
                       </Typography>
-                    ) : (
-                      <Skeleton width="100px" variant="text" />
-                    )}
-                  </CustomStackFullWidth>
-                )}
+                      {data ? (
+                        <Typography
+                          fontSize="14px"
+                          color={theme.palette.neutral[400]}
+                        >
+                          {data && getAmountWithSign(data?.delivery_charge)}
+                        </Typography>
+                      ) : (
+                        <Skeleton width="100px" variant="text" />
+                      )}
+                    </CustomStackFullWidth>
+                  )}
                 {data?.ref_bonus_amount > 0 ? (
                   <CustomStackFullWidth
                     direction="row"
@@ -502,7 +554,7 @@ const ParcelOrderSummery = ({
                   </CustomStackFullWidth>
                 ) : null}
                 {data?.tax_status !== "included" &&
-                data?.total_tax_amount > 0 ? (
+                  data?.total_tax_amount > 0 ? (
                   <CustomStackFullWidth
                     direction="row"
                     alignItems="center"
@@ -554,7 +606,7 @@ const ParcelOrderSummery = ({
                   </CustomStackFullWidth>
                 ) : null}
                 {data?.additional_charge !== null ||
-                data?.additional_charge !== 0 ? (
+                  data?.additional_charge !== 0 ? (
                   <CustomStackFullWidth
                     direction="row"
                     alignItems="center"
@@ -620,8 +672,8 @@ const ParcelOrderSummery = ({
                 </CustomStackFullWidth>
                 {(trackOrderData?.order_status === "canceled" ||
                   trackOrderData?.order_status === "returned") &&
-                trackOrderData?.parcel_cancellation?.before_pickup === 0 &&
-                trackOrderData?.parcel_cancellation?.return_fee > 0 ? (
+                  trackOrderData?.parcel_cancellation?.before_pickup === 0 &&
+                  trackOrderData?.parcel_cancellation?.return_fee > 0 ? (
                   <CustomStackFullWidth
                     direction="row"
                     alignItems="center"
@@ -640,10 +692,10 @@ const ParcelOrderSummery = ({
                         padding="4px 6px"
                         component="span"
                         ml={1}
-                        color={trackOrderData?.order_status==="returned"?theme.palette.primary.main:theme.palette.error.main}
-                        backgroundColor={trackOrderData?.order_status==="returned"?alpha(theme.palette.primary.main, 0.2):alpha(theme.palette.error.light, 0.2)}
+                        color={trackOrderData?.order_status === "returned" ? theme.palette.primary.main : theme.palette.error.main}
+                        backgroundColor={trackOrderData?.order_status === "returned" ? alpha(theme.palette.primary.main, 0.2) : alpha(theme.palette.error.light, 0.2)}
                       >
-                        {trackOrderData?.order_status==="returned"?t("Paid"):t("Due")}
+                        {trackOrderData?.order_status === "returned" ? t("Paid") : t("Due")}
                       </Typography>
                     </Typography>
                     {data ? (
@@ -664,22 +716,22 @@ const ParcelOrderSummery = ({
                 {(trackOrderData?.order_status === "returned") &&
                   trackOrderData?.parcel_cancellation?.before_pickup === 0 &&
                   trackOrderData?.parcel_cancellation?.return_fee > 0 && (
-                  <Stack
-                  width="100%"
-                  sx={{
-                  marginBottom: "10px",
-                  mt: "20px",
-                  borderBottom: (theme) =>
-                  `1px dotted ${theme.palette.neutral[400]}`,
-                }}
-              ></Stack>
+                    <Stack
+                      width="100%"
+                      sx={{
+                        marginBottom: "10px",
+                        mt: "20px",
+                        borderBottom: (theme) =>
+                          `1px dotted ${theme.palette.neutral[400]}`,
+                      }}
+                    ></Stack>
                   )}
 
 
                 {(
-                    trackOrderData?.order_status === "returned") &&
+                  trackOrderData?.order_status === "returned") &&
                   trackOrderData?.parcel_cancellation?.before_pickup === 0 &&
-                  trackOrderData?.parcel_cancellation?.return_fee > 0  ? (
+                  trackOrderData?.parcel_cancellation?.return_fee > 0 ? (
                   <CustomStackFullWidth
                     direction="row"
                     alignItems="center"
@@ -696,8 +748,8 @@ const ParcelOrderSummery = ({
                           padding="4px 6px"
                           component="span"
                           ml={1}
-                          color={trackOrderData?.order_status==="returned"?theme.palette.primary.main:theme.palette.error.main}
-                          backgroundColor={trackOrderData?.order_status==="returned"?alpha(theme.palette.primary.main, 0.2):alpha(theme.palette.error.light, 0.2)}
+                          color={trackOrderData?.order_status === "returned" ? theme.palette.primary.main : theme.palette.error.main}
+                          backgroundColor={trackOrderData?.order_status === "returned" ? alpha(theme.palette.primary.main, 0.2) : alpha(theme.palette.error.light, 0.2)}
                         >
                           {t("Paid")}
                         </Typography>
@@ -705,13 +757,13 @@ const ParcelOrderSummery = ({
                     </Typography>
                     {data ? (
                       <Typography fontWeight="600">
-                        {data && getAmountWithSign(data?.order_amount +trackOrderData?.parcel_cancellation?.return_fee)}
+                        {data && getAmountWithSign(data?.order_amount + trackOrderData?.parcel_cancellation?.return_fee)}
                       </Typography>
                     ) : (
                       <Skeleton width="100px" variant="text" />
                     )}
                   </CustomStackFullWidth>
-                ):null}
+                ) : null}
 
               </Stack>
             </ParcelOrderSummaryBox>

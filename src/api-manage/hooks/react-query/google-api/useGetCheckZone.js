@@ -14,7 +14,7 @@ const getZone = async (location, zoneId) => {
 
 export default function useGetCheckZone(location, zoneId, successHandler) {
   return useQuery(
-    ["zoneId", location?.lat, location?.lng],
+    ["zoneId", zoneId, location?.lat, location?.lng],
     () => getZone(location, zoneId),
     {
       onSuccess: successHandler,

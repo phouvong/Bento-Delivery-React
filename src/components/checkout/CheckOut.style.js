@@ -193,11 +193,10 @@ export const OrderSummary = styled(Typography)(({ theme }) => ({
 export const OrderFoodName = styled(Typography)(({ theme }) => ({
 	fontSize: "12px",
 	fontWeight: "500",
-	color: `${
-		theme.palette.mode === "dark"
-			? theme.palette.whiteContainer.main
-			: theme.palette.footer.appDownloadButtonBgGray
-	}`,
+	color: `${theme.palette.mode === "dark"
+		? theme.palette.whiteContainer.main
+		: theme.palette.footer.appDownloadButtonBgGray
+		}`,
 	textOverflow: "ellipsis",
 	whiteSpace: "nowrap",
 	overflow: "hidden",
@@ -279,12 +278,9 @@ export const CustomDatePicker = styled(DateCalendar)(({ theme }) => ({
 
 export const CustomButtonStack = styled(Stack)(({ theme }) => ({
 	[theme.breakpoints.down("sm")]: {
-		position: "fixed",
-		bottom: "0",
-		left: "0",
 		width: "100%",
-		padding: "18px",
-		background: theme.palette.background.default,
-		zIndex: "9999",
+
+
+
 	},
 }));

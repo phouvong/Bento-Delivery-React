@@ -7,40 +7,46 @@ import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style
 import CustomImageContainer from "../CustomImageContainer";
 import { CustomTypography } from "../landing-page/hero-section/HeroSection.style";
 
-const ChangePayBy = ({ paidBy, setPaidBy, zoneData }) => {
+const ChangePayBy = ({ paidBy, setPaidBy, zoneData, setPaymentMethod, setSelectedPaymentMethod }) => {
+	console.log({ zoneData });
 	const theme = useTheme();
 	return (
 		<CustomStackFullWidth spacing={1.2} gap="5px">
-			<CustomStackFullWidth>
-				<CustomTypography fontWeigh="500">
-					{t("Charge Paid By")}
-				</CustomTypography>
-			</CustomStackFullWidth>
 			<CustomStackFullWidth
 				direction="row"
 				sx={{
-					gap: {
-						xs: 1,
-					},
+					gap: 1,
 					flexWrap: "wrap",
+					padding: "1rem",
+					borderRight: { xs: "0px solid", md: "1px solid" },
+					borderColor: theme.palette.neutral[400],
 				}}
 			>
 				<Stack
 					spacing={0.5}
 					sx={{ cursor: "pointer" }}
-					onClick={() => setPaidBy("sender")}
+					onClick={() => {
+						setPaidBy("sender");
+						setPaymentMethod("cash_on_delivery");
+						setSelectedPaymentMethod("cash_on_delivery");
+					}}
 					flexWrap
 				>
 					<Stack
 						backgroundColor={
 							paidBy === "sender" &&
-							alpha(theme.palette.primary.main, 0.1)
+							alpha(theme.palette.primary.main, 1)
 						}
-						sx={{ borderRadius: "5px" }}
+						color={
+							paidBy === "sender" &&
+							theme.palette.neutral[100]
+						}
+						sx={{ borderRadius: ".5rem" }}
 						direction="row"
 						alignItems="center"
 						spacing={1}
 						padding="8px 30px"
+						fontWeight="500"
 						border="1px solid"
 						borderColor={
 							paidBy === "sender"
@@ -48,27 +54,31 @@ const ChangePayBy = ({ paidBy, setPaidBy, zoneData }) => {
 								: theme.palette.neutral[400]
 						}
 					>
-						<CustomImageContainer
+						{/* <CustomImageContainer
 							src={senderImage.src}
 							height="30px"
 							width="30x"
 							objectfit="contain"
-						/>
+						/> */}
 						<Typography align="center">{t("Sender")}</Typography>
 					</Stack>
 				</Stack>
-				{zoneData?.data?.zone_data?.[0]?.cash_on_delivery && (
+				{zoneData?.zone_data[0]?.cash_on_delivery && (
 					<Stack
 						spacing={0.5}
-						onClick={() => setPaidBy("receiver")}
+						onClick={() => {
+							setPaidBy("receiver");
+							setPaymentMethod("cash_on_delivery");
+							setSelectedPaymentMethod("cash_on_delivery");
+						}}
 						sx={{ cursor: "pointer" }}
 					>
 						<Stack
-							//selected={paidBy === "receiver"}
+							selected={paidBy === "receiver"}
 
 							backgroundColor={
 								paidBy === "receiver" &&
-								alpha(theme.palette.primary.main, 0.1)
+								alpha(theme.palette.primary.main, 1)
 							}
 							sx={{ borderRadius: "5px" }}
 							direction="row"
@@ -81,13 +91,17 @@ const ChangePayBy = ({ paidBy, setPaidBy, zoneData }) => {
 									? theme.palette.primary.main
 									: theme.palette.neutral[400]
 							}
+							color={
+								paidBy === "receiver" &&
+								theme.palette.neutral[100]
+							}
 						>
-							<CustomImageContainer
+							{/* <CustomImageContainer
 								src={receiverImage.src}
 								height="30px"
 								width="30px"
 								objectfit="contain"
-							/>
+							/> */}
 							<Typography align="center">{t("Receiver")}</Typography>
 						</Stack>
 					</Stack>

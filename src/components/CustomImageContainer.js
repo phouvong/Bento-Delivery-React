@@ -22,8 +22,8 @@ const CustomImageContainer = ({
   aspectRatio,
   padding,
   loading,
-    bg,
-                                borderBottomRightRadius,
+  bg,
+  borderBottomRightRadius,
   ...rest
 }) => {
   const [imageFile, setState] = useState(null);

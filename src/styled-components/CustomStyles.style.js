@@ -114,8 +114,8 @@ export const CustomPaperBigCard = styled(Paper)(
 			noboxshadow === "true"
 				? "none"
 				: theme.palette.mode === "light"
-				? `0px 0px 2px rgba(145, 158, 171, 0.2), 0px 5px 20px ${theme.palette.paperBoxShadow}`
-				: "none",
+					? `0px 0px 2px rgba(145, 158, 171, 0.2), 0px 5px 20px ${theme.palette.paperBoxShadow}`
+					: "none",
 		// marginBottom: '30px',
 	})
 );
@@ -287,7 +287,7 @@ export const CustomLink = styled(Link)(({ theme, color }) => ({
 export const CustomTextFieldContainer = styled(Box)(
 	({ theme, background, noheight }) => ({
 		width: "100%",
-		height: !noheight && "5rem",
+		minHeight: !noheight && "5rem",
 		color: theme.palette.neutral[1000],
 	})
 );
@@ -341,7 +341,7 @@ export const CustomImageContainerStyled = styled(Box)(
 		aspect_ratio,
 		padding,
 		bg,
-		 borderBottomRightRadius
+		borderBottomRightRadius
 	}) => ({
 		//maxWidth:'20rem',
 		display: "inline-flex",
@@ -354,7 +354,7 @@ export const CustomImageContainerStyled = styled(Box)(
 		marginBottom: margin_bottom,
 		position: "relative",
 		borderRadius: border_radius || "none",
-		borderBottomRightRadius:borderBottomRightRadius ? borderBottomRightRadius : "none",
+		borderBottomRightRadius: borderBottomRightRadius ? borderBottomRightRadius : "none",
 		[theme.breakpoints.down("md")]: {
 			height: mdHeight ? mdHeight : "",
 		},
@@ -434,10 +434,10 @@ export const SliderCustom = styled(Stack)(
 					float: float
 						? float
 						: theme.direction === "ltr"
-						? "left"
-						: "right",
+							? "left"
+							: "right",
 					gap: "5px",
-					
+
 					//paddingBottom: paddingBottom && "1rem !important",
 				},
 			},
@@ -555,8 +555,8 @@ export const UserInfoGrid = styled(Grid)(({ theme, page, userToken }) => ({
 				page === "profile-settings"
 					? "81%"
 					: page === "inbox"
-					? "0%"
-					: "37%",
+						? "0%"
+						: "37%",
 		},
 	},
 
@@ -574,8 +574,8 @@ export const UserInfoGrid = styled(Grid)(({ theme, page, userToken }) => ({
 				page === "profile-settings"
 					? "81%"
 					: page === "inbox"
-					? "0%"
-					: "37%",
+						? "0%"
+						: "37%",
 		},
 	},
 }));

@@ -23,40 +23,14 @@ const CheckoutFailed = (props) => {
       padding={{ xs: "40px 15px", md: "45px 45px 40px" }}
       alignItems="center"
     >
-      <CardContent sx={{ p: "10px" }}>
-        <Typography
-          align="center"
-          sx={{ fontSize: 24 }}
-          color="text.secondary"
-          gutterBottom
-        >
-          {t("Order Place Failed")}
-        </Typography>
 
-        <Typography align="center" sx={{ mb: 1.5 }} color="text.secondary">
-          {t("Order didn't place successfully.")}
-        </Typography>
-      </CardContent>
-      <CardActions sx={{ alignItems: "center" }}>
-        <Button
-          onClick={() => router.push("/home", undefined, { shallow: true })}
-          variant="contained"
-          fullWidth
-        >
-          {t("Back to home")}
-        </Button>
-      </CardActions>
-      <CustomModal
-        openModal={openModal}
-        setModalOpen={setModalOpen}
-        disableAutoFocus={true}
-      >
-        <CheckoutFailedCard
-          id={props.id}
-          configData={configData}
-          handleOrderDetailsClose={handleOrderDetailsClose}
-        />
-      </CustomModal>
+      <CheckoutFailedCard
+        id={props.id}
+        configData={configData}
+        handleOrderDetailsClose={handleOrderDetailsClose}
+        amount="300"
+      />
+
     </CustomStackFullWidth>
   );
 };

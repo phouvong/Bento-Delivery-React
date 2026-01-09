@@ -82,7 +82,7 @@ const BrandCard = (props) => {
 					)}
 					<Typography
 						variant="body2"
-						sx={{ opacity: "0.8" }}
+						sx={{ opacity: "0.8", fontSize: { xs: "10px", md: "14px" } }}
 						component="span"
 					>
 						{items_count} {t("Products")}

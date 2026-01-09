@@ -44,8 +44,8 @@ const CustomTextFieldWithFormik = (props) => {
 			return (
 				<CustomTextFieldContainer>
 					<CustomTextFieldStyle
-					// Removed inputProps={{ id: id }} as it does not work here
-					labelColor={labelColor}
+						// Removed inputProps={{ id: id }} as it does not work here
+						labelColor={labelColor}
 						height={height}
 						backgroundColor={backgroundColor}
 						disabled={disabled}
@@ -63,11 +63,16 @@ const CustomTextFieldWithFormik = (props) => {
 						onBlur={onBlurHandler}
 						type={showPassword ? "text" : type}
 
-					sx={{
-						"& .MuiFormLabel-asterisk": {
-							color: "red",
-						},
-					}}
+						sx={{
+							"& .MuiFormLabel-asterisk": {
+								color: "red",
+							},
+							"& .MuiFormHelperText-root": {
+								[theme.breakpoints.down("sm")]: {
+									fontSize: "10px",
+								},
+							},
+						}}
 						InputProps={{
 							inputProps: { min: 0, id: id }, // <-- add id to input
 							style: {
@@ -151,6 +156,11 @@ const CustomTextFieldWithFormik = (props) => {
 							"& .MuiFormLabel-asterisk": {
 								color: "red",
 							},
+							"& .MuiFormHelperText-root": {
+								[theme.breakpoints.down("sm")]: {
+									fontSize: "10px",
+								},
+							},
 						}}
 						{...fieldProps}
 					/>
@@ -158,7 +168,7 @@ const CustomTextFieldWithFormik = (props) => {
 			);
 		}
 	};
-	return <Box sx={{ width: "100%", height: "55px" }}>{renderHandler()}</Box>;
+	return <Box sx={{ width: "100%", minHeight: "55px" }}>{renderHandler()}</Box>;
 };
 
 export default CustomTextFieldWithFormik;

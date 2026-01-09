@@ -117,7 +117,7 @@ const ProductDetailsSection = ({
           xs={12}
           sm={7}
           md={7}
-          marginTop={productThumbImage?.length > 0 ? "0px" : "40px"}
+          marginTop={productThumbImage?.length > 0 ? "0px" : "0px"}
         >
           {productDetailsData?.module_type !== "food" && (
             <ProductInformation

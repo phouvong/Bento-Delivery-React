@@ -10,9 +10,9 @@ import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { setOfflineInfoStep } from "../../../redux/slices/offlinePaymentData";
 import { CustomTypography } from "../../landing-page/hero-section/HeroSection.style";
-import {getInfoFromZoneData} from "utils/CustomFunctions";
-import {toast} from "react-hot-toast";
-import {cod_exceeds_message} from "utils/toasterMessages";
+import { getInfoFromZoneData } from "utils/CustomFunctions";
+import { toast } from "react-hot-toast";
+import { cod_exceeds_message } from "utils/toasterMessages";
 
 const PlaceOrder = (props) => {
 	const {
@@ -42,7 +42,7 @@ const PlaceOrder = (props) => {
 	const handleOffline = (e) => {
 		if (storeData?.active) {
 			const codLimit = getInfoFromZoneData(zoneData)?.pivot?.maximum_cod_order_amount;
-			if(totalAmount <= codLimit){
+			if (totalAmount <= codLimit) {
 				if (isSchedules()) {
 					setChecked(e.target.checked);
 					dispatch(setOfflineInfoStep(2));
@@ -57,7 +57,7 @@ const PlaceOrder = (props) => {
 				} else {
 					storeCloseToast();
 				}
-			}else{
+			} else {
 				toast.error(t(cod_exceeds_message), {
 					duration: 5000,
 				});
@@ -101,29 +101,16 @@ const PlaceOrder = (props) => {
 					}
 				/>
 			</FormGroup>
-			{offlineInfoStep === 0 ? (
-				<LoadingButton
-					type="submit"
-					fullWidth
-					variant="contained"
-					onClick={placeOrder}
-					loading={orderLoading || isLoading}
-					disabled={!checked}
-				>
-					{t("Place Order")}
-				</LoadingButton>
-			) : (
-				<LoadingButton
-					// type="submit"
-					fullWidth
-					variant="contained"
-					onClick={handleOffline}
-					loading={orderLoading || isLoading}
-					disabled={!checked}
-				>
-					{t("Confirm Order")}
-				</LoadingButton>
-			)}
+			<LoadingButton
+				type="submit"
+				fullWidth
+				variant="contained"
+				onClick={placeOrder}
+				loading={orderLoading || isLoading}
+				disabled={!checked}
+			>
+				{t("Place Order")}
+			</LoadingButton>
 		</CustomStackFullWidth>
 	);
 };

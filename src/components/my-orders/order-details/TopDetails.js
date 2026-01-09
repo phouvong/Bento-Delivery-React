@@ -38,6 +38,15 @@ import PaymentUpdate from "./other-order/PaymentUpdate";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
 import usePostParcelReturn from "api-manage/hooks/react-query/order/usePostParcelReturn";
 import LoadingButton from "@mui/lab/LoadingButton";
+import AddPaymentMethod from "components/checkout/item-checkout/AddPaymentMethod";
+import PaymentMethod from "components/checkout/PaymentMethod";
+import useGetOfflinePaymentOptions from "api-manage/hooks/react-query/offlinePayment/useGetOfflinePaymentOptions";
+import { getDigitalMethodFromZone, handleFailedOrderPlace } from "utils/CustomFunctions";
+import { useUpdatePaymentMethod } from "api-manage/hooks/react-query/payment-method/useUpdatePaymentMethod";
+import { useUpdatePaymentByWallet } from "api-manage/hooks/react-query/useUpdatePaymentByWallet";
+import { baseUrl } from "api-manage/MainApi";
+import Router, { useRouter } from "next/router";
+import { useGetFailedPayment } from "api-manage/hooks/react-query/useGetFailedPayment";
 
 const TopDetails = (props) => {
   const {
@@ -54,13 +63,21 @@ const TopDetails = (props) => {
     refetchTrackData,
     dataIsLoading,
     page,
+    openPaymentMethod,
+    setOpenPaymentMethod,
+    paymentMethodUpdateMutation,
+    paymentFailedData,
+    setPaymentFailedData
   } = props;
   const { t } = useTranslation();
   const theme = useTheme();
-
+  const router = useRouter()
   const { orderDetailsModal, offlineInfoStep } = useSelector(
     (state) => state.offlinePayment
   );
+  console.log({ orderDetailsModal });
+  const { profileInfo } = useSelector((state) => state.profileInfo);
+  console.log({ profileInfo });
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const [cancelOpenModal, setCancelOpenModal] = useState(false);
   const [openModalForPayment, setModalOpenForPayment] = useState();
@@ -70,10 +87,13 @@ const TopDetails = (props) => {
   const [openModalOffline, setOpenModelOffline] = useState(orderDetailsModal);
   const [parcelReceiveModal, setParcelReceiveModal] = useState(false);
   const [openReviewModal, setOpenReviewModal] = useState(false);
+
+  const [paymentMethod, setPaymentMethod] = useState("");
   const dispatch = useDispatch();
   const { mutate: postParcelReturnMutation, isLoading: postParcelReturnLoading } = usePostParcelReturn();
 
-   const handlePostParcelReturn = () => {
+  console.log({ paymentFailedData })
+  const handlePostParcelReturn = () => {
     const formData = {
       guest_id: getGuestId(),
       order_id: id,
@@ -91,7 +111,7 @@ const TopDetails = (props) => {
     });
   };
 
-
+  console.log({ paymentMethod });
 
   const buttonBackgroundColor = () => {
     if (trackData?.order_status === "pending") {
@@ -130,20 +150,7 @@ const TopDetails = (props) => {
       return theme.palette.primary.main;
     }
   };
-  const fontColor = () => {
-    if (trackData?.order_status === "pending") {
-      return theme.palette.info.main;
-    }
-    if (trackData?.order_status === "processing") {
-      return theme.palette.warning.dark;
-    }
-    if (trackData?.order_status === "delivered") {
-      return theme.palette.primary.main;
-    }
-    if (trackData?.order_status === "canceled") {
-      return theme.palette.error.main;
-    }
-  };
+
   const currentLatLng = JSON.parse(
     window.localStorage.getItem("currentLatLng")
   );
@@ -164,24 +171,24 @@ const TopDetails = (props) => {
   const { mutate: orderCancelMutation, isLoading: orderLoading } =
     usePostOrderCancel();
   const handleOnSuccess = () => {
-      const handleSuccess = (response) => {
-        refetchOrderDetails();
-        refetchTrackData();
-        setCancelOpenModal(false);
-        setReturnFareOpenModal(false)
-        toast.success(response.message);
-      };
-      const formData = {
-        guest_id: getGuestId(),
-        order_id: id,
-        reason: cancelReason,
-        note: additionalInfo,
-        _method: "put",
-      };
-      orderCancelMutation(formData, {
-        onSuccess: handleSuccess,
-        onError: onErrorResponse,
-      });
+    const handleSuccess = (response) => {
+      refetchOrderDetails();
+      refetchTrackData();
+      setCancelOpenModal(false);
+      setReturnFareOpenModal(false)
+      toast.success(response.message);
+    };
+    const formData = {
+      guest_id: getGuestId(),
+      order_id: id,
+      reason: cancelReason,
+      note: additionalInfo,
+      _method: "put",
+    };
+    orderCancelMutation(formData, {
+      onSuccess: handleSuccess,
+      onError: onErrorResponse,
+    });
 
   };
 
@@ -234,10 +241,59 @@ const TopDetails = (props) => {
       .replace(/\b\w/g, (char) => char.toUpperCase());
   };
   const getReturnFee = () => {
-  const totalFee = trackData?.order_amount - trackData?.dm_tips;
-  const returnFeePercent = Number(configData?.parcel_cancellation_basic_setup?.return_fee || 0);
-  return (totalFee * returnFeePercent) / 100;
-};
+    const totalFee = trackData?.order_amount - trackData?.dm_tips;
+    const returnFeePercent = Number(configData?.parcel_cancellation_basic_setup?.return_fee || 0);
+    return (totalFee * returnFeePercent) / 100;
+  };
+  const {
+    data: offlinePaymentOptions,
+    refetch: refetchOfflinePaymentOptions,
+    isLoading: offlineIsLoading,
+  } = useGetOfflinePaymentOptions();
+  useEffect(() => {
+    refetchOfflinePaymentOptions();
+  }, []);
+  const isZoneDigital = getDigitalMethodFromZone(
+    trackData?.module_type !== "parcel" ? trackData?.store?.zone_id : trackData?.zone_id,
+    zoneData?.data
+  );
+
+  const { mutate: walletPaymentMutation } = useUpdatePaymentByWallet()
+
+  const handlePayment = (mutation) => {
+    const handleSuccess = (response) => {
+      toast.success(response.message);
+      refetchOrderDetails();
+      refetchTrackData();
+      setOpenPaymentMethod(false);
+    };
+
+    const formData = {
+      order_id: id,
+      _method: paymentMethod === "wallet" ? "POST" : "PUT",
+    };
+
+    mutation(formData, {
+      onSuccess: handleSuccess,
+      onError: onErrorResponse,
+    });
+  };
+
+  const failedOrderPlace = () => {
+    handleFailedOrderPlace({
+      paymentMethod,
+      paymentFailedData,
+      handlePayment,
+      paymentMethodUpdateMutation,
+      walletPaymentMutation,
+      profileInfo,
+      orderId: trackData?.id,
+      baseUrl,
+      router,
+    });
+
+  }
+  console.log({ orderDetailsModal })
   return (
     // <HeadingBox>
     <CustomStackFullWidth
@@ -266,21 +322,39 @@ const TopDetails = (props) => {
             >
               {data?.[0]?.order_id ? data?.[0]?.order_id : data?.id}
             </Typography>
-            <Typography
-              component="span"
-              fontSize="12px"
-              sx={{
-                textTransform: "capitalize",
-                padding: "4px",
-                marginLeft: "15px",
-                borderRadius: "3px",
-                backgroundColor: buttonBackgroundColor(),
-                color: (theme) => theme.palette.whiteContainer.main,
-                fontWeight: "600",
-              }}
-            >
-              {t(capitalizeText(trackData?.order_status))}
-            </Typography>
+            {trackData?.order_status === "failed" ? (
+              <Typography
+                component="span"
+                fontSize="12px"
+                sx={{
+                  textTransform: "capitalize",
+                  padding: "4px",
+                  marginLeft: "15px",
+                  borderRadius: "3px",
+                  backgroundColor: theme.palette.error.main,
+                  color: (theme) => theme.palette.whiteContainer.main,
+                  fontWeight: "600",
+                }}
+              >
+                {t("Payment Failed")}
+              </Typography>
+            ) : (
+              <Typography
+                component="span"
+                fontSize="12px"
+                sx={{
+                  textTransform: "capitalize",
+                  padding: "4px",
+                  marginLeft: "15px",
+                  borderRadius: "3px",
+                  backgroundColor: buttonBackgroundColor(),
+                  color: (theme) => theme.palette.whiteContainer.main,
+                  fontWeight: "600",
+                }}
+              >
+                {t(capitalizeText(trackData?.order_status))}
+              </Typography>
+            )}
             <Typography
               component="span"
               fontSize="12px"
@@ -294,8 +368,9 @@ const TopDetails = (props) => {
                 fontWeight: "600",
               }}
             >
-              {t(capitalizeText(trackData?.order_type))}
+              {t(capitalizeText(trackData?.order_type === "delivery" ? "home delivery" : trackData?.order_type))}
             </Typography>
+
           </Typography>
         )}
 
@@ -384,7 +459,7 @@ const TopDetails = (props) => {
                 : theme.palette.error.main
             }
 
-            // color={theme.palette.whiteContainer}
+          // color={theme.palette.whiteContainer}
           >
             {`Refund ${trackData?.refund?.refund_status}`}
           </OrderStatusButton>
@@ -396,7 +471,7 @@ const TopDetails = (props) => {
             <OrderStatusButton
               background={alpha(theme.palette.error.light, 0.3)}
               onClick={() => setOpenModal(true)}
-              // color={theme.palette.whiteContainer}
+            // color={theme.palette.whiteContainer}
             >
               {trackData?.refund_cancellation_note}
             </OrderStatusButton>
@@ -433,7 +508,7 @@ const TopDetails = (props) => {
               <OrderStatusButton
                 background={theme.palette.error.light}
                 onClick={() => setOpenModal(true)}
-                // color={theme.palette.whiteContainer}
+              // color={theme.palette.whiteContainer}
               >
                 {isSmall ? t("Refund") : t("Refund Request")}
               </OrderStatusButton>
@@ -441,34 +516,27 @@ const TopDetails = (props) => {
           </Stack>
         )}
       {trackData &&
-      trackData?.payment_method === "digital_payment" &&
-      trackData?.payment_status === "unpaid" &&
-      zoneData?.data?.zone_data?.[0]?.cash_on_delivery ? (
-        <OrderStatusButton
-          background={theme.palette.primary.main}
-          onClick={() => setModalOpenForPayment(true)}
-          // color={theme.palette.whiteContainer}
-        >
-          {isSmall ? t("Switch to COD") : t("Switch to cash on delivery")}
-        </OrderStatusButton>
+        trackData?.payment_method === "digital_payment" &&
+        trackData?.payment_status === "unpaid" &&
+        zoneData?.data?.zone_data?.[0]?.cash_on_delivery ? (
+        null
       ) : (
         <>
-          {trackData && trackData?.order_status === "failed" ? (
-            <PaymentUpdate
-              id={id}
-              refetchOrderDetails={refetch}
-              refetchTrackData={refetchTrackData}
-              trackData={trackData}
-              isSmall={isSmall}
-            />
+          {trackData && trackData?.order_status === "failed" && !getToken() ? (
+            <OrderStatusButton
+              background={theme.palette.error.deepLight}
+              onClick={() => setCancelOpenModal(true)}
+            >
+              {t("Cancel Order")}
+            </OrderStatusButton>
           ) : (
             <>
               {trackData?.module_type === "parcel" &&
-              trackData.order_status === "canceled" ? (
+                (trackData.order_status === "canceled" || trackData.order_status === "failed") ? (
                 <>
                   {trackData?.order_status === "canceled" &&
-                  trackData?.charge_payer === "sender" &&
-                  trackData?.parcel_cancellation?.before_pickup === 0 ? (
+                    trackData?.charge_payer === "sender" &&
+                    trackData?.parcel_cancellation?.before_pickup === 0 ? (
                     <Stack
                       direction="row"
                       alignItems="center"
@@ -507,11 +575,11 @@ const TopDetails = (props) => {
                   )}
                 </>
               ) : (
-                (getToken() && trackData?.module_type === "parcel"
+                (trackData?.module_type === "parcel"
                   ? ["pending", "confirmed", "picked_up"].includes(
-                      trackData?.order_status
-                    )
-                  : trackData?.order_status === "pending") && (
+                    trackData?.order_status
+                  )
+                  : (trackData?.order_status === "pending" || trackData?.order_status === "failed")) && (
                   <OrderStatusButton
                     background={theme.palette.error.deepLight}
                     onClick={() => setCancelOpenModal(true)}
@@ -558,6 +626,9 @@ const TopDetails = (props) => {
           trackDataIsFetching={trackDataIsFetching}
           handleOfflineClose={handleOfflineClose}
           page={page}
+          setOpenPaymentMethod={setOpenPaymentMethod}
+          setPaymentFailedData={setPaymentFailedData}
+          refetchTrackData={refetchTrackData}
         />
       </CustomModal>
 
@@ -730,7 +801,37 @@ const TopDetails = (props) => {
       <CustomModal
         openModal={openReviewModal}
         handleClose={() => setOpenReviewModal(false)}
-      ></CustomModal>
+      >
+
+      </CustomModal>
+      <CustomModal
+        openModal={openPaymentMethod}
+        handleClose={() => setOpenPaymentMethod(false)}
+      >
+        <PaymentMethod
+          setPaymentMethod={setPaymentMethod}
+          paymentMethod={paymentMethod}
+          zoneData={zoneData}
+          configData={configData}
+          orderType={trackData?.order_type}
+          usePartialPayment={false}
+          setOpenModel={setOpenPaymentMethod}
+          forprescription={trackData?.prescription_order}
+          offlinePaymentOptions={offlinePaymentOptions}
+          paymentMethodImage={null}
+          setPaymentMethodImage={null}
+          setSwitchToWallet={null}
+          isZoneDigital={isZoneDigital}
+          handlePartialPayment={() => setPaymentMethod("wallet")}
+          walletBalance={profileInfo?.wallet_balance}
+          removePartialPayment={null}
+          switchToWallet={null}
+          customerData={{ data: profileInfo }}
+          failed
+          payableAmount={trackData?.order_amount}
+          failedOrderPlace={failedOrderPlace}
+        />
+      </CustomModal>
     </CustomStackFullWidth>
     // </HeadingBox>
   );

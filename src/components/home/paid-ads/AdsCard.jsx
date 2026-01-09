@@ -4,6 +4,7 @@ import StarIcon from "@mui/icons-material/Star";
 import {
   alpha,
   IconButton, Skeleton,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
@@ -22,6 +23,7 @@ import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { addWishListStore, removeWishListStore } from "redux/slices/wishList";
 import { not_logged_in_message } from "utils/toasterMessages";
+import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
 
 const AdsCard = (props) => {
   const {
@@ -43,6 +45,7 @@ const AdsCard = (props) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const { mutate: addFavoriteMutation } = useAddStoreToWishlist();
   const { mutate } = useWishListStoreDelete();
+  const { ref: textRef, isEllipsed } = useTextEllipsis(item?.title);
 
   useEffect(() => {
     wishlistItemExistHandler();
@@ -181,99 +184,106 @@ const AdsCard = (props) => {
   };
 
   return (
-    <Box sx={{ maxWidth: "450px", cursor: "pointer" }}>
+    <Box sx={{
+      maxWidth: "450px",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+      "&:hover": {
+        boxShadow: theme.shadows[6],
+      }
+    }}>
       {onlyShimmer ? (
-          <Stack
+        <Stack
+          onClick={(e) => handleClick(e)}
+          sx={{
+            position: "relative",
+            margin: "0px 20px -110px",
+            borderRadius: "10px",
+          }}
+        >
+          <Skeleton variant="rounded" width="100%" height={200} />
+        </Stack>
+      ) : (
+        <>
+          {item?.add_type === "store_promotion" ? (
+            <Stack
               onClick={(e) => handleClick(e)}
               sx={{
                 position: "relative",
                 margin: "0px 20px -110px",
                 borderRadius: "10px",
               }}
-          >
-            <Skeleton variant="rounded" width="100%" height={200}  />
-          </Stack>
-      ) : (
-          <>
-            {item?.add_type === "store_promotion" ? (
-                <Stack
-                    onClick={(e) => handleClick(e)}
-                    sx={{
-                      position: "relative",
-                      margin: "0px 20px -110px",
-                      borderRadius: "10px",
-                    }}
-                >
-                  <Stack position="relative">
-                    {(item?.is_rating_active === 1 || item.is_review_active === 1) && (item?.average_rating>0 || item?.reviews_comments_count>0) && (
-                        <Stack
-                            maxWidth="90px"
-                            width="100%"
-                            position="absolute"
-                            bottom="10px"
-                            right="10px"
-                            alignItems="center"
-                            zIndex="1"
-                            flexDirection="row"
-                            backgroundColor={theme.palette.primary.main}
-                            borderRadius="6px"
-                            padding="5px"
-                            gap="5px"
+            >
+              <Stack position="relative">
+                {(item?.is_rating_active === 1 || item.is_review_active === 1) && (item?.average_rating > 0 || item?.reviews_comments_count > 0) && (
+                  <Stack
+                    maxWidth="90px"
+                    width="100%"
+                    position="absolute"
+                    bottom="10px"
+                    right="10px"
+                    alignItems="center"
+                    zIndex="1"
+                    flexDirection="row"
+                    backgroundColor={theme.palette.primary.main}
+                    borderRadius="6px"
+                    padding="5px"
+                    gap="5px"
+                  >
+                    {item.is_review_active === 1 && (
+                      <>
+                        <StarIcon
+                          sx={{
+                            fontSize: "18px",
+                            color: (theme) => theme.palette.neutral[100],
+                          }}
+                        />
+                        <Typography
+                          color={theme.palette.neutral[100]}
+                          fontSize="14px"
+                          fontWeight="600"
                         >
-                          {item.is_review_active === 1 && (
-                              <>
-                                <StarIcon
-                                    sx={{
-                                      fontSize: "18px",
-                                      color: (theme) => theme.palette.neutral[100],
-                                    }}
-                                />
-                                <Typography
-                                    color={theme.palette.neutral[100]}
-                                    fontSize="14px"
-                                    fontWeight="600"
-                                >
-                                  {item?.average_rating.toFixed(1)}
-                                </Typography>
-                              </>
-                          )}
-                          {item.is_review_active === 1 && (
-                              <Typography
-                                  color={theme.palette.neutral[100]}
-                                  fontSize="14px"
-                              >
-                                ({item?.reviews_comments_count})
-                              </Typography>
-                          )}
-                        </Stack>
+                          {item?.average_rating.toFixed(1)}
+                        </Typography>
+                      </>
                     )}
-
-                    <CustomImageContainer
-                        boxShadow={
-                          theme.palette.mode === "dark"
-                              ? "0px 15px 30px rgba(0, 0, 0, 0.8)"
-                              : "0px 15px 30px rgba(150, 150, 154, 0.40)"
-                        }
-                        src={item?.cover_image_full_url}
-                        width="100%"
-                        height="200px"
-                        objectFit="cover"
-                        borderRadius="10px"
-                        bg="#ddd"
-                    />
+                    {item.is_review_active === 1 && (
+                      <Typography
+                        color={theme.palette.neutral[100]}
+                        fontSize="14px"
+                      >
+                        ({item?.reviews_comments_count})
+                      </Typography>
+                    )}
                   </Stack>
-                </Stack>
-            ) : (
-                <VideoPlayerWithCenteredControl
-                    ended={ended}
-                    setEnded={setEnded}
-                    playing={playing}
-                    setPlaying={setPlaying}
-                    video={item?.video_attachment_full_url}
-                    isMargin={true}
+                )}
+
+                <CustomImageContainer
+                  boxShadow={
+                    theme.palette.mode === "dark"
+                      ? "0px 15px 30px rgba(0, 0, 0, 0.8)"
+                      : "0px 15px 30px rgba(150, 150, 154, 0.40)"
+                  }
+                  src={item?.cover_image_full_url}
+                  width="100%"
+                  height="200px"
+                  objectFit="cover"
+                  borderRadius="10px"
+                  bg="#ddd"
                 />
-            )}
-          </>
+              </Stack>
+            </Stack>
+          ) : (
+            <VideoPlayerWithCenteredControl
+              ended={ended}
+              setEnded={setEnded}
+              playing={playing}
+              setPlaying={setPlaying}
+              video={item?.video_attachment_full_url}
+              isMargin={true}
+            />
+          )}
+        </>
       )}
 
       <Stack
@@ -298,11 +308,11 @@ const AdsCard = (props) => {
               }}
             >
               {onlyShimmer ? (<Skeleton variant="circular" width={70} height={70} />) : (<CustomImageContainer
-                  src={item?.profile_image_full_url}
-                  width="70px"
-                  height="70px"
-                  objectFit="cover"
-                  borderRadius="50%"
+                src={item?.profile_image_full_url}
+                width="70px"
+                height="70px"
+                objectFit="cover"
+                borderRadius="50%"
               />)}
             </Stack>
             <Stack width={0} flexGrow={1}>
@@ -313,30 +323,58 @@ const AdsCard = (props) => {
                 justifyContent="space-between"
                 alignItems="center"
               >
-                <Typography
-                  sx={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "-webkit-box",
-                    WebkitLineClamp: "1",
-                    WebkitBoxOrient: "vertical",
-
-                    whiteSpace: "wrap",
-                    wordWrap: "break-word",
+                <Tooltip
+                  title={item?.title || ""}
+                  placement="bottom"
+                  arrow
+                  disableHoverListener={!isEllipsed}
+                  componentsProps={{
+                    tooltip: {
+                      sx: {
+                        bgcolor: (theme) => theme.palette.toolTipColor,
+                        "& .MuiTooltip-arrow": {
+                          color: (theme) => theme.palette.toolTipColor,
+                        },
+                      },
+                    },
                   }}
-                  color={theme.palette.neutral[1000]}
-                  fontSize={{ xs: "16px", sm: "18px", md: "20px" }}
-                  fontWeight="600"
-                  component="h3"
                 >
-                  {onlyShimmer ? <Skeleton width="70%" variant="text" /> : item?.title}
-                </Typography>
+                  <Typography
+                    ref={textRef}
+                    sx={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: "1",
+                      WebkitBoxOrient: "vertical",
+
+                      whiteSpace: "wrap",
+                      wordWrap: "break-word",
+                    }}
+                    color={theme.palette.neutral[1000]}
+                    fontSize={{ xs: "16px", sm: "18px", md: "20px" }}
+                    fontWeight="600"
+                    component="h3"
+                  >
+                    {onlyShimmer ? <Skeleton width="70%" variant="text" /> : item?.title}
+                  </Typography>
+                </Tooltip>
                 {!isWishlisted ? (
-                  <FavoriteBorderOutlinedIcon
+                  <IconButton
                     onClick={(e) => addToWishlistHandler(e)}
-                    sx={{ cursor: "pointer", flexShrink: 0 }}
-                    color="primary"
-                  />
+                    sx={{
+                      flexShrink: 0,
+                      transition: "all 0.3s ease",
+                      "&:hover": {
+                        backgroundColor: (theme) => theme.palette.primary.main,
+                        "& svg": {
+                          color: "#fff",
+                        }
+                      }
+                    }}
+                  >
+                    <FavoriteBorderOutlinedIcon color="primary" />
+                  </IconButton>
                 ) : (
                   <FavoriteIcon
                     onClick={(e) => removeFromWishlistHandler(e)}
@@ -352,29 +390,29 @@ const AdsCard = (props) => {
                 )}
               </Stack>
               {onlyShimmer ? (
-                  <Typography
-                      fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
-                      width="50%"
-                  >
-                    <Stack>
-                      <Skeleton width="100%" variant="text" />
-                      <Skeleton width="100%" variant="text" />
-                    </Stack>
-                  </Typography>
+                <Typography
+                  fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
+                  width="50%"
+                >
+                  <Stack>
+                    <Skeleton width="100%" variant="text" />
+                    <Skeleton width="100%" variant="text" />
+                  </Stack>
+                </Typography>
               ) : (
-                  <Typography
-                      sx={{
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-                        WebkitLineClamp: "2",
-                        WebkitBoxOrient: "vertical",
-                      }}
-                      fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
-                      color={theme.palette.neutral[500]}
-                  >
-                    {item?.description}
-                  </Typography>
+                <Typography
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: "2",
+                    WebkitBoxOrient: "vertical",
+                  }}
+                  fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
+                  color={theme.palette.neutral[500]}
+                >
+                  {item?.description}
+                </Typography>
               )}
             </Stack>
           </Stack>
@@ -401,8 +439,8 @@ const AdsCard = (props) => {
             >
               {onlyShimmer ? (
                 <Typography
-                    fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
-                    width="50%"
+                  fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
+                  width="50%"
                 >
                   <Stack>
                     <Skeleton width="100%" variant="text" />
@@ -410,19 +448,19 @@ const AdsCard = (props) => {
                   </Stack>
                 </Typography>
               ) : (
-                  <Typography
-                      sx={{
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        display: "-webkit-box",
-                        WebkitLineClamp: "2",
-                        WebkitBoxOrient: "vertical",
-                      }}
-                      fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
-                      color={theme.palette.neutral[500]}
-                  >
-                    {item?.description}
-                  </Typography>
+                <Typography
+                  sx={{
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    display: "-webkit-box",
+                    WebkitLineClamp: "2",
+                    WebkitBoxOrient: "vertical",
+                  }}
+                  fontSize={{ xs: "13px", sm: "14px", md: "14px" }}
+                  color={theme.palette.neutral[500]}
+                >
+                  {item?.description}
+                </Typography>
               )}
 
               <IconButton
@@ -431,6 +469,13 @@ const AdsCard = (props) => {
                 sx={{
                   borderRadius: "10px",
                   border: `1.5px solid ${theme.palette.primary.main}`,
+                  transition: "all 0.3s ease",
+                  "&:hover": {
+                    backgroundColor: theme.palette.primary.main,
+                    "& svg": {
+                      color: "#fff",
+                    }
+                  }
                 }}
               >
                 <ArrowForwardSharpIcon color="primary" />

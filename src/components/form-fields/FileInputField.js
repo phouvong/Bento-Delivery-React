@@ -6,6 +6,7 @@ import FileUpload from "../file-upload-container/FileUpload";
 const FileInputField = (props) => {
   const {
     width,
+    maxWidth,
     onChange,
     errorStatus,
     acceptedFileInput,
@@ -17,7 +18,7 @@ const FileInputField = (props) => {
   const imageContainerBusinessRef = useRef();
 
   return (
-    <CustomBoxFullWidth>
+    <CustomBoxFullWidth maxWidth={maxWidth}>
       <FileUpload
         titleText={titleText}
         labelText={labelText}

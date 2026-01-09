@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   CustomButton,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
-import { alpha, Grid, Stack, Typography, useTheme } from "@mui/material";
+import { alpha, Grid, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import CustomDivider from "components/CustomDivider";
 import RestaurantDetailsForm, {
   checkTaxiModule,
@@ -19,7 +19,7 @@ import { useQuery } from "react-query";
 import { GoogleApi } from "api-manage/hooks/react-query/googleApi";
 import { useDispatch, useSelector } from "react-redux";
 import { getZoneWiseModule } from "components/store-resgistration/helper";
-import { setAllData } from "redux/slices/storeRegistrationData";
+import { setAllData, setInZone } from "redux/slices/storeRegistrationData";
 import { SaveButton } from "components/profile/basic-information/Profile.style";
 import { useRouter } from "next/router";
 import useGetModule from "api-manage/hooks/react-query/useGetModule";
@@ -28,6 +28,7 @@ import { formatPhoneNumber } from "utils/CustomFunctions";
 import useGetZoneList from "api-manage/hooks/react-query/zone-list/zone-list";
 import { ActonButtonsSection } from "components/deliveryman-registration/CustomStylesDeliveryman";
 import BusinessTin from "components/store-resgistration/BusinessTin";
+import { shadows } from "@mui/system";
 
 export const generateInitialValues = (languages, allData) => {
   const initialValues = {
@@ -72,20 +73,24 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
   const { t } = useTranslation();
   const { modules, configData } = useSelector((state) => state.configData);
   const [polygonPaths, setPolygonPaths] = useState([]);
+  const [showZoneWarning, setShowZoneWarning] = useState(false);
   const [currentTab, setCurrentTab] = useState(0);
   const [selectedDates, setSelectedDates] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = React.useState("en");
   const [selectedZone, setSelectedZone] = React.useState(null);
-  const [inZone, setInZone] = React.useState(null);
-  const { allData, activeStep } = useSelector((state) => state.storeRegData);
+  const { allData, activeStep, inZone } = useSelector((state) => state.storeRegData);
   const { data, refetch } = useGetModule();
   const initialValues = generateInitialValues(configData?.language, allData);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
+  const isBottomMenu = useMediaQuery("(max-width: 1180px)");
 
   const RestaurantJoinFormik = useFormik({
     initialValues,
     validationSchema: ValidationSchemaForRestaurant(),
+    validationOptions: {
+      abortEarly: false, // ✅ THIS IS THE KEY
+    },
     onSubmit: async (values, helpers) => {
       try {
         if (checkTaxiModule(values?.module_id, moduleOption)) {
@@ -95,15 +100,12 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
             formSubmitOnSuccess(values);
           }
         } else {
-          if (inZone) {
-            formSubmitOnSuccess(values);
-          } else {
-            toast.error(t("Please select a zone"));
-          }
+          formSubmitOnSuccess(values);
         }
-      } catch (err) {}
+      } catch (err) { }
     },
   });
+  console.log({ inZone });
   let currentLatLng = undefined;
   if (typeof window !== "undefined") {
     currentLatLng = JSON.parse(window.localStorage.getItem("currentLatLng"));
@@ -161,7 +163,7 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
   };
   const restaurantAddressHandler = (value) => {
     RestaurantJoinFormik.setFieldValue("restaurant_address", {
-      ...RestaurantJoinFormik.values.restaurant_address,
+      ...(RestaurantJoinFormik.values.restaurant_address || {}),
       [selectedLanguage]: value,
     });
   };
@@ -183,8 +185,7 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
     RestaurantJoinFormik.setFieldValue("l_name", value);
   };
   const tinNumberHandler = (value) => {
-    const filtered = value.replace(/[^0-9\-\/]/g, "");
-    RestaurantJoinFormik.setFieldValue("tin", filtered);
+    RestaurantJoinFormik.setFieldValue("tin", value);
   };
 
   useEffect(() => {
@@ -203,29 +204,49 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
     RestaurantJoinFormik.setFieldValue("password", value);
   };
   const singleFileUploadHandlerForImage = (value) => {
+    if (value.currentTarget.files[0].size > 1048576) {
+      toast.error(t("Image size must be less than 1MB"));
+      return;
+    }
     RestaurantJoinFormik.setFieldValue("logo", value.currentTarget.files[0]);
+    //RestaurantJoinFormik.setFieldTouched("logo", true);
   };
   const imageOnchangeHandlerForImage = (value) => {
+    if (value.size > 1048576) {
+      toast.error(t("Image size must be less than 1MB"));
+      return;
+    }
     RestaurantJoinFormik.setFieldValue("logo", value);
   };
   const singleFileUploadHandlerForCoverPhoto = (value) => {
+    if (value.currentTarget.files[0].size > 1048576) {
+      toast.error(t("Image size must be less than 1MB"));
+      return;
+    }
     RestaurantJoinFormik.setFieldValue(
       "cover_photo",
       value.currentTarget.files[0]
     );
+    //RestaurantJoinFormik.setFieldTouched("cover_photo", true);
   };
   const singleFileUploadHandlerForTinFile = (value) => {
     // const file = e.currentTarget.files[0];
     RestaurantJoinFormik.setFieldValue("tin_certificate_image", value);
+    RestaurantJoinFormik.setFieldTouched("tin_certificate_image", true);
   };
   const imageOnchangeHandlerForTinImage = (value) => {
     RestaurantJoinFormik.setFieldValue("tin_certificate_image", value);
   };
   const imageOnchangeHandlerForCoverPhoto = (value) => {
+    if (value.size > 1048576) {
+      toast.error(t("Image size must be less than 1MB"));
+      return;
+    }
     RestaurantJoinFormik.setFieldValue("cover_photo", value);
   };
   const zoneHandler = (value) => {
     RestaurantJoinFormik.setFieldValue("zoneId", value);
+    RestaurantJoinFormik.setFieldValue("module_id", "");
   };
   const moduleHandler = (value) => {
     RestaurantJoinFormik.setFieldValue("module_id", value);
@@ -341,31 +362,36 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
     setPreview(null);
     RestaurantJoinFormik.resetForm();
     setSelectedDates(null);
+    dispatch(setInZone(null));
   };
+  useEffect(() => {
+    if (showZoneWarning || !inZone) {
+      //toast.error("Please select a zone");
+      RestaurantJoinFormik.setFieldValue("restaurant_address", null);
+    }
+  }, [showZoneWarning]);
+
   return (
     <CustomStackFullWidth
       sx={{
-        border: `1px solid ${alpha(theme.palette.neutral[400], 0.6)}`,
         marginTop: "2rem",
-        borderRadius: "8px",
-        padding: { xs: "1rem", md: "30px" },
       }}
     >
       <form noValidate onSubmit={RestaurantJoinFormik.handleSubmit}>
         <Stack
           sx={{
-            backgroundColor: (theme) => theme.palette.neutral[100],
-            // backgroundColor: (theme) => alpha(theme.palette.neutral[400], 0.1),
-            padding: ".6rem",
+            backgroundColor: theme.palette.neutral[100],
             borderRadius: "8px",
-            cursor: "pointer",
+            boxShadow: shadows[1],
           }}
         >
-          <Typography fontSize="18px" fontWeight="500" textAlign="left">
+          <Typography fontSize={{ xs: "16px", sm: "18px" }} fontWeight="500" textAlign="left" p={{ xs: 1.2, sm: 2 }} sx={{
+            borderBottom: `1px solid ${alpha(theme.palette.neutral[400], 0.2)}`,
+          }}>
             {t("Vendor Info")}
           </Typography>
-          <CustomDivider border="1px" paddingTop="5px" />
-          <CustomStackFullWidth padding={{ xs: "7px", md: "2rem" }} mt="1rem">
+
+          <CustomStackFullWidth padding="1rem" mt=".5rem">
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <RestaurantDetailsForm
@@ -385,6 +411,7 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
                   tabs={tabs}
                   selectedLanguage={selectedLanguage}
                   pickupZoneHandler={pickupZoneHandler}
+                  inZone={inZone}
                 />
               </Grid>
               <Grid item xs={12} md={6}>
@@ -398,7 +425,14 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
                     handleLocation={handleLocation}
                     restaurantAddressHandler={restaurantAddressHandler}
                     zoneId={RestaurantJoinFormik?.values?.zoneId}
-                    setInZone={setInZone}
+                    setInZone={(val) => dispatch(setInZone(val))}
+                    zoneHandler={zoneHandler}
+                    fromVendor={true}
+                    showZoneWarning={showZoneWarning}
+                    setShowZoneWarning={setShowZoneWarning}
+                    inZone={inZone}
+
+
                   />
                   <ImageSection
                     singleFileUploadHandlerForImage={
@@ -421,10 +455,9 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
         <CustomStackFullWidth
           mt="20px"
           sx={{
-            backgroundColor: (theme) => theme.palette.neutral[100],
-            // backgroundColor: (theme) => alpha(theme.palette.neutral[400], 0.1),
-            padding: "1rem",
+            backgroundColor: theme.palette.neutral[100],
             borderRadius: "8px",
+            boxShadow: shadows[1],
           }}
         >
           <OwnerForm
@@ -437,10 +470,9 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
         <CustomStackFullWidth
           mt="20px"
           sx={{
-            backgroundColor: (theme) => theme.palette.neutral[100],
-            // backgroundColor: (theme) => alpha(theme.palette.neutral[400], 0.1),
-            padding: "1rem",
+            backgroundColor: theme.palette.neutral[100],
             borderRadius: "8px",
+            boxShadow: shadows[1],
           }}
         >
           <AccountInfo
@@ -452,10 +484,9 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
         <CustomStackFullWidth
           mt="20px"
           sx={{
-            backgroundColor: (theme) => theme.palette.neutral[100],
-            // backgroundColor: (theme) => alpha(theme.palette.neutral[400], 0.1),
-            padding: "1rem",
+            backgroundColor: theme.palette.neutral[100],
             borderRadius: "8px",
+            boxShadow: shadows[1],
           }}
         >
           <BusinessTin
@@ -473,8 +504,14 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
             setPreview={setPreview}
           />
         </CustomStackFullWidth>
-        <Grid item md={12} xs={12} mt="1rem" align="end">
-          <ActonButtonsSection>
+        <Grid item md={12} xs={12} mt="1rem" align="end"
+          sx={{
+            position: "sticky",
+            bottom: isBottomMenu ? "66px" : "0",
+            zIndex: 999,
+          }}
+        >
+          <ActonButtonsSection sx={{ display: "inline-flex !important" }}>
             <CustomButton
               onClick={handleReset}
               //disabled={isLoading}
@@ -482,7 +519,6 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
                 bgcolor: (theme) => alpha(theme.palette.neutral[200], 0.4),
                 color: (theme) => theme.palette.primary.dark,
                 px: "30px",
-
                 borderRadius: "5px",
               }}
             >

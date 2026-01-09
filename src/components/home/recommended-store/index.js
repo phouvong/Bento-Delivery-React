@@ -12,7 +12,7 @@ import SpecialOfferCardShimmer from "../../Shimmer/SpecialOfferCardSimmer";
 import { HomeComponentsWrapper } from "../HomePageComponents";
 import { createEnhancedArrows } from "../../common/EnhancedSliderArrows";
 import StoreCard from "components/cards/StoreCard";
-import {useGetRecommendStores} from "api-manage/hooks/react-query/store/useGetRecommendStores";
+import { useGetRecommendStores } from "api-manage/hooks/react-query/store/useGetRecommendStores";
 
 
 
@@ -32,7 +32,7 @@ const RecommendedStore = () => {
   const [isSliderHovered, setIsSliderHovered] = useState(false);
   const {
     data: popularData,
-    isLoading:popularIsLoading ,
+    isLoading: popularIsLoading,
   } = useGetRecommendStores();
 
   // Enhanced slider settings
@@ -42,7 +42,7 @@ const RecommendedStore = () => {
     speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
-    ...createEnhancedArrows(isSliderHovered, { 
+    ...createEnhancedArrows(isSliderHovered, {
       displayNoneOnMobile: true,
       variant: "primary"
     }),
@@ -95,7 +95,7 @@ const RecommendedStore = () => {
           slidesToShow: 1.4,
           slidesToScroll: 1,
           initialSlide: 1,
-          infinite: true,
+          infinite: false,
         },
       },
       {
@@ -104,12 +104,12 @@ const RecommendedStore = () => {
           slidesToShow: 1.2,
           slidesToScroll: 1,
           initialSlide: 1,
-          infinite: true,
+          infinite: false,
         },
       },
     ],
   };
-  
+
   const sliderItems = (
     <SliderWrapper
       sx={{
@@ -129,7 +129,7 @@ const RecommendedStore = () => {
         </Slider>
       ) : (
         <>
-          { popularData?.stores?.length>0 &&  (
+          {popularData?.stores?.length > 0 && (
             <Slider {...enhancedSettings} ref={slider}>
               {popularData?.stores?.map((item, index) => {
                 return (
@@ -150,21 +150,22 @@ const RecommendedStore = () => {
   const getLayout = () => {
     return (
 
-          <>
-            <CustomStackFullWidth
-              direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              {popularIsLoading ? (
-                <Skeleton variant="text" width="110px" />
-              ) : (
-                <H2 text={t("Recommended Store")} component="h2" />
-              )}
-            </CustomStackFullWidth>
-            {sliderItems}
+      <>
+        <CustomStackFullWidth
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          pb=".7rem"
+        >
+          {popularIsLoading ? (
+            <Skeleton variant="text" width="110px" />
+          ) : (
+            <H2 text={t("Recommended Store")} component="h2" />
+          )}
+        </CustomStackFullWidth>
+        {sliderItems}
 
-          </>
+      </>
 
     );
   };

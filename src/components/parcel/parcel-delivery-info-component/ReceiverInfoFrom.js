@@ -10,6 +10,8 @@ import CustomPhoneInput from "../../custom-component/CustomPhoneInput";
 import { getLanguage } from "helper-functions/getLanguage";
 import dynamic from "next/dynamic";
 const MapModal = dynamic(() => import("../../Map/MapModal"));
+import MapIcon from '@mui/icons-material/Map';
+
 const ReceiverInfoFrom = ({
   addAddressFormik,
   receiverNameHandler,
@@ -70,14 +72,14 @@ const ReceiverInfoFrom = ({
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
   return (
     <CustomStackFullWidth height="100%">
-      <Card sx={{ padding: "1.2rem", height: "100%" }}>
-        <CustomStackFullWidth spacing={2}>
+      <Card sx={{ padding: "1.2rem", height: "100%", backgroundColor: theme.palette.background.paper, border: `1px solid rgba(0, 0, 0, 0.05)` }}>
+        <CustomStackFullWidth gap={1}>
           <Stack align="center">
             <Typography fontWeight={500} fontSize="16px">
               {t("Receiver Information")}
             </Typography>
           </Stack>
-          <CustomStackFullWidth alignItems="center" spacing={3}>
+          <CustomStackFullWidth alignItems="center" gap={1}>
             <CustomStackFullWidth alignItems="center">
               <CustomTextFieldWithFormik
                 required="true"
@@ -88,6 +90,7 @@ const ReceiverInfoFrom = ({
                 fieldProps={addAddressFormik.getFieldProps("receiverName")}
                 onChangeHandler={receiverNameHandler}
                 value={addAddressFormik.values.receiverName}
+                backgroundColor
               />
             </CustomStackFullWidth>
             <CustomTextFieldWithFormik
@@ -98,6 +101,7 @@ const ReceiverInfoFrom = ({
               fieldProps={addAddressFormik.getFieldProps("receiverEmail")}
               onChangeHandler={receiverEmailHandler}
               value={addAddressFormik.values.receiverEmail}
+              backgroundColor
             />
             <CustomStackFullWidth alignItems="center">
               <CustomPhoneInput
@@ -110,6 +114,7 @@ const ReceiverInfoFrom = ({
                 lanDirection={lanDirection}
                 height="45px"
                 borderRadius="8px"
+                required
               />
               {/*<CustomTextFieldWithFormik*/}
               {/*  required="true"*/}
@@ -129,8 +134,8 @@ const ReceiverInfoFrom = ({
                 alignItems="center"
                 pb="5px"
               >
-                <Typography>{t("Delivery Address")}</Typography>
-                <Button onClick={() => handleOpen()}>
+                <Typography></Typography>
+                <Button onClick={() => handleOpen()} sx={{ p: 0 }}>
                   <Stack
                     gap="5px"
                     alignItems="center"
@@ -143,22 +148,25 @@ const ReceiverInfoFrom = ({
                     >
                       {t("Set from map")}
                     </Typography>
-                    <PinDropIcon
+                    <MapIcon
                       sx={{ width: "20px", height: "20px" }}
                       color="primary"
                     />
                   </Stack>
                 </Button>
               </CustomStackFullWidth>
-              <GetLocationFrom
-                fromparcel="true"
-                handleLocation={handleLocation}
-                formattedAddress={receiverFormattedAddress}
-                currentLocationValue={currentLocationValue}
-                setCurrentLactionValue={setCurrentLactionValue}
-                testLocation={testLocation}
-                toReceiver="true"
-              />
+              <CustomStackFullWidth sx={{ marginBottom: "1.5rem" }}>
+                <GetLocationFrom
+                  fromparcel="true"
+                  handleLocation={handleLocation}
+                  formattedAddress={receiverFormattedAddress}
+                  currentLocationValue={currentLocationValue}
+                  setCurrentLactionValue={setCurrentLactionValue}
+                  testLocation={testLocation}
+                  toReceiver="true"
+                  setOpen={setOpen}
+                />
+              </CustomStackFullWidth>
 
             </CustomStackFullWidth>
             {/*<CustomStackFullWidth>*/}
@@ -181,6 +189,7 @@ const ReceiverInfoFrom = ({
                 fieldProps={addAddressFormik.getFieldProps("road")}
                 onChangeHandler={roadHandler}
                 value={addAddressFormik.values.road}
+                backgroundColor
               />
             </CustomStackFullWidth>
             <CustomStackFullWidth direction="row" spacing={1.3}>
@@ -192,6 +201,7 @@ const ReceiverInfoFrom = ({
                 fieldProps={addAddressFormik.getFieldProps("house")}
                 onChangeHandler={houseHandler}
                 value={addAddressFormik.values.senderPhone}
+                backgroundColor
               />
               <CustomTextFieldWithFormik
                 type="text"
@@ -201,6 +211,7 @@ const ReceiverInfoFrom = ({
                 fieldProps={addAddressFormik.getFieldProps("floor")}
                 onChangeHandler={floorHandler}
                 value={addAddressFormik.values.floor}
+                backgroundColor
               />
             </CustomStackFullWidth>
           </CustomStackFullWidth>

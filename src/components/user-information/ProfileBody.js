@@ -24,6 +24,7 @@ const ProfileBody = ({
   refetch,
   setEditAddress,
 }) => {
+  console.log({ orderId });
   const activeComponent = () => {
     if (page === "profile-settings") {
       return (
@@ -83,7 +84,7 @@ const ProfileBody = ({
       return <Settings configData={configData} />;
     }
   };
-  return <Stack>{activeComponent()}</Stack>;
+  return <Stack >{activeComponent()}</Stack>;
 };
 
 export default ProfileBody;

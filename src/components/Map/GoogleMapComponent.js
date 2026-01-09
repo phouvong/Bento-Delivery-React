@@ -33,6 +33,7 @@ const GoogleMapComponent = ({
   left,
   bottom,
   polygonPaths,
+  fromVendor
 }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
@@ -42,10 +43,10 @@ const GoogleMapComponent = ({
     height: isModalExpand
       ? "90vh"
       : height
-      ? height
-      : isSmall
-      ? "350px"
-      : "350px",
+        ? height
+        : isSmall
+          ? "350px"
+          : "350px",
     paddingBottom: "0px",
   };
   const mapRef = useRef(GoogleMap);
@@ -63,7 +64,7 @@ const GoogleMapComponent = ({
       streetViewControl: false,
       mapTypeControl: false,
       fullscreenControl: false,
-      styles:theme.palette.mode === "dark" ? darkStyles : grayMapStyle,
+      styles: theme.palette.mode === "dark" ? darkStyles : grayMapStyle,
     }),
     []
   );
@@ -132,6 +133,24 @@ const GoogleMapComponent = ({
       });
       setPolygonInstance(newPolygon);
 
+      newPolygon.addListener("click", (e) => {
+        if (fromVendor) {
+          setMapSetup(false);
+          setDisablePickButton?.(false);
+          setLocationEnabled?.(true);
+          setLocation({
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng(),
+          });
+          setCenterPosition({
+            lat: e.latLng.lat(),
+            lng: e.latLng.lng(),
+          });
+          setPlaceDetailsEnabled(false);
+          setPlaceDescription?.(undefined);
+        }
+      });
+
       // Create a LatLngBounds object to fit the polygon
       const bounds = new window.google.maps.LatLngBounds();
       polygonPaths.forEach((path) => {
@@ -139,9 +158,21 @@ const GoogleMapComponent = ({
       });
 
       // Fit the map to the new polygon bounds
-      map.fitBounds(bounds);
+      if (!fromVendor) {
+        map.fitBounds(bounds);
+      }
     }
-  }, [polygonPaths, map]);
+  }, [polygonPaths, map, fromVendor]);
+
+  useEffect(() => {
+    if (map && location?.lat && location?.lng) {
+      const lat = parseFloat(location.lat);
+      const lng = parseFloat(location.lng);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        map.panTo({ lat, lng });
+      }
+    }
+  }, [map, location]);
 
   return isLoaded ? (
     <Stack
@@ -190,7 +221,7 @@ const GoogleMapComponent = ({
       </Stack>
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={center ?? centerPosition}
+        center={map ? undefined : (center ?? centerPosition)}
         onLoad={onLoad}
         zoom={zoom}
         onUnmount={onUnmount}
@@ -226,6 +257,40 @@ const GoogleMapComponent = ({
             });
           }
         }}
+        onDragEnd={() => {
+          if (map) {
+            setMapSetup(false);
+            setDisablePickButton?.(false);
+            setLocationEnabled?.(true);
+            setLocation({
+              lat: map.center?.lat(),
+              lng: map.center?.lng(),
+            });
+            setCenterPosition({
+              lat: map.center?.lat(),
+              lng: map.center?.lng(),
+            });
+            setPlaceDetailsEnabled(false);
+            setPlaceDescription?.(undefined);
+          }
+        }}
+        onClick={(e) => {
+          if (fromVendor) {
+            setMapSetup(false);
+            setDisablePickButton?.(false);
+            setLocationEnabled?.(true);
+            setLocation({
+              lat: e.latLng.lat(),
+              lng: e.latLng.lng(),
+            });
+            setCenterPosition({
+              lat: e.latLng.lat(),
+              lng: e.latLng.lng(),
+            });
+            setPlaceDetailsEnabled(false);
+            setPlaceDescription?.(undefined);
+          }
+        }}
         options={options}
       >
         {!locationLoading ? (
@@ -240,6 +305,7 @@ const GoogleMapComponent = ({
               top: "50%",
               height: "60px",
               width: "45px",
+              pointerEvents: "none",
             }}
             alt="map"
           />

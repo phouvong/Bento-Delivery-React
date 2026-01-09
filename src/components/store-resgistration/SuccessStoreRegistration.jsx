@@ -1,5 +1,5 @@
 import React from "react";
-import { alpha, Stack, Typography, useTheme } from "@mui/material";
+import { alpha, Button, Stack, Typography, useTheme } from "@mui/material";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { t } from "i18next";
 import { useRouter } from "next/router";
@@ -56,6 +56,21 @@ const SuccessStoreRegistration = ({ flag }) => {
                 "Admin will confirm your registration after review"
               )}
             </Typography>
+            <Button
+              variant="contained"
+              sx={{ mt: "1rem" }}
+              onClick={() => {
+                const zoneId = localStorage.getItem("zoneid");
+                const location = localStorage.getItem("location");
+                if (zoneId || location) {
+                  router.push("/home");
+                } else {
+                  router.push("/");
+                }
+              }}
+            >
+              {t("Got it")}
+            </Button>
           </Stack>
         </>
       ) : (

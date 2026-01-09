@@ -9,8 +9,9 @@ import SEO from "../../src/components/seo";
 import CustomContainer from "../../src/components/container";
 import DeliveryManComponent from "../../src/components/deliveryman-registration/DeliveryManComponent";
 import { useDispatch, useSelector } from "react-redux";
-import { useGetConfigData } from "../../src/api-manage/hooks/useGetConfigData";
-import { setConfigData } from "../../src/redux/slices/configData";
+import { useGetConfigData } from "api-manage/hooks/useGetConfigData";
+import { setConfigData } from "redux/slices/configData";
+
 const Index = () => {
   const dispatch = useDispatch();
   const { landingPageData, configData } = useSelector(

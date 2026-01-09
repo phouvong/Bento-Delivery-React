@@ -5,23 +5,29 @@ import {
 } from "../file-previewer/FilePreviewer.style";
 import ImageUploaderThumbnail from "./ImageUploaderThumbnail";
 import CustomImageContainer from "components/CustomImageContainer";
+import ImageHoverOverlay from "./ImageHoverOverlay";
+import ImageViewModal from "./ImageViewModal";
 import emptyImage from "../profile/asset/gallery-add.png";
 
 const ImagePreviewer = ({
-                          anchor,
-                          file,
-                          label,
-                          width = "100%",
-                          borderRadius = "8px",
-                          error,
-                          objectFit = "cover",
-                          height = "130px",
-                          marginLeft,
-                        }) => {
+  anchor,
+  file,
+  label,
+  width = "100%",
+  borderRadius = "8px",
+  error,
+  objectFit = "cover",
+  height = "130px",
+  marginLeft,
+}) => {
   const [previewImage, setPreviewImage] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!file) return;
+    if (!file) {
+      setPreviewImage(null);
+      return;
+    }
 
     // If file is a File/Blob object (from input)
     if (file instanceof File || file instanceof Blob) {
@@ -38,47 +44,72 @@ const ImagePreviewer = ({
     }
   }, [file]);
 
+  const handleViewClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleEditClick = () => {
+    anchor?.current?.click();
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
-    <CustomBoxForFilePreviewer>
-      {previewImage ? (
-        <FilePreviewerWrapper
-          marginLeft={marginLeft}
-          onClick={() => anchor?.current?.click()}
-          width={width}
-          height={height}
-          objectFit={objectFit}
-          borderRadius={borderRadius}
-        >
-          <CustomImageContainer
-            src={previewImage}
-            width="100%"
-            height={height}
-            objectfit={objectFit}
-            borderRadius={borderRadius}
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = emptyImage;
-            }}
-          />
-        </FilePreviewerWrapper>
-      ) : (
-        <FilePreviewerWrapper
-          marginLeft={marginLeft}
-          onClick={() => anchor?.current?.click()}
-          width={width}
-          height={height}
-          objectFit={objectFit}
-          borderRadius={borderRadius}
-        >
-          <ImageUploaderThumbnail
-            label={label}
+    <>
+      <CustomBoxForFilePreviewer>
+        {previewImage ? (
+          <FilePreviewerWrapper
+            marginLeft={marginLeft}
             width={width}
-            error={error}
+            height={height}
+            objectFit={objectFit}
             borderRadius={borderRadius}
-          />
-        </FilePreviewerWrapper>
-      )}
-    </CustomBoxForFilePreviewer>
+            style={{ position: "relative" }}
+          >
+            <CustomImageContainer
+              src={previewImage}
+              width="100%"
+              height={height}
+              objectfit={objectFit}
+              borderRadius={borderRadius}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = emptyImage;
+              }}
+            />
+            <ImageHoverOverlay
+              onViewClick={handleViewClick}
+              onEditClick={handleEditClick}
+            />
+          </FilePreviewerWrapper>
+        ) : (
+          <FilePreviewerWrapper
+            marginLeft={marginLeft}
+            onClick={() => anchor?.current?.click()}
+            width={width}
+            height={height}
+            objectFit={objectFit}
+            borderRadius={borderRadius}
+          >
+            <ImageUploaderThumbnail
+              label={label}
+              width={width}
+              error={error}
+              borderRadius={borderRadius}
+            />
+          </FilePreviewerWrapper>
+        )}
+      </CustomBoxForFilePreviewer>
+
+      <ImageViewModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        imageSrc={previewImage}
+        alt={label || "Image preview"}
+      />
+    </>
   );
 };
 

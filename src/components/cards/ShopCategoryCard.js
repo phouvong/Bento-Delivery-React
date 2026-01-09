@@ -7,6 +7,7 @@ import { CustomBoxFullWidth } from "../../styled-components/CustomStyles.style";
 import { textWithEllipsis } from "../../styled-components/TextWithEllipsis";
 import CustomImageContainer from "../CustomImageContainer";
 import NextImage from "components/NextImage";
+import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
 
 const Wrapper = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -39,50 +40,64 @@ const ImageWrapper = styled(CustomBoxFullWidth)(({ theme }) => ({
 
 const ShopCategoryCard = (props) => {
   const { item, imageUrl, onlyshimmer } = props;
+  const { ref: textRef, isEllipsed } = useTextEllipsis(item?.name);
   const { t } = useTranslation();
   const classes = textWithEllipsis();
+  console.log({ isEllipsed });
+
   return (
     <Wrapper>
 
 
-        <Link
-          href={{
-            pathname: "/home",
-            query: {
-              search: "category",
-              id: `${item?.id}`,
-              module_id: `${getModuleId()}`,
-              name: item?.name && item?.name,
-              data_type: "category",
-            },
-          }}
-        >
-          <Grid container>
-            <Grid
-              item
-              xs={6}
-              container
-              sx={{ p: "8px" }}
-              alignItems="center"
-              justifyContent="center"
-            >
-              <Grid item xs={12}>
-                <Tooltip
-                  title={item?.name}
-                  placement="bottom"
-                  arrow
-                  componentsProps={{
-                    tooltip: {
-                      sx: {
-                        bgcolor: (theme) => theme.palette.toolTipColor,
-                        "& .MuiTooltip-arrow": {
-                          color: (theme) => theme.palette.toolTipColor,
-                        },
+      <Link
+        href={{
+          pathname: "/home",
+          query: {
+            search: "category",
+            id: `${item?.id}`,
+            module_id: `${getModuleId()}`,
+            name: item?.name && item?.name,
+            data_type: "category",
+          },
+        }}
+      >
+        <Grid container>
+          <Grid
+            item
+            xs={6}
+            container
+            sx={{ p: "8px" }}
+            alignItems="center"
+            justifyContent="center"
+          >
+            <Grid item xs={12}>
+              <Tooltip
+                title={isEllipsed ? item?.name : ""}
+
+                placement="bottom"
+                arrow
+                componentsProps={{
+                  tooltip: {
+                    sx: {
+                      bgcolor: (theme) => theme.palette.toolTipColor,
+                      "& .MuiTooltip-arrow": {
+                        color: (theme) => theme.palette.toolTipColor,
                       },
                     },
+                  },
+                }}
+              >
+                <CustomBoxFullWidth
+                  sx={{
+
+                    width: "100%",
+                    // Ensu"100%",
+                    // Ensure wrapper in flex can shrink and give a constrained width
+                    minWidth: 0,
                   }}
                 >
                   <Typography
+                    ref={textRef}
                     variant="h7"
                     fontWeight="400"
                     className={classes.multiLineEllipsis}
@@ -90,35 +105,36 @@ const ShopCategoryCard = (props) => {
                   >
                     {onlyshimmer ? <Skeleton variant="text" width="70px" /> : item?.name}
                   </Typography>
-                </Tooltip>
-              </Grid>
-              <Grid item xs={12}>
-                <Typography
-                  variant="body2"
-                  color="customColor.textGray"
-                  component="span"
-                >
-                  {t("Explore Items")}
-                </Typography>
-              </Grid>
+                </CustomBoxFullWidth>
+              </Tooltip>
             </Grid>
-            <Grid item xs={6}>
-              <ImageWrapper>
-                {onlyshimmer ? (<Skeleton variant="ractangle" height="100%" width="100%" />) : (
-                  <NextImage
-                    height={115}
-                    width={106}
-                    src={imageUrl}
-                    borderRadius="5px"
-                    objectFit="cover"
-                    //loading="loading"
-                    bg="#ddd"
-                  />
-                )}
-              </ImageWrapper>
+            <Grid item xs={12}>
+              <Typography
+                variant="body2"
+                color="customColor.textGray"
+                component="span"
+              >
+                {t("Explore Items")}
+              </Typography>
             </Grid>
           </Grid>
-        </Link>
+          <Grid item xs={6}>
+            <ImageWrapper>
+              {onlyshimmer ? (<Skeleton variant="ractangle" height="100%" width="100%" />) : (
+                <NextImage
+                  height={115}
+                  width={106}
+                  src={imageUrl}
+                  borderRadius="5px"
+                  objectFit="cover"
+                  //loading="loading"
+                  bg="#ddd"
+                />
+              )}
+            </ImageWrapper>
+          </Grid>
+        </Grid>
+      </Link>
     </Wrapper>
   );
 };

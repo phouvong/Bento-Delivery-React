@@ -20,8 +20,8 @@ const AccountInfo = ({
 
   return (
     <>
-      <Grid container spacing={3}>
-        <Grid item xs={12} lg={4}>
+      <Grid container columnSpacing={3}>
+        <Grid item xs={12} lg={4}  sx={{ minHeight: "5rem" }}>
           <CustomPhoneInput
             required
             value={deliveryManFormik.values.phone}

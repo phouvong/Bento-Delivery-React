@@ -17,12 +17,14 @@ const PaymentUpdate = ({
   refetchTrackData,
   trackData,
   isSmall,
+  paymentMethodUpdateMutation,
+                         setOpenPaymentMethod
 }) => {
   const theme = useTheme();
   const [openModal, setOpenModal] = useState(false);
   const { t } = useTranslation();
-  const { mutate: paymentMethodUpdateMutation, isLoading: orderLoading } =
-    useUpdatePaymentMethod();
+  // const { mutate: paymentMethodUpdateMutation, isLoading: orderLoading } =
+  //   useUpdatePaymentMethod();
 
   const handleOnSuccess = () => {
     const handleSuccess = (response) => {
@@ -44,7 +46,7 @@ const PaymentUpdate = ({
     <>
       <OrderStatusButton
         background={theme.palette.primary.main}
-        onClick={() => setOpenModal(true)}
+        onClick={() => setOpenPaymentMethod(true)}
         back
       >
         {isSmall ? t("Switch to COD") : t("Switch to cash on delivery")}

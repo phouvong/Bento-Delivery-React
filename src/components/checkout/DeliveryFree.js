@@ -19,29 +19,31 @@ const DeliveryFree = ({
 	extraChargeLoading,
 }) => {
 	const theme = useTheme();
+
 	return (
 		<CustomStackFullWidth
 			justifyContent="center"
 			alignItems="center"
 			direction="row"
-			spacing={4}
+			spacing={3}
+			padding="1.3rem"
+			backgroundColor={theme.palette.background.paper}
+			borderRadius=".5rem"
+			height={"100%"}
 		>
 			<Stack direction="row" width="100%" spacing={1.5}>
 				<CustomImageContainer
 					src={distanceImage.src}
-					width="37px"
-					height="37px"
+					width="24px"
+					height="24px"
 					objectfit="contain"
 				/>
-				<Stack>
+				<Stack direction="row" spacing={1.5} justifyContent="space-between" alignItems="center" flexGrow={1}>
 					<Typography color={theme.palette.neutral[1000]}>
 						{t("Distance")}
 					</Typography>
 					{data ? (
-						<Typography
-							color={theme.palette.primary.main}
-							fontWeight="600"
-						>
+						<Typography>
 							{handleDistance(
 								data,
 								senderLocation,
@@ -56,7 +58,7 @@ const DeliveryFree = ({
 					)}
 				</Stack>
 			</Stack>
-			<Stack direction="row" width="100%" spacing={1.5}>
+			{/* <Stack direction="row" width="100%" spacing={1.5}>
 				<CustomImageContainer
 					src={deliveryImage.src}
 					width="37px"
@@ -80,7 +82,7 @@ const DeliveryFree = ({
 						</Typography>
 					)}
 				</Stack>
-			</Stack>
+			</Stack> */}
 		</CustomStackFullWidth>
 	);
 };

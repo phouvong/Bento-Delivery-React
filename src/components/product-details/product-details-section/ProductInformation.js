@@ -109,7 +109,7 @@ const ProductInformation = ({
 				(item) =>
 					item?.id === productDetailsData?.id &&
 					JSON.stringify(item?.selectedOption?.[0]) ===
-						JSON.stringify(option)
+					JSON.stringify(option)
 			);
 			if (itemIsInCart) {
 				dispatch({
@@ -245,7 +245,7 @@ const ProductInformation = ({
 				(item) =>
 					item?.id === productDetailsData?.id &&
 					JSON.stringify(item?.selectedOption?.[0]) ===
-						JSON.stringify(state.modalData[0]?.selectedOption?.[0])
+					JSON.stringify(state.modalData[0]?.selectedOption?.[0])
 			);
 			const cartItemObject = {
 				cart_id: itemIsInCart?.cartItemId,
@@ -298,7 +298,7 @@ const ProductInformation = ({
 			<CustomStackFullWidth
 				spacing={0.5}
 				padding={{
-					xs: "0px 20px 0px 20px",
+					xs: "0px 8px 0px 8px",
 					sm: "10px 20px 10px 20px",
 					md: "0px",
 				}}
@@ -428,7 +428,7 @@ const ProductInformation = ({
 									>
 										{item}
 										{index !==
-										state?.modalData[0]?.nutritions_name.length - 1
+											state?.modalData[0]?.nutritions_name.length - 1
 											? ","
 											: "."}
 									</Typography>
@@ -453,7 +453,7 @@ const ProductInformation = ({
 									>
 										{item}
 										{index !==
-										state?.modalData[0]?.allergies_name.length - 1
+											state?.modalData[0]?.allergies_name.length - 1
 											? ","
 											: "."}
 									</Typography>
@@ -475,7 +475,7 @@ const ProductInformation = ({
 							{topInformation()}
 							<Stack
 								padding={{
-									xs: "10px 20px 10px 20px",
+									xs: "10px 10px 10px 10px",
 									sm: "20px",
 									md: "0px",
 								}}
@@ -525,14 +525,7 @@ const ProductInformation = ({
 						addToCartMutate={mutate}
 						updateIsLoading={updateIsLoading}
 					/>
-					{!isSmall && (
-						<CustomStackFullWidth sx={{ mt: ".5rem" }}>
-							<CategoryInformation
-								tags={state?.modalData?.[0]?.tags}
-								categories={state?.modalData?.[0]?.category_ids}
-							/>
-						</CustomStackFullWidth>
-					)}
+
 
 					<CustomModal
 						openModal={clearCartModal}

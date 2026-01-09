@@ -57,14 +57,14 @@ const PlanItemTitle = styled(Typography)(({ theme }) => ({
   fontSize: "16px",
   fontWeight: 600,
   marginBottom: "00px",
-  color: theme.palette.neutral[1000],
+  color: "#000",
 }));
 
 const PlanItemPrice = styled(Typography)(({ theme }) => ({
   fontSize: "40px",
   fontWeight: 600,
   marginBottom: "5px",
-  color: theme.palette.neutral[1000],
+  color: "#000",
 }));
 
 const PlanItemDayCount = styled(Box)(({ theme }) => ({
@@ -73,7 +73,7 @@ const PlanItemDayCount = styled(Box)(({ theme }) => ({
   borderBottom: `1px solid var(--border-clr)`,
   fontSize: "14px",
   paddingBottom: "6px",
-  color: theme.palette.neutral[1000],
+  color: "#000",
 }));
 
 const PlanItemInfoList = styled(List)(({ theme }) => ({
@@ -97,8 +97,11 @@ const PlanItemInfoListItem = styled(ListItem)(({ theme }) => ({
   "&:last-child": {
     borderBottom: "none",
   },
-  color: theme.palette.neutral[1000],
+  color: "#000",
   fontSize: "12px",
+  "& span": {
+    color: "#000",
+  },
 }));
 
 const Plan = ({ setSelectedPackage, selectedPackage, item }) => {
@@ -133,7 +136,7 @@ const Plan = ({ setSelectedPackage, selectedPackage, item }) => {
         <PlanItemInfoList>
           <PlanItemInfoListItem>
             <CheckCircleIcon
-              sx={{ color: theme.palette.neutral[100], fontSize: "20px" }}
+              sx={{ color: "#000", fontSize: "20px" }}
             />
             <span>
               {t("Max order")} ({item?.max_order})
@@ -141,7 +144,7 @@ const Plan = ({ setSelectedPackage, selectedPackage, item }) => {
           </PlanItemInfoListItem>
           <PlanItemInfoListItem>
             <CheckCircleIcon
-              sx={{ color: theme.palette.neutral[100], fontSize: "20px" }}
+              sx={{ color: "#000", fontSize: "20px" }}
             />
             <span>
               {" "}
@@ -151,7 +154,7 @@ const Plan = ({ setSelectedPackage, selectedPackage, item }) => {
           {item?.pos === 1 && (
             <PlanItemInfoListItem>
               <CheckCircleIcon
-                sx={{ color: theme.palette.neutral[100], fontSize: "20px" }}
+                sx={{ color: "#000", fontSize: "20px" }}
               />
               <span>{t("Pos")}</span>
             </PlanItemInfoListItem>
@@ -159,7 +162,7 @@ const Plan = ({ setSelectedPackage, selectedPackage, item }) => {
           {item?.mobile_app === 1 && (
             <PlanItemInfoListItem>
               <CheckCircleIcon
-                sx={{ color: theme.palette.neutral[100], fontSize: "20px" }}
+                sx={{ color: "#000", fontSize: "20px" }}
               />
               <span>{t("Mobile app")}</span>
             </PlanItemInfoListItem>
@@ -167,7 +170,7 @@ const Plan = ({ setSelectedPackage, selectedPackage, item }) => {
           {item?.chat === 1 && (
             <PlanItemInfoListItem>
               <CheckCircleIcon
-                sx={{ color: theme.palette.neutral[100], fontSize: "20px" }}
+                sx={{ color: "#000", fontSize: "20px" }}
               />
               <span>{t("Chat")}</span>
             </PlanItemInfoListItem>
@@ -175,7 +178,7 @@ const Plan = ({ setSelectedPackage, selectedPackage, item }) => {
           {item?.review === 1 && (
             <PlanItemInfoListItem>
               <CheckCircleIcon
-                sx={{ color: theme.palette.neutral[100], fontSize: "20px" }}
+                sx={{ color: "#000", fontSize: "20px" }}
               />
               <span>{t("Review")}</span>
             </PlanItemInfoListItem>
@@ -183,7 +186,7 @@ const Plan = ({ setSelectedPackage, selectedPackage, item }) => {
           {item?.self_delivery === 1 && (
             <PlanItemInfoListItem>
               <CheckCircleIcon
-                sx={{ color: theme.palette.neutral[100], fontSize: "20px" }}
+                sx={{ color: "#000", fontSize: "20px" }}
               />
               <span>{t("Self delivery")}</span>
             </PlanItemInfoListItem>
