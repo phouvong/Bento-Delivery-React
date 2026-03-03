@@ -40,7 +40,7 @@ const AddressReselectPopover = (props) => {
     }
     setGeoLocationEnable(true);
     setZoneIdEnabled(true);
-    window.reload()
+    window.location.reload();
   };
 
   const handleSetLocation = async () => {

@@ -41,11 +41,7 @@ const PopularItemsNearby = ({ title, subTitle }) => {
     isLoading: flashSalesIsLoading,
   } = useGetFlashSales({ limit, offset });
   const dispatch = useDispatch();
-  // useEffect(() => {
-  //   if (popularItemsNearby.products.length === 0) {
-  //     refetch();
-  //   }
-  // }, [popularItemsNearby]);
+
 
   useEffect(() => {
     flashSalesRefetch();

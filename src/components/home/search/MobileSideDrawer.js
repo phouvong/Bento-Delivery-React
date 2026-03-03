@@ -47,12 +47,12 @@ const MobileSideDrawer = (props) => {
         <Grid item xs={12}>
           <CustomStackFullWidth spacing={1.5}>
             <Typography fontWeight="bold">{t("Filter By")}</Typography>
-            <Stack width="100%" justifyContent="center" alignItems="center">
+            <Stack  justifyContent="center" alignItems="center">
               {currentTab !== 1 && (
                 <HighToLow handleSortBy={handleSortBy} sortBy={sortBy} />
               )}
             </Stack>
-            <Stack width="100%" justifyContent="center" alignItems="center">
+            <Stack  justifyContent="center" alignItems="center">
               {currentTab !== 0 && (
                 <NewSortBy handleSortBy={handleSortByNew} sortBy={newSort} />
               )}

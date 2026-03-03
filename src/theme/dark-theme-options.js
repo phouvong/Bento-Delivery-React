@@ -128,6 +128,7 @@ const toolTipColor = "#88908C";
 const paperBoxShadow = "#E5EAF1";
 export const darkThemeOptions = {
   components: {
+     MuiUseMediaQuery: { defaultProps: { noSsr: true } }, // ⚡ Fix hydration
     MuiAvatar: {
       styleOverrides: {
         root: {

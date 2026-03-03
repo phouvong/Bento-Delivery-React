@@ -13,7 +13,7 @@ import { ModuleTypes } from "../../helper-functions/moduleTypes";
 
 const CustomPaper = styled(Paper)(({ theme, display, padding }) => ({
   position: "absolute",
-  top: getCurrentModuleType() === ModuleTypes.FOOD ? 77 : 42,
+  top:  42,
   width: "100%",
   padding: "1.5rem 1.5rem 2rem 1.5rem",
   zIndex: 999,
@@ -58,16 +58,20 @@ const SearchSuggestionsBottom = (props) => {
       refetch();
     }
   }, []);
-
+ const queryModule = router?.query?.module || router?.query?.module_id;
+      const moduleValue = Array.isArray(queryModule)
+        ? queryModule[0]
+        : queryModule || getModuleId();
   const handleSearchHistoryOnClick = (value) => {
     setSelectedValue(value);
     setOpenSearchSuggestions(false);
     router.push(
       {
-        pathname: "/home",
+        pathname: "/search",
         query: {
           search: value,
           data_type: "searched",
+          module: moduleValue,
         },
       },
       undefined,
@@ -76,6 +80,7 @@ const SearchSuggestionsBottom = (props) => {
       }
     );
   };
+  
   const handleSearchSuggestionsOnClick = (value) => {
     setSelectedValue(value);
     setOpenSearchSuggestions(false);
@@ -83,10 +88,15 @@ const SearchSuggestionsBottom = (props) => {
       {
         pathname: "/search",
         query: {
-          searchValue: value.substring(0, value.indexOf(" ")),
+          search: value.substring(0, value.indexOf(" ")),
+          data_type: "searched",
+
         },
       },
-      "/search"
+      undefined,
+      {
+        shallow: true,
+      }
     );
   };
 

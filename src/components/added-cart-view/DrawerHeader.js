@@ -22,11 +22,14 @@ const DrawerHeader = ({ CartIcon, title, closeHandler }) => {
         </Typography>
       </Stack>
       <Stack direction="row" spacing={1} alignItems="center">
-        <CustomCloseIconButton onClick={closeHandler}>
+        <CustomCloseIconButton sx={{
+          backgroundColor:theme=>theme.palette.neutral[400],
+          color:theme=>theme.palette.neutral[100],
+          borderRadius:"50%",
+
+        }} onClick={closeHandler}>
           <ClearIcon fontSize="16px" />
-          <Typography fontSize="14px" fontWeight="400">
-            {t("Close")}
-          </Typography>
+         
         </CustomCloseIconButton>
       </Stack>
     </DrawerHeaderWrapper>

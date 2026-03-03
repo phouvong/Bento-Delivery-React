@@ -2,6 +2,7 @@ import { Skeleton, styled, Tooltip, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { getModuleId } from "helper-functions/getModuleId";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import NextImage from "components/NextImage";
 import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
@@ -69,17 +70,22 @@ const TextWrapper = styled(Box)(({ theme }) => ({
 const PharmacyCategoryCard = ({ image, title, id, onlyshimmer }) => {
   const [hover, setHover] = useState(false);
   const { ref: textRef, isEllipsed } = useTextEllipsis(title);
+  const router = useRouter();
+  const queryModule = router?.query?.module || router?.query?.module_id;
+  const moduleValue = Array.isArray(queryModule)
+    ? queryModule[0]
+    : queryModule || getModuleId();
 
   return (
     <Link
       href={{
-        pathname: "/home",
+        pathname: "/search",
         query: {
           search: "category",
           id,
-          module_id: `${getModuleId()}`,
           name: title,
           data_type: "category",
+          ...(moduleValue ? { module: String(moduleValue) } : {}),
         },
       }}
       passHref

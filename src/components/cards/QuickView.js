@@ -78,6 +78,7 @@ const QuickView = ({
   setOpenLocationAlert,
 }) => {
   const theme = useTheme();
+  const isRentalModule = getCurrentModuleType() === ModuleTypes.RENTAL;
 
   let location = undefined;
   if (typeof window !== "undefined") {
@@ -109,7 +110,7 @@ const QuickView = ({
           </IconButtonStyled>
         </PrimaryToolTip>
       )}
-      {!noWishlist && (
+      {!noWishlist && !isRentalModule && (
         <>
           {isWishlisted ? (
             <PrimaryToolTip text="Remove from wishlist">

@@ -15,7 +15,7 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
 import { Box, Stack } from "@mui/system";
-import React, {useReducer, useState} from "react";
+import React, { useReducer, useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
@@ -114,7 +114,7 @@ const Top = (props) => {
   } = props;
   const [state, dispatch] = useReducer(reducer, initialState);
   const theme = useTheme();
-  const [openShareModel,setOpenShareModel]=useState(false)
+  const [openShareModel, setOpenShareModel] = useState(false)
   const dispatchRedux = useDispatch();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const { t } = useTranslation();
@@ -234,11 +234,13 @@ const Top = (props) => {
   };
   const handleCopy = (url) => {
     navigator.clipboard.writeText(url)
-    toast(() => <span>{t('Your restaurant URL has been copied')}</span>)
+    toast(() => <span>{t('Your store URL has been copied')}</span>)
   }
-  const text1=t("discount will be applicable when  order amount exceeds is more than")
-  const max=t("max")
-  const text2=t("discount is applicable.")
+  const text1 = t("discount will be applicable when  order amount exceeds is more than")
+  const max = t("max")
+  const text2 = t("discount is applicable.")
+  console.log({ bannersData });
+
 
   const content = () => {
     if (isSmall) {
@@ -248,7 +250,7 @@ const Top = (props) => {
             sx={{
               position: "relative",
               height: "122px",
-              borderBottomRightRadius:"10px"
+              borderBottomRightRadius: "10px"
             }}
           >
             {storeDetails?.discount ? (
@@ -284,7 +286,7 @@ const Top = (props) => {
                       onClick={() => handleBannerClick(banner?.default_link)}
                       sx={{
                         cursor: "pointer",
-                        borderBottomRightRadius:"10px"
+                        borderBottomRightRadius: "10px"
                       }}
                     >
                       <CustomImageContainer
@@ -464,7 +466,7 @@ const Top = (props) => {
                         },
                       }}
                     >
-                     {storeDetails?.positive_rating.toFixed(0)}%
+                      {storeDetails?.positive_rating?.toFixed(0)}%
                     </Typography>
                     <Stack direction="row" alignItems="center" spacing={0.3}>
                       <Typography
@@ -591,9 +593,9 @@ const Top = (props) => {
                                 color:
                                   storeDetails?.avg_rating === 0
                                     ? alpha(
-                                        theme.palette.whiteContainer.main,
-                                        0.6
-                                      )
+                                      theme.palette.whiteContainer.main,
+                                      0.6
+                                    )
                                     : "warning.dark",
                               }}
                               name="read-only"
@@ -694,7 +696,7 @@ const Top = (props) => {
                       </Box>
                       <Box mt="10px">
                         <Tooltip title={"Location"} arrow placement={"bottom"}>
-                          <RoundedIconButton onClick={()=>setOpenShareModel(true)}>
+                          <RoundedIconButton onClick={() => setOpenShareModel(true)}>
                             <ShareOutlinedIcon color="primary" />
                           </RoundedIconButton>
                         </Tooltip>
@@ -730,7 +732,7 @@ const Top = (props) => {
                           },
                         }}
                       >
-                        {storeDetails?.positive_rating.toFixed(0)}%
+                        {storeDetails?.positive_rating?.toFixed(0)}%
                       </Typography>
                       <Stack direction="row" alignItems="center" spacing={0.3}>
                         <Typography>{t("Positive Review")}</Typography>
@@ -774,12 +776,12 @@ const Top = (props) => {
               </CustomBoxFullWidth>
             </ContentBox>
           </ContentWrapper>
-          <Stack width="50%" sx={{position:"relative",}}>
+          <Stack width="50%" sx={{ position: "relative", }}>
             {storeDetails?.discount ? (
               <Stack
                 sx={{
                   position: "absolute",
-                  bottom:"6px",
+                  bottom: "6px",
                   left: 0,
                   right: 0,
                   backgroundColor: (theme) =>
@@ -787,7 +789,7 @@ const Top = (props) => {
                   color: (theme) => theme.palette.neutral[100],
                   padding: "10px",
                   borderRadius: "0px",
-                  borderBottomRightRadius:"10px",
+                  borderBottomRightRadius: "10px",
                   zIndex: 999,
                 }}
               >
@@ -815,7 +817,7 @@ const Top = (props) => {
                           sx={{
                             cursor: "pointer",
                             width: "100%",
-                            borderTopRightRadius:"10%", borderBottomRightRadius:"10%"
+                            borderTopRightRadius: "10%", borderBottomRightRadius: "10%"
                           }}
                         >
                           <CustomImageContainer
@@ -830,7 +832,7 @@ const Top = (props) => {
                     })}
                   </Slider>
                 ) : (
-                  <Stack sx={{borderTopRightRadius:"10%", borderBottomRightRadius:"10%"}}>
+                  <Stack sx={{ borderTopRightRadius: "10%", borderBottomRightRadius: "10%" }}>
                     <CustomImageContainer
                       src={bannerCover}
                       width="100%"
@@ -866,7 +868,7 @@ const Top = (props) => {
           storeDetails={storeDetails}
         />
       )}
-      {openShareModel&&<StoreShare
+      {openShareModel && <StoreShare
         handleCopy={handleCopy}
         setOpenShareModal={setOpenShareModel}
         openShareModal={openShareModel}

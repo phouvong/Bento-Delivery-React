@@ -155,7 +155,7 @@ const RecommendedStore = () => {
           direction="row"
           alignItems="center"
           justifyContent="space-between"
-          pb=".7rem"
+          pb="1rem"
         >
           {popularIsLoading ? (
             <Skeleton variant="text" width="110px" />
@@ -172,10 +172,9 @@ const RecommendedStore = () => {
 
   return (
     <HomeComponentsWrapper sx={{ paddingTop: "5px", gap: "1rem" }}>
-      {getLayout()}
+      {popularData?.stores?.length > 0 ? getLayout() : null}
     </HomeComponentsWrapper>
   );
 };
 
 export default RecommendedStore
-

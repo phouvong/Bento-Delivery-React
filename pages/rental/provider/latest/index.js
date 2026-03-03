@@ -9,10 +9,17 @@ import CustomContainer from "../../../../src/components/container";
 import {CustomStackFullWidth} from "../../../../src/styled-components/CustomStyles.style";
 import TypeWiseStore from "../../../../src/components/Store/TypeWiseStore";
 import {getImageUrl} from "../../../../src/utils/CustomFunctions";
-import { getServerSideProps } from "../../../index";
+import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
+import { processMetadata } from "utils/fetchPageMetaData";
 
 
-const Index = ({ configData, landingPageData }) => {
+const Index = ({ configData, metaData }) => {
+  const metadata = processMetadata(metaData, {
+    title: `Latest Stores - ${configData?.business_name}`,
+    description: metaData?.description || '',
+    image: `${metaData?.image || configData?.logo_full_url}`,
+    robotsMeta: metaData?.robotsMeta || ''
+  })
   const { t } = useTranslation();
   const router = useRouter();
   const newText = t("New On");
@@ -20,11 +27,13 @@ const Index = ({ configData, landingPageData }) => {
     <>
       <CssBaseline />
       <SEO
-        title={configData ? `${newText}` : "Loading..."}
-        image={configData?.fav_icon_full_url}
+        title={metadata.title}
+        image={metadata.image}
         businessName={configData?.business_name}
+        description={metadata.description}
+        robotsMeta={metadata.robotsMeta}
       />
-      <MainLayout configData={configData} landingPageData={landingPageData}>
+      <MainLayout configData={configData}>
         <CustomContainer>
           <CustomStackFullWidth mt="1rem">
             <TypeWiseStore
@@ -41,4 +50,6 @@ const Index = ({ configData, landingPageData }) => {
 };
 
 export default Index;
-export { getServerSideProps };
+export const getServerSideProps = async (context) => {
+    return await getCommonServerSideProps(context, 'latest_store_page')
+}

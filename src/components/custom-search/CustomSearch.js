@@ -3,11 +3,13 @@ import SearchIcon from "@mui/icons-material/Search";
 import { useTranslation } from "react-i18next";
 import { IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import MicIcon from "@mui/icons-material/Mic";
 import LoadingButton from "@mui/lab/LoadingButton";
 import { CloseIconWrapper } from "styled-components/CustomStyles.style";
 import { Search, StyledInputBase } from "./CustomSearch.style";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
+import VoiceSearchModal from "./VoiceSearchModal";
 
 const CustomSearch = ({
   handleSearchResult,
@@ -24,6 +26,14 @@ const CustomSearch = ({
   if (typeof window !== "undefined") {
     language_direction = localStorage.getItem("direction");
   }
+  const [openVoiceModal, setOpenVoiceModal] = useState(false);
+
+  const handleVoiceModalOpen = () => {
+    setOpenVoiceModal(true);
+  };
+  const handleVoiceModalClose = () => {
+    setOpenVoiceModal(false);
+  };
 
   useEffect(() => {
     if (selectedValue) {
@@ -46,6 +56,7 @@ const CustomSearch = ({
     setIsEmpty?.(true);
   };
   const handleChange = (value) => {
+    console.log({ value });
     if (value === "") {
       handleSearchResult?.("");
       setIsEmpty?.(true);
@@ -83,6 +94,7 @@ const CustomSearch = ({
     } else {
       return (
         <>
+          <SearchIcon sx={{ marginInlineStart: "12px" }} />
           <StyledInputBase
             id="search-input"
             placeholder={t(label)}
@@ -92,8 +104,15 @@ const CustomSearch = ({
             language_direction={language_direction}
           // onFocus={() => handleOnFocus?.(value)}
           />
+          <IconButton onClick={handleVoiceModalOpen} sx={{ padding: "5px"}}>
+            <MicIcon
+              sx={{
+                color: (theme) => theme.palette.primary.main,
+              }}
+            />
+          </IconButton>
           {value === "" ? (
-            <SearchIcon sx={{ marginInlineEnd: "12px" }} />
+            null
           ) : (
             <>
               {isLoading ? (
@@ -111,7 +130,7 @@ const CustomSearch = ({
                 <CloseIconWrapper
                   onClick={() => handleReset()}
                   language_direction={language_direction}
-                  right="20px"
+                  right="27px"
                 >
                   <IconButton sx={{ marginRight: "-4px !important" }}>
                     <CloseIcon fontSize="small" />
@@ -130,6 +149,14 @@ const CustomSearch = ({
       <Search direction="row" alignItems="center" type2={type2}>
         {getTypeWiseChanges()}
       </Search>
+      <VoiceSearchModal
+        open={openVoiceModal}
+        handleClose={handleVoiceModalClose}
+        onResult={(result) => {
+          handleChange(result);
+          handleSearchResult(result);
+        }}
+      />
     </form>
   );
 };

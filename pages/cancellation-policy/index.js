@@ -6,10 +6,17 @@ import useGetPolicyPage from "../../src/api-manage/hooks/react-query/useGetPolic
 import React, { useEffect } from "react";
 import SEO from "../../src/components/seo";
 import { getImageUrl } from "utils/CustomFunctions";
+import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
+import { processMetadata } from "utils/fetchPageMetaData";
 
-const Index = ({ configData, landingPageData }) => {
+const Index = ({ configData,metaData }) => {
   const { t } = useTranslation();
-  
+  const metadata = processMetadata(metaData, {
+    title: metaData?.title ||` Cancellation policy - ${configData?.business_name}`,
+    description: metaData?.description || '',
+    image: `${metaData?.image || configData?.logo_full_url}`,
+    robotsMeta: metaData?.robotsMeta || ''
+  })
   // Fetch cancellation policy data using the custom hook
   const { data, refetch, isFetching } = useGetPolicyPage("/api/v1/cancelation");
 
@@ -28,15 +35,13 @@ const Index = ({ configData, landingPageData }) => {
     <>
       <CssBaseline />
       <SEO
-        title="Cancellation Policy"
-        image={`${getImageUrl(
-          { value: configData?.logo_storage },
-          "business_logo_url",
-          configData
-        )}/${configData?.fav_icon}`}
-        businessName={configData?.business_name}
+       title={metadata.title}
+       description={metadata.description}
+       image={metadata.image}
+       robotsMeta={metadata.robotsMeta}
+       configData={configData}
       />
-      <MainLayout configData={configData} landingPageData={landingPageData}>
+      <MainLayout configData={configData} >
         <PolicyPage
           data={data}
           title={t("Cancellation Policy")}
@@ -49,42 +54,6 @@ const Index = ({ configData, landingPageData }) => {
 
 export default Index;
 
-export const getStaticProps = async () => {
-  try {
-    const configRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/config`,
-      {
-        method: "GET",
-        headers: {
-          "X-software-id": 33571750,
-          "X-server": "server",
-          origin: process.env.NEXT_CLIENT_HOST_URL,
-        },
-      }
-    );
-
-    if (!configRes.ok) {
-      throw new Error(`Failed to fetch config: ${configRes.statusText}`);
-    }
-
-    const config = await configRes.json();
-
-    return {
-      props: {
-        configData: config,
-        landingPageData: {}, // Provide a default or fetch landing page data if needed
-      },
-      revalidate: 3600, // Revalidate every 1 hour
-    };
-  } catch (error) {
-    console.error("Error fetching config data:", error);
-
-    return {
-      props: {
-        configData: null,
-        landingPageData: {}, // Provide a default fallback
-      },
-      revalidate: 3600, // Revalidate to try again later
-    };
-  }
-};
+export const getServerSideProps = async (context) => {
+  return await getCommonServerSideProps(context, 'cancellation_policy_page')
+}

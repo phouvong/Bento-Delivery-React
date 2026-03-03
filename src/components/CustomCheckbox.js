@@ -9,14 +9,15 @@ const CustomCheckbox = ({ item, checkHandler, isChecked, seats }) => {
   const theme = useTheme();
   const [checked, setChecked] = useState(false);
   const checkboxRef = useRef(null);
+  const resolvedChecked = typeof isChecked === "function" ? isChecked() : !!isChecked;
 
   useEffect(() => {
-    setChecked(isChecked);
+    setChecked((prev) => (prev === resolvedChecked ? prev : resolvedChecked));
     // checkHandler?.({
     //   checked: isChecked,
     //   id: item?.id,
     // });
-  }, [isChecked]);
+  }, [resolvedChecked]);
 
   // useEffect(() => {
   //   checkboxRef.current.focus();

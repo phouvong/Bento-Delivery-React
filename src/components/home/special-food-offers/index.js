@@ -103,10 +103,10 @@ const SpecialFoodOffers = ({ title }) => {
   };
   const navigateToHome = () => {
     router.push({
-      pathname: '/home',
+      pathname: '/search',
       query: {
         search: "special-offer",
-        module_id: getModuleId(),
+      
         data_type: "discounted",
       },
     }).then(() => {

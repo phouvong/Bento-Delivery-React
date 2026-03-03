@@ -14,6 +14,7 @@ import Slider from "react-slick";
 
 import { useGetPopularStoreWithoutInfiniteScroll } from "api-manage/hooks/react-query/store/useGetPopularStore";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { getStoreRedirectURL } from "helper-functions/handleStoreRedirect";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import { setNewArrivalStores } from "redux/slices/storedData";
 import "slick-carousel/slick/slick.css";
@@ -183,15 +184,7 @@ const NewArrivalStores = () => {
                     return (
                       <Box key={index}>
                         <Link
-                          href={{
-                            pathname: `/store/[id]`,
-                            query: {
-                              id: `${item?.id}`,
-                              module_id: `${moduleId}`,
-                              module_type: getCurrentModuleType(),
-                              store_zone_id: `${item?.zone_id}`,
-                            },
-                          }}
+                          href={getStoreRedirectURL(item)}
                         >
                           <ImageWrapper>
                             <Box

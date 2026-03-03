@@ -9,6 +9,8 @@ import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import Loading from "../custom-loading/Loading";
 import { PrimaryToolTip } from "./QuickView";
+import CustomModal from "components/modal";
+import GetLocationAlert from "components/GetLocationAlert";
 
 const CustomButton = styled(Box)(({ theme, fill }) => ({
   width: "36px",
@@ -63,9 +65,22 @@ const AddWithIncrementDecrement = (props) => {
   const theme = useTheme();
   const [isAdded, setIsAdded] = useState(false);
   const [showIncDec, setShowIncDec] = useState(false);
+  const [openLocationAlert, setOpenLocationAlert] = useState(false);
+
+  const ensureLocation = (e) => {
+      e.stopPropagation();
+    if (typeof window === "undefined") return true;
+    const hasLocation = Boolean(localStorage.getItem("location"));
+    if (!hasLocation) {
+      setOpenLocationAlert(true);
+      return false;
+    }
+    return true;
+  };
 
   const handleCart = (e) => {
     e.stopPropagation();
+    if (!ensureLocation(e)) return;
     handleCardHoverFromCartIconClick?.(e);
     addToCartHandler?.(e);
   };
@@ -311,7 +326,17 @@ const AddWithIncrementDecrement = (props) => {
     }
   };
 
-  return <>{cardWiseManage()}</>;
+  return (
+    <>
+      {cardWiseManage()}
+      <CustomModal
+        openModal={openLocationAlert}
+        handleClose={() => setOpenLocationAlert(false)}
+      >
+        <GetLocationAlert setOpenAlert={setOpenLocationAlert} />
+      </CustomModal>
+    </>
+  );
 };
 
 AddWithIncrementDecrement.propTypes = {};

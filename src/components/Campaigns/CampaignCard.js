@@ -18,11 +18,11 @@ const CampaignCard = ({ data }) => {
   const theme = useTheme();
   const camImage = data?.image_full_url;
 
-  const handleClick = (campId) => {
+  const handleClick = (campId,slug) => {
     router.push(
       {
         pathname: "/campaigns/[id]",
-        query: { id: `${campId}-${getModuleId()}` },
+        query: { id: `${slug||campId}` },
       },
       undefined,
       { shallow: true }
@@ -31,7 +31,7 @@ const CampaignCard = ({ data }) => {
   return (
     <CustomStackFullWidth sx={{ height: "100%", cursor: "pointer" }}>
       <CustomPaperCard>
-        <CustomStackFullWidth spacing={1} onClick={() => handleClick(data?.id)}>
+        <CustomStackFullWidth spacing={1} onClick={() => handleClick(data?.id,data?.slug)}>
           <CustomImageContainer src={camImage} height="200px" />
           <Typography
             variant="h5"

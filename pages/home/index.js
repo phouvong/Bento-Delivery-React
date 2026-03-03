@@ -7,72 +7,62 @@ import MainLayout from "../../src/components/layout/MainLayout";
 import ModuleWiseLayout from "../../src/components/module-wise-layout";
 import ZoneGuard from "../../src/components/route-guard/ZoneGuard";
 import SEO from "../../src/components/seo";
-import { useGetConfigData } from "../../src/api-manage/hooks/useGetConfigData";
 import useGetLandingPage from "../../src/api-manage/hooks/react-query/useGetLandingPage";
-import { setLandingPageData } from "../../src/redux/slices/configData";
+import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
+import { processMetadata } from "utils/fetchPageMetaData";
 
-const Home = () => {
+const Home = ({ metaData,configData }) => {
+
 	const dispatch = useDispatch();
-	const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
+	//const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
 	const { data: dataLanding, refetch: refetchLanding } = useGetLandingPage();
 
-	const { landingPageData, configData } = useSelector(
-		(state) => state.configData
-	);
+	const metadata = processMetadata(metaData, {
+		title: `Home - ${configData?.business_name}`,
+		description: metaData?.description || '',
+		image: `${metaData?.image || configData?.logo_full_url}`,
+		robotsMeta: metaData?.robotsMeta || ''
+	})
 
 	useEffect(() => {
-		if (!configData) {
-			configRefetch();
-		}
-	}, [configData]);
-
-	useEffect(() => {
-		if (!landingPageData) {
-			refetchLanding();
-		}
-	}, [landingPageData]);
-
-	useEffect(() => {
-		if (dataLanding) {
-			dispatch(setLandingPageData(dataLanding));
-		}
-	}, [dataLanding]);
-	useEffect(() => {
-		if (dataConfig) {
-			if (dataConfig.length === 0) {
+		if (configData) {
+			if (configData.length === 0) {
 				Router.push("/404");
-			} else if (dataConfig?.maintenance_mode) {
+			} else if (configData?.maintenance_mode) {
 				Router.push("/maintainance");
 			} else {
-				dispatch(setConfigData(dataConfig));
+				dispatch(setConfigData(configData));
 			}
 		}
-	}, [dataConfig]);
+	}, [configData]);
 	useEffect(() => {
-		if (dataConfig) {
-			dispatch(setConfigData(dataConfig));
+		if (configData) {
+			dispatch(setConfigData(configData));
 		}
-	}, [dataConfig]);
+	}, [configData]);
+	console.log({metaData,configData});
+	
 
 	return (
 		<>
 			<CssBaseline />
 			{configData && (
 				<SEO
-					title="Home"
-					image={configData?.fav_icon_full_url}
-					businessName={configData?.business_name}
+					title={metadata.title}
+					description={metadata.description}
+					image={metadata.image}
+					robotsMeta={metadata.robotsMeta}
 					configData={configData}
 				/>
 			)}
 
 			<MainLayout
 				configData={configData}
-				landingPageData={landingPageData}
+				landingPageData={dataLanding}
 			>
 				<ModuleWiseLayout
 					configData={configData}
-					landingPageData={landingPageData}
+					landingPageData={dataLanding}
 				/>
 			</MainLayout>
 		</>
@@ -80,5 +70,7 @@ const Home = () => {
 };
 
 export default Home;
-
+export const getServerSideProps = async (context) => {
+	return await getCommonServerSideProps(context, 'home_page')
+}
 Home.getLayout = (page) => <ZoneGuard>{page}</ZoneGuard>;

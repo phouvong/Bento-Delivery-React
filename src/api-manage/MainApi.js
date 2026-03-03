@@ -19,9 +19,28 @@ MainApi.interceptors.request.use(function (config) {
     currentLocation = JSON.parse(localStorage.getItem("currentLatLng"));
     moduleid = JSON.parse(localStorage.getItem("module"))?.id;
   }
-  if (currentLocation) config.headers.latitude = currentLocation.lat;
-  if (currentLocation) config.headers.longitude = currentLocation.lng;
-  if (zoneid) config.headers.zoneid = zoneid;
+  config.headers.latitude = currentLocation?.lat || 0
+    config.headers.longitude = currentLocation?.lng || 0
+  const zoneidIsValid =
+    zoneid &&
+    zoneid !== "undefined" &&
+    zoneid !== "null" &&
+    !/nan/i.test(zoneid) &&
+    (() => {
+      try {
+        const parsed = JSON.parse(zoneid);
+        return (
+          Array.isArray(parsed) &&
+          parsed.length > 0 &&
+          parsed.every((id) => !Number.isNaN(Number(id)))
+        );
+      } catch {
+        return false;
+      }
+    })();
+  if (zoneidIsValid) {
+    config.headers.zoneid = zoneid;
+  }
   if (moduleid) config.headers.moduleId = moduleid;
   if (token) config.headers.authorization = `Bearer ${token}`;
   if (language) config.headers["X-localization"] = language;
@@ -31,18 +50,20 @@ MainApi.interceptors.request.use(function (config) {
   config.headers["ngrok-skip-browser-warning"] = true;
   return config;
 });
-// MainApi.interceptors.response.use(
-//     (response) => response,
-//     (error) => {
-//         if (error.response.status === 401) {
-//             toast.error(t('Your token has been expired.please sign in again'), {
-//                 id: 'error',
-//             })
-//             localStorage.removeItem('token')
-//             store.dispatch(removeToken())
-//         }
-//         return Promise.reject(error)
-//     }
-// )
+MainApi.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const status = error?.response?.status;
+    const message =
+      error?.response?.data?.message ||
+      error?.response?.data?.error ||
+      error?.response?.data?.errors?.[0]?.message;
+    if (typeof window !== "undefined" && status === 422 ) {
+      window.location.href = "/";
+    }
+    return Promise.reject(error);
+  }
+);
+
 
 export default MainApi;

@@ -1,6 +1,6 @@
 import { useFormik } from "formik";
 
-import { Grid, Stack } from "@mui/material";
+import { Grid, Stack, Typography } from "@mui/material";
 import {
   CustomColouredTypography,
   CustomStackFullWidth, CustomTextArea,
@@ -12,9 +12,10 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import { useTranslation } from "react-i18next";
 import CustomTextFieldWithFormik from "../form-fields/CustomTextFieldWithFormik";
 
-import Divider from "@mui/material/Divider";
+import { useTheme } from "@mui/material";
 import { useSelector } from "react-redux";
 import CustomImageContainer from "../CustomImageContainer";
+import { Button } from "@mui/material";
 
 import toast from "react-hot-toast";
 
@@ -23,8 +24,9 @@ import { useSubmitItemReview } from "api-manage/hooks/react-query/review/useSubm
 import { getAmountWithSign } from "helper-functions/CardHelpers";
 import CustomRatings from "../search/CustomRatings";
 
-const ItemForm = ({ data }) => {
+const ItemForm = ({ data, onReviewComplete }) => {
   const { t } = useTranslation();
+  const theme = useTheme();
   const { configData } = useSelector((state) => state.configData);
   const itemImage = configData?.base_urls?.item_image_url;
 
@@ -37,7 +39,7 @@ const ItemForm = ({ data }) => {
     onSubmit: async (values, helpers) => {
       try {
         handleFormsubmit(values);
-      } catch (err) {}
+      } catch (err) { }
     },
   });
   const handleChangeRatings = (value) => {
@@ -53,6 +55,9 @@ const ItemForm = ({ data }) => {
     mutate(formData, {
       onSuccess: (response) => {
         toast.success(response?.message);
+        if (data?.item_id) {
+          onReviewComplete?.(data.id);
+        }
       },
       onError: onErrorResponse,
     });
@@ -64,98 +69,124 @@ const ItemForm = ({ data }) => {
       <form onSubmit={formik.handleSubmit}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={12}>
-            <CustomStackFullWidth
+            <Stack
               direction="row"
-              justifyContent="space-between"
-              alignItems="center"
+              spacing={2}
+              alignItems="flex-start"
             >
-              <Stack
-                direction="row"
-                justifyContent="space-between"
-                alignItems="center"
-                spacing={1}
-                gap={languageDirection === "rtl" ? "1rem" : "0rem"}
-              >
-                <CustomImageContainer
-                  src={data?.image_full_url}
-                  width="100px"
-                  height="90px"
-                />
-                <Stack>
-                  <CustomTypographyBold>
-                    {data?.item_details?.name}
-                  </CustomTypographyBold>
-                  <CustomTypographyBold>
-                    {getAmountWithSign(data?.item_details?.price)}
-                  </CustomTypographyBold>
-                </Stack>
-              </Stack>
-              <Stack direction="row" spacing={0.5} alignItems="center">
-                <CustomTypographyGray sx={{ fontSize: "18px" }}>
-                  {t("Quantity")}
-                </CustomTypographyGray>
-                <CustomTypographyGray sx={{ fontSize: "18px" }}>
-                  :
+              <CustomImageContainer
+                src={data?.image_full_url}
+                width="80px"
+                height="80px"
+                objectFit="cover"
+              />
+              <Stack>
+                <Typography fontSize="16px">
+                  {data?.item_details?.name}
+                </Typography>
+                <CustomTypographyGray sx={{ fontSize: "12px", mt: 0.5 }}>
+                  {t("Qty")} : {data?.quantity}
                 </CustomTypographyGray>
                 <CustomColouredTypography
                   color="primary.main"
-                  sx={{ fontSize: "18px" }}
+                  sx={{ fontSize: "16px", fontWeight: "bold", mt: 0.5 }}
                 >
-                  {data?.quantity}
+                  {getAmountWithSign(data?.item_details?.price)}
                 </CustomColouredTypography>
               </Stack>
-            </CustomStackFullWidth>
+            </Stack>
           </Grid>
+
           <Grid item xs={12} md={12}>
-            <Divider sx={{ width: "100%" }} />
-          </Grid>
-          <Grid item xs={12} md={12} align="center">
-            <Stack alignItems="center">
-              <CustomTypographyGray sx={{ fontSize: "18px" }}>
+
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{
+                backgroundColor: theme => theme.palette.neutral[300],
+                padding: "15px",
+                borderRadius: "10px",
+              }}
+            >
+              <Typography sx={{ fontSize: "14px", fontWeight: "normal" }}>
                 {t("Rate the item")}
-              </CustomTypographyGray>
+              </Typography>
               <CustomRatings
                 handleChangeRatings={handleChangeRatings}
                 ratingValue={formik.values.rating}
-                fontSize={"2rem"}
+                fontSize={"1.2rem"}
+                color={theme.palette.primary.main}
               />
             </Stack>
+
           </Grid>
-          <Grid item xs={12} md={12} align="center">
+          <Grid item xs={12} md={12}>
             <Stack
-              alignItems="center"
               spacing={1}
               sx={{
-                ".MuiInputBase-input": { height: "1.3em !important" },
+                padding: "15px",
+                border: `1px solid ${theme.palette.neutral[300]}`,
+                borderRadius: "10px",
+                backgroundColor: theme => theme.palette.neutral[300],
               }}
             >
-              <CustomTypographyGray sx={{ fontSize: "18px" }}>
+              <Typography sx={{ fontSize: "14px", fontWeight: "normal", mb: 1 }}>
                 {t("Share your opinion")}
-              </CustomTypographyGray>
+              </Typography>
 
               <CustomTextArea
-                sx={{ width: "100%", minHeight: "100px" }}
-                label={t("Comment")}
+                sx={{
+                  width: "100%",
+                  minHeight: "100px",
+                  fontSize: "12px",
+                  border: "none",
+                  "& fieldset": { border: "none" }
+                }}
+                placeholder={t("Type your opinion")}
                 touched={formik.touched.comment}
                 errors={formik.errors.comment}
                 multiline
                 rows={4}
                 value={formik.values.comment}
-                onChange={formik.handleChange}  // ✅ Add this
-                name="comment"                  // ✅ Add this too
+                onChange={formik.handleChange}
+                name="comment"
               />
             </Stack>
           </Grid>
           <Grid item xs={12} md={12} mt="1rem">
-            <LoadingButton
-              fullWidth
-              variant="contained"
-              type="submit"
-              loading={isLoading}
-              // sx={{ width: '100%' }}
-            >
-              {t("Submit")}
-            </LoadingButton>
+            <Stack direction={{ xs: "column", md: "row" }} spacing={2} justifyContent="flex-end">
+              <Button
+                variant="contained"
+                sx={{
+                  backgroundColor: "#F3F3F3",
+                  color: "#333333",
+                  "&:hover": {
+                    backgroundColor: "#E0E0E0",
+                  },
+                  width: "100%",
+                  boxShadow: "none",
+                  textTransform: "none",
+                  fontWeight: "400",
+                }}
+                onClick={() => {
+                  if (data?.item_id) {
+                    onReviewComplete?.(data?.id)
+                  }
+                }}
+              >
+                {t("Skip for Now")}
+              </Button>
+              <LoadingButton
+                fullWidth
+                variant="contained"
+                type="submit"
+                loading={isLoading}
+                sx={{ width: '100%', backgroundColor: "#008631" }} // Specific green as per image
+              >
+                {t("Submit")}
+              </LoadingButton>
+            </Stack>
           </Grid>
         </Grid>
       </form>

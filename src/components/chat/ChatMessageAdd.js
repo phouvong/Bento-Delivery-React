@@ -83,6 +83,9 @@ const ChatMessageAdd = ({
 		text: "",
 		file: [],
 	});
+	const bodyText = typeof body?.text === "string" ? body.text : "";
+	const attachedFileCount = Array.isArray(body?.file) ? body.file.length : 0;
+	const canSend = bodyText.trim().length > 0 || attachedFileCount > 0;
 	const [selected, setSelected] = useState(false);
 	const xSmall = useMediaQuery((theme) => theme.breakpoints.down("md"));
 	const fileInputRef = useRef(null);
@@ -91,15 +94,15 @@ const ChatMessageAdd = ({
 	};
 	const handleClick = (item) => {
 		setSelected(item?.id === selected ? false : item?.id);
-		setBody({ ...body, text: item?.message });
+		setBody({ ...body, text: item?.message ?? "" });
 	};
 	const handleSend = () => {
-		if (!body) {
+		if (!canSend) {
 			toast.error(t("write something"));
 			return;
 		}
 
-		if (body.file.length > 3) {
+		if (attachedFileCount > 3) {
 			toast.error(t(message_sending_image_limit));
 			return;
 		}
@@ -236,8 +239,7 @@ const ChatMessageAdd = ({
 										) : (
 											<IconButton
 												disabled={
-													body.text === "" &&
-													body?.file?.length === 0
+													!canSend
 												}
 												sx={{
 													flexDirection:

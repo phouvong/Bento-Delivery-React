@@ -15,7 +15,7 @@ const StorePage = ({ configData, storeDetails, distance }) => {
   useScrollToTop();
 
   const metaTitle = `${storeDetails?.meta_title || storeDetails?.name} - ${configData?.business_name}`;
-  const metaImage = storeDetails?.meta_image_full_url || storeDetails?.cover_photo_full_url;
+  const metaImage = storeDetails?.meta_image_full_url || configData?.logo_full_url;
 
   const manageVisitedStores = () => {
     const key = "visitedStores";
@@ -71,7 +71,8 @@ export default StorePage;
 export const getServerSideProps = async (context) => {
   const {
     id: storeId,
-    module_id: moduleId,
+    module,
+    module_id: legacyModuleId,
     lat,
     lng,
     distance,
@@ -100,6 +101,8 @@ export const getServerSideProps = async (context) => {
       signal: controller.signal,
     });
     console.timeEnd("Fetch Config");
+
+    const moduleId = module || legacyModuleId;
 
     console.time("Fetch Store Details");
     const storeDetailsRes = await fetch(`${baseUrl}${store_details_api}/${storeId}`, {

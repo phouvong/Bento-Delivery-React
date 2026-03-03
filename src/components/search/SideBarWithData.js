@@ -41,6 +41,8 @@ const SideBarWithData = forwardRef((props, ref) => {
     // Clear the timeout if the component unmounts before it fires
     return () => clearTimeout(timeoutId);
   }, []);
+  console.log({pageData});
+  
 
   const getProductShimmer = () => (
     <Grid item xs={12} sm={4} md={3}>
@@ -149,10 +151,8 @@ const SideBarWithData = forwardRef((props, ref) => {
             ref={sidebarRef}
             sx={{
               position: 'sticky',
-              top: '80px',
-              height: 'calc(100vh - 100px)',
-            
-            
+              top: '112px',
+              //height: 'calc(100vh - 100px)',
             }}
           >
             <SearchFilter
@@ -173,7 +173,7 @@ const SideBarWithData = forwardRef((props, ref) => {
               filterData={filterData}
               //setFilterData={setFilterData}
             />
-            <CustomBoxFullWidth ref={ref}>
+            <CustomBoxFullWidth ref={ref} sx={{ minHeight: "80vh" }}>
               <Grid container spacing={2}>
                 {getLayoutHandler()}
                 {isFetchingNextPage && (

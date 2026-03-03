@@ -32,7 +32,7 @@ export const SearchLocationTextField = styled(TextField)(
     },
     "& .MuiOutlinedInput-root": {
       //color: theme.palette.primary.main,
-      fontSize: fromparcel === "true" ? "12px" : { xs: "14px", sm: "16px" },
+      fontSize: fromparcel === "true" ? "12px" : { xs: "12px", sm: "16px" },
       padding: fromparcel === "true" && "5px",
       height: fromparcel === "true" && "45px",
 

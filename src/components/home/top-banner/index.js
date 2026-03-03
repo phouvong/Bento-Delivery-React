@@ -39,7 +39,7 @@ const TopBanner = () => {
       case ModuleTypes.RENTAL:
         return alpha(theme.palette.primary.main, 0.05);
       default:
-        return "inherit";
+        return null;
     }
   };
   const getBGImage = () => {
@@ -56,7 +56,7 @@ const TopBanner = () => {
         return parcelImage?.src;
 
       default:
-        return "inherit";
+        return null;
     }
   };
   // if (!moduleType) return null;
@@ -74,7 +74,7 @@ const TopBanner = () => {
         overflow: "hidden",
       }}
     >
-      {getCurrentModuleType() === "rental" ? (
+      {moduleType === "rental" ? (
         <Box
           sx={{
             svg: { position: "absolute" },
@@ -113,7 +113,7 @@ const TopBanner = () => {
         </Box>
       ) : (
         <Box sx={{ position: "absolute", height: "100%", width: "100%", "img": { objectFit: "cover", width: "100%", height: "100%" } }}>
-          <Image width={1917} height={270} src={getBGImage()} alt="banner" priority={true} />
+          {getBGImage() && <Image width={1917} height={270} src={getBGImage()} alt="banner" priority={true} />}
         </Box>
       )}
     </CustomBoxFullWidth>

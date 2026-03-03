@@ -21,6 +21,7 @@ import { persistStore } from "redux-persist";
 import { useTranslation } from "react-i18next";
 import useScrollToTop from "../src/api-manage/hooks/custom-hooks/useScrollToTop";
 import { useEffect } from "react";
+import ModuleChecker from "../src/components/module-select/ModuleChecker";
 
 Router.events.on("routeChangeStart", nProgress.start);
 Router.events.on("routeChangeError", nProgress.done);
@@ -77,6 +78,7 @@ function MyApp(props) {
                     <RTL direction={value?.settings?.direction}>
                       <CssBaseline />
                       <Toaster position="top-center" />
+                      <ModuleChecker />
                       {getLayout(<Component {...pageProps} />)}
                     </RTL>
                   </ThemeProvider>

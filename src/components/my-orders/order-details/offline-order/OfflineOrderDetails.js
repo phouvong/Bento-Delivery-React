@@ -14,6 +14,12 @@ import Router from 'next/router';
 import { onErrorResponse } from '../../../../api-manage/api-error-response/ErrorResponses';
 import { getGuestId } from '../../../../helper-functions/getToken';
 
+const formatUnderscoreText = (value) =>
+    (value === null || value === undefined ? '' : String(value)).replaceAll(
+        '_',
+        ' '
+    );
+
 const OfflineOrderDetails = ({ trackOrderData, setOpenOfflineModal, setOpenPaymentMethod, refetchTrackOrder }) => {
     const theme = useTheme();
     const dispatch = useDispatch();
@@ -66,9 +72,9 @@ const OfflineOrderDetails = ({ trackOrderData, setOpenOfflineModal, setOpenPayme
                     return (
                         <Stack padding="3px 0px" key={index}>
                             <Typography sx={{ fontSize: "12px", wordWrap: "break-word", textTransform: "capitalize" }}>
-                                {item?.input_name.replaceAll("_", " ")}&nbsp;&nbsp;:&nbsp;&nbsp;
+                                {formatUnderscoreText(item?.input_name)}&nbsp;&nbsp;:&nbsp;&nbsp;
                                 <Typography fontWeight="600" component="span" fontSize="12px">
-                                    {item?.input_data.replaceAll("_", " ")}
+                                    {formatUnderscoreText(item?.input_data)}
                                 </Typography>
                             </Typography>
                         </Stack>
@@ -103,9 +109,9 @@ const OfflineOrderDetails = ({ trackOrderData, setOpenOfflineModal, setOpenPayme
                     return (
                         <Stack padding="3px 0px" key={index}>
                             <Typography sx={{ fontSize: "12px", wordWrap: "break-word", textTransform: "capitalize" }}>
-                                {item?.user_input.replaceAll("_", " ")}&nbsp;&nbsp;:&nbsp;&nbsp;
+                                {formatUnderscoreText(item?.user_input)}&nbsp;&nbsp;:&nbsp;&nbsp;
                                 <Typography fontWeight="600" component="span" fontSize="12px">
-                                    {item?.user_data.replaceAll("_", " ")}
+                                    {formatUnderscoreText(item?.user_data)}
                                 </Typography>
                             </Typography>
                         </Stack>

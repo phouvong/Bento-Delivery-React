@@ -112,14 +112,14 @@ const BrandSelectBox = (props) => {
         fontWeight="bold"
         sx={{
           color: (theme) => theme.palette.neutral[1000],
-          paddingBottom: "1rem",
+          paddingInlineStart : "0.5rem",
         }}
       >
         {t(title)}
       </Typography>
-      <CustomPaperBox>
+      
         <CustomStackFullWidth p="1rem">
-          <Scrollbar style={{ maxHeight: "330px" }} scrollbarMinSize={1}>
+          
             {showAll && (
               <CustomCheckbox
                 item={{ name: "All", id: "all" }}
@@ -147,9 +147,9 @@ const BrandSelectBox = (props) => {
                   </ListItemText>
                 </ListItemButton>
               ))}
-          </Scrollbar>
+         
         </CustomStackFullWidth>
-      </CustomPaperBox>
+     
     </CustomStackFullWidth>
   );
 };

@@ -91,15 +91,6 @@ const Address = (props) => {
               {t("Add Address")}
             </GrayButton>
           )}
-
-          {/*{!edit && (*/}
-          {/*  <AddNewAddress*/}
-          {/*    refetch={refetch}*/}
-          {/*    t={t}*/}
-          {/*    configData={configData}*/}
-          {/*    openAddressModal={openAddressModal}*/}
-          {/*  />*/}
-          {/*)}*/}
         </Stack>
       </CustomStackFullWidth>
       <Grid container spacing={{ xs: 1, sm: 1.5, md: 2.5 }}>

@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "i18n:scan": "node i18n-scan.js",
+    "i18n:watch": "node i18n-watch.js",
     "type-check": "tsc --noEmit",
     "type-check:watch": "tsc --noEmit --watch"
   },

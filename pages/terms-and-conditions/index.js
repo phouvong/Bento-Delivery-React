@@ -4,11 +4,18 @@ import CssBaseline from "@mui/material/CssBaseline";
 import MainLayout from "../../src/components/layout/MainLayout";
 import PolicyPage from "../../src/components/policy-page";
 import useGetPolicyPage from "../../src/api-manage/hooks/react-query/useGetPolicyPage";
-import { getServerSideProps } from "../index";
 import SEO from "../../src/components/seo";
 import { getImageUrl } from "utils/CustomFunctions";
+import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
+import { processMetadata } from "utils/fetchPageMetaData";
 
-const Index = ({ configData, landingPageData }) => {
+const Index = ({ configData, metaData }) => {
+  const metadata = processMetadata(metaData, {
+    title: metaData?.title ||`terms - ${configData?.business_name}`,
+    description: metaData?.description || '',
+    image: `${metaData?.image || configData?.logo_full_url}`,
+    robotsMeta: metaData?.robotsMeta || ''
+  })
   const { t } = useTranslation();
   const { data, refetch, isFetching } = useGetPolicyPage(
     "/api/v1/terms-and-conditions"
@@ -21,15 +28,13 @@ const Index = ({ configData, landingPageData }) => {
     <>
       <CssBaseline />
       <SEO
-        title={configData ? `Terms And Conditions` : "Loading..."}
-        image={`${getImageUrl(
-          { value: configData?.logo_storage },
-          "business_logo_url",
-          configData
-        )}/${configData?.fav_icon}`}
-        businessName={configData?.business_name}
+        title={metadata.title}
+        description={metadata.description}
+        image={metadata.image}
+        robotsMeta={metadata.robotsMeta}
+        configData={configData}
       />
-      <MainLayout configData={configData} landingPageData={landingPageData}>
+      <MainLayout configData={configData} >
         <PolicyPage
           data={data}
           title={t("Terms And Conditions")}
@@ -41,4 +46,6 @@ const Index = ({ configData, landingPageData }) => {
 };
 
 export default Index;
-export { getServerSideProps };
+export const getServerSideProps = async (context) => {
+  return await getCommonServerSideProps(context, 'terms_and_conditions_page')
+}

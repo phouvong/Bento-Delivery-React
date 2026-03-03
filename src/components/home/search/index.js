@@ -20,6 +20,8 @@ import {
   setRating_Count,
   setSelectedBrands,
   setSelectedCategories,
+  setStoreSelectedItems,
+  setStoreSelectedItems2,
 } from "redux/slices/categoryIds";
 
 const SearchResult = (props) => {
@@ -37,8 +39,14 @@ const SearchResult = (props) => {
   const { data_type } = router.query;
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-  const id = router.query.id;
-  const brand_id = router.query.brand_id;
+  const rawId = router.query.id;
+  const id = Array.isArray(rawId) ? rawId[0] : rawId;
+  const rawBrandId = router.query.brand_id;
+  const brand_id = Array.isArray(rawBrandId) ? rawBrandId[0] : rawBrandId;
+  const rawCategoryIds = router?.query?.category_ids;
+  const categoryIdsValue = Array.isArray(rawCategoryIds)
+    ? rawCategoryIds[0]
+    : rawCategoryIds;
   const [currentView, setCurrentView] = useState(0);
   const [offset, setOffset] = useState(0);
   const [openSideDrawer, setOpenSideDrawer] = useState(false);
@@ -56,14 +64,49 @@ const SearchResult = (props) => {
   const sidebarRef = useRef(null);
   const scrollTimeoutRef = useRef(null);
   const { ref, inView } = useInView({
-    rootMargin: "0px 0px 38% 0px",
+    rootMargin: "0px 0px 80% 0px",
   });
   const { selectedBrands, selectedCategories, filterData, rating_count } =
     useSelector((state) => state.categoryIds);
   useEffect(() => {
-    dispatch(setSelectedBrands(data_type === "brand" ? [brand_id] : []));
-    dispatch(setSelectedCategories(data_type === "category" ? [id] : []));
-  }, []);
+    if (!router.isReady) return;
+
+    setCategoryId(id);
+    setOffset(0);
+    setLinkRouteTo(routeTo);
+
+    const parsedBrandId = Number(brand_id);
+    const nextBrandIds =
+      data_type === "brand" && Number.isFinite(parsedBrandId)
+        ? [parsedBrandId]
+        : [];
+    dispatch(setSelectedBrands(nextBrandIds));
+    dispatch(setStoreSelectedItems2(nextBrandIds));
+
+    let nextCategoryIds = [];
+    if (categoryIdsValue === "all") {
+      nextCategoryIds = [];
+    } else if (
+      typeof categoryIdsValue === "string" &&
+      categoryIdsValue.length > 0
+    ) {
+      nextCategoryIds = [
+        ...new Set(
+          categoryIdsValue
+            .split(",")
+            .map((item) => Number(item))
+            .filter((item) => Number.isFinite(item))
+        ),
+      ].sort((a, b) => a - b);
+    } else if (data_type === "category") {
+      const parsedCategoryId = Number(id);
+      if (Number.isFinite(parsedCategoryId)) {
+        nextCategoryIds = [parsedCategoryId];
+      }
+    }
+    dispatch(setSelectedCategories(nextCategoryIds));
+    dispatch(setStoreSelectedItems(nextCategoryIds));
+  }, [router.isReady, id, brand_id, data_type, routeTo, categoryIdsValue]);
 
   // Handle scroll behavior for independent sidebar scrolling
   // The sidebar remains fixed until the main content area has mostly scrolled past,
@@ -180,6 +223,7 @@ const SearchResult = (props) => {
     filterValue,
     rating_count,
     minMax,
+    module: getCurrentModuleType(),
   };
 
   const {
@@ -191,6 +235,8 @@ const SearchResult = (props) => {
     isFetchingNextPage,
     isLoading: isLoadingSearch,
   } = useGetSearchPageData(pageParams, handleSuccess);
+  console.log({searchData});
+  
 
   // Update items container height when data changes
   useEffect(() => {
@@ -207,7 +253,7 @@ const SearchResult = (props) => {
 
   useEffect(() => {
     handleFilterSelection();
-  }, []);
+  }, [id, brand_id, data_type]);
 
   useEffect(() => {
     const hasData =

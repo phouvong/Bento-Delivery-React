@@ -33,16 +33,20 @@ const FoodCategoryCard = (props) => {
   const theme = useTheme()
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const { ref: textRef, isEllipsed } = useTextEllipsis(name);
+  const queryModule = router?.query?.module || router?.query?.module_id;
+    const moduleValue = Array.isArray(queryModule)
+      ? queryModule[0]
+      : queryModule || getModuleId();
 
   const handleClick = () => {
     router.push({
-      pathname: "/home",
+      pathname: "/search",
       query: {
         search: "category",
         id: id,
-        module_id: `${getModuleId()}`,
         name: name && (name),
         data_type: "category",
+        ...(moduleValue ? { module: String(moduleValue) } : {}),
       },
     });
   };

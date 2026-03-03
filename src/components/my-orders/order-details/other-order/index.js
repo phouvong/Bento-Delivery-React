@@ -209,93 +209,56 @@ const OtherOrder = (props) => {
     }
   };
 
+  const content = (
+    <>
+      <TopDetails
+        data={data}
+        trackData={trackOrderData}
+        trackDataIsLoading={trackDataIsLoading}
+        trackDataIsFetching={trackDataIsFetching}
+        currentTab={currentTab}
+        configData={configData}
+        id={id}
+        openModal={openModal}
+        setOpenModal={setOpenModal}
+        refetchOrderDetails={refetch}
+        refetchTrackData={refetchTrackOrder}
+        dataIsLoading={dataIsLoading}
+        openPaymentMethod={openPaymentMethod}
+        setOpenPaymentMethod={setOpenPaymentMethod}
+        page={page}
+        paymentMethodUpdateMutation={paymentMethodUpdateMutation}
+        paymentFailedData={paymentFailedData}
+        setPaymentFailedData={setPaymentFailedData}
+      />
+      <CustomDivider border={isSmall ? "1px" : undefined} />
+      {!trackDataIsLoading && (
+        <ProfileTab
+          menuData={
+            data && data.module_type === "parcel"
+              ? orderDetailsMenuDataForParcel
+              : trackOrderData?.order_type === "take_away"
+                ? orderDetailsMenuDataTakeAway
+                : orderDetailsMenuData
+          }
+          marginright="20px"
+          fontSize="14px"
+          padding="15px 15px 15px 25px"
+          borderRadius="5px"
+          page={currentTab}
+          handlePage={handleTab}
+        />
+      )}
+      {trackOrderData && activeTabPanel()}
+    </>
+  );
+
   return (
     <CustomStackFullWidth alignItems="center" justifyContent="center" mb="2rem">
       {isSmall ? (
-        <CustomPaperBigCard padding="14px">
-          <TopDetails
-            data={data}
-            trackData={trackOrderData}
-            trackDataIsLoading={trackDataIsLoading}
-            trackDataIsFetching={trackDataIsFetching}
-            currentTab={currentTab}
-            configData={configData}
-            id={id}
-            openModal={openModal}
-            setOpenModal={setOpenModal}
-            refetchOrderDetails={refetch}
-            refetchTrackData={refetchTrackOrder}
-            dataIsLoading={dataIsLoading}
-            openPaymentMethod={openPaymentMethod}
-            setOpenPaymentMethod={setOpenPaymentMethod}
-            page={page}
-            paymentMethodUpdateMutation={paymentMethodUpdateMutation}
-            paymentFailedData={paymentFailedData}
-            setPaymentFailedData={setPaymentFailedData}
-          />
-          <CustomDivider border="1px" />
-          {trackDataIsLoading ? null : (
-            <ProfileTab
-              menuData={
-                data && data.module_type === "parcel"
-                  ? orderDetailsMenuDataForParcel
-                  : trackOrderData?.order_type === "take_away"
-                    ? orderDetailsMenuDataTakeAway
-                    : orderDetailsMenuData
-              }
-              marginright="20px"
-              fontSize="14px"
-              padding="15px 15px 15px 25px"
-              borderRadius="5px"
-              page={currentTab}
-              handlePage={handleTab}
-            />
-          )}
-          {trackOrderData && activeTabPanel()}
-        </CustomPaperBigCard>
+        <CustomPaperBigCard padding="14px">{content}</CustomPaperBigCard>
       ) : (
-        <>
-          <TopDetails
-            data={data}
-            trackData={trackOrderData}
-            trackDataIsLoading={trackDataIsLoading}
-            trackDataIsFetching={trackDataIsFetching}
-            currentTab={currentTab}
-            configData={configData}
-            id={id}
-            openModal={openModal}
-            setOpenModal={setOpenModal}
-            refetchOrderDetails={refetch}
-            refetchTrackData={refetchTrackOrder}
-            dataIsLoading={dataIsLoading}
-            page={page}
-            openPaymentMethod={openPaymentMethod}
-            setOpenPaymentMethod={setOpenPaymentMethod}
-            paymentMethodUpdateMutation={paymentMethodUpdateMutation}
-            paymentFailedData={paymentFailedData}
-            setPaymentFailedData={setPaymentFailedData}
-          // parcel={trackOrderData?.module_type === "parcel"}
-          />
-          <CustomDivider />
-          {trackDataIsLoading ? null : (
-            <ProfileTab
-              menuData={
-                data && data.module_type === "parcel"
-                  ? orderDetailsMenuDataForParcel
-                  : trackOrderData?.order_type === "take_away"
-                    ? orderDetailsMenuDataTakeAway
-                    : orderDetailsMenuData
-              }
-              marginright="20px"
-              fontSize="14px"
-              padding="15px 15px 15px 25px"
-              borderRadius="5px"
-              page={currentTab}
-              handlePage={handleTab}
-            />
-          )}
-          {trackOrderData && activeTabPanel()}
-        </>
+        content
       )}
       <RefundModal
         open={openModal}

@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Slider from "react-slick";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { setSelectedModule } from "redux/slices/utils";
+import { getModuleIdentifier, saveModuleParam } from "../../../../utils/moduleParamManager";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
@@ -175,6 +176,7 @@ const ModuleSelectionRaw = (props) => {
       dispatch(setModules(data));
     }
   }, [data]);
+console.log({data,modules});
 
   const router = useRouter();
 
@@ -182,7 +184,18 @@ const ModuleSelectionRaw = (props) => {
     setIsSelected(item?.module_type);
     dispatch(setSelectedModule(item));
     localStorage.setItem("module", JSON.stringify(item));
-    router.replace("/home");
+    
+    // Get module identifier (slug if available, otherwise id)
+    const moduleIdentifier = getModuleIdentifier(item);
+    
+    // Save module to localStorage and cookie
+    saveModuleParam(item?.id, item?.slug);
+    
+    router.replace(
+      { pathname: "/home", query: { module: moduleIdentifier } },
+      undefined,
+      { shallow: true }
+    );
   };
 
   return (

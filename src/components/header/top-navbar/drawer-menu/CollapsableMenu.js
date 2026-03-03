@@ -12,6 +12,7 @@ import { useTranslation } from "react-i18next";
 import { CustomStackFullWidth } from "../../../../styled-components/CustomStyles.style";
 import { VIEW_ALL_TEXT } from "../../../../utils/staticTexts";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
 
 const CollapsableMenu = ({
   value,
@@ -25,7 +26,7 @@ const CollapsableMenu = ({
 
   const [open, setOpen] = useState(false);
   const handleClick = () => setOpen((prevState) => !prevState);
-  const handleRoute = (id) => {
+  const handleRoute = (id, slug) => {
     if (forcategory === "true") {
       if (getCurrentModuleType() === "rental") {
         router.push({
@@ -34,21 +35,21 @@ const CollapsableMenu = ({
         });
       } else {
         router.push({
-          pathname: "/home",
+          pathname: "/search",
           query: {
             search: "category",
             id: id,
-            module_id: `${getModuleId()}`,
+            module: `${getModuleId()}`,
             name: btoa(name),
             data_type: "category",
           },
         });
       }
     } else {
-      router.push({
-        pathname: `/${value?.path}/[id]`,
-        query: { id: `${id}`, module_id: `${getModuleId()}` },
-      });
+      handleStoreRedirect({
+        id: id,
+        slug: slug,
+      }, router);
     }
 
     // Ensure these states are updated regardless of the route logic
@@ -58,19 +59,19 @@ const CollapsableMenu = ({
 
   const handleView = () => {
     if (pathName === "/categories") {
-      if (getCurrentModuleType() === "rental"){
+      if (getCurrentModuleType() === "rental") {
         router.push({ pathname: "/rental/vehicle-search", query: { all_category: 1 } }, undefined, { shallow: false });
       } else {
         router.push(
           {
-            pathname: "/home",
-          query: {
-            search: VIEW_ALL_TEXT.allCategories,
-            from: "allCategories",
-            data_type: "new",
+            pathname: "/search",
+            query: {
+              search: VIEW_ALL_TEXT.allCategories,
+              from: "allCategories",
+              data_type: "new",
+            },
           },
-        },
-        undefined,
+          undefined,
           { shallow: true }
         );
       }
@@ -112,7 +113,7 @@ const CollapsableMenu = ({
                 },
               }}
               key={index}
-              onClick={() => handleRoute(item.id)}
+              onClick={() => handleRoute(item.id, item?.slug)}
             >
               <ListItemText primary={item.name}></ListItemText>
             </ListItemButton>

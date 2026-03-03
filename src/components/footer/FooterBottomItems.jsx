@@ -1,4 +1,4 @@
-import { Typography, useTheme } from '@mui/material'
+import { Typography, useTheme,NoSsr } from '@mui/material'
 import { t } from 'i18next';
 import React from 'react'
 import { CustomStackFullWidth } from '../../styled-components/CustomStyles.style';
@@ -6,6 +6,7 @@ import { CustomStackFullWidth } from '../../styled-components/CustomStyles.style
 const FooterBottomItems = ({ configData,handleClickToRoute }) => {
     const theme = useTheme();
     return (
+        <NoSsr>
         <CustomStackFullWidth
             direction={{ xs: "column", sm: "row" }}
             spacing={{ xs: 2, md: 3 }}
@@ -74,6 +75,7 @@ const FooterBottomItems = ({ configData,handleClickToRoute }) => {
                 </Typography>
             )}
         </CustomStackFullWidth>
+        </NoSsr>
     )
 }
 

@@ -35,8 +35,7 @@ const Root = (props) => {
 	let lanDirection = undefined;
 
 	if (typeof window !== "undefined") {
-		lanDirection = JSON.parse(localStorage.getItem("settings"));
-		// languageSetting = JSON.parse(localStorage.getItem("language-setting"));
+		lanDirection = JSON.parse(localStorage.getItem("settings"))
 	}
 	// console.log({ lanDirection })
 	return (

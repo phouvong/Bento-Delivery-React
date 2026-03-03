@@ -71,7 +71,7 @@ const SearchFilterWithResults = ({
 							/>
 						)}
 					</Grid>
-					<Grid item container xs={12} sm={12} md={12} spacing={1}>
+					<Grid item container xs={12} sm={12} md={12} spacing={1} sx={{minHeight:"60vh"}}>
 						{currentTab === "items" && (
 							<>
 								{pageData?.products?.length > 0 &&
@@ -110,12 +110,7 @@ const SearchFilterWithResults = ({
 										>
 											<StoresInfoCard
 												data={item}
-												// image={`${store_image_url}/${item?.logo}`}
-												// title={item?.name}
-												// avgRating={item?.avg_rating}
-												// address={item?.address}
-												// id={item?.id}
-												// moduleId={moduleId}
+												
 											/>
 										</Grid>
 									))}

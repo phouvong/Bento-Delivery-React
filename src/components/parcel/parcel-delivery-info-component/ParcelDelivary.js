@@ -1,4 +1,4 @@
-import { Grid } from "@mui/material";
+import { Grid, Card, IconButton } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useFormik } from "formik";
 import { getToken } from "helper-functions/getToken";
@@ -18,6 +18,11 @@ import SenderInfoForm from "./SenderInfoForm";
 import ValidationSchema from "./ValidationSchema";
 import dynamic from "next/dynamic";
 import { formatPhoneNumber } from "utils/CustomFunctions";
+import SaveAddress from "../../SaveAddress";
+import CustomModal from "components/modal";
+import CloseIcon from "@mui/icons-material/Close";
+import MapModal from "components/Map/MapModal";
+
 const AuthModal = dynamic(() => import("components/auth/AuthModal"));
 const PercelDelivery = ({ configData }) => {
   const router = useRouter();
@@ -26,6 +31,7 @@ const PercelDelivery = ({ configData }) => {
   const { parcelInfo } = useSelector((state) => state.parcelInfoData);
   const { parcelCategories } = useSelector((state) => state.parcelCategories);
   const { profileInfo } = useSelector((state) => state.profileInfo);
+  const [openMapModal, setOpenMapModal] = useState(false);
   const [senderLocation, setSenderLocation] = useState(
     parcelInfo ? parcelInfo?.senderLocations : {}
   );
@@ -39,6 +45,10 @@ const PercelDelivery = ({ configData }) => {
   let token = getToken();
   const [openAuth, setOpenAuth] = useState(false);
   const [modalFor, setModalFor] = useState("sign-in");
+  const [senderOptionalAddress, setSenderOptionalAddress] = useState({});
+  const [receiverOptionalAddress, setReceiverOptionalAddress] = useState({});
+  const [openSave, setOpenSave] = useState(false);
+  const [saveFrom, setSaveFrom] = useState("");
   const { coords, isGeolocationAvailable, isGeolocationEnabled, getPosition } =
     useGeolocated({
       positionOptions: {
@@ -96,6 +106,47 @@ const PercelDelivery = ({ configData }) => {
     );
   }, [profileInfo?.phone]);
 
+  const handleOpenSave = (type) => {
+    setSaveFrom(type);
+    setOpenSave(true);
+  };
+
+  useEffect(() => {
+    senderRoadHandler(
+      senderOptionalAddress?.road
+        ? senderOptionalAddress?.road
+        : addAddressFormik.values.senderRoad
+    );
+    senderFloorHandler(
+      senderOptionalAddress?.floor
+        ? senderOptionalAddress?.floor
+        : addAddressFormik.values.senderFloor
+    );
+    senderHouseHandler(
+      senderOptionalAddress?.house
+        ? senderOptionalAddress?.house
+        : addAddressFormik.values.senderHouse
+    );
+  }, [senderOptionalAddress]);
+
+  useEffect(() => {
+    roadHandler(
+      receiverOptionalAddress?.road
+        ? receiverOptionalAddress?.road
+        : addAddressFormik.values.road
+    );
+    floorHandler(
+      receiverOptionalAddress?.floor
+        ? receiverOptionalAddress?.floor
+        : addAddressFormik.values.floor
+    );
+    houseHandler(
+      receiverOptionalAddress?.house
+        ? receiverOptionalAddress?.house
+        : addAddressFormik.values.house
+    );
+  }, [receiverOptionalAddress]);
+
   const senderNameHandler = (value) => {
     addAddressFormik.setFieldValue("senderName", value);
   };
@@ -135,7 +186,8 @@ const PercelDelivery = ({ configData }) => {
     setSenderFormattedAddress(currentLocation);
   };
   const handleReceiverLocation = (location, currentLocation) => {
-
+    console.log({location, currentLocation});
+    
     setReceiverLocation(location);
     setReceiverFormattedAddress(currentLocation);
   };
@@ -146,8 +198,27 @@ const PercelDelivery = ({ configData }) => {
   const handleRoute = () => {
     router.push("/checkout?page=parcel", undefined, { shallow: true });
   };
-  console.log("location", receiverLocation, parcelInfo?.receiverLocations);
+  let currentLocation = {};
+
+  let zoneid = undefined;
+  if (typeof window !== "undefined") {
+    zoneid = localStorage.getItem("zoneid");
+     currentLocation = JSON.parse(localStorage.getItem("currentLatLng"));
+  }
+  console.log({parcelCategories});
+  console.log({receiverLocation});
+  
   const formSubmitHandler = (values) => {
+    if(!parcelCategories?.id){
+      toast.error(t("Please select parcel category to proceed"));
+      return;
+    }
+    if(!currentLocation?.lat || !currentLocation?.lng){
+     setOpenMapModal(true);
+     toast.error(t("Please select your location to proceed"));
+     return;
+    }
+
     const tempValue = {
       ...values,
       senderLocations: senderLocation,
@@ -158,7 +229,9 @@ const PercelDelivery = ({ configData }) => {
       image: parcelCategories?.image_full_url,
       description: parcelCategories?.description,
     };
-    console.log("tempValue", receiverLocation);
+    
+    
+    
     if ((senderLocation || parcelInfo?.senderLocations) && (receiverLocation || parcelInfo?.receiverLocations)) {
       dispatch(setParcelData(tempValue));
       if (!token && configData?.guest_checkout_status === 1) {
@@ -212,10 +285,12 @@ const PercelDelivery = ({ configData }) => {
               senderHouseHandler={senderHouseHandler}
               senderFloorHandler={senderFloorHandler}
               senderEmailHandler={senderEmailHandler}
+              handleOpenSave={handleOpenSave}
             />
           </Grid>
           <Grid item xs={12} sm={12} md={4}>
             <ReceiverInfoFrom
+             handleOpenSave={handleOpenSave}
               addAddressFormik={addAddressFormik}
               receiverNameHandler={receiverNameHandler}
               receiverPhoneHandler={receiverPhoneHandler}
@@ -252,6 +327,52 @@ const PercelDelivery = ({ configData }) => {
         open={openAuth}
         handleClose={() => setOpenAuth(false)}
       />
+      {openSave && (
+        <CustomModal openModal={openSave} handleClose={() => setOpenSave(false)}>
+          <CustomStackFullWidth sx={{ minWidth: "350px", position: "relative",padding: "1rem 1rem" }}>
+            <IconButton
+              onClick={() => setOpenSave(false)}
+              sx={{
+                position: "absolute",
+                top: -2,
+                right: 0,
+                zIndex: 2,
+                backgroundColor: (theme) => theme.palette.background.paper,
+                "&:hover": {
+                  backgroundColor: (theme) => theme.palette.action.hover,
+                },
+              }}
+            >
+              <CloseIcon sx={{ fontSize: "1rem" }} />
+            </IconButton>
+
+          
+              <SaveAddress
+                configData={configData}
+                setSenderFormattedAddress={setSenderFormattedAddress}
+                setSenderLocation={setSenderLocation}
+                setSenderOptionalAddress={setSenderOptionalAddress}
+                setReceiverFormattedAddress={setReceiverFormattedAddress}
+                setReceiverLocation={setReceiverLocation}
+                setReceiverOptionalAddress={setReceiverOptionalAddress}
+                sender={saveFrom === "sender" ? "true" : undefined}
+                setOpenSave={setOpenSave}
+                parcel
+              />
+        
+          </CustomStackFullWidth>
+        </CustomModal>
+      )}
+       {openMapModal && (
+        <MapModal
+          open={openMapModal}
+          handleClose={() => setOpenMapModal(false)}
+          disableAutoFocus
+          fromStore
+          fromparcel
+          
+        />
+      )}
     </CustomStackFullWidth>
   );
 };

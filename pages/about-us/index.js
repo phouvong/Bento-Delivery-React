@@ -6,10 +6,18 @@ import MainLayout from "../../src/components/layout/MainLayout";
 import PolicyPage from "../../src/components/policy-page";
 import SEO from "../../src/components/seo";
 import { getImageUrl } from "utils/CustomFunctions";
+import { fetchPageMetadata, processMetadata } from "utils/fetchPageMetaData";
+import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
 
-const Index = ({ configData, landingPageData }) => {
+const Index = ({ configData, metaData }) => {
   const { t } = useTranslation();
   const { data, refetch, isFetching } = useGetPolicyPage("/api/v1/about-us");
+  const metadata = processMetadata(metaData, {
+        title: `About us - ${configData?.business_name}`,
+        description: '',
+        image:  configData?.logo_full_url,
+       
+    })
 
   useEffect(() => {
     if (refetch) refetch();
@@ -18,19 +26,19 @@ const Index = ({ configData, landingPageData }) => {
   if (!configData) {
     return <div>{t("Configuration data is not available")}</div>;
   }
+  console.log({metadata,configData});
+  
 
   return (
     <>
       <CssBaseline />
       <SEO
-        image={`${getImageUrl(
-          { value: configData?.logo_storage },
-          "business_logo_url",
-          configData
-        )}/${configData?.fav_icon}`}
-        businessName={configData?.business_name}
+        title={metadata.title}
+        description={metadata.description}
+        image={metadata?.image}
+        robotsMeta={metadata.robotsMeta}
       />
-      <MainLayout configData={configData} landingPageData={landingPageData}>
+      <MainLayout configData={configData} >
         <PolicyPage data={data} title={t("About us")} isFetching={isFetching} />
       </MainLayout>
     </>
@@ -39,40 +47,7 @@ const Index = ({ configData, landingPageData }) => {
 
 export default Index;
 
-export const getStaticProps = async () => {
-  try {
-    const configRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/config`,
-      {
-        method: "GET",
-        headers: {
-          "X-software-id": 33571750,
-          "X-server": "server",
-          origin: process.env.NEXT_CLIENT_HOST_URL,
-        },
-      }
-    );
+export const getServerSideProps = async (context) => {
+  return await getCommonServerSideProps(context, 'about_us_page')
+}
 
-    if (!configRes.ok) {
-      throw new Error(`Failed to fetch config: ${configRes.statusText}`);
-    }
-
-    const config = await configRes.json();
-
-    return {
-      props: {
-        configData: config,
-      },
-      revalidate: 3600,
-    };
-  } catch (error) {
-    console.error("Error fetching config data:", error);
-
-    return {
-      props: {
-        configData: null,
-      },
-      revalidate: 3600,
-    };
-  }
-};

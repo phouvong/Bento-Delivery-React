@@ -4,17 +4,42 @@ import { useRouter } from "next/router";
 const ZoneGuard = (props) => {
   const { children } = props;
   const router = useRouter();
-  const [checked, setChecked] = useState(false);
+  const [checked, setChecked] = useState(true);
   useEffect(
     () => {
       if (!router.isReady) {
         return;
       }
-      const zoneId = JSON.parse(localStorage.getItem("zoneid"));
-      const location = localStorage.getItem("location");
-      if (zoneId?.length > 0 && location) {
+      const moduleFromUrlRaw = router.query.module || router.query.module_id;
+      const moduleFromUrl = Array.isArray(moduleFromUrlRaw)
+        ? moduleFromUrlRaw[0]
+        : moduleFromUrlRaw;
+      if (moduleFromUrl) {
+        setChecked(true);
+        return;
+      }
+      const safeGetItem = (key) => {
+        try {
+          return localStorage.getItem(key);
+        } catch {
+          return null;
+        }
+      };
+      let storedModule = null;
+      try {
+        storedModule = JSON.parse(safeGetItem("module") || "null");
+      } catch {
+        storedModule = null;
+      }
+      const storedIdentifier =
+        safeGetItem("selectedModuleIdentifier") ||
+        safeGetItem("selectedModuleId") ||
+        storedModule?.slug ||
+        storedModule?.id;
+      if (storedIdentifier) {
         setChecked(true);
       } else {
+        setChecked(false);
         router.push("/", undefined, { shallow: true });
       }
     },

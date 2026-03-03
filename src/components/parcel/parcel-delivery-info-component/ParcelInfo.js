@@ -20,6 +20,7 @@ const ParcelInfo = ({ parcelCategories, setReceiverLocation }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+   
   const [tempSelected, setTempSelected] = useState(parcelCategories);
   const { parcelInfo } = useSelector((state) => state.parcelInfoData);
   const { data, refetch, isFetched, isLoading } = useGetParcelCategory();
@@ -34,7 +35,7 @@ const ParcelInfo = ({ parcelCategories, setReceiverLocation }) => {
   const handleUpdate = () => {
     if (tempSelected) {
       dispatch(setParcelCategories(tempSelected));
-      setReceiverLocation(parcelInfo?.receiverLocations);
+      //setReceiverLocation(parcelInfo?.receiverLocations);
       setOpen(false);
     }
   }
@@ -180,6 +181,7 @@ const ParcelInfo = ({ parcelCategories, setReceiverLocation }) => {
           </Stack>
         </Box>
       </Modal>
+    
     </CustomStackFullWidth>
   );
 };

@@ -24,6 +24,7 @@ import ProductMoreView from "../home/visit-again/ProductMoreView";
 import { CustomOverLay } from "./Card.style";
 import QuickView, { PrimaryToolTip } from "./QuickView";
 import NextImage from "components/NextImage";
+import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
 
 export const getModuleWiseData = () => {
 	switch (getCurrentModuleType()) {
@@ -122,15 +123,7 @@ const VisitAgainCard = (props) => {
 		wishlistItemExistHandler();
 	}, [wishLists]);
 	const handleClick = () => {
-		router.push({
-			pathname: `/store/[id]`,
-			query: {
-				id: `${item?.slug ? item?.slug : item?.id}`,
-				module_id: `${item?.module_id}`,
-				module_type: getCurrentModuleType(),
-				store_zone_id: `${item?.zone_id}`,
-			},
-		});
+		handleStoreRedirect(item, router);
 	};
 	const quickViewHandleClick = () => {
 		handleClick();

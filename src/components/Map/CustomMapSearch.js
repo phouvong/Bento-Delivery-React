@@ -41,6 +41,7 @@ const CustomMapSearch = ({
   searchHeight,
   handleOpen,
   setOpen,
+  notShow
 }) => {
   const theme = useTheme();
   const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
@@ -76,7 +77,8 @@ const CustomMapSearch = ({
             >
               {props.children}
               <Box textAlign="center" p={1}>
-                <Button
+                {notShow ? null : (
+                   <Button
                   variant="text"
                   size="small"
                   onMouseDown={(e) => {
@@ -94,6 +96,8 @@ const CustomMapSearch = ({
                   <MapIcon />
                   <Typography variant="body1" onClick={() => setOpen(true)} color={theme.palette.text.main}>{t("Set from map")}</Typography>
                 </Button>
+                )}
+                
               </Box>
             </Paper>
           )}

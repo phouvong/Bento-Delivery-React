@@ -6,7 +6,7 @@ import ShoppingCartRoundedIcon from "@mui/icons-material/ShoppingCartRounded";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import SimpleBar from "simplebar-react";
 import "simplebar-react/dist/simplebar.min.css";
-import { Badge, BottomNavigation, Paper } from "@mui/material";
+import { Badge, BottomNavigation, NoSsr, Paper } from "@mui/material";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { CustomBottomNavigationAction } from "./NavBar.style";
 import { t } from "i18next";
@@ -21,6 +21,7 @@ import { Taxi } from "components/header/second-navbar/SecondNavbar";
 import Box from "@mui/material/Box";
 import { getModule } from "helper-functions/getLanguage";
 import LocalTaxiIcon from "@mui/icons-material/LocalTaxi";
+
 
 const styles = {
   maxWidth: 2000,
@@ -54,6 +55,7 @@ const BottomNav = () => {
 
   // const handleChange = () => {};
   return (
+    <NoSsr>
     <CustomStackFullWidth>
       <Paper
         sx={{
@@ -187,6 +189,7 @@ const BottomNav = () => {
         )}
       </Paper>
     </CustomStackFullWidth>
+    </NoSsr>
   );
 };
 

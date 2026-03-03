@@ -61,7 +61,7 @@ const CheckOutPage = () => {
 
       <MainLayout configData={configData} landingPageData={landingPageData}>
         <CustomContainer>
-          <AuthGuard from="checkout">
+          
             {page === "parcel" && <ParcelCheckout configData={configData} />}
             {page === "prescription" && (
               <PrescriptionCheckout
@@ -108,7 +108,7 @@ const CheckOutPage = () => {
                 buyNowItemList={buyNowItemList}
               />
             )}
-          </AuthGuard>
+         
         </CustomContainer>
       </MainLayout>
     </>

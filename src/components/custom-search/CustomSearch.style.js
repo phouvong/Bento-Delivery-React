@@ -48,7 +48,7 @@ export const StyledInputBase = styled(InputBase)(
     width: "100%",
 
     "& .MuiInputBase-input": {
-      padding: "10px 17px",
+      padding: "10px 10px",
       transition: theme.transitions.create("width"),
       width: "100%",
     },

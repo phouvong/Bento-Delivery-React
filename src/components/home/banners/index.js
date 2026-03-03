@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
-import {Grid, Skeleton, styled, useMediaQuery, useTheme} from "@mui/material";
+import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
+
+import { Grid, Skeleton, styled, useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,6 +20,7 @@ import {
 import CustomImageContainer from "../../CustomImageContainer";
 import FoodDetailModal from "../../food-details/foodDetail-modal/FoodDetailModal";
 import NextImage from "components/NextImage";
+import { handleProductRedirect } from "helper-functions/handleProductRedirect";
 
 export const BannersWrapper = styled(Box)(({ theme }) => ({
   cursor: "pointer",
@@ -26,9 +29,9 @@ export const BannersWrapper = styled(Box)(({ theme }) => ({
   height: "234px",
   position: "relative",
   overflow: "hidden",
-  img:{
-    width:'100%',
-    height:'100%',
+  img: {
+    width: '100%',
+    height: '100%',
   },
 
 
@@ -46,9 +49,9 @@ export const BannersWrapper = styled(Box)(({ theme }) => ({
   },
 }));
 
-const Banners = ({feature}) => {
+const Banners = ({ feature }) => {
   const router = useRouter();
-  const theme=useTheme()
+  const theme = useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isExtraSmallScreen = useMediaQuery(theme.breakpoints.down("xs"));
   const { selectedModule } = useSelector((state) => state.utilsData);
@@ -99,13 +102,13 @@ const Banners = ({feature}) => {
     if (banner?.isCampaign) {
 
       router.push(
-          {
-            pathname: "/campaigns/[id]",
-            query: { id: `${banner?.id}`, module_id: `${getModuleId()}` },
-          },
-          undefined,
-          { scroll: false } // Disable Next.js auto scroll
-        )
+        {
+          pathname: "/campaigns/[id]",
+          query: { id: `${banner?.slug||banner?.id}`},
+        },
+        undefined,
+        { scroll: false } // Disable Next.js auto scroll
+      )
         .then(() => {
           // Add slight delay to ensure new page is mounted
           setTimeout(() => {
@@ -116,39 +119,14 @@ const Banners = ({feature}) => {
       window.open(banner?.link, "_blank");
     } else {
       if (banner?.type === "store_wise") {
-        router.push(
-          {
-            pathname: "/store/[id]",
-            query: {
-              id: `${
-                banner?.store?.slug ? banner?.store?.slug : banner?.store?.id
-              }`,
-              module_id: `${getModuleId()}`,
-              store_zone_id: `${banner?.store?.zone_id}`,
-            },
-          },
-          undefined,
-          { shallow: true }
-        );
+        handleStoreRedirect(banner?.store, router);
       } else {
         if (banner?.type === "item_wise") {
           if (selectedModule?.module_type !== "ecommerce") {
             setFoodBanner(banner?.item);
             setOpenModal(true);
           } else {
-            router.push(
-              {
-                pathname: "/product/[id]",
-                query: {
-                  id: `${
-                    banner?.item?.slug ? banner?.item?.slug : banner?.item?.id
-                  }`,
-                  module_id: `${getModuleId()}`,
-                },
-              },
-              undefined,
-              { shallow: true }
-            );
+            handleProductRedirect(banner?.item, router);
           }
         }
       }
@@ -213,58 +191,58 @@ const Banners = ({feature}) => {
   return (
     <>
       <CustomStackFullWidth
-          sx={{
-            mt: "10px",
-            "& .slick-list": {
-              marginRight: { xs: "-10px", sm: "-20px" },
-            },
-            "& .slick-slide": {
-              paddingRight: { xs: "10px", sm: "20px" },
-            },
-          }}
+        sx={{
+          mt: "10px",
+          "& .slick-list": {
+            marginRight: { xs: "-10px", sm: "-20px" },
+          },
+          "& .slick-slide": {
+            paddingRight: { xs: "10px", sm: "20px" },
+          },
+        }}
       >
         {!isFetched ? (
-            <Slider {...settings}>
-              {[...Array(2)].map((_, index) => (
-                  <BannersWrapper key={index}>
-                    <Skeleton
-                        variant="rectangular"
-                        height="100%"
-                        width="100%"
+          <Slider {...settings}>
+            {[...Array(2)].map((_, index) => (
+              <BannersWrapper key={index}>
+                <Skeleton
+                  variant="rectangular"
+                  height="100%"
+                  width="100%"
+                />
+              </BannersWrapper>
+            ))}
+          </Slider>
+        ) : (
+          bannersData?.length > 0 && (
+            <SliderCustom>
+              <Slider {...settings}>
+                {bannersData.map((item, index) => (
+                  <BannersWrapper
+                    key={index}
+                    onClick={
+                      item?.type === "default" && item?.link === null
+                        ? undefined
+                        : () => handleBannerClick(item)
+                    }
+                    sx={{
+                      cursor:
+                        item?.type === "default" && item?.link === null ? "default" : "pointer",
+                    }}
+                  >
+                    <NextImage
+                      src={item?.image_full_url}
+                      alt={item?.title}
+                      height={isExtraSmallScreen ? "150" : isSmallScreen ? "200" : "234"}
+                      width={624}
+                      objectFit="cover"
+                      borderRadius="10px"
                     />
                   </BannersWrapper>
-              ))}
-            </Slider>
-        ) : (
-            bannersData?.length > 0 && (
-                <SliderCustom>
-                  <Slider {...settings}>
-                    {bannersData.map((item, index) => (
-                      <BannersWrapper
-                        key={index}
-                        onClick={
-                          item?.type === "default" && item?.link===null
-                            ? undefined
-                            : () => handleBannerClick(item)
-                        }
-                        sx={{
-                          cursor:
-                            item?.type === "default" && item?.link===null ? "default" : "pointer",
-                        }}
-                      >
-                        <NextImage
-                          src={item?.image_full_url}
-                          alt={item?.title}
-                          height={isExtraSmallScreen ? "150" : isSmallScreen ? "200" : "234"}
-                          width={624}
-                          objectFit="cover"
-                          borderRadius="10px"
-                        />
-                      </BannersWrapper>
-                    ))}
-                  </Slider>
-                </SliderCustom>
-            )
+                ))}
+              </Slider>
+            </SliderCustom>
+          )
         )}
       </CustomStackFullWidth>
 

@@ -1,9 +1,6 @@
 import { NoSsr } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
-
 import React, { useEffect, useState } from "react";
-import { getImageUrl } from "utils/CustomFunctions";
-
 import MainLayout from "../../src/components/layout/MainLayout";
 import SEO from "../../src/components/seo";
 import CustomContainer from "../../src/components/container";
@@ -11,8 +8,12 @@ import DeliveryManComponent from "../../src/components/deliveryman-registration/
 import { useDispatch, useSelector } from "react-redux";
 import { useGetConfigData } from "api-manage/hooks/useGetConfigData";
 import { setConfigData } from "redux/slices/configData";
+import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
+import { processMetadata } from "utils/fetchPageMetaData";
 
-const Index = () => {
+const Index = ({ metaData }) => {
+
+
   const dispatch = useDispatch();
   const { landingPageData, configData } = useSelector(
     (state) => state.configData
@@ -28,26 +29,27 @@ const Index = () => {
       dispatch(setConfigData(dataConfig));
     }
   }, [dataConfig]);
-
+  const metadata = processMetadata(metaData, {
+    title: metaData?.title || `Deliveryman Registration - ${configData?.business_name}`,
+    description: metaData?.description || '',
+    image: `${metaData?.image || configData?.logo_full_url}`,
+    robotsMeta: metaData?.robotsMeta || ''
+  })
   return (
     <>
       <CssBaseline />
       <SEO
-        title={configData ? `Deliveryman Registration` : "Loading..."}
-        image={`${getImageUrl(
-          { value: configData?.logo_storage },
-          "business_logo_url",
-          configData
-        )}/${configData?.fav_icon}`}
-        businessName={configData?.business_name}
+        title={metadata.title}
+        description={metadata.description}
+        image={metadata.image}
+        robotsMeta={metadata.robotsMeta}
         configData={configData}
       />
-      <MainLayout configData={configData} landingPageData={landingPageData}>
+      <MainLayout configData={configData} >
         <NoSsr>
           <CustomContainer>
             <DeliveryManComponent
               configData={configData}
-              landingPageData={landingPageData}
             />
           </CustomContainer>
         </NoSsr>
@@ -57,3 +59,7 @@ const Index = () => {
 };
 
 export default Index;
+export const getServerSideProps = async (context) => {
+  return await getCommonServerSideProps(context, 'deliveryman_join_page')
+}
+

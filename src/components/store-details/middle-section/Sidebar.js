@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useReducer, useState} from "react";
+import React, {useEffect, useMemo, useReducer, useRef, useState} from "react";
 import { Scrollbar } from "../../srollbar";
 import {
   Drawer,
@@ -169,6 +169,29 @@ const Sidebar = (props) => {
     noSsr: true,
   });
   const [minMax, setMinMax] = useState([0, 0]);
+  const skipNextMinMaxSyncRef = useRef(false);
+
+  useEffect(() => {
+    const range = Array.isArray(priceFilterRange)
+      ? priceFilterRange?.[0]
+      : priceFilterRange;
+    const min = Number(range?.min_price);
+    const max = Number(range?.max_price);
+    if (!Number.isFinite(min) || !Number.isFinite(max)) return;
+
+    setMinMax((prev) => {
+      const prevMin = Number(prev?.[0] ?? 0);
+      const prevMax = Number(prev?.[1] ?? 0);
+      const isUninitialized =
+        !Number.isFinite(prevMin) ||
+        !Number.isFinite(prevMax) ||
+        (prevMin === 0 && prevMax === 0);
+      if (!isUninitialized) return prev;
+
+      skipNextMinMaxSyncRef.current = true;
+      return [min, max];
+    });
+  }, [priceFilterRange]);
   const handleOnSuccess = (res) => {
     if (ownCategories?.length > 0 && res?.data?.length > 0) {
       const common = res?.data?.filter((item) =>
@@ -193,27 +216,36 @@ const Sidebar = (props) => {
       value[0] = priceFilterRange?.[0]?.min_price;
     }
     setMinMax(value);
-    handleChangePrice(value);
   };
 
   const handleMinChange = useMemo(
     () =>
       debounce((value) => {
-        setMinMax([+value, minMax[1]]);
+        const parsed = Number(value);
+        if (!Number.isFinite(parsed)) return;
+        const nextMin = Math.max(0, parsed);
+        setMinMax((prev) => [nextMin, prev?.[1] ?? 0]);
       }, 200),
-    [minMax]
+    []
   );
 
   const handleMaxChange = useMemo(
     () =>
       debounce((value) => {
-        setMinMax([minMax[0], +value]);
+        const parsed = Number(value);
+        if (!Number.isFinite(parsed)) return;
+        const nextMax = Math.max(0, parsed);
+        setMinMax((prev) => [prev?.[0] ?? 0, nextMax]);
       }, 200),
-    [minMax]
+    []
   );
   useEffect(() => {
+    if (skipNextMinMaxSyncRef.current) {
+      skipNextMinMaxSyncRef.current = false;
+      return;
+    }
     if(minMax[1]>0){
-      handleChangePrice(minMax);
+      handleChangePrice?.(minMax);
     }
   }, [minMax]);
   const categoriesCheckBoxHandler = (data) => {
@@ -239,9 +271,9 @@ const Sidebar = (props) => {
         </Typography>
       )}
       {state.categories?.length > 0 && (
-        <CustomPaperBox>
+        <>
           <CustomStackFullWidth p="1rem">
-            <Scrollbar style={{ maxHeight: "300px" }} scrollbarMinSize={5}>
+            <>
               {state.categories?.length > 0 &&
                 state.categories?.map((item, index) => {
                   return (
@@ -253,10 +285,10 @@ const Sidebar = (props) => {
                     />
                   );
                 })}
-            </Scrollbar>
+            </>
             {/*</List>*/}
           </CustomStackFullWidth>
-        </CustomPaperBox>
+        </>
       )}
       {isFetching && (
         <CustomPaperBox>
@@ -284,7 +316,7 @@ const Sidebar = (props) => {
         <Typography fontWeight="bold" color={theme.palette.neutral[1000]}>
           {t("Price Range")}
         </Typography>
-        <CustomPaperBox>
+        <>
           <CustomStackFullWidth p="1rem" spacing={1} key={"12"}>
             <CustomDivider />
             <CustomSlider
@@ -306,6 +338,9 @@ const Sidebar = (props) => {
                 type="number"
                 value={minMax[0] <= 0 ? "" : minMax[0]}
                 onChange={(e) => handleMinChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (["-", "e", "E", "+"].includes(e.key)) e.preventDefault();
+                }}
                 InputProps={{
                   startAdornment: (
                     <Box component="span" sx={{ mr: 1 }}>
@@ -313,6 +348,7 @@ const Sidebar = (props) => {
                     </Box>
                   ),
                 }}
+                inputProps={{ min: 0 }}
                 sx={{
                   "& input[type=number]": {
                     MozAppearance: "textfield", // for Firefox
@@ -330,15 +366,15 @@ const Sidebar = (props) => {
                   },
                 }}
               />
-
-
               <Typography>-</Typography>
-
               {/* Max Value Input */}
               <TextField
                 type="number"
                 value={minMax[1] === 0 ? "" : minMax[1]}
                 onChange={(e) => handleMaxChange(e.target.value)}
+                onKeyDown={(e) => {
+                  if (["-", "e", "E", "+"].includes(e.key)) e.preventDefault();
+                }}
                 InputProps={{
                   startAdornment: (
                     <Box component="span" sx={{ mr: 1 }}>
@@ -346,6 +382,7 @@ const Sidebar = (props) => {
                     </Box>
                   ),
                 }}
+                inputProps={{ min: 0 }}
                 sx={{
                   "& input[type=number]": {
                     MozAppearance: "textfield", // for Firefox
@@ -366,7 +403,7 @@ const Sidebar = (props) => {
             </CustomStackFullWidth>
 
           </CustomStackFullWidth>
-        </CustomPaperBox>
+        </>
       </CustomStackFullWidth>
     </CustomStackFullWidth>
   );

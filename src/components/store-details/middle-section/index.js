@@ -38,6 +38,9 @@ import DotSpin from "../../DotSpin";
 import SearchIcon from "@mui/icons-material/Search";
 import StoreFilter from "components/store-details/middle-section/StoreFilter";
 import {filterTypeItems} from "components/search/filterTypes";
+import { CustomPaperBox } from "components/multiple-checkbox-with-title";
+import useScrollYThresholdValue from "api-manage/hooks/custom-hooks/useScrollYThresholdValue";
+import { Scrollbar } from "components/srollbar";
 
 export const handleShimmerProducts = () => {
   return (
@@ -414,7 +417,7 @@ const MiddleSection = (props) => {
 
   let moduleId = getModuleId()
     ? getModuleId()
-    : parseInt(router.query.module_id);
+    : parseInt(router.query.module || router.query.module_id);
   const handleSearchResult = (value) => {
     setOffset(1);
     dispatch({ type: ACTION.setOffSet, payload: 1 });
@@ -495,11 +498,18 @@ const MiddleSection = (props) => {
 
     }
   }
+  const scrollbarMaxHeight = useScrollYThresholdValue({
+      threshold: 300,
+      belowValue: "45vh",
+      aboveValue: "100vh",
+    });
+    console.log({scrollbarMaxHeight});
+    
   return (
     <NoSsr>
       <CustomBoxFullWidth>
         {moduleId && (
-          <Grid container sx={{ mt: { xs: "5px", sm: "20px" } }}>
+          <Grid container sx={{ mt: { xs: "5px", sm: "20px" } }} spacing={2}>
             <Grid
               item
               xs={12}
@@ -652,7 +662,20 @@ const MiddleSection = (props) => {
                 }}
               ></Stack>
             </Grid>
-            <Grid item xs={0} sm={0} md={0} lg={3}>
+            <Grid item xs={0} sm={0} md={0} lg={3} >
+              <CustomPaperBox sx={{
+                position: "sticky",
+                top: "90px",
+                paddingY:"1.5rem"
+                //height:"100%"
+                
+              }}>
+                <Scrollbar  style={{
+	            maxHeight: scrollbarMaxHeight,
+	            transition: "max-height 300ms ease",
+	            willChange: "max-height",
+              
+	          }} scrollbarMinSize={5}>
               <Sidebar
                 {...props}
                 onClose={() =>
@@ -682,6 +705,8 @@ const MiddleSection = (props) => {
                 ratingCount={ratingCount}
                 setRatingCount={setRatingCount}
               />
+              </Scrollbar>
+              </CustomPaperBox>
             </Grid>
             <Grid
               item

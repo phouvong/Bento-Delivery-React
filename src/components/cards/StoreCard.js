@@ -1,5 +1,7 @@
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { alpha, Grid, Stack, styled, Tooltip, Typography } from "@mui/material";
+import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
+
 import { Box } from "@mui/system";
 import { useAddStoreToWishlist } from "api-manage/hooks/react-query/wish-list/useAddStoreToWishLists";
 import { useWishListStoreDelete } from "api-manage/hooks/react-query/wish-list/useWishListStoreDelete";
@@ -149,19 +151,10 @@ const StoreCard = (props) => {
     });
   };
   const handleClick = () => {
-    router.push({
-      pathname: getCurrentModuleType() === "rental"
-        ? `/rental/provider-details/${item?.id}`
-        : `/store/[id]`,
-      query: {
-        id: `${item?.slug ? item?.slug : item?.id}`,
-        module_id: `${item?.module_id}`,
-        module_type: getCurrentModuleType(),
-        store_zone_id: `${item?.zone_id}`,
-        distance: item?.distance,
-      },
-    });
+    handleStoreRedirect(item, router);
   };
+  console.log({isWishlisted});
+  
   return (
     <Wrapper
       spacing={2}

@@ -34,7 +34,7 @@ const Index = () => {
         title={configData ? `Parcel Deliver information` : "Loading..."}
         image={`${getImageUrl(
           { value: configData?.logo_storage },
-          "business_logo_url",
+          "logo_full_url",
           configData
         )}/${configData?.fav_icon}`}
         businessName={configData?.business_name}

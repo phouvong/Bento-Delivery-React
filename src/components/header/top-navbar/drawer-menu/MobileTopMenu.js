@@ -153,7 +153,7 @@ const MobileTopMenu = ({
                     value={collapsableMenu.latest}
                     setOpenDrawer={setOpenDrawer}
                     toggleDrawers={toggleDrawer}
-                    pathName="/store/latest"
+                    pathName="/store/new"
                   />
                   <CollapsableMenu
                     value={collapsableMenu.popularStore}

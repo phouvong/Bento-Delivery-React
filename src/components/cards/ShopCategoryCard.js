@@ -8,6 +8,7 @@ import { textWithEllipsis } from "../../styled-components/TextWithEllipsis";
 import CustomImageContainer from "../CustomImageContainer";
 import NextImage from "components/NextImage";
 import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
+import { useRouter } from "next/router";
 
 const Wrapper = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -39,25 +40,29 @@ const ImageWrapper = styled(CustomBoxFullWidth)(({ theme }) => ({
 }));
 
 const ShopCategoryCard = (props) => {
+  const router = useRouter();
   const { item, imageUrl, onlyshimmer } = props;
   const { ref: textRef, isEllipsed } = useTextEllipsis(item?.name);
   const { t } = useTranslation();
   const classes = textWithEllipsis();
   console.log({ isEllipsed });
+  const queryModule = router?.query?.module || router?.query?.module_id;
+    const moduleValue = Array.isArray(queryModule)
+      ? queryModule[0]
+      : queryModule || getModuleId();
 
   return (
     <Wrapper>
-
-
       <Link
         href={{
-          pathname: "/home",
+          pathname: "/search",
           query: {
             search: "category",
             id: `${item?.id}`,
-            module_id: `${getModuleId()}`,
+           
             name: item?.name && item?.name,
             data_type: "category",
+            ...(moduleValue ? { module: String(moduleValue) } : {}),
           },
         }}
       >

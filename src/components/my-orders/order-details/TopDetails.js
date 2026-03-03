@@ -7,6 +7,7 @@ import {
   alpha,
   useMediaQuery,
   useTheme,
+  Drawer,
 } from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
 import { Stack } from "@mui/system";
@@ -35,6 +36,7 @@ import CancelOrder from "./CenacelOrder";
 import DigitalPaymentManage from "./DigitalPaymentManage";
 import OfflineOrderDetailsModal from "./offline-order/OfflineOrderDetailsModal";
 import PaymentUpdate from "./other-order/PaymentUpdate";
+import RateAndReview from "../../review/RateAndReview";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
 import usePostParcelReturn from "api-manage/hooks/react-query/order/usePostParcelReturn";
 import LoadingButton from "@mui/lab/LoadingButton";
@@ -47,6 +49,7 @@ import { useUpdatePaymentByWallet } from "api-manage/hooks/react-query/useUpdate
 import { baseUrl } from "api-manage/MainApi";
 import Router, { useRouter } from "next/router";
 import { useGetFailedPayment } from "api-manage/hooks/react-query/useGetFailedPayment";
+import CustomDivider from "components/CustomDivider";
 
 const TopDetails = (props) => {
   const {
@@ -111,7 +114,6 @@ const TopDetails = (props) => {
     });
   };
 
-  console.log({ paymentMethod });
 
   const buttonBackgroundColor = () => {
     if (trackData?.order_status === "pending") {
@@ -373,7 +375,6 @@ const TopDetails = (props) => {
 
           </Typography>
         )}
-
         <Stack
           direction={{ xs: "column", md: "row" }}
           alignItems={{ xs: "flex-start", md: "center" }}
@@ -487,23 +488,24 @@ const TopDetails = (props) => {
         data?.length > 0 &&
         hasChatAndReview(trackData?.store)?.isReview === 1 && (
           <Stack direction="row" spacing={0.5}>
-            <Link href={`/rate-and-review/${id}`}>
-              <Button
-                variant="outlined"
-                background={theme.palette.error.light}
-                // color={theme.palette.whiteContainer}
-                sx={{
-                  [theme.breakpoints.down("md")]: {
-                    padding: "5px 5px",
-                    fontSize: "10px",
-                  },
-                }}
-              >
-                {" "}
-                {isSmall ? t("Review") : t("Give a review")}
-                {/*{t("Give a review")}*/}
-              </Button>
-            </Link>
+
+            <Button
+              variant="outlined"
+              background={theme.palette.error.light}
+              // color={theme.palette.whiteContainer}
+              sx={{
+                [theme.breakpoints.down("md")]: {
+                  padding: "5px 5px",
+                  fontSize: "10px",
+                },
+              }}
+              onClick={() => setOpenReviewModal(true)}
+            >
+              {" "}
+              {isSmall ? t("Review") : t("Give a review")}
+              {/*{t("Give a review")}*/}
+            </Button>
+
             {configData?.refund_active_status && getToken() && (
               <OrderStatusButton
                 background={theme.palette.error.light}
@@ -798,12 +800,48 @@ const TopDetails = (props) => {
           </Stack>
         </Stack>
       </CustomModal>
-      <CustomModal
-        openModal={openReviewModal}
-        handleClose={() => setOpenReviewModal(false)}
-      >
+      <Drawer
+        anchor="right"
+        open={openReviewModal}
+        onClose={() => setOpenReviewModal(false)}
+        variant="temporary"
+        sx={{
+          zIndex: 1300,
+          "& .MuiDrawer-paper": {
+            width: { xs: "300px", sm: "400px", md: "450px" }, // Responsive width
+            padding: "20px",
+            boxSizing: "border-box",
 
-      </CustomModal>
+          },
+        }}
+      >
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ marginBottom: "10px" }}
+        >
+          <Typography fontSize="16px" fontWeight="700">
+            {t("Give Review")}
+          </Typography>
+          <IconButton
+            onClick={() => setOpenReviewModal(false)}
+            sx={{
+              backgroundColor: (theme) => theme.palette.neutral[200],
+              borderRadius: "50%",
+              padding: "5px",
+              "&:hover": {
+                backgroundColor: (theme) => theme.palette.neutral[300],
+              },
+            }}
+          >
+            <CloseIcon sx={{ fontSize: "16px" }} />
+          </IconButton>
+
+        </Stack>
+        <CustomDivider border="1px" />
+        <RateAndReview  trackData={trackData} onAllItemsReviewed={() => setOpenReviewModal(false)} />
+      </Drawer>
       <CustomModal
         openModal={openPaymentMethod}
         handleClose={() => setOpenPaymentMethod(false)}

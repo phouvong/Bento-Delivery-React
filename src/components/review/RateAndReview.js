@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   CustomPaperBigCard,
   CustomStackFullWidth,
@@ -18,21 +18,53 @@ import nodata from "../../../public/static/nodata.png";
 import { Stack } from "@mui/system";
 
 
-const RateAndReview = () => {
+const RateAndReview = ({ onAllItemsReviewed, trackData }) => {
   const { deliveryManInfo } = useSelector((state) => state.searchFilterStore);
   const [type, setType] = useState("items");
+  const [items, setItems] = useState([]);
+  const loadedOrderId = useRef(null);
   const router = useRouter();
-  const { id } = router.query;
-  const { refetch, data, isRefetching } = useGetOrderDetails(id);
+  const { orderId } = router.query;
+  const { refetch, data, isRefetching } = useGetOrderDetails(orderId);
   const {
     refetch: refetchTrackOrder,
     data: trackOrderData,
-    isRefetching: refetchingTrackOrder,
-  } = useGetTrackOrderData(id);
+  } = useGetTrackOrderData(orderId);
+
+  // Load items when data arrives for a new order, but preserve local state during refetches
+  useEffect(() => {
+    if (data && data.length > 0) {
+      // Check if this is a new order or the first load
+      if (loadedOrderId.current !== orderId) {
+        const unReviewedItems = data.filter((item) => item.isReview === false);
+        setItems(data);
+        loadedOrderId.current = orderId;
+      }
+      // If it's the same order (just a refetch), keep the local items state
+    }
+  }, [data, orderId]);
 
   useEffect(() => {
-    id && refetch() && refetchTrackOrder();
-  }, [id]);
+    if (!orderId) return;
+    refetch();
+    refetchTrackOrder();
+  }, [orderId, refetch, refetchTrackOrder]);
+
+  const handleItemReviewed = (itemId) => {
+    if (itemId) {
+      setItems((prevItems) => {
+        const filtered = prevItems.filter((item) => {
+          return item.id !== itemId;
+        });
+        if (filtered.length === 0) {
+          onAllItemsReviewed?.();
+        }
+        return filtered;
+      });
+    }
+  };
+  console.log({ trackOrderData });
+
   return (
     <CustomStackFullWidth
       alignItems="center"
@@ -42,11 +74,11 @@ const RateAndReview = () => {
 
     >
       <>
-        {isRefetching ? (
+        {isRefetching && !items.length && !data ? (
           <Skeleton variant="ractangle" width="100px" height="100%" />
         ) : (
-          deliveryManInfo &&
-          data?.module_type !== "parcel" && (
+          trackData?.delivery_man &&
+          (data?.module_type !== "parcel" || items?.module_type !== "parcel") && (
             <GroupButtonsRateAndReview
               setType={setType}
               type={type}
@@ -60,32 +92,34 @@ const RateAndReview = () => {
           justifyContent="center"
           spacing={3}
           sx={{
-            maxWidth:"600px"
+            maxWidth: "600px"
           }}
         >
-          {type === "items" && data?.module_type !== "parcel" ? (
-            data ? (
-              data?.map((item, index) => {
+          {type === "items" && (data?.module_type !== "parcel") ? (
+            items?.length > 0 ? (
+              items?.map((item, index) => {
                 return (
-                  <CustomPaperBigCard key={index}>
-                    <ItemForm data={item} />
+                  <CustomPaperBigCard sx={{ padding: { xs: ".5rem", md: "1rem" } }} key={item?.id}>
+                    <ItemForm data={item} onReviewComplete={handleItemReviewed} />
                   </CustomPaperBigCard>
                 );
               })
             ) : (
-              <Shimmer />
+              !isRefetching && <CustomEmptyResult label="No items to review" />
             )
           ) : (
-            <CustomPaperBigCard>
-              {trackOrderData?.delivery_man ? (
+            <CustomPaperBigCard sx={{ padding: { xs: ".5rem", md: "1rem" } }}>
+              {trackData?.delivery_man ? (
                 <DeliverymanForm
-                  data={trackOrderData?.delivery_man}
-                  orderId={id}
+                  data={trackData?.delivery_man}
+                  orderId={orderId}
+                  onReviewComplete={() => onAllItemsReviewed?.()}
                 />
               ) : (
                 <CustomStackFullWidth
                   justifyContent="center"
                   alignItems="center"
+                  paddingBottom="20px"
                 >
                   <Stack
                     width="100%"

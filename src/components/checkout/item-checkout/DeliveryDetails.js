@@ -89,7 +89,7 @@ const DeliveryDetails = (props) => {
 					gap={{ xs: "5px", md: "10px" }}
 					sx={{ flexWrap: { xs: "wrap", sm: "wrap", md: "nowrap" } }}
 				>
-					{ isHomeDelivery===1 && (
+					{ isHomeDelivery && (
 						<DeliveryOptionButton
 							fullwidth="true"
 							orderType={orderType === "delivery"}

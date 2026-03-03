@@ -10,6 +10,8 @@ import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { useAddToWishlist } from "api-manage/hooks/react-query/wish-list/useAddWishList";
 import { getCartListModuleWise } from "helper-functions/getCartListModuleWise";
 import { getModuleId } from "helper-functions/getModuleId";
+import { getStoreRedirectURL } from "helper-functions/handleStoreRedirect";
+
 import { getGuestId } from "helper-functions/getToken";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -292,6 +294,8 @@ const ProductInformation = ({
 			});
 		} else toast.error(t(not_logged_in_message));
 	};
+	console.log({state});
+	
 
 	const topInformation = () => {
 		return (
@@ -306,16 +310,12 @@ const ProductInformation = ({
 				{state.modalData[0]?.store_name ? (
 					router.pathname !== `/store/[id]` ? (
 						<Link
-							href={{
-								pathname: "/store/[id]",
-								query: {
-									id: `${state.modalData[0]?.store_id}`,
-									module_id: `${getModuleId()}`,
-									lat: currentLocation?.lat,
-									lng: currentLocation?.lng,
-									store_zone_id: `${state?.modalData[0]?.zone_id}`,
-								},
-							}}
+							href={getStoreRedirectURL(state.modalData[0]?.store_details|| {
+							id:productDetailsData?.store_id,
+							slug:productDetailsData?.store_slug,
+						}, 
+							
+							)}
 						>
 							{" "}
 							<Typography

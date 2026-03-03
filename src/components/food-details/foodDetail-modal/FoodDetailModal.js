@@ -48,6 +48,7 @@ import useCartItemUpdate from "../../../api-manage/hooks/react-query/add-cart/us
 import { getGuestId } from "helper-functions/getToken";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import {useGetItemDetails} from "api-manage/hooks/react-query/product-details/useGetItemDetails";
+import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
 
 const FoodDetailModal = ({
   product:fromCard,
@@ -59,6 +60,7 @@ const FoodDetailModal = ({
   addToWishlistHandler,
   removeFromWishlistHandler,
   isWishlisted,
+  setOpenLocationAlert
 }) => {
   const router = useRouter();
   const { t } = useTranslation();
@@ -85,6 +87,10 @@ const FoodDetailModal = ({
   let token = undefined;
   if (typeof window !== "undefined") {
     token = localStorage.getItem("token");
+  }
+  let location = undefined;
+  if (typeof window !== "undefined") {
+    location = localStorage.getItem("location");
   }
   const handleSuccessItem = (resData) => {
   }
@@ -508,7 +514,8 @@ const FoodDetailModal = ({
     }
   };
   const addToCard = (status) => {
-    let checkingFor = status ? status : "cart";
+    if(location){
+let checkingFor = status ? status : "cart";
     if (cartList?.length > 0) {
       //checking same restaurant items already exist or not
       const isRestaurantExist = cartList.find(
@@ -529,6 +536,10 @@ const FoodDetailModal = ({
     } else {
       handleAddToCartOnDispatch(checkingFor);
     }
+    }else{
+      setOpenLocationAlert?.(true);
+    }
+    
   };
   const clearCartAlert = () => {
     dispatch(setClearCart());
@@ -814,17 +825,10 @@ const FoodDetailModal = ({
 
   const handleRouteToStore = () => {
     if (router.pathname !== `/store/[id]`) {
-      router.push({
-        pathname: `/store/[id]`,
-        query: {
-          id: modalData[0]?.store_id,
-          module_id: `${modalData[0]?.module_id}`,
-          module_type: getCurrentModuleType(),
-          store_zone_id: `${modalData[0].zone_id}`,
-        },
-      });
+     handleStoreRedirect(modalData[0]?.store_details, router);
     }
   };
+console.log({ modalData });
 
   return (
     <>

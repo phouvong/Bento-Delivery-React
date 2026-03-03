@@ -69,11 +69,11 @@ function runScanner() {
     // Add debouncing to prevent multiple rapid executions
     clearTimeout(watcher.debounceTimer);
     watcher.debounceTimer = setTimeout(() => {
-        console.log("🔄 Running i18next-scanner...");
+        console.log("🔄 Running i18n scan...");
 
-        exec("npx i18next-scanner", { cwd: __dirname }, (err, stdout, stderr) => {
+        exec("node i18n-scan.js", { cwd: __dirname }, (err, stdout, stderr) => {
             if (err) {
-                console.error("❌ Error running i18next-scanner:", err.message);
+                console.error("❌ Error running i18n scan:", err.message);
                 return;
             }
 

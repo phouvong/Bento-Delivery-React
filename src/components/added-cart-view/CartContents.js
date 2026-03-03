@@ -29,7 +29,7 @@ const CartContents = (props) => {
 
       <SimpleBar
         style={{
-          maxHeight: "60vh",
+          maxHeight: "70vh",
           width: "100%",
         }}
       >

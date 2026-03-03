@@ -15,10 +15,11 @@ import AddressReselect from "../top-navbar/address-reselect/AddressReselect";
 import DrawerMenu from "../top-navbar/drawer-menu/DrawerMenu";
 import MobileModuleSelection from "./mobile-module-select";
 import CustomLogo from "components/logo/CustomLogo";
+import { useRouter } from "next/router";
 
 const ModuleWiseNav = (props) => {
 	const {
-		router,
+
 		configData,
 		token,
 		setToggled,
@@ -26,7 +27,7 @@ const ModuleWiseNav = (props) => {
 		setOpenSignIn,
 		setModalFor,
 	} = props;
-
+	const router = useRouter()
 	const { modules } = useSelector((state) => state.configData);
 	const [openDrawer, setOpenDrawer] = useState(false);
 	const { data, refetch } = useGetModule();
@@ -141,7 +142,7 @@ const ModuleWiseNav = (props) => {
 							>
 								<Grid
 									item
-									xs={router.pathname === "/home" ? 2 : 4}
+									xs={router.pathname === "/home" ? Object.keys(router.query).length > 0 ? 2 : 2 : 4}
 									sm={4}
 									align="left"
 									justifyItems="flex-start"
@@ -157,12 +158,9 @@ const ModuleWiseNav = (props) => {
 										getIcon()
 									)}
 								</Grid>
-								{location ? (
-									<Grid
+								<Grid
 										item
-										xs={
-											router.pathname === "/home" ? 10 : 8
-										}
+										xs={router.pathname === "/home" ? Object.keys(router.query).length > 0 ? 8 : 10 : 8}
 										sm={8}
 										align="left"
 									>
@@ -172,15 +170,6 @@ const ModuleWiseNav = (props) => {
 											openDrawer={openDrawer}
 										/>
 									</Grid>
-								) : (
-									<Grid
-										item
-										xs={
-											router.pathname === "/home" ? 2 : 10
-										}
-										sm={11}
-									></Grid>
-								)}
 							</Grid>
 						</CustomBoxFullWidth>
 					</Grid>

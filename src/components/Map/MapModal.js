@@ -58,6 +58,7 @@ const MapModal = ({
   fromReceiver,
   fromStore,
   selectedLocation,
+  fromparcel
 }) => {
   const router = useRouter();
   const theme = useTheme();
@@ -218,8 +219,18 @@ const MapModal = ({
         handleClose();
       } else {
         if (fromStore) {
-          window.location.reload();
-          handleClose();
+          if (fromparcel) {
+            localStorage.setItem(
+              "location",
+              geoCodeResults?.results[0]?.formatted_address
+            );
+            localStorage.setItem("currentLatLng", JSON.stringify(location));
+            handleClose();
+          } else {
+            window.location.reload();
+            handleClose();
+          }
+
         } else if (location && selectedModule) {
           window.location.reload();
           handleClose();
@@ -256,9 +267,10 @@ const MapModal = ({
           expand={isModalExpand ? "true" : "false"}
           sx={{
             display: openModuleSelection ? "none" : "inherit",
-            padding: { xs: "15px", md: "2rem" },
+            padding: { xs: "15px", md: "1.5rem" },
             borderRadius: isModalExpand ? "0px" : { xs: "8px", md: "20px" },
             position: "relative",
+            minHeight: "400px"
           }}
         >
           <IconButton
@@ -286,10 +298,20 @@ const MapModal = ({
                 color={theme.palette.neutral[500]}
               >
                 {t(
-                  "Sharing your accurate location enhances precision in search results and delivery estimates, ensures effortless order delivery."
+                  "Sharing your location improves search accuracy and delivery estimates for smoother order delivery."
                 )}
               </Typography>
-              <CustomStackFullWidth>
+              <CustomStackFullWidth
+                sx={{
+                  position: { xs: "relative", md: "absolute" },
+                  width: { xs: "100%", md: "90%" },
+                  top: { md: "20%" },
+                  zIndex: 999,
+                  maxWidth: { xs: "100%", md: "600px" },
+                  right: { md: "5%" },
+                  mt: { xs: 1, md: 0 },
+                }}
+              >
                 {loadingAuto ? (
                   <Skeleton width="100%" height="40px" variant="rectangular" />
                 ) : (
@@ -321,6 +343,9 @@ const MapModal = ({
                           borderRadius: "4px",
                           border: (theme) =>
                             `1px solid ${theme.palette.neutral[200]}`,
+                          "& .MuiOutlinedInput-root": {
+                            height: "40px",
+                          },
                         }}
                         frommap="true"
                         label={null}
@@ -346,10 +371,11 @@ const MapModal = ({
               </CustomStackFullWidth>
               <CustomBoxFullWidth
                 sx={{
-                  mt: 2,
+                  mt: 1,
                   color: (theme) => theme.palette.neutral[1000],
                   p: "5px",
                   position: "relative",
+
                 }}
               >
                 <LocationView>
@@ -368,6 +394,7 @@ const MapModal = ({
                 </LocationView>
                 {!!location ? (
                   <GoogleMapComponent
+                    mapmodal
                     setDisablePickButton={setDisablePickButton}
                     setLocationEnabled={setLocationEnabled}
                     setLocation={handleLocationSet}
@@ -384,6 +411,9 @@ const MapModal = ({
                   <CustomStackFullWidth
                     alignItems="center"
                     justifyContent="center"
+                    sx={{
+                      minHeight: "300px",
+                    }}
                   >
                     <FacebookCircularProgress />
                     <CustomTypographyGray nodefaultfont="true">
@@ -414,49 +444,68 @@ const MapModal = ({
                   />
                 </WrapperCurrentLocationPick>
               </CustomBoxFullWidth>
-              <CustomStackFullWidth
-                justifyCenter="center"
-                alignItems="center"
+            </SimpleBar>
+            <CustomStackFullWidth
+              alignItems="center"
+              justifyContent="flex-end"
+              direction={{ xs: "column", md: "row" }}
+              sx={{
+                gap: "1rem",
+                paddingInlineEnd: "1rem",
+                width: "100%",
+              }}
+            >
+              <Button
+                onClick={handleClose}
+                variant="outlined"
                 sx={{
-                  position: "sticky",
-                  bottom: 0,
-                  zIndex: 9,
+                  width: { xs: "100%", md: "auto" },   // 👈 full width only mobile
+                  minWidth: { md: "150px" },
+                  backgroundColor: theme => theme.palette.neutral[300],
+                  color: theme => theme.palette.neutral[1000],
                 }}
               >
-                {errorLocation?.response?.data ? (
-                  <Button
-                    aria-label="picklocation"
-                    sx={{
-                      flex: "1 0",
-                      width: "100%",
-                      top: "-3rem",
-                    }}
-                    disabled={locationLoading}
-                    variant="contained"
-                    color="error"
-                    onClick={() => {
-                      if (zoneId) {
-                        localStorage.setItem("zoneid", zoneId);
-                      }
-                      handleClose();
-                    }}
-                  >
-                    {errorLocation?.response?.data?.errors[0]?.message}
-                  </Button>
-                ) : (
-                  <PrimaryButton
-                    disabled={
-                      isLoading ||
-                      !geoCodeResults?.results[0]?.formatted_address
+                {t("Cancel")}
+              </Button>
+
+              {errorLocation?.response?.data ? (
+                <Button
+                  aria-label="picklocation"
+                  disabled={locationLoading}
+                  variant="contained"
+                  color="error"
+                  sx={{
+                    width: { xs: "100%", md: "auto" },  // 👈 full width only mobile
+                    minWidth: { md: "150px" },
+                  }}
+                  onClick={() => {
+                    if (zoneId) {
+                      localStorage.setItem("zoneid", zoneId);
                     }
-                    variant="contained"
-                    onClick={() => handlePickLocationOnClick()}
-                  >
-                    {t("Pick Locations")}
-                  </PrimaryButton>
-                )}
-              </CustomStackFullWidth>
-            </SimpleBar>
+                    handleClose();
+                  }}
+                >
+                  {errorLocation?.response?.data?.errors[0]?.message}
+                </Button>
+              ) : (
+                <Button
+                  disabled={
+                    isLoading ||
+                    !geoCodeResults?.results[0]?.formatted_address
+                  }
+                  variant="contained"
+                  sx={{
+                    width: { xs: "100%", md: "auto" },  // 👈 full width only mobile
+                    minWidth: { md: "150px" },
+                  }}
+                  onClick={() => handlePickLocationOnClick()}
+                >
+                  {t("Pick Locations")}
+                </Button>
+              )}
+            </CustomStackFullWidth>
+
+
           </CustomStackFullWidth>
         </CustomBoxWrapper>
       </Modal>

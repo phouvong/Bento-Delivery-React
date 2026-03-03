@@ -225,9 +225,8 @@ export const OfferTypography = styled(Typography)(
         ? "10px 15px 10px 22px"
         : "10px 30px 10px 15px ",
     // borderRadius: '10px 0px 50px',
-    borderRadius: `${
-      language_direction === "rtl" ? "0px 10px 0px 50px" : "10px 0px 50px"
-    }`,
+    borderRadius: `${language_direction === "rtl" ? "0px 10px 0px 50px" : "10px 0px 50px"
+      }`,
     // borderRadius: '0px 10px 0px 50px',
     fontWeight: 500,
     // justifyContent: `${language_direction === 'rtl' ? 'right' : 'left'}`,

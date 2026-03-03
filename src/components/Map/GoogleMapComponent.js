@@ -10,6 +10,7 @@ import {
   alpha,
   CircularProgress,
   IconButton,
+  Modal,
   Stack,
   useMediaQuery,
 } from "@mui/material";
@@ -18,6 +19,7 @@ import pickMarker from "./assets/pick_marker.png";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { darkStyles, grayMapStyle } from "../mapColor.js";
+import ModalExtendShrink from "./ModalExtendShrink";
 
 const GoogleMapComponent = ({
   setDisablePickButton,
@@ -30,18 +32,26 @@ const GoogleMapComponent = ({
   setPlaceDescription,
   height,
   isModalExpand,
+  setIsModalExpand,
+  t = (text) => text,
   left,
   bottom,
   polygonPaths,
-  fromVendor
+  fromVendor,
+  mapmodal
 }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+  const [localExpanded, setLocalExpanded] = useState(false);
+  const expanded =
+    typeof isModalExpand === "boolean" ? isModalExpand : localExpanded;
+  const setExpanded =
+    typeof setIsModalExpand === "function" ? setIsModalExpand : setLocalExpanded;
   const containerStyle = {
-    width: "100%",
-    maxHeight: isModalExpand ? "70dvh" : "50dvh",
-    height: isModalExpand
-      ? "90vh"
+    width: expanded ? "100vw" : "100%",
+    maxHeight: expanded ? "100dvh" : "50dvh",
+    height: expanded
+      ? "100dvh"
       : height
         ? height
         : isSmall
@@ -64,9 +74,10 @@ const GoogleMapComponent = ({
       streetViewControl: false,
       mapTypeControl: false,
       fullscreenControl: false,
+        disableDefaultUI: true,
       styles: theme.palette.mode === "dark" ? darkStyles : grayMapStyle,
     }),
-    []
+    [theme.palette.mode]
   );
 
   const { isLoaded } = useJsApiLoader({
@@ -174,14 +185,15 @@ const GoogleMapComponent = ({
     }
   }, [map, location]);
 
-  return isLoaded ? (
+  const MapContent = (
     <Stack
       padding="0px"
       sx={{
-        boxShadow: "inset 0px 4px 4px rgba(0, 0, 0, 0.1)",
-        borderRadius: "10px",
+        boxShadow: expanded ? "none" : "inset 0px 4px 4px rgba(0, 0, 0, 0.1)",
         p: "4px",
         position: "relative",
+        width: expanded ? "100vw" : "100%",
+        height: expanded ? "100dvh" : "auto",
       }}
     >
       <Stack
@@ -219,6 +231,22 @@ const GoogleMapComponent = ({
           <RemoveIcon color="primary" />
         </IconButton>
       </Stack>
+      {!mapmodal && (
+        <Stack
+          position="absolute"
+          zIndex={1}
+          sx={{
+            right: { xs: "10px", sm: "12px" },
+            bottom: { xs: "20px", sm: "80px", md: "70px" },
+          }}
+        >
+          <ModalExtendShrink
+            isModalExpand={expanded}
+            setIsModalExpand={setExpanded}
+            t={t}
+          />
+        </Stack>
+      )}
       <GoogleMap
         mapContainerStyle={containerStyle}
         center={map ? undefined : (center ?? centerPosition)}
@@ -319,6 +347,7 @@ const GoogleMapComponent = ({
               marginLeft: -11,
               left: "50%",
               top: "50%",
+              minHeight: "300px",
             }}
           >
             <CircularProgress />
@@ -326,6 +355,25 @@ const GoogleMapComponent = ({
         )}
       </GoogleMap>
     </Stack>
+  );
+
+  return isLoaded ? (
+    expanded ? (
+      <Modal open={expanded} onClose={() => setExpanded(false)}>
+        <Stack
+          sx={{
+            width: "100vw",
+            height: "100dvh",
+            backgroundColor: theme.palette.background.paper,
+            outline: "none",
+          }}
+        >
+          {MapContent}
+        </Stack>
+      </Modal>
+    ) : (
+      MapContent
+    )
   ) : (
     <></>
   );

@@ -71,17 +71,17 @@ const deliveryManValidationSchema = () => {
       .required("Profile image is required")
       .test("fileType", "Only images are allowed", (value) =>
         value
-          ? ["image/jpeg", "image/png", "image/jpg" ,"image/webp"].includes(value.type)
+          ? ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(value.type)
           : false
       ),
 
-    // identity_image: Yup.mixed()
-    //   .required("Identity image is required")
-    //   .test("fileType", "Only images are allowed", (value) =>
-    //     value
-    //       ? ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-    //       : false
-    //   ),
+    identity_image: Yup.mixed()
+      .required("Identity image is required")
+      .test("fileType", "Only images are allowed", (value) =>
+        value
+          ? ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
+          : false
+      ),
   });
 };
 

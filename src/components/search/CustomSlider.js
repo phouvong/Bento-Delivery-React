@@ -19,18 +19,20 @@ const StyledSlider = styled(Slider)(({ theme }) => ({
 }));
 
 const CustomSlider = ({
-                        handleChangePrice,
-                        minMax,
-                        priceFilterRange,
-                        store,
-                        rentalPriceFilterRange,
-                      }) => {
+  handleChangePrice,
+  minMax,
+  priceFilterRange,
+  store,
+  rentalPriceFilterRange,
+}) => {
   const { filterData } = useSelector((state) => state.searchFilterStore);
   const [value, setValue] = useState(
     (rentalPriceFilterRange || minMax).map(Number)
   );
   const minDistance = 1;
   const isMount = useIsMount();
+  console.log({ priceFilterRange });
+
 
   const handleChange = (event, newValue, activeThumb) => {
     if (!Array.isArray(newValue)) return;

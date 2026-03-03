@@ -29,6 +29,13 @@ const HomeSearch = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [searchRef]);
+  useEffect(() => {
+    const handleRouteChange = () => setOpenSearchSuggestions(false);
+    router.events.on("routeChangeStart", handleRouteChange);
+    return () => {
+      router.events.off("routeChangeStart", handleRouteChange);
+    };
+  }, [router.events]);
   const handleSearchResult = (value) => {
     localStorage.setItem("searchValue", value);
     router.push(

@@ -61,7 +61,7 @@ export const FoodHalalHaram = ({ position, width }) => {
           position: position ? position : "absolute",
           bottom: position === "relative" ? "" : "10px",
           left: position === "relative" ? "" : "10px",
-          zIndex: "999",
+          zIndex: "9",
           img: {
             objectFit: "contain",
           },

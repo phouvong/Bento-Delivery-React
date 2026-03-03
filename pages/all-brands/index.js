@@ -3,24 +3,27 @@ import React from "react";
 import Brands from "../../src/components/home/brands";
 import MainLayout from "../../src/components/layout/MainLayout";
 import SEO from "../../src/components/seo";
-import { getServerSideProps } from "../index";
-import { getImageUrl } from "utils/CustomFunctions";
+import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
+import { processMetadata } from "utils/fetchPageMetaData";
 
-const Index = ({ configData, landingPageData }) => {
+const Index = ({ configData,metaData, }) => {
+  const metadata = processMetadata(metaData, {
+    title: `All Brands - ${configData?.business_name}`,
+    description: metaData?.description || '',
+    image: `${metaData?.image || configData?.logo_full_url}`,
+    robotsMeta: metaData?.robotsMeta || ''
+  })
   return (
     <>
       <CssBaseline />
       <SEO
-        title={configData ? `All Brands` : "Loading..."}
-        image={`${getImageUrl(
-          { value: configData?.logo_storage },
-          "business_logo_url",
-          configData
-        )}/${configData?.fav_icon}`}
-        businessName={configData?.business_name}
+        title={metadata.title}
+        description={metadata.description}
+        image={metadata.image}
+        robotsMeta={metadata.robotsMeta}
         configData={configData}
       />
-      <MainLayout configData={configData} landingPageData={landingPageData}>
+      <MainLayout configData={configData} >
         <Brands viewAll />
       </MainLayout>
     </>
@@ -28,4 +31,6 @@ const Index = ({ configData, landingPageData }) => {
 };
 
 export default Index;
-export { getServerSideProps };
+export const getServerSideProps = async (context) => {
+    return await getCommonServerSideProps(context, 'brands_page')
+}

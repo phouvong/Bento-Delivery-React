@@ -1,4 +1,6 @@
 import React, { useEffect } from "react";
+import { handleStoreRedirect } from "../../../../helper-functions/handleStoreRedirect";
+
 import {
   CustomStackFullWidth,
   CustomTypographyGray,
@@ -45,24 +47,12 @@ const NavPopularStore = () => {
   }, [data]);
 
   const handleClick = (item) => {
-    if (getCurrentModuleType() === "rental") {
-      router.push({
-        pathname: `/rental/provider-details/${item?.id}`,
-      });
-    } else {
-      router.push({
-        pathname: "/store/[id]",
-        query: {
-          id: `${item?.slug ? item?.slug : item?.id}`,
-          module_id: `${getModuleId()}`,
-          module_type: getCurrentModuleType(),
-          store_zone_id: `${item?.zone_id}`,
-          distance: item?.distance,
-        },
-      });
-    }
+     console.log({item});
+    handleStoreRedirect(item, router);
   };
   const popular = t("Popular");
+ 
+  
 
   return (
     <CustomStackFullWidth spacing={4}>
@@ -109,7 +99,7 @@ const NavPopularStore = () => {
           </Stack>
         )}
         <Stack width="70%" justifyContent="flex-start" alignItems="center">
-          <ViewMore redirect={getCurrentModuleType() === "rental" ? "/rental/provider/popular":  "/store/popular"} />
+          <ViewMore redirect={getCurrentModuleType() === "rental" ? "/rental/provider/popular" : "/store/popular"} />
         </Stack>
       </Stack>
     </CustomStackFullWidth>

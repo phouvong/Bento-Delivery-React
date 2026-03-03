@@ -58,9 +58,19 @@ import NextImage from "components/NextImage";
 import trackImage from "./assets/fi_2726193.png"
 const AuthModal = dynamic(() => import("components/auth/AuthModal"));
 
-const Cart = ({ isLoading }) => {
+const parseJsonFromStorage = (value) => {
+  if (!value) return null;
+  try {
+    return JSON.parse(value);
+  } catch {
+    return null;
+  }
+};
+
+const Cart = ({ isLoading,refetch }) => {
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
   const { cartList } = useSelector((state) => state.cart);
+   // const { refetch } = useGetAllCartList();
   const handleIconClick = () => {
     setSideDrawerOpen(true);
   };
@@ -83,6 +93,7 @@ const Cart = ({ isLoading }) => {
           sideDrawerOpen={sideDrawerOpen}
           setSideDrawerOpen={setSideDrawerOpen}
           cartList={cartList}
+          refetch={refetch}
         />
       )}
     </>
@@ -91,7 +102,7 @@ const Cart = ({ isLoading }) => {
 
 export const Taxi = ({ isLoading, label, color }) => {
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
-
+  const { refetch } = useGetAllCartList();
   const { cartList } = useSelector((state) => state.cart);
   const handleIconClick = () => {
     setSideDrawerOpen(true);
@@ -136,6 +147,7 @@ export const Taxi = ({ isLoading, label, color }) => {
           sideDrawerOpen={sideDrawerOpen}
           setSideDrawerOpen={setSideDrawerOpen}
           cartList={cartList}
+          refetch={refetch}
         />
       )}
     </>
@@ -343,7 +355,7 @@ const SecondNavBar = ({ configData }) => {
   if (typeof window !== "undefined") {
     location = localStorage.getItem("location");
     token = localStorage.getItem("token");
-    zoneId = JSON.parse(localStorage.getItem("zoneid"));
+    zoneId = parseJsonFromStorage(localStorage.getItem("zoneid"));
   }
 
   const handleOpenPopover = () => {
@@ -396,8 +408,8 @@ const SecondNavBar = ({ configData }) => {
             objectFit="contain"
           />
         )}
-        {!isSmall && location && (
-          <NavLinks t={t} zoneid="zoneid" moduleType={moduleType} />
+        {!isSmall && (router.pathname !== "/" || location) && (
+          <NavLinks t={t} zoneid={zoneId} moduleType={moduleType} />
         )}
       </Stack>
 
@@ -446,13 +458,7 @@ const SecondNavBar = ({ configData }) => {
                     </clipPath>
                   </defs>
                 </svg>
-                {/*<NextImage*/}
-                {/*  src={trackImage}*/}
-                {/*  alt="track-order"*/}
-                {/*  width={22}*/}
-                {/*  height={22}*/}
-                {/*  style={{objectFit: "contain", color: theme.palette.primary.main}}*/}
-                {/*/>*/}
+
               </Tooltip>
             </IconButton>
           )}
@@ -472,7 +478,7 @@ const SecondNavBar = ({ configData }) => {
             moduleType !== "rental" &&
             // !isLoading &&
             (location || cartList?.length !== 0) &&
-            zoneId && <Cart isLoading={isLoading} />}
+            zoneId && <Cart isLoading={isLoading}  refetch={cartListRefetch}/>}
 
           {moduleType === "rental" && <Taxi isLoading={isLoading} />}
 
@@ -512,42 +518,7 @@ const SecondNavBar = ({ configData }) => {
             </IconButton>
           ) : (
             <Stack flexDirection="row" gap="1rem" alignItems="" center>
-              {!location && (
-                <Stack
-                  direction="row"
-                  spacing={2}
-                  justifyContent="end"
-                  alignItems="center"
-                >
-                  <ThemeSwitches />
-                  <Box
-                    sx={{
-                      backgroundColor: theme => theme.palette.neutral[300],
-                      borderRadius: '32px',
-                      paddingBlock: "2px",
-                      display: 'flex',
-                      alignItems: 'center', marginInlineEnd: "10px"
-                    }}
-                  >
-                    <CallToAdmin configData={configData} />
-                  </Box>
-
-                  <Box
-                    sx={{
-                      backgroundColor: theme => theme.palette.neutral[300],
-                      borderRadius: '32px',
-
-                      display: 'flex',
-                      alignItems: 'center', marginInlineEnd: "10px"
-                    }}
-                  >
-                    <CustomLanguage
-                      countryCode={countryCode}
-                      language={language}
-                    />
-                  </Box>
-                </Stack>
-              )}
+             
               <Stack justifyContent="flex-end" alignItems="end">
                 <SignInButton
                   onClick={() => setOpenSignIn(true)}

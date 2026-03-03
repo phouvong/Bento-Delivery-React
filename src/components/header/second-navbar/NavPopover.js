@@ -30,7 +30,7 @@ const NavPopover = ({
   subCategory,
   popoverFor,
   handlePopoverCloseSub,
-                      setCategoryLength
+  setCategoryLength
 }) => {
   const classes = useStyles();
   const { categories } = useSelector((state) => state.storedData);
@@ -74,8 +74,8 @@ const NavPopover = ({
               getModule()?.module_type === "rental"
                 ? rentalCategories
                 : [...categories].sort(
-                    (a, b) => b?.childes?.length - a?.childes?.length
-                  )
+                  (a, b) => b?.childes?.length - a?.childes?.length
+                )
             }
           />
         );
@@ -90,7 +90,7 @@ const NavPopover = ({
       <Popover
         disableScrollLock={true}
         id={popoverDivId}
-        open={popoverFor==="category"?categories?.length>0 || rentalCategories?.length>0 ?open:false:open}
+        open={popoverFor === "category" ? categories?.length > 0 || rentalCategories?.length > 0 ? open : false : open}
         anchorEl={anchorEl}
         anchorOrigin={{
           vertical: "bottom",
@@ -104,7 +104,7 @@ const NavPopover = ({
         classes={{
           paper: classes.paper,
         }}
-        //onClose={handlePopoverClose}
+      //onClose={handlePopoverClose}
       >
         {popoverHandle()}
       </Popover>

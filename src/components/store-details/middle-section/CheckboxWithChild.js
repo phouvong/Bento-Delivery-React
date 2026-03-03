@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Stack } from "@mui/system";
 import {
   CustomBoxFullWidth,
@@ -8,9 +8,41 @@ import CustomCheckbox from "../../CustomCheckbox";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 const CheckboxWithChild = (props) => {
-  const { item, checkHandler, selectedItems } = props;
+  const {
+    item,
+    checkHandler,
+    selectedItems,
+    scrollIdPrefix,
+    expandedIds,
+    setExpandedIds,
+    expandedId,
+    setExpandedId,
+  } = props;
   const [open, setOpen] = useState(true);
+  const isMultiControlled =
+    Array.isArray(expandedIds) && typeof setExpandedIds === "function";
+  const isSingleControlled =
+    expandedId !== undefined && typeof setExpandedId === "function";
+  const isOpen = isMultiControlled
+    ? expandedIds.includes(item?.id)
+    : isSingleControlled
+      ? expandedId === item?.id
+      : open;
   const clickHandler = () => {
+    if (!item?.childes?.length) return;
+    if (isMultiControlled) {
+      setExpandedIds((prev) => {
+        const prevIds = Array.isArray(prev) ? prev : [];
+        return prevIds.includes(item?.id)
+          ? prevIds.filter((id) => id !== item?.id)
+          : [...prevIds, item?.id];
+      });
+      return;
+    }
+    if (isSingleControlled) {
+      setExpandedId((prev) => (prev === item?.id ? null : item?.id));
+      return;
+    }
     setOpen((prev) => !prev);
   };
   const isCheckedHandler = (id) => {
@@ -18,7 +50,9 @@ const CheckboxWithChild = (props) => {
     return !!isExist;
   };
   return (
-    <CustomBoxFullWidth>
+    <CustomBoxFullWidth
+      id={scrollIdPrefix ? `${scrollIdPrefix}${item?.id}` : undefined}
+    >
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <CustomCheckbox
           item={item}
@@ -27,7 +61,7 @@ const CheckboxWithChild = (props) => {
         />
         {item?.childes?.length > 0 && (
           <>
-            {open ? (
+            {isOpen ? (
               <KeyboardArrowUpIcon
                 onClick={clickHandler}
                 color="primary"
@@ -43,10 +77,14 @@ const CheckboxWithChild = (props) => {
           </>
         )}
       </Stack>
-      {open && (
+      {isOpen && (
         <>
           {item?.childes?.map((childItem, childIndex) => (
-            <CustomStackFullWidth key={childIndex} sx={{ padding: "0px 16px" }}>
+            <CustomStackFullWidth
+              key={childIndex}
+              id={scrollIdPrefix ? `${scrollIdPrefix}${childItem?.id}` : undefined}
+              sx={{ padding: "0px 16px" }}
+            >
               <CustomCheckbox
                 item={childItem}
                 checkHandler={checkHandler}

@@ -1,17 +1,12 @@
-import React, { useReducer } from "react";
-import {
-  CustomIconButton,
-  CustomStackFullWidth,
-} from "../../../styled-components/CustomStyles.style";
+import React from "react";
+import { CustomIconButton } from "../../../styled-components/CustomStyles.style";
 import { Button, Typography, useMediaQuery } from "@mui/material";
-import { handleClick } from "../HelperFunctions";
 import AddIcon from "@mui/icons-material/Add";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import { t } from "i18next";
 import { useTheme } from "@emotion/react";
-import { initialState, reducer } from "../states";
 import { Box } from "@mui/system";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setOpenAddressModal } from "../../../redux/slices/addAddress";
 
 const AddNewAddressButton = ({
@@ -22,7 +17,6 @@ const AddNewAddressButton = ({
 }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
-  const { openAddressModal } = useSelector((state) => state.addressModel);
   const dispatch = useDispatch();
 
   return (
@@ -62,7 +56,14 @@ const AddNewAddressButton = ({
               </Typography>
             </Button>
           ) : (
-            <CustomIconButton onClick={handleAddressModal} align={align}>
+            <CustomIconButton
+              onClick={() =>
+                handleAddressModal
+                  ? handleAddressModal()
+                  : dispatch(setOpenAddressModal(true))
+              }
+              align={align}
+            >
               <AddCircleOutlineIcon fontSize="14px" color="primary" />
               <Typography
                 fontSize={{ xs: "14", md: "12px" }}

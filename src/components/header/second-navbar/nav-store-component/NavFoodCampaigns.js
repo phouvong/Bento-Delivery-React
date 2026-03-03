@@ -15,17 +15,17 @@ const NavFoodCampaigns = ({ campaigns, isLoading }) => {
   const theme = useTheme();
 
   const handleClick = (e, item) => {
+    console.log({item});
+    
     e.stopPropagation();
     router.push(
       {
         pathname: "/campaigns/[id]",
         query: {
           id: `${item?.slug ? item?.slug : item?.id}`,
-          module_id: `${getModuleId()}`,
+
         },
       },
-      undefined,
-      { shallow: true }
     );
   };
 

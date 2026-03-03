@@ -802,15 +802,21 @@ const ItemCheckout = (props) => {
 	const handleImageUpload = (value) => {
 		setIsImageSelected([value]);
 	};
+	console.log({payableAmount});
+	
 	const handlePartialPayment = () => {
-		if (payableAmount > customerData?.data?.wallet_balance) {
+		if (payableAmount > customerData?.data?.wallet_balance && configData?.partial_payment_status === 1) {
 			setUsePartialPayment(true);
 			setPaymentMethod("");
 			dispatch(setOfflineMethod(""));
 		} else {
+			if (customerData?.data?.wallet_balance > payableAmount) {
 			setPaymentMethod("wallet");
 			setSwitchToWallet(true);
-			dispatch(setOfflineMethod(""));
+				dispatch(setOfflineMethod(""));
+			}else{
+				toast.error(t("Your wallet balance is insufficient for partial payment."));
+			}
 		}
 	};
 	const removePartialPayment = () => {
@@ -1007,6 +1013,13 @@ const ItemCheckout = (props) => {
 			setPaymentMethod("cash_on_delivery")
 		}
 	}, [isZoneDigital, configData?.cash_on_delivery]);
+
+	useEffect(() => {
+		setPaymentMethodImage(
+			""
+		);
+		setPaymentMethod("")
+	}, [cartList]);
 	return (
 		<>
 			{method === "offline" ? (
@@ -1097,7 +1110,7 @@ const ItemCheckout = (props) => {
 								confirmPasswordHandler={confirmPasswordHandler}
 								check={check}
 								setCheck={setCheck}
-								isHomeDelivery={configData?.home_delivery_status}
+								isHomeDelivery={configData?.home_delivery_status && storeData?.delivery}
 							/>
 
 							{Number.parseInt(configData?.dm_tips_status) === 1 &&

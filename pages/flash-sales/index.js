@@ -3,14 +3,21 @@ import React, { useEffect } from "react";
 import SEO from "../../src/components/seo";
 import MainLayout from "../../src/components/layout/MainLayout";
 import FlashSales from "../../src/components/flash-sales";
-import { getImageUrl } from "utils/CustomFunctions";
 import { useDispatch, useSelector } from "react-redux";
 import { useGetConfigData } from "../../src/api-manage/hooks/useGetConfigData";
 import { setConfigData } from "../../src/redux/slices/configData";
+import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
+import { processMetadata } from "utils/fetchPageMetaData";
 
-const FlashSalesPage = () => {
+const FlashSalesPage = ({configData,metaData}) => {
   const dispatch = useDispatch();
-  const { landingPageData, configData } = useSelector(
+  const metadata=processMetadata(metaData, {
+    title: `Flash Sales - ${configData?.business_name}`,
+    description: metaData?.description || '',
+    image: `${metaData?.image || configData?.logo_full_url}`,
+    robotsMeta: metaData?.robotsMeta || ''
+  })
+  const { configData: storeConfigData } = useSelector(
     (state) => state.configData
   );
   const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
@@ -28,15 +35,13 @@ const FlashSalesPage = () => {
     <>
       <CssBaseline />
       <SEO
-        title={configData ? `Flash Sale` : "Loading..."}
-        image={`${getImageUrl(
-          { value: configData?.logo_storage },
-          "business_logo_url",
-          configData
-        )}/${configData?.fav_icon}`}
+        title={metadata?.title}
+        image={metadata?.image}
+        description={metadata?.description}
+        robotsMeta={metadata?.robotsMeta}
         businessName={configData?.business_name}
       />
-      <MainLayout configData={configData} landingPageData={landingPageData}>
+      <MainLayout configData={configData} >
         <FlashSales />
       </MainLayout>
     </>
@@ -44,3 +49,7 @@ const FlashSalesPage = () => {
 };
 
 export default FlashSalesPage;
+export const getServerSideProps = async (context) => {
+    return await getCommonServerSideProps(context, 'flash_sales')
+}
+

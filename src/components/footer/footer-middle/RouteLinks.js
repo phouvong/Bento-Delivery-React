@@ -51,19 +51,24 @@ const RouteLinks = (props) => {
   };
   const theme = useTheme();
   const isXsmall = useMediaQuery(theme.breakpoints.down("sm"));
+  console.log({ configData });
+
 
   return (
     <CustomStackFullWidth spacing={2} alignItems={{ xs: "start" }}>
       {RouteLinksData.map((item, index) => {
-        if((!configData?.toggle_dm_registration && item.value==="delivery_man") || (!configData?.toggle_dm_registration && item?.value==="restaurant_owner") )
-          return null
-
+        if (
+          (!configData?.toggle_store_registration && item?.value === "restaurant_owner") ||
+          (!configData?.toggle_dm_registration && item?.value === "delivery_man")
+        ) {
+          return null;
+        }
         return (
           <Typography
             key={index}
             onClick={() => handleClick(item.link, item.value)}
             sx={{
-              textAlign:"left",
+              textAlign: "left",
               cursor: "pointer",
               "&:hover": {
                 color: theme.palette.primary.main,
@@ -95,7 +100,7 @@ const RouteLinks = (props) => {
           },
         }}
       >
-        {selectedModule?.module_type==="rental" ? t("Track Trip"):t("Track Order")}
+        {selectedModule?.module_type === "rental" ? t("Track Trip") : t("Track Order")}
       </Typography>
     </CustomStackFullWidth>
   );

@@ -178,6 +178,7 @@ const AddAddressComponent = ({
             handleAgreeLocation={() => handleAgreeLocation(coords, dispatch)}
             currentLocation={state.currentLocation}
             handleCloseLocation={() => handleCloseLocation(dispatch)}
+            notShow
           />
         </AddAddressSearchBox>
         <Stack>
@@ -198,7 +199,7 @@ const AddAddressComponent = ({
             onClick={getCurrentLocation}
             sx={{
               position: "absolute",
-              bottom: "25%",
+              bottom: { xs: "18%", md: "28%" },
               right: "10px",
               borderRadius: "50%",
               color: (theme) => theme.palette.primary.main,

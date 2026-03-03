@@ -38,21 +38,44 @@ const ImageUploaderWithPreview = ({
         id="file"
         name="file"
         type="file"
-        accept="image/jpeg, image/png, image/jpg, image/gif,image/webp"
+        accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
         hidden
         onChange={(e) => {
-          const file = e.target.files[0];
-          const unsupportedFormats = ["image/avif", "application/pdf, image/x-icon, image/svg+xml, image/heif , image/heic"];
+          const file = e.target.files?.[0];
+          if (!file) return;
 
-          if (file && unsupportedFormats.includes(file.type)) {
+          // Allowed MIME types
+          const allowedTypes = [
+            "image/jpeg",
+            "image/png",
+            "image/jpg",
+            "image/gif",
+            "image/webp",
+          ];
+
+          // Block dangerous extensions explicitly
+          const blockedExtensions = [
+            ".php", ".js", ".exe", ".sh", ".bat", ".cmd",
+            ".svg", ".html", ".htm", ".json"
+          ];
+
+          const fileName = file.name.toLowerCase();
+
+          const hasBlockedExtension = blockedExtensions.some(ext =>
+            fileName.endsWith(ext)
+          );
+
+          if (!allowedTypes.includes(file.type) || hasBlockedExtension) {
             e.target.value = "";
-            alert("This file format is not supported. Please upload JPG, PNG, JPEG,WEBP or GIF images only.");
+            alert("Only JPG, PNG, JPEG, WEBP, or GIF images are allowed.");
             return;
           }
+
           onChange(e);
         }}
-
       />
+
+
     </>
   );
 };

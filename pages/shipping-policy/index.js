@@ -6,10 +6,17 @@ import PolicyPage from "../../src/components/policy-page";
 import useGetPolicyPage from "../../src/api-manage/hooks/react-query/useGetPolicyPage";
 import SEO from "../../src/components/seo";
 import { getImageUrl } from "utils/CustomFunctions";
+import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
+import { processMetadata } from "utils/fetchPageMetaData";
 
-const Index = ({ configData, landingPageData }) => {
+const Index = ({ configData, metaData }) => {
   const { t } = useTranslation();
-
+  const metadata = processMetadata(metaData, {
+    title: metaData?.title ||`Store Registration - ${configData?.business_name}`,
+    description: metaData?.description || '',
+    image: `${metaData?.image || configData?.logo_full_url}`,
+    robotsMeta: metaData?.robotsMeta || ''
+  })
   // Fetch shipping policy data
   const { data, refetch, isFetching } = useGetPolicyPage(
     "/api/v1/shipping-policy"
@@ -29,15 +36,13 @@ const Index = ({ configData, landingPageData }) => {
     <>
       <CssBaseline />
       <SEO
-        title="Shipping Policy"
-        image={`${getImageUrl(
-          { value: configData?.logo_storage },
-          "business_logo_url",
-          configData
-        )}/${configData?.fav_icon || ""}`}
-        businessName={configData?.business_name || ""}
+      title={metadata.title}
+      description={metadata.description}
+      image={metadata.image}
+      robotsMeta={metadata.robotsMeta}
+      configData={configData}
       />
-      <MainLayout configData={configData} landingPageData={landingPageData}>
+      <MainLayout configData={configData} >
         <PolicyPage
           data={data}
           title={t("Shipping Policy")}
@@ -50,43 +55,6 @@ const Index = ({ configData, landingPageData }) => {
 
 export default Index;
 
-export const getStaticProps = async () => {
-  try {
-    // Fetch configuration data
-    const configRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/config`,
-      {
-        method: "GET",
-        headers: {
-          "X-software-id": 33571750,
-          "X-server": "server",
-          origin: process.env.NEXT_CLIENT_HOST_URL,
-        },
-      }
-    );
-
-    if (!configRes.ok) {
-      throw new Error(`Failed to fetch config: ${configRes.statusText}`);
-    }
-
-    const config = await configRes.json();
-
-    return {
-      props: {
-        configData: config, // Pass configuration data as props
-        landingPageData: {}, // Default landing page data
-      },
-      revalidate: 3600, // Revalidate every 1 hour
-    };
-  } catch (error) {
-    console.error("Error fetching configuration data:", error);
-
-    return {
-      props: {
-        configData: null, // Pass null if fetching fails
-        landingPageData: {}, // Default landing page data
-      },
-      revalidate: 3600,
-    };
-  }
-};
+export const getServerSideProps = async (context) => {
+  return await getCommonServerSideProps(context, 'shipping_policy_page')
+}

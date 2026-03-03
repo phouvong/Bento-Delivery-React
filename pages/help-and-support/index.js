@@ -6,9 +6,17 @@ import { useTranslation } from "react-i18next";
 import SEO from "../../src/components/seo";
 import CustomContainer from "../../src/components/container";
 import { getImageUrl } from "utils/CustomFunctions";
+import { fetchPageMetadata, processMetadata } from "utils/fetchPageMetaData";
+import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
 
-const Index = ({ configData, landingPageData }) => {
+const Index = ({ configData ,metaData}) => {
   const { t } = useTranslation();
+  const metadata = processMetadata(metaData, {
+    title: `Help and Support - ${configData?.business_name}`,
+    description: metaData?.description || '',
+    image: `${metaData?.image || configData?.logo_full_url}`,
+     robotsMeta: metaData?.robotsMeta || ''
+  })
 
   // Handle cases where `configData` is missing
   if (!configData) {
@@ -19,16 +27,13 @@ const Index = ({ configData, landingPageData }) => {
     <>
       <CssBaseline />
       <SEO
+        title={metadata.title}
+        description={metadata.description}
+        image={metadata.image}
+        robotsMeta={metadata.robotsMeta}
         configData={configData}
-        title="Help and Support"
-        image={`${getImageUrl(
-          { value: configData?.logo_storage },
-          "business_logo_url",
-          configData
-        )}/${configData?.fav_icon}`}
-        businessName={configData?.business_name}
       />
-      <MainLayout configData={configData} landingPageData={landingPageData}>
+      <MainLayout configData={configData} >
         <CustomContainer>
           <HelpAndSupport configData={configData} t={t} />
         </CustomContainer>
@@ -39,43 +44,6 @@ const Index = ({ configData, landingPageData }) => {
 
 export default Index;
 
-export const getStaticProps = async () => {
-  try {
-    // Fetch configuration data
-    const configRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/config`,
-      {
-        method: "GET",
-        headers: {
-          "X-software-id": 33571750,
-          "X-server": "server",
-          origin: process.env.NEXT_CLIENT_HOST_URL,
-        },
-      }
-    );
-
-    if (!configRes.ok) {
-      throw new Error(`Failed to fetch config: ${configRes.statusText}`);
-    }
-
-    const config = await configRes.json();
-
-    return {
-      props: {
-        configData: config, // Pass configuration data as props
-        landingPageData: {}, // Provide a default or fetch landing page data if needed
-      },
-      revalidate: 3600, // Revalidate every 1 hour (3600 seconds)
-    };
-  } catch (error) {
-    console.error("Error fetching config data:", error);
-
-    return {
-      props: {
-        configData: null, // Return null configData on error
-        landingPageData: {}, // Provide fallback data
-      },
-      revalidate: 3600,
-    };
-  }
-};
+export const getServerSideProps = async (context) => {
+    return await getCommonServerSideProps(context, 'contact_us_page')
+}

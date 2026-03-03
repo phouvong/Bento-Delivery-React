@@ -13,6 +13,7 @@ const CustomModal = (props) => {
     
   } = props;
   const handleCloseModal = (event, reason) => {
+    event?.stopPropagation?.();
     if (reason && reason === "backdropClick") {
       if (disableAutoFocus) {
         return true;

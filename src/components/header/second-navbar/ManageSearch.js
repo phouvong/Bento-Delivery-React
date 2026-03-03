@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import CustomSearch from "../../custom-search/CustomSearch";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import SearchSuggestionsBottom from "../../search/SearchSuggestionsBottom";
 import { t } from "i18next";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
@@ -19,6 +19,8 @@ const ManageSearch = ({
   currentTab,
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const [openSearchSuggestions, setOpenSearchSuggestions] = useState(false);
   const [selectedValue, setSelectedValue] = useState("");
@@ -55,14 +57,10 @@ const ManageSearch = ({
         data_type: "searched",
       };
 
-      router.replace(
-        {
-          pathname: router.pathname,
-          query: newQuery,
-        },
-        undefined,
-        { shallow: true }
-      );
+      router.push({
+        pathname: '/search',
+        query: newQuery
+      });
     } else {
       if (remove === "true" && searchQuery) {
         const newQuery = {
@@ -71,9 +69,9 @@ const ManageSearch = ({
           data_type: d_type,
         };
 
-        router.replace(
+        router.push(
           {
-            pathname: router.pathname,
+            pathname: '/search',
             query: newQuery,
           },
           undefined,
@@ -121,6 +119,10 @@ const ManageSearch = ({
       }
     }
   }, [itemOrStoreSuggestionData?.items, itemOrStoreSuggestionData?.stores]);
+
+  useEffect(() => {
+    setOpenSearchSuggestions(false);
+  }, [pathname, searchParams?.toString()]);
   const handleOnFocus = () => {
     if (searchValue === "") {
       setIsEmpty(true);
@@ -162,14 +164,7 @@ const ManageSearch = ({
   const getModuleWiseSearch = () => {
     if (getCurrentModuleType() === ModuleTypes.FOOD) {
       return (
-        <Box
-          sx={{
-            backgroundColor: (theme) =>
-              alpha(theme.palette.moduleTheme.food, 0.4),
-            padding: { xs: "8px", md: "16px" },
-            borderRadius: "2px",
-          }}
-        >
+       
           <CustomSearch
             label={t("Search foods and restaurants...")}
             handleSearchResult={handleKeyPress}
@@ -178,7 +173,7 @@ const ManageSearch = ({
             handleOnFocus={handleOnFocus}
             setSearchValue={setSearchValue}
           />
-        </Box>
+        
       );
     } else {
       return (
@@ -193,6 +188,7 @@ const ManageSearch = ({
       );
     }
   };
+console.log({openSearchSuggestions});
 
   return (
     <Box
@@ -208,7 +204,7 @@ const ManageSearch = ({
       onFocus={() => handleOnFocus()}
       ref={searchRef}
     >
-      {zoneid && router.pathname !== "/" && (
+      {router.pathname !== "/" && (
         <>
           {getModuleWiseSearch()}
           {openSearchSuggestions && (

@@ -200,6 +200,7 @@ const CartContent = (props) => {
       return cartItem?.totalPrice;
     }
   };
+console.log({cartItem});
 
   return (
     <>
@@ -257,6 +258,9 @@ const CartContent = (props) => {
             </Typography>
           )}
           <VariationContent cartItem={cartItem} />
+          <Typography fontSize="11px" color="#93A2AE">
+            {cartItem?.unit_type}
+          </Typography>
           <Typography fontWeight="500" fontSize={{ xs: "13px", md: "16px" }}>
             {getAmountWithSign(
               handleTotalAmountWithAddons(

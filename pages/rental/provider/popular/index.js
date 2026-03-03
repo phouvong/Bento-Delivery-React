@@ -6,21 +6,30 @@ import MainLayout from "../../../../src/components/layout/MainLayout";
 import {PageDetailsWrapper} from "../../../../src/styled-components/CustomStyles.style";
 import CustomContainer from "../../../../src/components/container";
 import TypeWiseStore from "../../../../src/components/Store/TypeWiseStore";
-import { getServerSideProps } from "../../../index";
 import {getCurrentModuleType} from "../../../../src/helper-functions/getCurrentModuleType";
+import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
+import { processMetadata } from "utils/fetchPageMetaData";
 
 
-const Index = ({ configData, landingPageData }) => {
+const Index = ({ configData, metaData }) => {
+const metadata = processMetadata(metaData, {
+    title: `Popular Stores - ${configData?.business_name}`,
+    description: metaData?.description || '',
+    image: `${metaData?.image || configData?.logo_full_url}`,
+    robotsMeta: metaData?.robotsMeta || ''
+  })
   const { t } = useTranslation();
   return (
     <>
       <CssBaseline />
       <SEO
-        title={configData ? `${t("Popular store")}` : "Loading..."}
-        image={configData?.fav_icon_full_url}
+        title={metadata.title}
+        image={metadata.image}
         businessName={configData?.business_name}
+        description={metadata.description}
+        robotsMeta={metadata.robotsMeta}
       />
-      <MainLayout configData={configData} landingPageData={landingPageData}>
+      <MainLayout configData={configData}>
         <PageDetailsWrapper>
           <CustomContainer>
             <TypeWiseStore
@@ -37,4 +46,7 @@ const Index = ({ configData, landingPageData }) => {
 };
 
 export default Index;
-export { getServerSideProps };
+export const getServerSideProps = async (context) => {
+    return await getCommonServerSideProps(context, 'popular_store_page')
+}
+

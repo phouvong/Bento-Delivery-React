@@ -10,7 +10,13 @@ import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { getModuleId } from "helper-functions/getModuleId";
 
 const ViewMore = ({ redirect, handlePopoverCloseSub, buttonType }) => {
+ 
+  
   const router = useRouter();
+  const queryModule = router?.query?.module || router?.query?.module_id;
+      const moduleValue = Array.isArray(queryModule)
+        ? queryModule[0]
+        : queryModule || getModuleId();
   const handleClick = () => {
     handlePopoverCloseSub?.();
     if (redirect === "/categories") {
@@ -18,13 +24,14 @@ const ViewMore = ({ redirect, handlePopoverCloseSub, buttonType }) => {
         getCurrentModuleType() === "rental"
           ? { pathname: "/rental/vehicle-search", query: { all_category: 1 } }
           : {
-              pathname: "/home",
-              query: {
-                search: VIEW_ALL_TEXT.allCategories,
-                from: "allCategories",
-                data_type: "category",
-              },
-            };
+            pathname: "/search",
+            query: {
+              search: VIEW_ALL_TEXT.allCategories,
+              from: "allCategories",
+              data_type: "category",
+              module: moduleValue,
+            },
+          };
       router.push(query, undefined, { shallow: true });
     } else {
       router.push(redirect, undefined, { shallow: true });

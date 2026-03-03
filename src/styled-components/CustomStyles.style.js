@@ -287,7 +287,7 @@ export const CustomLink = styled(Link)(({ theme, color }) => ({
 export const CustomTextFieldContainer = styled(Box)(
 	({ theme, background, noheight }) => ({
 		width: "100%",
-		minHeight: !noheight && "5rem",
+		minHeight: !noheight && "4rem",
 		color: theme.palette.neutral[1000],
 	})
 );

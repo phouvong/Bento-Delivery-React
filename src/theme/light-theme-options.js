@@ -134,6 +134,7 @@ const toolTipColor = neutral[1000];
 
 export const lightThemeOptions = {
 	components: {
+		 MuiUseMediaQuery: { defaultProps: { noSsr: true } }, // ⚡ Fix hydration
 		MuiAvatar: {
 			styleOverrides: {
 				root: {

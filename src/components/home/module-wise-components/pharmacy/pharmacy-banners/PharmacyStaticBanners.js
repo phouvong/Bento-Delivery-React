@@ -19,7 +19,7 @@ const PharmacyStaticBanners = () => {
     router.push(
       {
         pathname: "/campaigns/[id]",
-        query: { id: `${banner?.id}`, module_id: `${getModuleId()}` },
+        query: { id: `${banner?.slug||banner?.id}` },
       },
       undefined,
       { shallow: true }

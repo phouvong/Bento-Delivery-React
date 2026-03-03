@@ -1,39 +1,29 @@
 import React from "react";
-import { ButtonGroup, Tabs } from "@mui/material";
+import { Box, Tab, Tabs } from "@mui/material";
 import { useTranslation } from "react-i18next";
-import { RestaurantDetailsNavButton } from "../food-details/food-card/FoodCard.style";
+
 const GroupButtonsRateAndReview = ({ setType, type, moduleType }) => {
   const { t } = useTranslation();
+
+  const handleChange = (event, newValue) => {
+    setType(newValue);
+  };
+
   return (
-    <Tabs
-      orientation="horizontal"
-      // variant="contained"
-      variant="scrollable"
-      scrollButtons="auto"
-      aria-label="scrollable auto tabs example"
-    >
-      <ButtonGroup>
+    <Box sx={{ width: "100%", bgcolor: "background.paper" }}>
+      <Tabs
+        value={type}
+        onChange={handleChange}
+        centered
+        indicatorColor="primary"
+        textColor="primary"
+      >
         {moduleType !== "parcel" && (
-          <RestaurantDetailsNavButton
-            background={type === "items"}
-            onClick={() => setType("items")}
-            sx={{ width: { xs: "80px", md: "100px" } }}
-          >
-            {t("Items")}
-          </RestaurantDetailsNavButton>
+          <Tab label={t("Items")} value="items" />
         )}
-        <RestaurantDetailsNavButton
-          // color={
-          //     type === 'veg' ? 'primary' : 'whiteContainer'
-          // }
-          background={type === "delivery_man"}
-          onClick={() => setType("delivery_man")}
-          sx={{ width: "100px" }}
-        >
-          {t("Delivery man")}
-        </RestaurantDetailsNavButton>
-      </ButtonGroup>
-    </Tabs>
+        <Tab label={t("Delivery man")} value="delivery_man" />
+      </Tabs>
+    </Box>
   );
 };
 

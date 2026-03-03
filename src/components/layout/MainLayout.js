@@ -25,23 +25,36 @@ const MainLayout = ({ children, configData }) => {
 			refetch();
 		}
 	}, []);
-	if (data) {
-		const selectedModuleType = JSON.parse(
-			localStorage.getItem("module")
-		)?.module_type;
-		if (data.length === 0) {
-			localStorage.removeItem("module");
-			router.push("/", undefined, { shallow: true });
-		} else {
-			if (
-				!data?.find((item) => item.module_type === selectedModuleType)
-			) {
-				const newModule = data[0];
-				localStorage.setItem("module", JSON.stringify(newModule));
-				dispatch(setSelectedModule(newModule));
-			}
-		}
-	}
+	// if (data) {
+	// 	const selectedModuleType = JSON.parse(
+	// 		localStorage.getItem("module")
+	// 	)?.module_type;
+	// 	if (data.length === 0) {
+	// 		localStorage.removeItem("module");
+	// 		router.push("/", undefined, { shallow: true });
+	// 	} else {
+	// 		if (
+	// 			!data?.find((item) => item.module_type === selectedModuleType)
+	// 		) {
+	// 			const newModule = data[0];
+	// 			localStorage.setItem("module", JSON.stringify(newModule));
+	// 			dispatch(setSelectedModule(newModule));
+	// 			if (router.isReady) {
+	// 				const nextQuery = {
+	// 					...router.query,
+	// 					module_id: `${newModule.id}`,
+	// 				};
+	// 				if (router.query.module_id !== `${newModule.id}`) {
+	// 					router.replace(
+	// 						{ pathname: router.pathname, query: nextQuery },
+	// 						undefined,
+	// 						{ shallow: true }
+	// 					);
+	// 				}
+	// 			}
+	// 		}
+	// 	}
+	// }
 	const { landingPageData } = useSelector((state) => state.configData);
 	const { data: landing, refetch: landingRefetch } = useGetLandingPage();
 	useEffect(() => {

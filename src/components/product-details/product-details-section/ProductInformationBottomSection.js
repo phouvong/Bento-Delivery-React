@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Stack, styled } from "@mui/system";
 import { PrimaryButton } from "../../Map/map.style";
 import {
@@ -24,6 +24,8 @@ import NotAvailableCard from "./NotAvailableCard";
 import { getCurrentModuleType } from "../../../helper-functions/getCurrentModuleType";
 import Loading from "../../custom-loading/Loading";
 import { isVariationAvailable } from "components/product-details/product-details-section/helperFunction";
+import GetLocationAlert from "components/GetLocationAlert";
+import CustomModal from "components/modal";
 
 export const BottomStack = styled(Stack)(({ theme }) => ({
   [theme.breakpoints.down("sm")]: {
@@ -53,6 +55,7 @@ const ProductInformationBottomSection = ({
   const { cartList } = useSelector((state) => state.cart);
   const { wishLists } = useSelector((state) => state.wishList);
   const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
+  const [openLocationAlert, setOpenLocationAlert] = useState(false);
 
   const variationErrorToast = () =>
     toast.error(
@@ -79,6 +82,16 @@ const ProductInformationBottomSection = ({
     }
   };
   const router = useRouter();
+
+  const ensureLocation = () => {
+    if (typeof window === "undefined") return true;
+    const hasLocation = Boolean(localStorage.getItem("location"));
+    if (!hasLocation) {
+      setOpenLocationAlert(true);
+      return false;
+    }
+    return true;
+  };
 
   const handleRedirect = () => {
     if (productDetailsData?.isCampaignItem) {
@@ -108,6 +121,7 @@ const ProductInformationBottomSection = ({
   };
 
   const handleRedirectToCheckoutClick = () => {
+    if (!ensureLocation()) return;
     if (productDetailsData?.selectedOption?.length > 0) {
       if (productDetailsData?.selectedOption?.[0]?.stock === 0) {
         variationErrorToast();
@@ -142,6 +156,7 @@ const ProductInformationBottomSection = ({
   useEffect(() => {}, [wishListCount]);
 
   const handleVariationAvailability = (checkFor, cartItem) => {
+    if (!ensureLocation()) return;
     if (productDetailsData?.selectedOption?.length > 0) {
       if (productDetailsData?.selectedOption?.[0]?.stock === 0) {
         variationErrorToast();
@@ -273,6 +288,12 @@ const ProductInformationBottomSection = ({
           {t("prescription is required")}
         </Typography>
       )}
+       <CustomModal
+                openModal={openLocationAlert}
+                handleClose={() => setOpenLocationAlert(false)}
+              >
+                <GetLocationAlert setOpenAlert={setOpenLocationAlert} />
+              </CustomModal>
     </>
   );
 };

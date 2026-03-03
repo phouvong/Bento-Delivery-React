@@ -18,7 +18,7 @@ export const useGetItemDetails = (params, itemSuccess,productUpdate) => {
   const queryKey = ['item-Details', params.id, params.campaign]
 
   return useQuery(queryKey, () => getData(params), {
-    enabled: !productUpdate,
+    enabled: !productUpdate && Boolean(params.id),
     onSuccess: itemSuccess,
     onError: onSingleErrorResponse,
     retry: false,

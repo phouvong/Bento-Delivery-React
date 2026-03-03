@@ -21,6 +21,12 @@ import {
 import CheckoutFailedCard from "components/checkout/CheckoutFailedCard";
 import { useRouter } from "next/router";
 import { CustomBox } from "styled-components/CustomStyles.style";
+
+const formatUnderscoreText = (value) =>
+  (value === null || value === undefined ? "" : String(value)).replaceAll(
+    "_",
+    " "
+  );
 const OfflineOrderDetailsModal = ({
   trackData,
   handleOfflineClose,
@@ -138,11 +144,11 @@ const OfflineOrderDetailsModal = ({
                             <ModalCustomTypography
                               sx={{ textTransform: "capitalize" }}
                             >
-                              {item?.user_input.replaceAll("_", " ")}
+                              {formatUnderscoreText(item?.user_input)}
                             </ModalCustomTypography>
                             <Typography sx={{ wordWrap: "break-word" }}>
                               :&nbsp;&nbsp;
-                              {item?.user_data.replaceAll("_", " ")}
+                              {formatUnderscoreText(item?.user_data)}
                             </Typography>
                           </ItemWrapper>
                         );

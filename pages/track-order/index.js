@@ -12,7 +12,7 @@ const TrackOrder = ({ configData }) => {
     <div>
       <CssBaseline />
       <SEO
-        image={`${configData?.base_urls?.business_logo_url}/${configData?.fav_icon}`}
+        image={`${configData?.base_urls?.logo_full_url}/${configData?.fav_icon}`}
         businessName={configData?.business_name}
         configData={configData}
       />

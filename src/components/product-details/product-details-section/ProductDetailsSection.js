@@ -28,37 +28,7 @@ export const handleDiscountChip = (product, t) => {
       );
     }
   }
-  // if (product?.store_discount > 0) {
-  //   if (product?.store_discount > 0) {
-  //     return (
-  //       <OfferTypography>
-  //         {product?.store_discount}% {t("OFF")}
-  //       </OfferTypography>
-  //     );
-  //   } else {
-  //     return (
-  //       <OfferTypography>
-  //         {getAmountWithSign(product?.store_discount)}
-  //       </OfferTypography>
-  //     );
-  //   }
-  // } else {
-  //   if (product?.discount !== 0) {
-  //     if (product?.discount_type === "percent") {
-  //       return (
-  //         <OfferTypography>
-  //           {product?.discount}% {t("OFF")}
-  //         </OfferTypography>
-  //       );
-  //     } else {
-  //       return (
-  //         <OfferTypography>
-  //           {getAmountWithSign(product?.discount)} {t("OFF")}
-  //         </OfferTypography>
-  //       );
-  //     }
-  //   }
-  // }
+
 };
 const ProductDetailsSection = ({
   productDetailsData,

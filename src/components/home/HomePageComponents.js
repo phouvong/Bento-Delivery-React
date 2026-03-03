@@ -1,4 +1,4 @@
-import { styled, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { NoSsr, styled, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
@@ -30,7 +30,7 @@ import Shop from "./module-wise-components/ecommerce";
 import FoodModule from "./module-wise-components/food";
 import Parcel from "./module-wise-components/parcel/Index";
 import Pharmacy from "./module-wise-components/pharmacy/Pharmacy";
-import SearchResult from "./search";
+
 import TopBanner from "./top-banner";
 import TaxiSearchPanel from "components/home/module-wise-components/rental/components/global/search/TaxiSearchPanel";
 import { useGetWishList } from "api-manage/hooks/react-query/rental-wishlist/useGetWishlist";
@@ -60,7 +60,7 @@ const HomePageComponents = ({ configData, landingPageData }) => {
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [dontShowAgain, setDontShowAgain] = useState(false);
 
-  const [currentTab, setCurrentTab] = useState(0);
+
   const { profileInfo } = useSelector((state) => state.profileInfo);
   const router = useRouter();
   const dispatch = useDispatch();
@@ -77,14 +77,21 @@ const HomePageComponents = ({ configData, landingPageData }) => {
         }
       }
     });
-  const currentLatLng = JSON.parse(
-    window.localStorage.getItem("currentLatLng")
-  );
+  const [currentLatLng, setCurrentLatLng] = useState(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedLatLng = JSON.parse(window.localStorage.getItem("currentLatLng"));
+      setCurrentLatLng(storedLatLng);
+    }
+  }, []);
+
   const { data: zoneData } = useQuery(
-    ["zoneId", location],
+    ["zoneId", currentLatLng],
     async () => GoogleApi.getZoneId(currentLatLng),
     {
       retry: 1,
+      enabled: !!currentLatLng,
     }
   );
   const { mutate: paymentMethodUpdateMutation, isLoading: repayOrderLoading } =
@@ -183,9 +190,14 @@ const HomePageComponents = ({ configData, landingPageData }) => {
   };
 
   const handleRateButtonClick = () => {
-    router.push(`/rate-and-review/${orderId}`, undefined, {
-      shallow: true,
-    });
+    router.push(
+      {
+        pathname: "/profile",
+        query: { orderId, page: "my-orders" },
+      },
+      undefined,
+      { shallow: true }
+    );
   };
   const handleCloseWelcomeModal = () => {
     dispatch(setWelcomeModal(false));
@@ -221,149 +233,139 @@ const HomePageComponents = ({ configData, landingPageData }) => {
 
   return (
     <PushNotificationLayout>
-      <CustomStackFullWidth>
-        <CustomStackFullWidth sx={{ position: "relative" }}>
-          <TopBanner />
-          <CustomStackFullWidth
-            alignItems="center"
-            justifyContent="center"
-            sx={{
-              position: "absolute",
-              top: { xs: -4, sm: 50 },
-              left: 0,
-              right: 0,
-            }}
-          >
-            <SearchWithTitle
-              currentTab={currentTab}
-              zoneid={zoneid}
-              token={token}
-              searchQuery={
-                router.query?.data_type === "searched"
-                  ? router.query.search
-                  : ""
-              }
-              name={router.query.name}
-              query={router.query}
-            />
+      <NoSsr>
+        <CustomStackFullWidth>
+          <CustomStackFullWidth sx={{ position: "relative" }}>
+            <TopBanner />
+            <CustomStackFullWidth
+              alignItems="center"
+              justifyContent="center"
+              sx={{
+                position: "absolute",
+                top: { xs: -4, sm: 50 },
+                left: 0,
+                right: 0,
+              }}
+            >
+              <SearchWithTitle
+                currentTab={0}
+                zoneid={zoneid}
+                token={token}
+                searchQuery={
+                  router.query?.data_type === "searched"
+                    ? router.query.search
+                    : ""
+                }
+                name={router.query.name}
+                query={router.query}
+              />
+            </CustomStackFullWidth>
           </CustomStackFullWidth>
-        </CustomStackFullWidth>
-        {moduleType === "rental" && (
-          <Box>
-            <TaxiSearchPanel position="relative" />
-          </Box>
-        )}
-        {router.query.data_type ? (
-          <SearchResult
-            key={router.query.id}
-            searchValue={router.query.search}
-            name={router.query.name}
-            isSearch={router.query.fromSearch}
-            routeTo={router.query.from}
-            configData={configData}
-            currentTab={currentTab}
-            setCurrentTab={setCurrentTab}
-          />
-        ) : (
+          {moduleType === "rental" && (
+            <Box>
+              <TaxiSearchPanel position="relative" />
+            </Box>
+          )}
           <Box width="100%">{getModuleWiseComponents()}</Box>
+        </CustomStackFullWidth>
+
+        {open && (
+          <CustomModal openModal={open} handleClose={handleClose}>
+            <LastOrderReview
+              handleClose={handleClose}
+              handleRateButtonClick={handleRateButtonClick}
+              productImage={data?.images}
+            />
+          </CustomModal>
         )}
-      </CustomStackFullWidth>
-      {open && (
-        <CustomModal openModal={open} handleClose={handleClose}>
-          <LastOrderReview
-            handleClose={handleClose}
-            handleRateButtonClick={handleRateButtonClick}
-            productImage={data?.images}
-          />
-        </CustomModal>
-      )}
-      <CustomModal
-        handleClose={handleCloseWelcomeModal}
-        openModal={welcomeModal}
-        closeButton
-      >
-        <Box
-          sx={{
-            maxWidth: "382px",
-            width: "95vw",
-            px: 1.3,
-            pb: 4,
-            textAlign: "center",
-            img: {
-              height: "unset",
-            },
-          }}
-        >
-          <img
-            src={"/static/sign-up-welcome.svg"}
-            alt="welcome"
-            width={183}
-            height={183}
-          />
-          <Box maxWidth={"308px"} mx={"auto"} mt={2}>
-            <Typography variant="h6" color="primary" mb={2}>
-              {t(`Welcome to ! ${configData?.business_name}`)}
-            </Typography>
-            <Typography variant="body2" lineHeight={"1.5"}>
-              {profileInfo?.is_valid_for_discount
-                ? t(
-                  `Get ready for a special welcome gift, enjoy a special discount on your first order within`
-                ) +
-                " " +
-                profileInfo?.validity +
-                "."
-                : " "}
-              {"  "}
-              {t(`Start exploring the best services around you.`)}
-            </Typography>
-          </Box>
-        </Box>
-      </CustomModal>
-      {token && getCurrentModuleType() !== "parcel" && <CashBackPopup />}
-      {token && failPayment && !(Array.isArray(failPayment) && failPayment.length === 0) && (
         <CustomModal
-          handleClose={() => {
-            setOpenIncompleteOrder(false);
-            // localStorage.setItem("incompleteOrderModalClosedAt", Date.now().toString());
-          }}
-          openModal={openIncompleteOrder}
+          handleClose={handleCloseWelcomeModal}
+          openModal={welcomeModal}
           closeButton
         >
-          <IncompleteOrderModal
-            dontShowAgain={dontShowAgain}
-            setDontShowAgain={setDontShowAgain}
-            setOpenPaymentModal={setOpenPaymentModal} setOpenIncompleteOrder={setOpenIncompleteOrder} failPaymentOrderData={failPayment} />
+          <Box
+            sx={{
+              maxWidth: "382px",
+              width: "95vw",
+              px: 1.3,
+              pb: 4,
+              textAlign: "center",
+              img: {
+                height: "unset",
+              },
+            }}
+          >
+            <img
+              src={"/static/sign-up-welcome.svg"}
+              alt="welcome"
+              width={183}
+              height={183}
+            />
+            <Box maxWidth={"308px"} mx={"auto"} mt={2}>
+              <Typography variant="h6" color="primary" mb={2}>
+                {t(`Welcome to ! ${configData?.business_name}`)}
+              </Typography>
+              <Typography variant="body2" lineHeight={"1.5"}>
+                {profileInfo?.is_valid_for_discount
+                  ? t(
+                    `Get ready for a special welcome gift, enjoy a special discount on your first order within`
+                  ) +
+                  " " +
+                  profileInfo?.validity +
+                  "."
+                  : " "}
+                {"  "}
+                {t(`Start exploring the best services around you.`)}
+              </Typography>
+            </Box>
+          </Box>
         </CustomModal>
-      )}
-      <CustomModal
-        openModal={openPaymentModal}
-        handleClose={() => setOpenPaymentModal(false)}
-      >
-        <PaymentMethod
-          setPaymentMethod={setPaymentMethod}
-          paymentMethod={paymentMethod}
-          zoneData={zoneData}
-          configData={configData}
-          orderType={failPayment?.order_type}
-          usePartialPayment={false}
-          setOpenModel={setOpenPaymentModal}
-          forprescription={failPayment?.prescription_order}
-          offlinePaymentOptions={offlinePaymentOptions}
-          paymentMethodImage={null}
-          setPaymentMethodImage={null}
-          setSwitchToWallet={null}
-          isZoneDigital={isZoneDigital}
-          handlePartialPayment={() => setPaymentMethod("wallet")}
-          walletBalance={profileInfo?.wallet_balance}
-          removePartialPayment={null}
-          switchToWallet={null}
-          customerData={{ data: profileInfo }}
-          failed
-          payableAmount={failPayment?.order_amount}
-          failedOrderPlace={failedOrderPlace}
+        {token && getCurrentModuleType() !== "parcel" && <CashBackPopup />}
+        {token && failPayment && !(Array.isArray(failPayment) && failPayment.length === 0) && (
+          <CustomModal
+            handleClose={() => {
+              setOpenIncompleteOrder(false);
+              // localStorage.setItem("incompleteOrderModalClosedAt", Date.now().toString());
+            }}
+            openModal={openIncompleteOrder}
+            closeButton
+          >
+            <IncompleteOrderModal
+              dontShowAgain={dontShowAgain}
+              setDontShowAgain={setDontShowAgain}
+              setOpenPaymentModal={setOpenPaymentModal} setOpenIncompleteOrder={setOpenIncompleteOrder} failPaymentOrderData={failPayment} />
+          </CustomModal>
+        )}
+        <CustomModal
+          openModal={openPaymentModal}
+          handleClose={() => setOpenPaymentModal(false)}
+        >
+          <PaymentMethod
+            setPaymentMethod={setPaymentMethod}
+            paymentMethod={paymentMethod}
+            zoneData={zoneData}
+            configData={configData}
+            orderType={failPayment?.order_type}
+            usePartialPayment={false}
+            setOpenModel={setOpenPaymentModal}
+            forprescription={failPayment?.prescription_order}
+            offlinePaymentOptions={offlinePaymentOptions}
+            paymentMethodImage={null}
+            setPaymentMethodImage={null}
+            setSwitchToWallet={null}
+            isZoneDigital={isZoneDigital}
+            handlePartialPayment={() => setPaymentMethod("wallet")}
+            walletBalance={profileInfo?.wallet_balance}
+            removePartialPayment={null}
+            switchToWallet={null}
+            customerData={{ data: profileInfo }}
+            failed
+            payableAmount={failPayment?.order_amount}
+            failedOrderPlace={failedOrderPlace}
 
-        />
-      </CustomModal>
+          />
+        </CustomModal>
+      </NoSsr>
     </PushNotificationLayout>
   );
 };

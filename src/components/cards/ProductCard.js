@@ -12,6 +12,8 @@ import { styled } from "@mui/material/styles";
 import { Box, Stack } from "@mui/system";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
 import { useRouter } from "next/router";
+import { handleProductRedirect } from "helper-functions/handleProductRedirect";
+
 import React, { useEffect, useReducer, useState, useRef } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
@@ -331,19 +333,12 @@ const ProductCard = (props) => {
   };
   const handleClick = () => {
     if (item?.module_type === "ecommerce") {
-      router.push({
-        pathname: "/product/[id]",
-        query: {
-          id: `${item?.slug ? item?.slug : item?.id}`,
-          module_id: `${getModuleId()}`,
-        },
-      }).then(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" }); // ✅ scroll to top after navigation
-      });
+      handleProductRedirect(item, router);
     } else {
       dispatch({ type: ACTION.setOpenModal, payload: true });
     }
   };
+
 
   useEffect(() => {
     if (item) {
@@ -432,15 +427,7 @@ const ProductCard = (props) => {
   const addToCart = (e) => {
     if (item?.module_type === "ecommerce") {
       if (item?.variations?.length > 0 || item?.has_variant) {
-        router.push({
-          pathname: "/product/[id]",
-          query: {
-            id: `${item?.slug ? item?.slug : item?.id}`,
-            module_id: `${getModuleId()}`,
-          },
-        }).then(() => {
-          window.scrollTo({ top: 0, behavior: "smooth" }); // ✅ scroll to top after navigation
-        });
+        handleProductRedirect(item, router);
       } else {
         e.stopPropagation();
         addToCartHandler();
@@ -1127,6 +1114,7 @@ const ProductCard = (props) => {
         addToWishlistHandler={addToWishlistHandler}
         removeFromWishlistHandler={removeFromWishlistHandler}
         isWishlisted={isWishlisted}
+        setOpenLocationAlert={setOpenLocationAlert}
       />
     ) : (
       <>
@@ -1185,6 +1173,7 @@ const ProductCard = (props) => {
             setOpenLocationAlert={setOpenLocationAlert}
             noRecommended={noRecommended}
             configData={configData}
+            
           />
         ) : (
           <CardWrapper
@@ -1251,7 +1240,7 @@ const ProductCard = (props) => {
                         theme.palette.mode === "dark" ? "#B3B3B399" : "#EDEDED99",
                       color: theme.palette.neutral[1000],
                       fontSize: "12px",
-                      zIndex: "999",
+                      zIndex: "9",
 
                     }}
                     component="h4"

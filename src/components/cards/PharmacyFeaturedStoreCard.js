@@ -9,6 +9,7 @@ import { getCurrentModuleType } from "../../helper-functions/getCurrentModuleTyp
 import { CustomBoxFullWidth } from "../../styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
 import Body2 from "../typographies/Body2";
+import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
 
 const Wrapper = styled(CustomBoxFullWidth)(({ theme, hover }) => ({
 	position: "relative",
@@ -48,15 +49,7 @@ const PharmacyFeaturedStoreCard = (props) => {
 	const { t } = useTranslation();
 	const router = useRouter();
 	const handleClick = () => {
-		router.push({
-			pathname: `/store/[id]`,
-			query: {
-				id: `${data?.slug ? data?.slug : data?.id}`,
-				module_id: `${data?.module_id}`,
-				module_type: getCurrentModuleType(),
-				store_zone_id: `${data?.zone_id}`,
-			},
-		});
+		 handleStoreRedirect(data, router);
 	};
 	return (
 		<Wrapper

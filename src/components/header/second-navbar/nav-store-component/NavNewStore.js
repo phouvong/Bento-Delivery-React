@@ -1,4 +1,6 @@
 import { Typography } from "@mui/material";
+import { handleStoreRedirect } from "../../../../helper-functions/handleStoreRedirect";
+
 import { Stack } from "@mui/system";
 import { useRouter } from "next/router";
 import React, { useEffect } from "react";
@@ -34,22 +36,7 @@ const NavNewStore = () => {
     }
   }, [data]);
   const handleClick = (item) => {
-    if (getCurrentModuleType() === "rental") {
-      router.push({
-        pathname: `/rental/provider-details/${item?.id}`,
-      });
-    } else {
-      router.push({
-        pathname: "/store/[id]",
-        query: {
-          id: `${item?.slug ? item?.slug : item?.id}`,
-          module_id: `${getModuleId()}`,
-          module_type: getCurrentModuleType(),
-          store_zone_id: `${item?.zone_id}`,
-          distance: item?.distance,
-        },
-      });
-    }
+    handleStoreRedirect(item, router);
   };
 
   return (
@@ -92,7 +79,7 @@ const NavNewStore = () => {
           </Stack>
         )}
         <Stack width="70%" justifyContent="flex-start" alignItems="center">
-          <ViewMore redirect={getCurrentModuleType() === "rental"? "/rental/provider/latest": "/store/latest"} />
+          <ViewMore redirect={getCurrentModuleType() === "rental" ? "/rental/provider/latest" : "/store/new"} />
         </Stack>
       </Stack>
     </CustomStackFullWidth>

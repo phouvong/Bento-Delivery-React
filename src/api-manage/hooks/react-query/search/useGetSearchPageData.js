@@ -52,6 +52,7 @@ export default function useGetSearchPageData(pageParams, handleSuccess) {
       pageParams?.minMax,
       pageParams?.searchValue,
       pageParams?.selectedBrands,
+      pageParams?.module,
     ],
     ({ pageParam = 1 }) => getSearch({ ...pageParams, pageParam }),
     {
@@ -67,7 +68,7 @@ export default function useGetSearchPageData(pageParams, handleSuccess) {
       retry: 1,
       enabled: false,
       onError: onSingleErrorResponse,
-      cacheTime: 300000,
+      cacheTime: 30,
       onSuccess: handleSuccess,
     }
   );

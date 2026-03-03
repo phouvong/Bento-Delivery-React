@@ -73,10 +73,15 @@ const BestReviewedItems = (props) => {
   }, [data]);
   useEffect(() => {
     if (data) {
-      setMenu(["All", ...uniqueCategories?.map((item) => item.name)]);
+      if (uniqueCategories?.length > 0) {
+        setMenu(["All", ...uniqueCategories?.map((item) => item.name)]);
+        
+      }
       setFilteredData(bestReviewedItems.products);
+
     }
   }, [bestReviewedItems.products]);
+console.log({uniqueCategories});
 
   useEffect(() => {
     if (selectedMenuIndex === 0) {
@@ -94,6 +99,9 @@ const BestReviewedItems = (props) => {
     }
   }, [selectedMenuIndex]);
 
+  console.log("vvvv",getCategoryIds());
+
+  
   const slides = () =>
     filteredData?.map((product) => (
       <ProductCard
@@ -102,7 +110,7 @@ const BestReviewedItems = (props) => {
         cardheight="340px"
         cardFor="vertical"
         cardType="vertical-type"
-        // cardFor="popular items"
+      // cardFor="popular items"
       />
     ));
 
@@ -115,7 +123,7 @@ const BestReviewedItems = (props) => {
     slidesToShow: info?.best_reviewed_section_banner ? 4 : 5,
     slidesToScroll: 2,
     cssEase: "linear",
-    ...createEnhancedArrows(isSliderHovered, { 
+    ...createEnhancedArrows(isSliderHovered, {
       displayNoneOnMobile: true,
       variant: "primary",
       noBackground: true
@@ -177,7 +185,7 @@ const BestReviewedItems = (props) => {
     slidesToShow: info?.best_reviewed_section_banner ? 2.1 : 2.7,
     slidesToScroll: 1,
     cssEase: "linear",
-    ...createEnhancedArrows(isSliderHovered, { 
+    ...createEnhancedArrows(isSliderHovered, {
       displayNoneOnMobile: true,
       variant: "primary",
       noBackground: true
@@ -314,8 +322,8 @@ const BestReviewedItems = (props) => {
                       sm={12}
                       lg={info?.best_reviewed_section_banner ? 9.5 : 12}
                     >
-                      <SliderCustom 
-                        nopadding="false" 
+                      <SliderCustom
+                        nopadding="false"
                         paddingBottom="1rem"
                         onMouseEnter={() => setIsSliderHovered(true)}
                         onMouseLeave={() => setIsSliderHovered(false)}

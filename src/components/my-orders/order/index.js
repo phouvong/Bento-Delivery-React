@@ -318,7 +318,7 @@ const Order = (props) => {
                 {getAmountWithSign(order?.order_amount)}
               </Typography>
               {order?.order_status == "delivered"
-                ? deliveredInformation()
+                ? null
                 : notDeliveredInformation()}
             </Stack>
           </CustomStackFullWidth>

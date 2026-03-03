@@ -37,7 +37,7 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
     { name: t("High to Low"), value: "high" },
     { name: t("Low to High"), value: "low" },
   ];
-  const Sort_by=t("Sort by:")
+  const Sort_by = t("Sort by:").trimEnd();
 
   const getContent = (label, showArrow) => {
     return (
@@ -57,7 +57,7 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
           fontSize="13px"
           sx={{ color: (theme) => theme.palette.neutral[600] }}
         >
-          {`${Sort_by} ${label}`}
+          {`${Sort_by} ${label}`.trim()}
         </Typography>
         {showArrow === "true" &&
           (open ? (
@@ -74,7 +74,7 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
   };
 
   return (
-    <div>
+    <>
       <Wrapper border="true" onClick={handleClick}>
         {getContent(
           sortOptions.find((option) => option.value === sortBy)?.name ||
@@ -107,7 +107,7 @@ const HighToLow = ({ handleSortBy, sortBy }) => {
           </Wrapper>
         ))}
       </Popover>
-    </div>
+    </>
   );
 };
 

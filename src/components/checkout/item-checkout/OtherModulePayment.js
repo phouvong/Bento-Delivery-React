@@ -191,7 +191,6 @@ const OtherModulePayment = (props) => {
     parcel,
     setOpenModel,
     usePartialPayment,
-
     offlinePaymentOptions,
     setPaymentMethodImage,
     isZoneDigital,
@@ -252,13 +251,11 @@ const OtherModulePayment = (props) => {
     setIsCheckedOffline(false);
 
   }, [router.pathname]);
+console.log({usePartialPayment});
 
   return (
     <CustomStackFullWidth spacing={1} position="relative">
-      <Box sx={{ position: "absolute", top: "0", right: "0", padding: "10px", zIndex: 1, cursor: "pointer" }}>
-        {/* Modal Close Button */}
-        <CloseIcon onClick={() => setOpenModel(false)} />
-      </Box>
+      
       <CustomStackFullWidth
         p={{ xs: "20px", md: "45px 45px 10px 45px" }}
         sx={{ maxHeight: "450px", overflowY: "auto", overflowX: "hidden" }}
@@ -293,8 +290,7 @@ const OtherModulePayment = (props) => {
             {configData?.customer_wallet_status === 1 && getToken() &&
               (failed
                 ? customerData?.data?.wallet_balance > payableAmount
-                : customerData?.data?.wallet_balance > 0) &&
-              configData?.partial_payment_status === 1 && (
+                : customerData?.data?.wallet_balance > 0) && (
                 <Box sx={{ flex: "1 1 calc(50% - 5px)" }}>
                   <PartialPayment
                     remainingBalance={
@@ -345,14 +341,15 @@ const OtherModulePayment = (props) => {
                       color={theme.palette.neutral[600]}
                       fontWeight="500"
                     >
-                      {getAmountWithSign(
+                  {getAmountWithSign(
                         paymentMethod === "wallet"
                           ? payableAmount
                           : walletBalance
                       )}
                     </Typography>
                   </Stack>
-                  {!usePartialPayment ? null : (
+                  {!usePartialPayment ||
+                  configData?.partial_payment_status !== 1 ? null : (
                     <Stack
                       direction="row"
                       justifyContent="space-between"
@@ -381,7 +378,8 @@ const OtherModulePayment = (props) => {
               </Box>
             )}
 
-            {!usePartialPayment ? null : (
+            {!usePartialPayment ||
+            configData?.partial_payment_status !== 1 ? null : (
               <Box
                 sx={{
                   flex: "1 1 calc(100% - 5px)",
@@ -485,9 +483,10 @@ const OtherModulePayment = (props) => {
             paidBy !== "receiver" &&
             forprescription !== "true" &&
             configData?.digital_payment_info?.digital_payment &&
+            (!usePartialPayment || configData?.partial_payment_status === 1) &&
             (configData?.partial_payment_method === "digital_payment" ||
               configData?.partial_payment_method === "both" ||
-              configData?.partial_payment_method === null) && (
+              configData?.partial_payment_method === null || configData?.partial_payment_method === "") && (
               <CustomStackFullWidth paddingY="10px">
                 <Typography fontSize="14px" fontWeight="500">
                   {t("Payment Methods")}
