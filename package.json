@@ -86,6 +86,6 @@
   },
   "resolutions": {
     "@swc/helpers": "^0.5.0"
-  }
+  },
 "npm_config_legacy_peer_deps": "true"
 }
