@@ -15,7 +15,7 @@ import { getStoresOrRestaurants } from "helper-functions/getStoresOrRestaurants"
 import { getGuestId, getToken } from "helper-functions/getToken";
 import moment from "moment/moment";
 import Router from "next/router";
-import React, { useEffect, useReducer, useState, useRef } from "react";
+import React, { useEffect, useMemo, useReducer, useState, useRef } from "react";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "react-query";
@@ -145,6 +145,8 @@ const ItemCheckout = (props) => {
 	const [isPackaging, setIsPackaging] = useState(false);
 	const [packagingCharge, setPackagingCharge] = useState(0);
 	const [paymentMethodImage, setPaymentMethodImage] = useState("");
+	const isInitialCartRender = useRef(true);
+	const previousCartListRef = useRef(cartList);
 	const [changeAmount, setChangeAmount] = useState();
 	const [state, customDispatch] = useReducer(scheduleReducer, INITIAL_STATE);
 	const { profileInfo } = useSelector((state) => state.profileInfo);
@@ -203,14 +205,20 @@ const ItemCheckout = (props) => {
 		}
 	}, [storeId]);
 
-	const currentLatLng = JSON.parse(
-		window.localStorage.getItem("currentLatLng")
-	);
+	const currentLatLng = useMemo(() => {
+		if (typeof window === "undefined") return null;
+		try {
+			return JSON.parse(window.localStorage.getItem("currentLatLng") || "null");
+		} catch (error) {
+			return null;
+		}
+	}, []);
 	const { data: zoneData } = useQuery(
-		["zoneId", location],
+		["zoneId", currentLatLng],
 		async () => GoogleApi.getZoneId(currentLatLng),
 		{
 			retry: 1,
+			enabled: Boolean(currentLatLng?.lat && currentLatLng?.lng),
 		}
 	);
 
@@ -314,13 +322,6 @@ const ItemCheckout = (props) => {
 			}
 		}
 	};
-
-
-	// useEffect(() => {
-	//   if (offlineCheck) {
-	//     handleOffineOrder();
-	//   }
-	// }, [orderId]);
 
 	const handleProductList = (productList, totalQty) => {
 		return productList?.map((cart) => {
@@ -815,7 +816,7 @@ const ItemCheckout = (props) => {
 			setSwitchToWallet(true);
 				dispatch(setOfflineMethod(""));
 			}else{
-				toast.error(t("Your wallet balance is insufficient for partial payment."));
+				toast.error(t("Your wallet balance is insufficient for payment."));
 			}
 		}
 	};
@@ -983,10 +984,9 @@ const ItemCheckout = (props) => {
 	}, [isPackaging]);
 	const isZoneDigital = getDigitalMethodFromZone(
 		storeData?.zone_id,
-		zoneData?.data
+		zoneData
 	);
 
-	const isZoneCod = () => { };
 	const hasOnlyPaymentMethod = () => {
 		if (
 			!configData?.cash_on_delivery &&
@@ -1015,10 +1015,23 @@ const ItemCheckout = (props) => {
 	}, [isZoneDigital, configData?.cash_on_delivery]);
 
 	useEffect(() => {
-		setPaymentMethodImage(
-			""
-		);
-		setPaymentMethod("")
+		if (isInitialCartRender.current) {
+			isInitialCartRender.current = false;
+			previousCartListRef.current = cartList;
+			return;
+		}
+
+		const cartChanged = !deepEqual(previousCartListRef.current, cartList);
+		const hasPreviousCartItems = previousCartListRef.current?.length > 0;
+
+		if (cartChanged && hasPreviousCartItems && cartList?.length > 0) {
+			setPaymentMethodImage(
+				""
+			);
+			setPaymentMethod("")
+		}
+
+		previousCartListRef.current = cartList;
 	}, [cartList]);
 	return (
 		<>

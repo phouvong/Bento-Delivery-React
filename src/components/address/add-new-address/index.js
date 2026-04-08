@@ -43,6 +43,8 @@ const AddNewAddress = (props) => {
     openAddressModal,
     editAddress,
     setEditAddress,
+    setAddress,
+    handleLatLng,
   } = props;
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
@@ -313,6 +315,8 @@ const AddNewAddress = (props) => {
                 refetch={refetch}
                 isRefetcing={isFetchingGeoCode}
                 editAddress={editAddress}
+                setAddress={setAddress}
+                handleLatLng={handleLatLng}
               />
             </CustomStackFullWidth>
           </Paper>

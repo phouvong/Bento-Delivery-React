@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import MainLayout from "../../src/components/layout/MainLayout";
 import ProductDetails from "../../src/components/product-details/ProductDetails";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import SEO from "../../src/components/seo";
 import CustomContainer from "../../src/components/container";
 import { NoSsr } from "@mui/material";
+import { setConfigData } from "redux/slices/configData";
 
 const Index = ({ configData, productDetailsData,  }) => {
+  const dispatch = useDispatch();
   const { cartList, campaignItem } = useSelector((state) => state.cart);
   const [productDetails, setProductDetails] = useState([]);
   
@@ -16,6 +18,11 @@ const Index = ({ configData, productDetailsData,  }) => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
+  useEffect(() => {
+    if (configData) {
+      dispatch(setConfigData(configData));
+    }
+  }, [configData, dispatch]);
   useEffect(() => {
     handleProductDetails();
   }, [productDetailsData, cartList]);

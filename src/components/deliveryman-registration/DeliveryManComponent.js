@@ -23,7 +23,10 @@ import { objectToFormData } from "helper-functions/objectToFormData";
 import { FORM_TITLE } from "./constants";
 import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 
-const DeliveryManComponent = ({ configData }) => {
+const DeliveryManComponent = ({
+  configData,
+  applicationTitle = "Deliveryman Application",
+}) => {
   useScrollToTop();
   const router = useRouter();
   const { t } = useTranslation();
@@ -45,12 +48,15 @@ const DeliveryManComponent = ({ configData }) => {
       phone: "",
       password: "",
       confirm_password: "",
+      type: "is_delivery",
     },
     validationSchema: deliveryManValidationSchema(),
     validationOptions: {
       abortEarly: false, // ✅ THIS IS THE KEY
     },
     onSubmit: async (values, helpers) => {
+      console.log({values});
+      
       try {
         const { confirm_password, ...modifiedValues } = values;
         registerDeliveryman(objectToFormData(modifiedValues), {
@@ -83,7 +89,7 @@ const DeliveryManComponent = ({ configData }) => {
     <>
       <TitleTopSection>
         <H1
-          text={t("Deliveryman Application")}
+          text={t(applicationTitle)}
           sx={{
             fontWeight: "700",
             fontSize: { xs: "26px", md: "36px" },

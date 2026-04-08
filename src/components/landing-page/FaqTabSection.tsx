@@ -52,7 +52,7 @@ const FaqTabSection: React.FC<FaqTabSectionProps> = ({ faq_section }) => {
     );
 
     const dynamicSellerFaqs = faq_section?.faq_list?.filter(
-        faq => faq.user_type === 'restaurant' && faq.status === 1
+        faq => faq.user_type === 'vendor' && faq.status === 1
     );
 
     const dynamicDriverFaqs = faq_section?.faq_list?.filter(
@@ -80,7 +80,7 @@ const FaqTabSection: React.FC<FaqTabSectionProps> = ({ faq_section }) => {
 
     if (dynamicDriverFaqs?.length) {
         tabs.push({
-            label: "I'm a Rider",
+            label: "I'm a Deliveryman",
             icon: <DirectionsCarIcon />,
             type: "deliveryman"
         });

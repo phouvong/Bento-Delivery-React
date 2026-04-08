@@ -5,7 +5,7 @@ import {
   SliderCustom,
 } from "styled-components/CustomStyles.style";
 import { Stack } from "@mui/system";
-import { t } from "i18next";
+import { useTranslation } from "react-i18next";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import Plan from "components/store-resgistration/Plan";
 import FormSubmitButton from "components/profile/FormSubmitButton";
@@ -24,6 +24,7 @@ import {
 
 const BusinessPlan = ({ formSubmit, isLoading }) => {
   const theme = useTheme();
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { configData } = useSelector((state) => state.configData);
   const { allData } = useSelector((state) => state.storeRegData);
@@ -152,7 +153,11 @@ const BusinessPlan = ({ formSubmit, isLoading }) => {
               </Stack>
               <Typography fontSize="13px" color={theme.palette.neutral[400]}>
                 {t(
-                  `Store will pay ${configData?.admin_commission}% commission to ${configData?.business_name} from each order. You will get access of all the features and options  in store panel , app and interaction with user.`
+                  "store_registration_commission_description",
+                  {
+                    commission: configData?.admin_commission,
+                    businessName: configData?.business_name,
+                  }
                 )}
               </Typography>
             </Stack>

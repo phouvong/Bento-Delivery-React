@@ -5,11 +5,13 @@ import {Stack} from "@mui/system";
 import {Typography} from "@mui/material";
 import {useTranslation} from "react-i18next";
 import {CustomSwitch} from "../../header/NavBar.style";
+import {useTheme} from "@mui/material/styles";
 
 const Cutlery = props => {
     const {isChecked, handleChange} = props
     const [checked, setChecked] = useState(isChecked)
     const {t} = useTranslation()
+    const theme = useTheme()
     const handleChangeInner = (event)=>{
         setChecked(event.target.checked)
         handleChange?.( event.target.checked)
@@ -28,6 +30,17 @@ const Cutlery = props => {
                 checked={checked}
                 onChange={handleChangeInner}
                 noimage='true'
+                sx={{
+                    "& .MuiSwitch-thumb": {
+                        backgroundColor: theme.palette.mode === "dark" ? "#fff" : undefined,
+                    },
+                    "& .MuiSwitch-track": {
+                        border:
+                            theme.palette.mode === "dark"
+                                ? `1px solid ${theme.palette.neutral[500]}`
+                                : "none",
+                    },
+                }}
             />
         </CustomStackFullWidth>
     );

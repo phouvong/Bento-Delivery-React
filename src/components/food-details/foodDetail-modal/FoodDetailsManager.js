@@ -67,7 +67,7 @@ const FoodDetailsManager = (props) => {
         />
         <CustomStackForFoodModal width="100%" spacing={2}>
           <Stack spacing={1.4} alignItems="start">
-            {!product?.available_date_ends && (
+            {!product?.available_date_ends && Number(product?.avg_rating) > 0 && (
               <CustomRatingBox rating={product?.avg_rating} />
             )}
             {router.pathname !== `/store/[id]` ? (

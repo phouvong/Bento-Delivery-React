@@ -1,4 +1,5 @@
 import CssBaseline from "@mui/material/CssBaseline";
+import NoSsr from "@mui/material/NoSsr";
 import { getCartListModuleWise } from "helper-functions/getCartListModuleWise";
 import Router, { useRouter } from "next/router";
 import React, { useEffect } from "react";
@@ -61,7 +62,7 @@ const CheckOutPage = () => {
 
       <MainLayout configData={configData} landingPageData={landingPageData}>
         <CustomContainer>
-          
+          <NoSsr>
             {page === "parcel" && <ParcelCheckout configData={configData} />}
             {page === "prescription" && (
               <PrescriptionCheckout
@@ -108,7 +109,7 @@ const CheckOutPage = () => {
                 buyNowItemList={buyNowItemList}
               />
             )}
-         
+          </NoSsr>
         </CustomContainer>
       </MainLayout>
     </>

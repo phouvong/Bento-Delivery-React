@@ -357,18 +357,22 @@ const ProductInformation = ({
 				) : (
 					<Skeleton width={100} variant="text" />
 				)}
-				{state.modalData[0]?.generic_name[0] && (
+				{(state.modalData[0]?.module_type === "pharmacy" ||
+					state.modalData[0]?.module?.module_type === "pharmacy") &&
+					state.modalData[0]?.generic_name?.[0] && (
 					<Typography
 						fontSize={{ xs: "12px", sm: "12px" }}
 						fontWeight="400"
 						color="customColor.textGray"
 						component="h2"
 					>
-						{state.modalData[0]?.generic_name[0]}
+						{state.modalData[0]?.generic_name?.[0]}
 					</Typography>
 				)}
 
-				{state.modalData[0]?.isCampaignItem ? null : (
+				{!state.modalData[0]?.isCampaignItem &&
+					Number(state.modalData[0]?.avg_rating) > 0 &&
+					Number(state.modalData[0]?.rating_count) > 0 && (
 					<Stack direction="row" alignItems="center" spacing={1}>
 						<Stack direction="row" alignItems="base-line" spacing={0.5}>
 							<CustomRatings

@@ -12,6 +12,7 @@ import { Stack } from "@mui/system";
 import CustomContainer from "components/container";
 import DollarSignHighlighter from "components/DollarSignHighlighter";
 import { t } from "i18next";
+import { filterOutRiderShareModules } from "helper-functions/moduleFilter";
 
 const ComponentTwoContainer = styled(Box)(
 	({ theme, paddingTop, paddingBottom }) => ({
@@ -25,12 +26,13 @@ const AvailableZoneSection = ({ zoneSection }) => {
 	const theme = useTheme();
 	const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
 	const toolTipsContent = (zone) => {
+		const filteredModules = filterOutRiderShareModules(zone?.modules);
 		return (
 			<>
 				<Stack>
 					<Typography paddingX="7px">{zone?.display_name}</Typography>
 					<Stack direction="row" p="7px" flexWrap="wrap" gap="4px">
-						{zone?.modules?.length > 0 ? (
+						{filteredModules?.length > 0 ? (
 							<Typography fontSize="12px">
 								{t("Modules are")}{" "}
 							</Typography>
@@ -41,10 +43,10 @@ const AvailableZoneSection = ({ zoneSection }) => {
 						)}
 
 						{/* Add a space after the text */}
-						{zone?.modules?.map((item, index) => (
+						{filteredModules?.map((item, index) => (
 							<Typography key={index} fontSize="12px">
 								{item}
-								{index !== zone.modules.length - 1 ? "," : "."}
+								{index !== filteredModules.length - 1 ? "," : "."}
 							</Typography>
 						))}
 					</Stack>
@@ -163,7 +165,10 @@ const AvailableZoneSection = ({ zoneSection }) => {
 									}}
 								>
 									{zoneSection?.available_zone_list
-										?.filter((item) => item?.modules?.length > 0)
+										?.filter(
+											(item) =>
+												filterOutRiderShareModules(item?.modules)?.length > 0
+										)
 										.map((zone, index) => (
 											<Tooltip
 												arrow

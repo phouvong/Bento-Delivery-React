@@ -11,6 +11,7 @@ import {
 import { styled } from "@mui/material/styles";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import Box from "@mui/material/Box";
+import { useTranslation } from "react-i18next";
 
 const CustomConnector = styled(StepConnector)(({ theme }) => ({
   "&.MuiStepConnector-root": {
@@ -53,6 +54,7 @@ const steps = ["General Information", "Business Plan", "Complete Registration"];
 
 const CustomStepper = ({ activeStep, flag }) => {
   const theme = useTheme();
+  const { t } = useTranslation();
   const isSmallSize = useMediaQuery(theme.breakpoints.down("md"));
   let lanDirection = undefined;
   if (typeof window !== "undefined") {
@@ -121,7 +123,7 @@ const CustomStepper = ({ activeStep, flag }) => {
               ></Box>
             )}
 
-            <StepLabel>{label}</StepLabel>
+            <StepLabel>{t(label)}</StepLabel>
           </CustomStep>
         );
       })}

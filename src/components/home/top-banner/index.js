@@ -8,7 +8,7 @@ import banner from "../assets/banner.webp";
 import rcommerceSearchBg from "../assets/ecommerce_top_bg.png";
 import foodBanner from "../assets/food.png";
 import pharmacy from "../assets/par.png";
-import parcelImage from "../assets/parcelBg.png";
+import parcelImage from "../assets/parcel.svg";
 import { BannerCityIcon } from "components/home/module-wise-components/rental/RentalIcons";
 import LeftCar from "/public/static/rental/left_car.png";
 import RightCar from "/public/static/rental/right_car.png";

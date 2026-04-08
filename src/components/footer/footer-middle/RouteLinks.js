@@ -40,9 +40,7 @@ const RouteLinks = (props) => {
         undefined,
         { shallow: true }
       );
-    } else if (value === "delivery_man") {
-      router.push(href, undefined, { shallow: true });
-    } else if (value === "help-and-support") {
+    } else {
       router.push(href, undefined, { shallow: true });
     }
   };

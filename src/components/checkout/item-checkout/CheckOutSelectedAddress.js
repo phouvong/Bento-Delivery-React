@@ -19,6 +19,8 @@ const CheckOutSelectedAddress = ({
   configData,
   editAddress,
   setEditAddress,
+  setAddress,
+  handleLatLng,
 }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -73,6 +75,8 @@ const CheckOutSelectedAddress = ({
         configData={configData}
         editAddress={editAddress}
         setEditAddress={setEditAddress}
+        setAddress={setAddress}
+        handleLatLng={handleLatLng}
       />
     </div>
   );

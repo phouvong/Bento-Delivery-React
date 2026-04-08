@@ -77,9 +77,11 @@ const SearchWithTitle = (props) => {
           fontWeight="600"
           lineHeight="33.18px"
           component="h1"
+
           sx={{
             fontSize: {
               md: ModuleTypes.RENTAL === "rental" && "30px !important",
+              color: moduleType === "parcel" ? "black" : "inherit"
             },
             textTransform:
               ModuleTypes.RENTAL === "rental" ? "capitalize" : "initial",
@@ -90,7 +92,7 @@ const SearchWithTitle = (props) => {
         <Typography
           variant={isSmall ? "subtitle2" : "subtitle1"}
           textAlign="center"
-          sx={{ color: (theme) =>theme.palette.mode==="dark"?theme.palette.neutral[1000]: theme.palette.neutral[400] }}
+          sx={{ color: moduleType === "parcel" ? "black" : (theme) => theme.palette.mode === "dark" ? theme.palette.neutral[1000] : theme.palette.neutral[400] }}
           fontWeight="400"
           lineHeight="18.75px"
           component="p"

@@ -20,12 +20,30 @@ const CollapsableMenu = ({
   setOpenDrawer,
   pathName,
   forcategory,
+  open,
+  onToggle,
+  onClose,
 }) => {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const [open, setOpen] = useState(false);
-  const handleClick = () => setOpen((prevState) => !prevState);
+  const [localOpen, setLocalOpen] = useState(false);
+  const isControlled = typeof open === "boolean";
+  const isOpen = isControlled ? open : localOpen;
+  const handleClick = () => {
+    if (isControlled) {
+      onToggle?.();
+      return;
+    }
+    setLocalOpen((prevState) => !prevState);
+  };
+  const closeMenu = () => {
+    if (isControlled) {
+      onClose?.();
+      return;
+    }
+    setLocalOpen(false);
+  };
   const handleRoute = (id, slug) => {
     if (forcategory === "true") {
       if (getCurrentModuleType() === "rental") {
@@ -53,7 +71,7 @@ const CollapsableMenu = ({
     }
 
     // Ensure these states are updated regardless of the route logic
-    setOpen(false);
+    closeMenu();
     setOpenDrawer(false);
   };
 
@@ -79,7 +97,7 @@ const CollapsableMenu = ({
       router.push(pathName, undefined, { shallow: true });
     }
 
-    setOpen(false);
+    closeMenu();
     setOpenDrawer(false);
   };
   return (
@@ -94,14 +112,14 @@ const CollapsableMenu = ({
         }}
       >
         <ListItemText primary={t(value?.text)} />
-        {open ? (
+        {isOpen ? (
           <ExpandLess sx={{ fontSize: "20px" }} />
         ) : (
           <ExpandMore sx={{ fontSize: "20px" }} />
         )}
       </ListItemButton>
 
-      <Collapse in={open} timeout="auto" unmountOnExit>
+      <Collapse in={isOpen} timeout="auto" unmountOnExit>
         <List component="div">
           {value.items?.slice?.(0, 10)?.map((item, index) => (
             <ListItemButton

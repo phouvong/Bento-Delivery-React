@@ -217,6 +217,18 @@ const OtherModulePayment = (props) => {
   const [isCheckedOffline, setIsCheckedOffline] = useState(
     offlineMethod !== ""
   );
+  const isPartialPaymentActive =
+    usePartialPayment && configData?.partial_payment_status === 1;
+  const allowCodForPartialPayment =
+    (isZoneDigital?.cash_on_delivery &&
+      configData?.cash_on_delivery &&
+      configData?.partial_payment_method === "both") ||
+    configData?.partial_payment_method === "cod";
+  const allowDigitalForPartialPayment =
+    configData?.partial_payment_method === "digital_payment" ||
+    configData?.partial_payment_method === "both" ||
+    configData?.partial_payment_method === null ||
+    configData?.partial_payment_method === "";
 
   const handleClickOffline = () => {
     setOpenOfflineOptions(!openOfflineOptions);
@@ -251,7 +263,6 @@ const OtherModulePayment = (props) => {
     setIsCheckedOffline(false);
 
   }, [router.pathname]);
-console.log({usePartialPayment});
 
   return (
     <CustomStackFullWidth spacing={1} position="relative">
@@ -297,7 +308,7 @@ console.log({usePartialPayment});
                       customerData?.data?.wallet_balance - payableAmount
                     }
                     handlePartialPayment={handlePartialPayment}
-                    usePartialPayment={usePartialPayment}
+                    usePartialPayment={isPartialPaymentActive}
                     walletBalance={customerData?.data?.wallet_balance}
                     paymentMethod={paymentMethod}
                     switchToWallet={switchToWallet}
@@ -307,7 +318,7 @@ console.log({usePartialPayment});
                   />
                 </Box>
               )}
-            {(usePartialPayment || switchToWallet) && (
+            {(isPartialPaymentActive || switchToWallet) && (
               <Box
                 sx={{
                   flex: "1 1 calc(50% - 5px)",
@@ -348,8 +359,7 @@ console.log({usePartialPayment});
                       )}
                     </Typography>
                   </Stack>
-                  {!usePartialPayment ||
-                  configData?.partial_payment_status !== 1 ? null : (
+                  {!isPartialPaymentActive ? null : (
                     <Stack
                       direction="row"
                       justifyContent="space-between"
@@ -378,8 +388,7 @@ console.log({usePartialPayment});
               </Box>
             )}
 
-            {!usePartialPayment ||
-            configData?.partial_payment_status !== 1 ? null : (
+            {!isPartialPaymentActive ? null : (
               <Box
                 sx={{
                   flex: "1 1 calc(100% - 5px)",
@@ -397,11 +406,8 @@ console.log({usePartialPayment});
                 </Typography>
               </Box>
             )}
-            {usePartialPayment
-              ? ((isZoneDigital?.cash_on_delivery &&
-                configData?.cash_on_delivery &&
-                configData?.partial_payment_method === "both") ||
-                configData?.partial_payment_method === "cod") && (
+            {isPartialPaymentActive
+              ? allowCodForPartialPayment && (
                 <Box sx={{ flex: "1 1 calc(50% - 5px)" }} minHeight="67px">
                   <PayButton
                     value="cash_on_delivery"
@@ -483,10 +489,7 @@ console.log({usePartialPayment});
             paidBy !== "receiver" &&
             forprescription !== "true" &&
             configData?.digital_payment_info?.digital_payment &&
-            (!usePartialPayment || configData?.partial_payment_status === 1) &&
-            (configData?.partial_payment_method === "digital_payment" ||
-              configData?.partial_payment_method === "both" ||
-              configData?.partial_payment_method === null || configData?.partial_payment_method === "") && (
+            (!isPartialPaymentActive || allowDigitalForPartialPayment) && (
               <CustomStackFullWidth paddingY="10px">
                 <Typography fontSize="14px" fontWeight="500">
                   {t("Payment Methods")}
@@ -538,7 +541,7 @@ console.log({usePartialPayment});
             )}
         </CustomStackFullWidth>
         <Stack onClick={handleClickOffline} sx={{ cursor: "pointer", mt: 2 }}>
-          {!usePartialPayment && configData?.offline_payment_status === 1 &&
+          {!isPartialPaymentActive && configData?.offline_payment_status === 1 &&
             isZoneDigital?.offline_payment &&
             forprescription !== "true" &&
             typeof offlinePaymentOptions !== "undefined" &&

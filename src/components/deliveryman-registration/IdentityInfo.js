@@ -134,7 +134,7 @@ const IdentityInfo = ({
               {t("Identity Image")}
             </InputLabel>
             <Typography fontSize="10px">
-              ({t("JPG, JPEG, PNG ,WEBP Less Than 1MB Ratio 1:1")})
+            ({t("JPG, JPEG, PNG, WEBP Less Than 1MB Ratio 1:1, Max 6 Images")})
             </Typography>
           </Stack>
 

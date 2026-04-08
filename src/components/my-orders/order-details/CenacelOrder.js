@@ -123,11 +123,11 @@ const CancelOrder = ({
                                 ? "rgba(174, 175, 175, 0.04)"
                                 : "transparent",
                               "& .MuiFormControlLabel-label": {
-                                color: (Array.isArray(cancelReason)
+                                color: (theme) => (Array.isArray(cancelReason)
                                   ? cancelReason.includes(reason.reason)
                                   : cancelReason === reason.reason)
-                                  ? "#000000"
-                                  : "inherit",
+                                  ? theme.palette.text.primary
+                                  : theme.palette.text.secondary,
                                 fontWeight: (Array.isArray(cancelReason)
                                   ? cancelReason.includes(reason.reason)
                                   : cancelReason === reason.reason)
@@ -185,7 +185,7 @@ const CancelOrder = ({
                   </LoadingButton>
                 )}
 
-                <Typography onClick={() => setModalOpen(false)} fontWeight="600" sx={{ textDecoration: "underline", cursor: "pointer", color: "#000" }} variant="body2" >{t("Continue Delivery")}</Typography>
+                <Typography onClick={() => setModalOpen(false)} fontWeight="600" sx={{ textDecoration: "underline", cursor: "pointer", color: theme=>theme.palette.neutral[1000] }} variant="body2" >{t("Continue Delivery")}</Typography>
               </Stack>
 
             </DialogActions>

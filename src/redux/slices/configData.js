@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { filterOutRiderShareModules } from "helper-functions/moduleFilter";
 
 const initialState = {
   configData: null,
@@ -23,7 +24,9 @@ export const configDataSlice = createSlice({
       state.countryCode = action.payload;
     },
     setModules: (state, action) => {
-      state.modules = action.payload.map((item) => item);
+      state.modules = filterOutRiderShareModules(action.payload).map(
+        (item) => item
+      );
     },
     setLandingPageData: (state, action) => {
       state.landingPageData = action.payload;

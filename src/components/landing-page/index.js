@@ -16,6 +16,7 @@ import Box from "@mui/material/Box";
 import StatsSection from "./stats-section";
 import ClientSection from "./our-client/ClientSection";
 import DeliveryManAppDownload from "./delivery-download-section";
+import RiderAppDownload from "./rider-download-section";
 import { GallerySection } from "./gallery-section";
 import ImageTitleSection from "./ImageTitleSection";
 import FaqTabSection from "./FaqTabSection";
@@ -63,6 +64,11 @@ const LandingPage = ({ configData, landingPageData }) => {
     zoneid = localStorage.getItem("zoneid");
   }
   console.log({ landingPageData });
+  const riderAppDownloadSection = landingPageData?.rider_app_download_section;
+  const hasRiderAppDownloadSection =
+    riderAppDownloadSection &&
+    typeof riderAppDownloadSection === "object" &&
+    Object.keys(riderAppDownloadSection).length > 0;
 
 
   return (
@@ -109,6 +115,14 @@ const LandingPage = ({ configData, landingPageData }) => {
           <Box >
             <CustomContainer>
               <DeliveryManAppDownload deliveryManApp={landingPageData?.deliveryman_app_download_section} />
+            </CustomContainer>
+          </Box>
+        ) : null}
+        {hasRiderAppDownloadSection &&
+        Number(riderAppDownloadSection?.download_rider_app_section_status) === 1 ? (
+          <Box>
+            <CustomContainer>
+              <RiderAppDownload riderApp={riderAppDownloadSection} />
             </CustomContainer>
           </Box>
         ) : null}

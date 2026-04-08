@@ -101,6 +101,7 @@ const OrderCalculation = (props) => {
       surgePrice
 
     );
+console.log({price,zoneData});
 
     setDeliveryFee(orderType !== "delivery" ? 0 : price);
     if (price === 0) {

@@ -15,11 +15,15 @@ const AuthGuard = (props) => {
       }
       const token = localStorage.getItem("token");
       const guest = localStorage.getItem("guest_id");
-      if ((token || guest) && orderId) {
+      if ((token || guest)) {
         setChecked(true);
       } else if (guest && configData?.guest_checkout_status === 1) {
         setChecked(true);
-      } else {
+      }
+      else if((token || guest) && orderId){
+        setChecked(true);
+      }
+      else {
         router.push(
           {
             pathname: "/",

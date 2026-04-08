@@ -118,6 +118,10 @@ const Top = (props) => {
   const dispatchRedux = useDispatch();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const { t } = useTranslation();
+  const hasStoreRatingOrReview =
+    Number(storeDetails?.avg_rating) > 0 ||
+    Number(storeDetails?.rating_count) > 0 ||
+    Number(storeDetails?.reviews_comments_count) > 0;
   const router = useRouter();
   const ACTION = {
     setViewMap: "setViewMap",
@@ -368,61 +372,65 @@ const Top = (props) => {
                       >
                         <H1 text={storeDetails?.name} textAlign="flex-start" />
 
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="center"
-                            spacing={0.4}
-                          >
-                            <StyledRating
-                              name="read-only"
-                              value={
-                                storeDetails?.avg_rating
-                                  ? storeDetails.avg_rating
-                                  : 5
-                              }
-                              readOnly
-                              size="small"
-                              hasRating="true"
-                            />
-                            {storeDetails?.rating_count !== 0 ? (
-                              <Typography>{`(${storeDetails?.avg_rating})`}</Typography>
-                            ) : null}
-                          </Stack>
-                          <Typography
-                            sx={{
-                              color: (theme) => theme.palette.neutral[600],
-                            }}
-                          >
-                            |
-                          </Typography>
-                          {storeDetails?.rating_count !== 0 ? (
+                        {hasStoreRatingOrReview && (
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              justifyContent="center"
+                              spacing={0.4}
+                            >
+                              <StyledRating
+                                name="read-only"
+                                value={
+                                  Number(storeDetails?.avg_rating) === 0
+                                    ? 0
+                                    : storeDetails?.avg_rating
+                                      ? storeDetails.avg_rating
+                                      : 5
+                                }
+                                readOnly
+                                size="small"
+                                hasRating="true"
+                              />
+                              {storeDetails?.rating_count !== 0 && storeDetails.avg_rating !== 0 ? (
+                                <Typography>{`(${storeDetails?.avg_rating})`}</Typography>
+                              ) : null}
+                            </Stack>
                             <Typography
-                              textDecoration="underline"
-                              fontWeight="700"
-                              lineHeight="16.15px"
                               sx={{
-                                fontSize: {
-                                  xs: "10px",
-                                  sm: "14px",
-                                },
-                                cursor: "pointer",
+                                color: (theme) => theme.palette.neutral[600],
                               }}
-                              onClick={() => setOpenReviewModal(true)}
                             >
-                              {storeDetails?.reviews_comments_count}{" "}
-                              {t("Reviews")}
+                              |
                             </Typography>
-                          ) : (
-                            <Typography
-                              fontSize={{ xs: "11px", md: "13.5px" }}
-                              sx={{ textDecoration: "underLine" }}
-                            >
-                              {t("No reviews yet")}
-                            </Typography>
-                          )}
-                        </Stack>
+                            {storeDetails?.rating_count !== 0 ? (
+                              <Typography
+                                textDecoration="underline"
+                                fontWeight="700"
+                                lineHeight="16.15px"
+                                sx={{
+                                  fontSize: {
+                                    xs: "10px",
+                                    sm: "14px",
+                                  },
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => setOpenReviewModal(true)}
+                              >
+                                {storeDetails?.reviews_comments_count}{" "}
+                                {t("Reviews")}
+                              </Typography>
+                            ) : (
+                              <Typography
+                                fontSize={{ xs: "11px", md: "13.5px" }}
+                                sx={{ textDecoration: "underLine" }}
+                              >
+                                {t("No reviews yet")}
+                              </Typography>
+                            )}
+                          </Stack>
+                        )}
                         <Typography
                           textDecoration="underline"
                           fontWeight="400"
@@ -581,73 +589,77 @@ const Top = (props) => {
                       <CustomStackFullWidth spacing={1}>
                         <H1 text={storeDetails?.name} textAlign="flex-start" />
 
-                        <Stack direction="row" alignItems="center" spacing={1}>
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="center"
-                            spacing={0.4}
-                          >
-                            <StyledRating
-                              sx={{
-                                color:
-                                  storeDetails?.avg_rating === 0
-                                    ? alpha(
-                                      theme.palette.whiteContainer.main,
-                                      0.6
-                                    )
-                                    : "warning.dark",
-                              }}
-                              name="read-only"
-                              value={
-                                storeDetails?.avg_rating
-                                  ? storeDetails?.avg_rating
-                                  : 5
-                              }
-                              readOnly
-                              size="small"
-                              hasRating={
-                                storeDetails?.avg_rating === 0 ? true : false
-                              }
-                            />
-                            {storeDetails?.rating_count !== 0 ? (
-                              <Typography>{`(${storeDetails?.avg_rating})`}</Typography>
-                            ) : null}
-                          </Stack>
-                          <Typography
-                            sx={{
-                              color: (theme) => theme.palette.neutral[600],
-                            }}
-                          >
-                            |
-                          </Typography>
-                          {storeDetails?.rating_count !== 0 ? (
-                            <Typography
-                              onClick={() => setOpenReviewModal(true)}
-                              fontSize="14px"
-                              sx={{
-                                textDecoration: "underLine",
-                                cursor: "pointer",
-                              }}
-                              fontWeight="700"
-                              lineHeight="16.15px"
-                              component="span"
+                        {hasStoreRatingOrReview && (
+                          <Stack direction="row" alignItems="center" spacing={1}>
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              justifyContent="center"
+                              spacing={0.4}
                             >
-                              {storeDetails?.reviews_comments_count}
+                              <StyledRating
+                                sx={{
+                                  color:
+                                    storeDetails?.avg_rating === 0
+                                      ? alpha(
+                                        theme.palette.whiteContainer.main,
+                                        0.6
+                                      )
+                                      : "warning.dark",
+                                }}
+                                name="read-only"
+                                value={
+                                  Number(storeDetails?.avg_rating) === 0
+                                    ? 0
+                                    : storeDetails?.avg_rating
+                                      ? storeDetails?.avg_rating
+                                      : 5
+                                }
+                                readOnly
+                                size="small"
+                                hasRating={
+                                  storeDetails?.avg_rating === 0 ? true : false
+                                }
+                              />
+                              {storeDetails?.rating_count !== 0 ? (
+                                <Typography>{`(${storeDetails?.avg_rating})`}</Typography>
+                              ) : null}
+                            </Stack>
+                            <Typography
+                              sx={{
+                                color: (theme) => theme.palette.neutral[600],
+                              }}
+                            >
+                              |
+                            </Typography>
+                            {storeDetails?.rating_count !== 0 ? (
                               <Typography
+                                onClick={() => setOpenReviewModal(true)}
+                                fontSize="14px"
+                                sx={{
+                                  textDecoration: "underLine",
+                                  cursor: "pointer",
+                                }}
+                                fontWeight="700"
+                                lineHeight="16.15px"
                                 component="span"
-                                fontSize="13px"
-                                fontWeight="400"
                               >
-                                {t(" Reviews")}
+                                {storeDetails?.reviews_comments_count}
+                                <Typography
+                                  component="span"
+                                  fontSize="13px"
+                                  fontWeight="400"
+                                >
+                                  {t(" Reviews")}
+                                </Typography>
                               </Typography>
-                            </Typography>
-                          ) : (
-                            <Typography fontSize="13.5px">
-                              {t("No reviews yet")}
-                            </Typography>
-                          )}
-                        </Stack>
+                            ) : (
+                              <Typography fontSize="13.5px">
+                                {t("No reviews yet")}
+                              </Typography>
+                            )}
+                          </Stack>
+                        )}
 
                         <Typography
                           fontSize="14px"

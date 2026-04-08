@@ -867,6 +867,7 @@ export const arabic = {
 	"No Data Found": "لاتوجد بيانات",
 	"No location found.": "لم يتم العثور على موقع.",
 	"Item updated successfully": "تم تحديث العنصر بنجاح",
+	"Profile successfully updated": "تم تحديث الملف الشخصي بنجاح",
 	"Logged out successfully": "سجلت بنجاح",
 	"No title given": "لا عنوان معطى",
 	"Best reviewed Foods": "أفضل الأطعمة المراجعة",
@@ -1066,6 +1067,7 @@ export const arabic = {
 	"We are under maintenance.": "نحن تحت الصيانة.",
 	"added via": "أضيفت عبر",
 	"Popular in this store!": "شعبية في هذا المتجر!",
+	"Recommended for you": "موصى به لك",
 	"Add to cart": "أضف إلى السلة",
 	"Sort by : High to Low": "فرز بواسطة: عالية إلى منخفضة",
 	"Sort by : Low to High": "فرز بواسطة: منخفض إلى مرتفع",
@@ -1081,6 +1083,10 @@ export const arabic = {
 		"هل تحتاج إلى طلب نفس الطب؟ لا تقلق فقط انقر هنا",
 	"Refill Request": "طلب إعادة الملء",
 	"Visit Again!": "زورني مره اخرى!",
+	"Get your recent medicine from the store you recently ordered":
+		"احصل على الدواء الأخير من المتجر الذي طلبت منه مؤخرًا",
+	"Get your recent purchase from the shop you recently ordered":
+		"احصل على آخر مشترياتك من المتجر الذي طلبت منه مؤخرًا",
 	"Get your recent medicine from the store you recently visited":
 		"احصل على دورك الأخير من المتجر الذي قمت بزيارته مؤخرًا",
 	"Get your recent purchase from the shop you recently visited":
@@ -1103,6 +1109,9 @@ export const arabic = {
 	"Popular Store": "متجر شعبي",
 	"Search foods and restaurants...": "البحث عن الأطعمة والمطاعم ...",
 	"Wanna Try  Again!": "هل تريد المحاولة مرة أخرى!",
+	"Wanna Try  Again!!": "هل تريد المحاولة مرة أخرى!!",
+	"Get your recent food from the restaurant you recently ordered":
+		"احصل على طعامك الأخير من المطعم الذي طلبت منه مؤخرًا",
 	"Get your recent food from the restaurant you recently visited":
 		"احصل على طعامك الأخير من المطعم الذي قمت بزيارته مؤخرًا",
 	"Special Food Offers": "عروض الطعام الخاصة",
@@ -1391,6 +1400,7 @@ export const arabic = {
 	"Business Cover": "غلاف العمل",
 	"Business Logo": "شعار العمل",
 	"Business Module": "وحدة العمل",
+	"Business Plan": "خطة العمل",
 	"Business Name": "اسم العمل",
 	"Business TIN": "الرقم الضريبي للعمل",
 	"Business Zone": "منطقة العمل",
@@ -1411,6 +1421,7 @@ export const arabic = {
 	"Click to view The file": "انقر لعرض الملف",
 	"Comments": "تعليقات",
 	"Commission Base": "أساس العمولة",
+	"Complete Registration": "إكمال التسجيل",
 	"Complete Order": "إكمال الطلب",
 	"Completed Successfully": "تم الانتهاء بنجاح",
 	"Confirm": "تأكيد",
@@ -1608,8 +1619,10 @@ export const arabic = {
 	"Restaurant address required": "عنوان المطعم مطلوب",
 	"Restaurant name required": "اسم المطعم مطلوب",
 	"Return Fare": "أجرة الإرجاع",
-	"Run store by purchasing subsciption  packages. You will have access the features of in store panel , app and interaction with user according to the subscription packages.": "قم بتشغيل المتجر عن طريق شراء باقات الاشتراك. ستتمكن من الوصول إلى ميزات لوحة المتجر والتطبيق والتفاعل مع المستخدم وفقاً لباقات الاشتراك.",
-	"Save Address": "حفظ العنوان",
+		"Run store by purchasing subsciption  packages. You will have access the features of in store panel , app and interaction with user according to the subscription packages.": "قم بتشغيل المتجر عن طريق شراء باقات الاشتراك. ستتمكن من الوصول إلى ميزات لوحة المتجر والتطبيق والتفاعل مع المستخدم وفقاً لباقات الاشتراك.",
+		"store_registration_commission_description": "سيدفع المتجر عمولة بنسبة {{commission}}% إلى {{businessName}} من كل طلب. ستحصل على إمكانية الوصول إلى جميع الميزات والخيارات في لوحة المتجر والتطبيق والتفاعل مع المستخدم.",
+		"Store will pay {{commission}}% commission to {{businessName}} from each order. You will get access to all the features and options in store panel, app and interaction with user.": "سيدفع المتجر عمولة بنسبة {{commission}}% إلى {{businessName}} من كل طلب. ستحصل على إمكانية الوصول إلى جميع الميزات والخيارات في لوحة المتجر والتطبيق والتفاعل مع المستخدم.",
+		"Save Address": "حفظ العنوان",
 	"Save for your next order": "حفظ لطلبك القادم",
 	"Scan to Download": "امسح للتنزيل",
 	"Schedule Delivery": "جدولة التوصيل",

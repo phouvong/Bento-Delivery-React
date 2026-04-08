@@ -8,7 +8,7 @@ import { CustomDateFormat } from "components/date-and-time-formators/CustomDateF
 import CloseIcon from "components/icons/CloseIcon";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
 import { t } from "i18next";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCashbackList } from "redux/slices/cashbackList";
 import CustomImageContainer from "components/CustomImageContainer";
@@ -16,6 +16,7 @@ import cashbackImage from "../../../public/static/cash-back.svg";
 
 const CashBackPopup = () => {
   const [open, setOpen] = useState(false);
+  const lastScrollY = useRef(0);
   const theme = useTheme();
   const dispatch = useDispatch();
   const handleSuccess = (data) => {
@@ -27,6 +28,24 @@ const CashBackPopup = () => {
   useEffect(() => {
     if (!cashbackList) refetch();
   }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    lastScrollY.current = window.scrollY;
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY.current && open) {
+        setOpen(false);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [open]);
 
   if (cashbackList?.length > 0)
     return (

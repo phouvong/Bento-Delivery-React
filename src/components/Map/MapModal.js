@@ -406,6 +406,7 @@ const MapModal = ({
                     locationEnabled={locationEnabled}
                     setPlaceDescription={setPlaceDescription}
                     isModalExpand={isModalExpand}
+                    setIsModalExpand={setIsModalExpand}
                   />
                 ) : (
                   <CustomStackFullWidth

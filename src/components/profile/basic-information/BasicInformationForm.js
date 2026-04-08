@@ -213,7 +213,7 @@ const BasicInformationForm = ({
         } else {
           setOpenEmail(false);
           setOpen(false);
-          toast.success(response?.message);
+          toast.success(t(response?.message));
           refetch();
           handleClick();
         }

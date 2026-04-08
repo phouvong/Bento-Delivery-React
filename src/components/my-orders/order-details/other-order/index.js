@@ -27,10 +27,11 @@ import OrderSummery from "./OrderSummery";
 import RefundModal from "./RefundModal";
 import StoreDetails from "./StoreDetails";
 import { useSelector } from "react-redux";
-import { getGuestId } from "helper-functions/getToken";
+import { getGuestId, getToken } from "helper-functions/getToken";
 import { useUpdatePaymentMethod } from "api-manage/hooks/react-query/payment-method/useUpdatePaymentMethod";
 import { useGetFailedPayment } from "api-manage/hooks/react-query/useGetFailedPayment";
 import { cod_exceeds_message } from "utils/toasterMessages";
+
 
 const OtherOrder = (props) => {
   const { configData, data, refetch, id, dataIsLoading, page } = props;
@@ -45,7 +46,7 @@ const OtherOrder = (props) => {
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const guestId = getGuestId();
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
-  const phone = guestUserInfo?.contact_person_number;
+  const phone = guestUserInfo?.contact_person_number || router.query?.phone;
   const [paymentFailedData, setPaymentFailedData] = useState(null);
   const { mutate: paymentMethodUpdateMutation, isLoading: repayOrderLoading } =
     useUpdatePaymentMethod();
@@ -69,8 +70,12 @@ const OtherOrder = (props) => {
     }
   }, [trackOrderData?.id]);
   useEffect(() => {
-    refetchTrackOrder();
-  }, []);
+    if (!id) return;
+
+    if (getToken() || phone) {
+      refetchTrackOrder();
+    }
+  }, [id, phone, guestId, refetchTrackOrder]);
 
   useEffect(() => {
     let interval;
@@ -139,7 +144,6 @@ const OtherOrder = (props) => {
       toast.error(cod_exceeds_message);
     }
   };
-  console.log({ paymentFailedData });
   const activeTabPanel = () => {
     switch (currentTab) {
       case "order-summary":

@@ -15,6 +15,9 @@ const StoreAndDeliveryManCommon = ({
 }) => {
   const theme = useTheme();
   const totalOrderText = t("Delivery Completed");
+  const avgRating = Number(data?.avg_rating || 0);
+  const ratingCount = Number(data?.rating_count || 0);
+  const shouldShowRatings = avgRating > 0 && ratingCount > 0;
   return (
     <>
       <Grid item md={1.2} sm={4} xs={3}>
@@ -34,31 +37,36 @@ const StoreAndDeliveryManCommon = ({
         <Typography fontWeight="600" fontSize={{ xs: "14px", md: "20px" }}>
           {data && data?.name ? data?.name : data?.f_name}
         </Typography>
-        <Stack direction="row" alignItems="center">
-          <CustomRatings
-            readOnly="true"
-            ratingValue={data?.avg_rating}
-            color={theme.palette.warning.new}
-          />
-          <Typography fontSize={{ xs: "10px", md: "13.4px" }} fontWeight="700">
-            ({data?.avg_rating.toFixed(2)})
-          </Typography>
+        {shouldShowRatings && (
+          <Stack direction="row" alignItems="center">
+            <CustomRatings
+              readOnly="true"
+              ratingValue={avgRating}
+              color={theme.palette.warning.new}
+            />
+            <Typography
+              fontSize={{ xs: "10px", md: "13.4px" }}
+              fontWeight="700"
+            >
+              ({avgRating.toFixed(2)})
+            </Typography>
 
-          <Typography
-            fontSize={{ xs: "10px", md: "13.4px" }}
-            fontWeight="700"
-            ml="9px"
-            paddingLeft="9px"
-            sx={{
-              //textDecoration: "underLine",
-              borderLeft: "2px solid",
-              borderColor: (theme) => alpha(theme.palette.neutral[400], 0.4),
-              color: (theme) => alpha(theme.palette.neutral[600], 0.9),
-            }}
-          >
-            {data?.rating_count} {t("Reviews")}
-          </Typography>
-        </Stack>
+            <Typography
+              fontSize={{ xs: "10px", md: "13.4px" }}
+              fontWeight="700"
+              ml="9px"
+              paddingLeft="9px"
+              sx={{
+                //textDecoration: "underLine",
+                borderLeft: "2px solid",
+                borderColor: (theme) => alpha(theme.palette.neutral[400], 0.4),
+                color: (theme) => alpha(theme.palette.neutral[600], 0.9),
+              }}
+            >
+              {ratingCount} {t("Reviews")}
+            </Typography>
+          </Stack>
+        )}
         {fromDelivery !== "true" ? (
           <Typography fontSize={{ xs: "10px", md: "13.4px" }} mt="3px">
             {t("Address")} : {data && data?.address}

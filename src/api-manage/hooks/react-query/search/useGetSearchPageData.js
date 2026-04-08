@@ -68,7 +68,7 @@ export default function useGetSearchPageData(pageParams, handleSuccess) {
       retry: 1,
       enabled: false,
       onError: onSingleErrorResponse,
-      cacheTime: 30,
+      //cacheTime: 30,
       onSuccess: handleSuccess,
     }
   );

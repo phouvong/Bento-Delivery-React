@@ -24,15 +24,22 @@ export default function useGetTrackOrderData(
   setShowOrderDetails,
   handleSuccess
 ) {
-  return useQuery(["track-order-data", order_id], () => getData(order_id, phone, guestId), {
-    onSuccess: handleSuccess,
-    enabled: false,
-    retry: 1,
-    onError: (error) => {
-      setShowOrderDetails?.(false)
-      error?.response?.data?.errors?.forEach((item) => {
-        handleTokenExpire(item);
-      });
+  return useQuery(
+    ["track-order-data", order_id, phone, guestId],
+    ({ queryKey }) => {
+      const [, currentOrderId, currentPhone, currentGuestId] = queryKey;
+      return getData(currentOrderId, currentPhone, currentGuestId);
     },
-  });
+    {
+      onSuccess: handleSuccess,
+      enabled: false,
+      retry: 1,
+      onError: (error) => {
+        setShowOrderDetails?.(false);
+        error?.response?.data?.errors?.forEach((item) => {
+          handleTokenExpire(item);
+        });
+      },
+    }
+  );
 }

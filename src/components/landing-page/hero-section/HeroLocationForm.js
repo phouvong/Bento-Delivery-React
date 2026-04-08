@@ -299,7 +299,7 @@ const HeroLocationForm = () => {
                 <HeroFormItem ref={excludedDivRef}>
                   <Box
                     sx={{
-                      backgroundColor: (theme) => theme.palette.neutral[300],
+                      
                       // width: "100%",
                       alignItems: "center",
                       justifyContent: "center",
@@ -363,8 +363,13 @@ const HeroLocationForm = () => {
                   height: "100%",
                   width: "100%",
                   borderRadius: "0px 8px 8px 0px",
-                  // cursor: (!location?.lat || isLoadingGeoCode) ? "not-allowed" : "pointer"
-                  "&:disabled": {
+                  transition: "all 0.2s ease",
+                  "&.Mui-disabled": {
+                    backgroundColor: (theme) =>
+                      theme.palette.action.disabledBackground,
+                    color: (theme) => theme.palette.action.disabled,
+                    boxShadow: "none",
+                    opacity: 1,
                     cursor: "not-allowed",
                     pointerEvents: "all !important",
                   },

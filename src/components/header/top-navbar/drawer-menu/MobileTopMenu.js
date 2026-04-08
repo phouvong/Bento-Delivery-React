@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import List from "@mui/material/List";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
@@ -30,6 +30,7 @@ const MobileTopMenu = ({
   isLogoutLoading,
   setOpenModal,
 }) => {
+  const [expandedMenu, setExpandedMenu] = useState(null);
   const { wishLists } = useSelector((state) => state.wishList);
   const router = useRouter();
   let token = undefined;
@@ -108,6 +109,10 @@ const MobileTopMenu = ({
   const getWishlistCount = () => {
     return wishLists?.item?.length + wishLists?.store?.length;
   };
+  const handleToggleMenu = (menuKey) => {
+    setExpandedMenu((prev) => (prev === menuKey ? null : menuKey));
+  };
+
   return (
     <Box
       sx={{
@@ -148,18 +153,27 @@ const MobileTopMenu = ({
                     toggleDrawers={toggleDrawer}
                     pathName="/categories"
                     forcategory="true"
+                    open={expandedMenu === "cat"}
+                    onToggle={() => handleToggleMenu("cat")}
+                    onClose={() => setExpandedMenu(null)}
                   />
                   <CollapsableMenu
                     value={collapsableMenu.latest}
                     setOpenDrawer={setOpenDrawer}
                     toggleDrawers={toggleDrawer}
                     pathName="/store/new"
+                    open={expandedMenu === "latest"}
+                    onToggle={() => handleToggleMenu("latest")}
+                    onClose={() => setExpandedMenu(null)}
                   />
                   <CollapsableMenu
                     value={collapsableMenu.popularStore}
                     setOpenDrawer={setOpenDrawer}
                     toggleDrawers={toggleDrawer}
                     pathName="/store/popular"
+                    open={expandedMenu === "popularStore"}
+                    onToggle={() => handleToggleMenu("popularStore")}
+                    onClose={() => setExpandedMenu(null)}
                   />
                 </>
               )}

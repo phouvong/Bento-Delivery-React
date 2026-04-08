@@ -2,7 +2,8 @@ import { alpha, useMediaQuery, useTheme, Card, Skeleton, Box, Grid, Typography }
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { getToken } from "helper-functions/getToken";
 import { ModuleTypes } from "helper-functions/moduleTypes";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Slider from "react-slick";
 import {
   CustomStackFullWidth,
@@ -58,19 +59,31 @@ const VisitAgainShimmerCard = () => {
 };
 
 const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
+  const { t } = useTranslation();
   const theme = useTheme();
   const token = getToken();
   const isSmallScreen = useMediaQuery('(min-width:600px)');
   const [isSliderHovered, setIsSliderHovered] = useState(false);
+  const sliderRef = useRef(null);
+
+  // Re-render slider when data changes
+  useEffect(() => {
+    if (sliderRef.current && !isLoading) {
+      setTimeout(() => {
+        sliderRef.current?.slickGoTo?.(0);
+      }, 0);
+    }
+  }, [isLoading, visitedStores]);
 
   const getModuleWiseData = () => {
     switch (getCurrentModuleType()) {
       case ModuleTypes.GROCERY:
         return {
           mainPosition: "flex-start",
-          heading: isVisited ? "Visit Again!" : "Whats New",
-          subHeading:
-            "Get your recent purchase from the shop you recently ordered",
+          heading: isVisited ? t("Visit Again!") : t("Whats New"),
+          subHeading: t(
+            "Get your recent purchase from the shop you recently ordered"
+          ),
           bgColor:
             theme.palette.mode === "dark"
               ? "rgba(3, 157, 85, 0.05)"
@@ -79,9 +92,10 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
       case ModuleTypes.PHARMACY:
         return {
           mainPosition: !isVisited ? "flex-start" : "center",
-          heading: isVisited ? "Visit Again!" : "Whats New",
-          subHeading:
-            "Get your recent medicine from the store you recently ordered",
+          heading: isVisited ? t("Visit Again!") : t("Whats New"),
+          subHeading: t(
+            "Get your recent medicine from the store you recently ordered"
+          ),
           bgColor:
             theme.palette.mode === "dark"
               ? "rgba(3, 157, 85, 0.05)"
@@ -90,9 +104,10 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
       case ModuleTypes.ECOMMERCE:
         return {
           mainPosition: "flex-start",
-          heading: isVisited ? "Visit Again!" : "Whats New",
-          subHeading:
-            "Get your recent purchase from the shop you recently ordered",
+          heading: isVisited ? t("Visit Again!") : t("Whats New"),
+          subHeading: t(
+            "Get your recent purchase from the shop you recently ordered"
+          ),
           bgColor:
             theme.palette.mode === "dark"
               ? "rgba(3, 157, 85, 0.05)"
@@ -101,9 +116,10 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
       case ModuleTypes.FOOD:
         return {
           mainPosition: "flex-start",
-          heading: isVisited ? "Wanna Try  Again!!" : "Whats New",
-          subHeading:
-            "Get your recent food from the restaurant you recently ordered",
+          heading: isVisited ? t("Wanna Try  Again!!") : t("Whats New"),
+          subHeading: t(
+            "Get your recent food from the restaurant you recently ordered"
+          ),
           bgColor:
             theme.palette.mode === "dark"
               ? "rgba(3, 157, 85, 0.05)"
@@ -270,7 +286,7 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
           onMouseEnter={() => setIsSliderHovered(true)}
           onMouseLeave={() => setIsSliderHovered(false)}
         >
-          <Slider {...enhancedSettings}>
+          <Slider ref={sliderRef} {...enhancedSettings}>
             {isLoading ? (
               [...Array(5)].map((_, index) => (
                 <VisitAgainShimmerCard key={index} />

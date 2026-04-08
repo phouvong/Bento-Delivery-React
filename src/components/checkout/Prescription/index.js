@@ -45,7 +45,7 @@ const PrescriptionCheckout = ({ storeId ,page}) => {
   const [orderType, setOrderType] = useState("delivery");
   const [address, setAddress] = useState(undefined);
   const [prescriptionImages, setPrescriptionImages] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("");
   const [unavailable_item_note, setUnavailable_item_note] = useState(null);
   const [delivery_instruction, setDelivery_instruction] = useState(null);
   const [deliveryTip, setDeliveryTip] = useState(0);
@@ -210,6 +210,13 @@ const PrescriptionCheckout = ({ storeId ,page}) => {
     storeData?.zone_id,
     zoneData?.data
   );
+
+  useEffect(() => {
+    if (isZoneDigital?.cash_on_delivery && configData?.cash_on_delivery) {
+      setPaymentMethod("cash_on_delivery");
+    }
+  }, [isZoneDigital, configData?.cash_on_delivery]);
+
   return (
     <Grid
       container

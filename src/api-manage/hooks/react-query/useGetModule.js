@@ -3,10 +3,11 @@ import { useQuery } from "react-query";
 import { moduleList } from "../../ApiRoutes";
 import { onErrorResponse } from "../../api-error-response/ErrorResponses";
 import { useEffect, useState } from "react";
+import { filterOutRiderShareModules } from "helper-functions/moduleFilter";
 
 const getModule = async () => {
   const { data } = await MainApi.get(moduleList);
-  return data;
+  return filterOutRiderShareModules(data);
 };
 
 const normalizeZoneIdForKey = (zoneId) => {
@@ -67,11 +68,12 @@ export default function useGetModule() {
     enabled: false,
     onError: onErrorResponse,
   });
+  const { refetch } = query;
 
   useEffect(() => {
     if (!zoneIdsKey) return;
-    query.refetch();
-  }, [zoneIdsKey, query.refetch]);
+    refetch();
+  }, [zoneIdsKey, refetch]);
 
   return query;
 }

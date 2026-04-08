@@ -9,15 +9,20 @@ import { getAmountWithSign } from "../../helper-functions/CardHelpers";
 import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import CustomDivider from "../CustomDivider";
 import TrackOrder from "./index";
+import { useDispatch } from "react-redux";
+import { setOrderDetailsModal } from "redux/slices/offlinePaymentData";
 
 const TrackOrderDetails = ({
 	showOrderDetails,
 	trackOrderFormik,
 	trackOrderData,
 }) => {
+	const dispatch = useDispatch();
 	const theme = useTheme();
 	const router = useRouter();
 	const handleClick = () => {
+		
+		dispatch(setOrderDetailsModal(false));
 		router.push(
 			{
 				pathname: "/profile",

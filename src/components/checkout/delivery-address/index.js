@@ -20,6 +20,7 @@ import AddNewAddressButton from "../../address/add-new-address/AddNewAddressButt
 import { setOpenAddressModal } from "../../../redux/slices/addAddress";
 import CheckOutSelectedAddress from "../item-checkout/CheckOutSelectedAddress";
 import CheckoutSelectedAddressGuest from "../item-checkout/CheckoutSelectedAddressGuest";
+import { getToken } from "helper-functions/getToken";
 
 const getZoneWiseAddresses = (addresses, restaurantId) => {
   const newArray = [];
@@ -45,7 +46,7 @@ const DeliveryAddress = ({
   const { profileInfo } = useSelector((state) => state.profileInfo);
   const [openSaveAddress, setOpenSaveAddress] = useState(false);
   const [editAddress, setEditAddress] = useState(null);
-  const token = localStorage.getItem("token");
+  const token = getToken();
 
   const saveAddressModalClose = () => {
     setOpenSaveAddress(false);
@@ -128,6 +129,9 @@ const DeliveryAddress = ({
           <AddNewAddressButton
             align="right"
             handleAddressModal={handleAddressModal}
+            setAddress={setAddress}
+            handleLatLng={handleLatLng}
+            t={t}
           />
         )}
 
@@ -139,11 +143,11 @@ const DeliveryAddress = ({
             openAddressModal={openAddressModal}
             editAddress={editAddress}
             setEditAddress={setEditAddress}
+            setAddress={setAddress}
+            handleLatLng={handleLatLng}
           />
         )}
       </Stack>
-      {/*{isLoading && <Skeleton width="100%" height={150} />}*/}
-      {/*{isRefetching && <Skeleton width="100%" height={150} />}*/}
       {renderOnNavbar === "true" ? (
         <>
           <AddressSelectionList
@@ -167,6 +171,8 @@ const DeliveryAddress = ({
                 configData={configData}
                 editAddress={editAddress}
                 setEditAddress={setEditAddress}
+                setAddress={setAddress}
+                handleLatLng={handleLatLng}
               />
               <IconButton
                 sx={{ width: "150px" }}

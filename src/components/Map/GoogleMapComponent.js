@@ -231,13 +231,16 @@ const GoogleMapComponent = ({
           <RemoveIcon color="primary" />
         </IconButton>
       </Stack>
-      {!mapmodal && (
+      {(!mapmodal || expanded) && (
         <Stack
           position="absolute"
-          zIndex={1}
+          zIndex={2}
           sx={{
             right: { xs: "10px", sm: "12px" },
-            bottom: { xs: "20px", sm: "80px", md: "70px" },
+            top: expanded ? { xs: "10px", sm: "12px" } : undefined,
+            bottom: expanded
+              ? undefined
+              : { xs: "20px", sm: "80px", md: "70px" },
           }}
         >
           <ModalExtendShrink

@@ -30,6 +30,8 @@ const AddressForm = ({
   editAddress,
   setAddAddress,
   email,
+  setAddress,
+  handleLatLng,
 }) => {
   const typeData = [
     {
@@ -137,11 +139,27 @@ const AddressForm = ({
   });
 
   const formSubmitOnSuccess = (values) => {
+    const updateSelectedAddress = (addressValues) => {
+      if (typeof handleLatLng === "function") {
+        handleLatLng(addressValues);
+        return;
+      }
+
+      if (typeof setAddress === "function") {
+        setAddress({
+          ...addressValues,
+          lat: addressValues?.latitude ?? addressValues?.lat,
+          lng: addressValues?.longitude ?? addressValues?.lng,
+        });
+      }
+    };
+
     if (token) {
       if (editAddress && editAddress?.address_type) {
         const newValue = { ...values, id: editAddress?.id };
         updateMutate(newValue, {
           onSuccess: (response) => {
+            updateSelectedAddress(newValue);
             if (atModal === "true") {
               toast.success(response?.message);
               popoverClose();
@@ -163,6 +181,7 @@ const AddressForm = ({
         mutate(values, {
           onSuccess: (response) => {
             if (response) {
+              updateSelectedAddress(values);
               if (atModal === "true") {
                 toast.success(response?.message);
                 popoverClose?.();

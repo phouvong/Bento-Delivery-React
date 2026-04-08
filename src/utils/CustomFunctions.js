@@ -614,10 +614,12 @@ function distanceInKmBetweenEarthCoordinates(lat1, lon1, lat2, lon2) {
 }
 
 export const handleDistance = (distance, origin, destination) => {
-
   if (typeof distance?.distanceMeters === 'number') {
     return Number(distance?.distanceMeters) / 1000;
-  } else if (distance?.status === "ZERO_RESULTS") {
+  } else if (
+    distance?.status === "ZERO_RESULTS" ||
+    (Array.isArray(distance) && distance.length === 0)
+  ) {
     return (
       distanceInKmBetweenEarthCoordinates(
         origin?.latitude || origin?.lat,
@@ -652,14 +654,18 @@ export const cartItemsTotalAmount = (cartList) => {
 
 export const getInfoFromZoneData = (zoneData) => {
   let chargeInfo;
-  if (zoneData?.data?.zone_data?.length > 0) {
-    zoneData?.data?.zone_data?.forEach((item, index) => {
+
+   console.log("vvv",zoneData);
+  if (zoneData?.zone_data?.length > 0) {
+    zoneData?.zone_data?.forEach((item, index) => {
       if (item?.modules?.length > 0) {
         item?.modules?.forEach((moduleItem) => {
+           console.log("vvv",moduleItem?.id,getCurrentModuleType(),getCurrentModuleId());
           if (
             moduleItem?.module_type === getCurrentModuleType() &&
             moduleItem?.id === getCurrentModuleId()
           ) {
+             
             chargeInfo = {
               ...moduleItem,
               increased_delivery_fee_status:
@@ -754,8 +760,10 @@ export const getDeliveryFees = (
         }
       }
     } else {
-      if (zoneData?.data?.zone_data?.length > 0) {
+      if (zoneData?.zone_data?.length > 0) {
         const chargeInfo = getInfoFromZoneData(zoneData);
+        console.log({chargeInfo});
+        
         if (chargeInfo?.pivot?.delivery_charge_type === "fixed") {
           if ((isAdminFreeDeliveryEnabled && (isFreeDeliveryByAmount || isFreeDeliveryToAllStores)) ||
             orderType === "take_away") {

@@ -1,4 +1,6 @@
 import ArrowForwardSharpIcon from "@mui/icons-material/ArrowForwardSharp";
+import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
+
 import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
 import StarIcon from "@mui/icons-material/Star";
 import {
@@ -171,17 +173,22 @@ const AdsCard = (props) => {
   }, [ended, index, itemLength, sliderRef]);
   const handleClick = (e) => {
     e.stopPropagation();
-    router.push({
-      pathname: `/store/[id]`,
-      query: {
-        id: `${item?.store?.slug ? item?.store?.slug : item?.store?.id}`,
-        module_id: `${item?.store?.module_id}`,
-        module_type: getCurrentModuleType(),
-        store_zone_id: `${item?.store?.zone_id}`,
-        distance: item?.store?.distance,
-      },
-    });
+    handleStoreRedirect(item?.store, router);
   };
+  const hasAverageRating =
+    item?.average_rating !== null && item?.average_rating !== undefined;
+  const hasReviewCount =
+    item?.reviews_comments_count !== null &&
+    item?.reviews_comments_count !== undefined;
+  const showRating =
+    item?.is_rating_active === 1 &&
+    hasAverageRating &&
+    Number(item?.average_rating) > 0;
+  const showReviewCount =
+    item?.is_review_active === 1 &&
+    hasReviewCount &&
+    Number(item?.reviews_comments_count) > 0;
+  const shouldShowRatingReview = showRating || showReviewCount;
 
   return (
     <Box sx={{
@@ -215,10 +222,9 @@ const AdsCard = (props) => {
               }}
             >
               <Stack position="relative">
-                {(item?.is_rating_active === 1 || item.is_review_active === 1) && (item?.average_rating > 0 || item?.reviews_comments_count > 0) && (
+                {shouldShowRatingReview && (
                   <Stack
-                    maxWidth="90px"
-                    width="100%"
+                    width="fit-content"
                     position="absolute"
                     bottom="10px"
                     right="10px"
@@ -230,7 +236,7 @@ const AdsCard = (props) => {
                     padding="5px"
                     gap="5px"
                   >
-                    {item.is_review_active === 1 && (
+                    {showRating && (
                       <>
                         <StarIcon
                           sx={{
@@ -243,11 +249,11 @@ const AdsCard = (props) => {
                           fontSize="14px"
                           fontWeight="600"
                         >
-                          {item?.average_rating.toFixed(1)}
+                          {Number(item?.average_rating).toFixed(1)}
                         </Typography>
                       </>
                     )}
-                    {item.is_review_active === 1 && (
+                    {showReviewCount && (
                       <Typography
                         color={theme.palette.neutral[100]}
                         fontSize="14px"

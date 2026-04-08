@@ -1,5 +1,16 @@
 import * as Yup from "yup";
 
+const PROFILE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+const IDENTITY_IMAGE_TYPES =  ["image/jpeg", "image/png", "image/webp", "image/gif"];
+
+const getFile = (value) => {
+  if (!value) return null;
+  if (value instanceof File) return value;
+  if (Array.isArray(value)) return value[0] || null;
+  if (value?.length) return value[0] || null;
+  return null;
+};
+
 const deliveryManValidationSchema = () => {
   return Yup.object().shape({
     f_name: Yup.string()
@@ -24,36 +35,38 @@ const deliveryManValidationSchema = () => {
         "password-requirements",
         "Password requirements not met",
         function (value) {
-          if (!value) return true; // Handled by required()
+          if (!value) return true;
 
           const errors = [];
+
           if (value.length < 8) {
-            errors.push(
-              "Password is too short - should be 8 characters minimum."
-            );
+            errors.push("Password is too short - should be 8 characters minimum.");
           }
           if (!/[0-9]/.test(value)) {
-            errors.push("one number.");
+            errors.push("Password must contain at least one number.");
           }
           if (!/[A-Z]/.test(value)) {
-            errors.push("one uppercase letter.");
+            errors.push("Password must contain at least one uppercase letter.");
           }
           if (!/[a-z]/.test(value)) {
-            errors.push("one lowercase letter.");
+            errors.push("Password must contain at least one lowercase letter.");
           }
           if (!/[!@#$%^&*(),.?":{}|<>+_=]/.test(value)) {
-            errors.push("one special character.");
+            errors.push("Password must contain at least one special character.");
           }
 
           if (errors.length > 0) {
             return this.createError({ message: errors.join(" ") });
           }
+
           return true;
         }
       ),
+
     confirm_password: Yup.string()
       .required("Confirm Password required")
       .oneOf([Yup.ref("password"), null], "Passwords must match"),
+
     earning: Yup.number()
       .typeError("Earning must be a number")
       .required("Earning is required"),
@@ -67,21 +80,32 @@ const deliveryManValidationSchema = () => {
       .oneOf(["passport", "driving_license", "nid"], "Invalid identity type"),
 
     identity_number: Yup.string().required("Identity number is required"),
+
     image: Yup.mixed()
       .required("Profile image is required")
-      .test("fileType", "Only images are allowed", (value) =>
-        value
-          ? ["image/jpeg", "image/png", "image/jpg", "image/webp"].includes(value.type)
-          : false
-      ),
+      .test("fileType", "Only JPG, JPEG, PNG, and WEBP images are allowed", (value) => {
+        const file = getFile(value);
+        if (!file) return false;
+        return PROFILE_IMAGE_TYPES.includes(file.type);
+      })
+      .test("fileSize", "Profile image must be less than 1MB", (value) => {
+        const file = getFile(value);
+        if (!file) return false;
+        return file.size <= 1024 * 1024;
+      }),
 
     identity_image: Yup.mixed()
       .required("Identity image is required")
-      .test("fileType", "Only images are allowed", (value) =>
-        value
-          ? ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-          : false
-      ),
+      .test("fileType", "Only JPG, JPEG, and PNG images are allowed", (value) => {
+        const file = getFile(value);
+        if (!file) return false;
+        return IDENTITY_IMAGE_TYPES.includes(file.type);
+      })
+      .test("fileSize", "Identity image must be less than 1MB", (value) => {
+        const file = getFile(value);
+        if (!file) return false;
+        return file.size <= 1024 * 1024;
+      }),
   });
 };
 

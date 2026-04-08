@@ -22,6 +22,8 @@ const GetLocationAlert = ({ setOpenAlert }) => {
     setOpen(true);
     //setOpenAlert(false);
   };
+  console.log({coords});
+  
   return (
     <CustomStackFullWidth
       p="1rem"
@@ -58,6 +60,7 @@ const GetLocationAlert = ({ setOpenAlert }) => {
           coords={coords}
           disableAutoFocus
           fromStore
+          //selectedLocation={coords}
         />
       )}
     </CustomStackFullWidth>

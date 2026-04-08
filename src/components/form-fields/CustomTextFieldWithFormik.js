@@ -32,6 +32,7 @@ const CustomTextFieldWithFormik = (props) => {
 	const theme = useTheme();
 	const [inputValue, setInputValue] = useState(value);
 	const [showPassword, setShowPassword] = useState(false);
+	const hasError = Boolean(touched && errors);
 	const onChangeHandlerForField = (e) => {
 		setInputValue(e.target.value);
 	};
@@ -55,7 +56,7 @@ const CustomTextFieldWithFormik = (props) => {
 						label={label}
 						name={label}
 						required={required}
-						error={Boolean(touched && errors)}
+						error={hasError}
 						helperText={touched && errors}
 						value={inputValue}
 						placeholder={placeholder ? placeholder : ""}
@@ -68,6 +69,10 @@ const CustomTextFieldWithFormik = (props) => {
 								color: "red",
 							},
 							"& .MuiFormHelperText-root": {
+								position: "static",
+								marginLeft: "0px",
+								marginTop: "5px",
+								lineHeight: 1.3,
 								[theme.breakpoints.down("sm")]: {
 									fontSize: "10px",
 								},
@@ -135,7 +140,7 @@ const CustomTextFieldWithFormik = (props) => {
 						placeholder={placeholder ? placeholder : ""}
 						name={label}
 						required={required}
-						error={Boolean(touched && errors)}
+						error={hasError}
 						helperText={touched && errors}
 						value={inputValue}
 						onChange={onChangeHandlerForField}
@@ -157,6 +162,10 @@ const CustomTextFieldWithFormik = (props) => {
 								color: "red",
 							},
 							"& .MuiFormHelperText-root": {
+								position: "static",
+								marginLeft: "0px",
+								marginTop: "5px",
+								lineHeight: 1.3,
 								[theme.breakpoints.down("sm")]: {
 									fontSize: "10px",
 								},
@@ -168,7 +177,16 @@ const CustomTextFieldWithFormik = (props) => {
 			);
 		}
 	};
-	return <Box sx={{ width: "100%", minHeight: "55px" }}>{renderHandler()}</Box>;
+	return (
+		<Box
+			sx={{
+				width: "100%",
+				minHeight: hasError ? "78px" : "55px",
+			}}
+		>
+			{renderHandler()}
+		</Box>
+	);
 };
 
 export default CustomTextFieldWithFormik;

@@ -50,7 +50,6 @@ const TrackParcelOrderDrawer = (props) => {
   const phone = phoneOrEmail;
 
   const handleSuccess = (res) => {
-    console.log({ res });
     setOrderData(res);
   };
   const {
@@ -59,12 +58,12 @@ const TrackParcelOrderDrawer = (props) => {
     data: trackOrderData,
     isLoading,
     isRefetching,
-  } = useGetTrackOrderData(orderId, phone, guestId, handleSuccess);
+  } = useGetTrackOrderData(orderId, phone, guestId, undefined, handleSuccess);
   useEffect(() => {
-    if (orderId) {
+    if (orderId && (getToken() || phone)) {
       refetch();
     }
-  }, [orderId]);
+  }, [orderId, phone, refetch]);
   useEffect(() => {
     if (trackOrderData) {
       setOrderData(trackOrderData);
@@ -129,9 +128,6 @@ const TrackParcelOrderDrawer = (props) => {
       { shallow: true }
     );
   };
-  console.log({ orderData });
-
-
   return (
     <CustomSideDrawer
       anchor="right"

@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { alpha, useTheme } from "@mui/material";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Slider from "react-slick";
 import usePopularProductsInStore from "../../../api-manage/hooks/react-query/product-details/usePopularProductsInStore";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
@@ -17,6 +18,7 @@ import useGetCommonConditionStore from "../../../api-manage/hooks/react-query/co
 
 const PopularInTheStore = ({ id, storeShare }) => {
   const theme = useTheme();
+  const { t } = useTranslation();
   const offset = 1;
   const limit = 10;
   const getBG = () => {
@@ -25,22 +27,22 @@ const PopularInTheStore = ({ id, storeShare }) => {
         case ModuleTypes.GROCERY:
           return {
             bgColor: alpha(theme.palette.primary.main, 0.2),
-            title: "Recommended for you",
+            title: t("Recommended for you"),
           };
         case ModuleTypes.PHARMACY:
           return {
             bgColor: alpha(theme.palette.info.custom1, 0.1),
-            title: "Common Conditions!",
+            title: t("Common Conditions!"),
           };
         case ModuleTypes.ECOMMERCE:
           return {
             bgColor: alpha(theme.palette.info.blue, 0.1),
-            title: "Recommended for you",
+            title: t("Recommended for you"),
           };
         case ModuleTypes.FOOD:
           return {
             bgColor: alpha(theme.palette.moduleTheme.food, 0.1),
-            title: "Recommended for you",
+            title: t("Recommended for you"),
           };
       }
     } else {
@@ -48,22 +50,22 @@ const PopularInTheStore = ({ id, storeShare }) => {
         case ModuleTypes.GROCERY:
           return {
             bgColor: alpha(theme.palette.primary.main, 0.2),
-            title: "Popular in this store!",
+            title: t("Popular in this store!"),
           };
         case ModuleTypes.PHARMACY:
           return {
             bgColor: alpha(theme.palette.info.custom1, 0.2),
-            title: "Common Conditions!",
+            title: t("Common Conditions!"),
           };
         case ModuleTypes.ECOMMERCE:
           return {
             bgColor: alpha(theme.palette.info.blue, 0.1),
-            title: "Popular in this store!",
+            title: t("Popular in this store!"),
           };
         case ModuleTypes.FOOD:
           return {
             bgColor: alpha(theme.palette.moduleTheme.food, 0.1),
-            title: "Popular in this Restaurant!",
+            title: t("Popular in this Restaurant!"),
           };
       }
     }

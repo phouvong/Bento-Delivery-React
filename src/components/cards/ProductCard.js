@@ -1273,7 +1273,7 @@ const ProductCard = (props) => {
                     isWishlisted={isWishlisted}
                     isProductExist={isProductExist}
                     addToCartHandler={addToCart}
-                    showAddtocart={cardFor === "vertical" && !isProductExist}
+                    showAddtocart={(cardFor === "vertical" || cardFor === "flashSale") && !isProductExist}
                     isLoading={isLoading}
                     openLocationAlert={openLocationAlert}
                     setOpenLocationAlert={setOpenLocationAlert}

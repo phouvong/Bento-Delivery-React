@@ -64,7 +64,7 @@ const SearchResult = (props) => {
   const sidebarRef = useRef(null);
   const scrollTimeoutRef = useRef(null);
   const { ref, inView } = useInView({
-    rootMargin: "0px 0px 80% 0px",
+    rootMargin: "0px 0px 50% 0px",
   });
   const { selectedBrands, selectedCategories, filterData, rating_count } =
     useSelector((state) => state.categoryIds);
@@ -406,6 +406,8 @@ const SearchResult = (props) => {
     minMax,
     selectedBrands,
   ]);
+  console.log({inView});
+  
 
   const handleCurrentTab = (value) => {
     setCurrentTab(value);
