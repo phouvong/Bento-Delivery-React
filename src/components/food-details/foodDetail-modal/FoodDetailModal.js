@@ -1,5 +1,5 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, Grid, Modal } from "@mui/material";
+import { Box, Grid, Modal, Skeleton } from "@mui/material";
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
@@ -32,6 +32,7 @@ import {
   setClearCart,
   setUpdateVariationToCart,
 } from "redux/slices/cart";
+import { setCartSidebarOpen } from "redux/slices/utils";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { FoodDetailModalStyle } from "./foodDetailModal.style";
 import IconButton from "@mui/material/IconButton";
@@ -62,6 +63,7 @@ const FoodDetailModal = ({
   isWishlisted,
   setOpenLocationAlert
 }) => {
+  console.log({fromCard});
   const router = useRouter();
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -94,10 +96,11 @@ const FoodDetailModal = ({
   }
   const handleSuccessItem = (resData) => {
   }
+  console.log({fromCard});
   const params={
     id:fromCard?.id
   }
-  const {data}=useGetItemDetails(params, handleSuccessItem,productUpdate)
+  const {data,isLoading:cardDataIsLoading}=useGetItemDetails(params, handleSuccessItem,productUpdate)
 
   useEffect(() => {
     if(productUpdate){
@@ -214,8 +217,8 @@ const FoodDetailModal = ({
         };
       });
       dispatch(setCart(product));
+      //dispatch(setCartSidebarOpen(true));
       handleClose();
-      //dispatch()
     }
   };
   const updateCartSuccessHandler = (res) => {
@@ -862,12 +865,40 @@ console.log({ modalData });
             </IconButton>
           </CustomStackFullWidth>
 
+          {cardDataIsLoading ? (
+            <Box sx={{ p: "1rem" }}>
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <Skeleton variant="rectangular" width="100%" sx={{ minWidth: { sm: 200 }, height: { xs: 200, sm: 220 }, borderRadius: "10px" }} />
+                <Stack spacing={1.5} flex={1}>
+                  <Skeleton variant="text" width="70%" height={28} />
+                  <Skeleton variant="text" width="40%" height={20} />
+                  <Skeleton variant="text" width="55%" height={20} />
+                  <Skeleton variant="text" width="35%" height={20} />
+                  <Skeleton variant="rectangular" width="50%" height={32} sx={{ borderRadius: "6px", mt: 1 }} />
+                </Stack>
+              </Stack>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" mt={2}>
+                <Skeleton variant="text" width="30%" height={28} />
+                <Skeleton variant="rectangular" width={120} height={36} sx={{ borderRadius: "8px" }} />
+              </Stack>
+              <Stack spacing={1} mt={2}>
+                <Skeleton variant="text" width="25%" height={22} />
+                
+              </Stack>
+              <Stack direction="row" spacing={2} mt={1}>
+                <Skeleton variant="rectangular" width="50%" height={50} sx={{ borderRadius: "8px" }} />
+                <Skeleton variant="rectangular" width="50%" height={50} sx={{ borderRadius: "8px" }} />
+              </Stack>
+              
+            </Box>
+          ) : (
+          <>
           <FoodDetailsManager
             configData={configData}
             handleDiscountChip={handleDiscountChip}
             imageBaseUrl={imageBaseUrl}
             modalData={modalData}
-            product={product}
+            product={data || fromCard}
             t={t}
             router={router}
             isInList={isInList}
@@ -1013,6 +1044,8 @@ console.log({ modalData });
               </Grid>
             </Grid>
           </Box>
+          </>
+          )}
           {clearCartModal && (
             <CustomModal
               openModal={clearCartModal}

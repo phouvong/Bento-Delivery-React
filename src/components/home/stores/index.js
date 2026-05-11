@@ -154,7 +154,7 @@ const Stores = (props) => {
   };
 
   return (
-    <HomeComponentsWrapper sx={{ paddingTop: "1rem" }}>
+    <HomeComponentsWrapper>
       <CustomStackFullWidth
         direction="row"
         alignItems="center"

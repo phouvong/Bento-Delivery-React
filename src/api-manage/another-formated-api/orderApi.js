@@ -1,12 +1,11 @@
 import MainApi from "../MainApi";
-import {getToken} from "helper-functions/getToken";
+import { getToken } from "helper-functions/getToken";
 
 export const OrderApi = {
   placeOrder: (formData) => {
     return MainApi.post("/api/v1/customer/order/place", formData);
   },
   prescriptionPlaceOrder: (orderData) => {
-
     const {
       store_id,
       distance,
@@ -20,7 +19,7 @@ export const OrderApi = {
       contact_person_number,
       dm_tips,
       order_type,
-      payment_method
+      payment_method,
     } = orderData;
     let formData = new FormData();
     formData.append("store_id", store_id);
@@ -29,9 +28,20 @@ export const OrderApi = {
     formData.append("longitude", longitude);
     formData.append("latitude", latitude);
 
-    prescriptionImages.forEach((image) => {
-      formData.append("order_attachment[]", image);
-    });
+    // prescriptionImages.forEach((image) => {
+    //   formData.append("order_attachment[]", image);
+    // });
+    const filterBinaryImages = prescriptionImages.filter((img) => !img.name);
+    const filterUrlImages = prescriptionImages.filter((img) => img.name);
+
+    filterBinaryImages?.length &&
+      filterBinaryImages.forEach((image) => {
+        formData.append("order_attachment[]", image?.file);
+      });
+    filterUrlImages?.length &&
+      filterUrlImages.forEach((image) => {
+        formData.append("saved_images[]", image?.name);
+      });
 
     formData.append("order_note", order_note);
     formData.append("guest_id", guest_id);
@@ -48,7 +58,7 @@ export const OrderApi = {
   },
   orderHistory: (orderType, limit, offset) => {
     return MainApi.get(
-      `/api/v1/customer/order/${orderType}?limit=${limit}&offset=${offset}`
+      `/api/v1/customer/order/${orderType}?limit=${limit}&offset=${offset}`,
     );
   },
   orderDetails: (order_id) => {

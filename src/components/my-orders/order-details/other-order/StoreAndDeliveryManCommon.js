@@ -2,6 +2,7 @@ import React from "react";
 import { alpha, Grid, Typography, useTheme } from "@mui/material";
 import CustomImageContainer from "../../../CustomImageContainer";
 import { Stack } from "@mui/system";
+import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge";
 import CustomRatings from "../../../search/CustomRatings";
 import { t } from "i18next";
 import { getImageUrl } from "utils/CustomFunctions";
@@ -34,9 +35,14 @@ const StoreAndDeliveryManCommon = ({
         )}
       </Grid>
       <Grid item md={8} sm={8} xs={10.8} alignSelf="center">
-        <Typography fontWeight="600" fontSize={{ xs: "14px", md: "20px" }}>
-          {data && data?.name ? data?.name : data?.f_name}
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={0.6}>
+          <Typography fontWeight="600" fontSize={{ xs: "14px", md: "20px" }}>
+            {data && data?.name ? data?.name : data?.f_name}
+          </Typography>
+          {data?.name && (
+            <VerifiedStoreBadge verified={data?.verified_seller} />
+          )}
+        </Stack>
         {shouldShowRatings && (
           <Stack direction="row" alignItems="center">
             <CustomRatings

@@ -11,7 +11,6 @@ export const BannerWrapper = styled(Box)(({ theme }) => ({
   width: "100%",
   height: "360px",
   position: "relative",
-  marginTop: "20px",
   img:{
     width: "100%",
     height: "100%",

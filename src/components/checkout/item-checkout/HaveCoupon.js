@@ -49,12 +49,19 @@ const HaveCoupon = (props) => {
   };
   const handleSuccess = (response) => {
     const totalAmountOverall = totalAmount - deliveryFee - deliveryTip;
-    if(min_order_amount && totalAmountOverall < min_order_amount) {
+
+    if (totalAmountOverall > min_order_amount) {
       if (
         Number.parseInt(response?.data?.min_purchase) <=
         Number.parseInt(totalAmountOverall)
       ) {
-        if (response?.data?.discount_type === "percent") {
+        if (response?.data?.coupon_type === "free_delivery") {
+          // Free delivery coupon — no discount amount validation needed.
+          dispatch(setCouponInfo(response.data));
+          toast.success(t("Coupon Applied"));
+          dispatch(setCouponType(response.data.coupon_type));
+          setCouponDiscount({ ...response.data, zoneId: zoneId });
+        } else if (response?.data?.discount_type === "percent") {
           dispatch(setCouponInfo(response.data));
           toast.success(t("Coupon Applied"));
           dispatch(setCouponType(response.data.coupon_type));
@@ -79,14 +86,13 @@ const HaveCoupon = (props) => {
           )}`
         );
       }
-    }else{
+    } else {
       toast.error(
         `${t(coupon_minimum)} ${getAmountWithSign(
           response?.data?.min_purchase
         )}`
       );
     }
-
   };
   const { isLoading, refetch } = useQuery(
     "apply-coupon",

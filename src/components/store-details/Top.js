@@ -29,6 +29,8 @@ import {
   removeWishListStore,
 } from "redux/slices/wishList";
 import ShareOutlinedIcon from '@mui/icons-material/ShareOutlined'
+import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge"
+import VerifiedIcon from "@mui/icons-material/Verified"
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
@@ -261,7 +263,7 @@ const Top = (props) => {
               <Stack
                 sx={{
                   position: "absolute",
-                  bottom: "6px",
+                  bottom: {xs:"70px",sm:"6px"},
                   left: 0,
                   right: 0,
                   backgroundColor: (theme) =>
@@ -269,9 +271,10 @@ const Top = (props) => {
                   color: (theme) => theme.palette.neutral[100],
                   padding: "10px",
                   borderRadius: "10px",
+                  zIndex: 1,
                 }}
               >
-                <Typography fontSize="13px" fontWeight="600" textAlign="center">
+                <Typography fontSize={{ xs: "10px", sm: "13px" }} fontWeight={{ xs: "500", sm: "600" }}    textAlign="center">
                   {`${storeDetails?.discount?.discount}% ${text1}  ${getAmountWithSign(
                     storeDetails?.discount?.min_purchase
                   )} ${max} ${getAmountWithSign(
@@ -370,7 +373,19 @@ const Top = (props) => {
                         sx={{ color: "whiteContainer.main" }}
                         spacing={1}
                       >
-                        <H1 text={storeDetails?.name} textAlign="flex-start" />
+                        <Stack direction="row" alignItems="center" spacing={0.8}>
+                          <H1 text={storeDetails?.name} textAlign="flex-start" />
+                          {storeDetails?.verified_seller && (
+                            <VerifiedIcon
+                              sx={{
+                                fontSize: "24px",
+                                color: "#ffffff",
+                                flexShrink: 0,
+                                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
+                              }}
+                            />
+                          )}
+                        </Stack>
 
                         {hasStoreRatingOrReview && (
                           <Stack direction="row" alignItems="center" spacing={1}>
@@ -587,7 +602,19 @@ const Top = (props) => {
                     </Grid>
                     <Grid item xs={7} md={7.5} alignSelf="center">
                       <CustomStackFullWidth spacing={1}>
-                        <H1 text={storeDetails?.name} textAlign="flex-start" />
+                        <Stack direction="row" alignItems="center" spacing={0.8}>
+                          <H1 text={storeDetails?.name} textAlign="flex-start" />
+                          {storeDetails?.verified_seller && (
+                            <VerifiedIcon
+                              sx={{
+                                fontSize: "24px",
+                                color: "#ffffff",
+                                flexShrink: 0,
+                                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
+                              }}
+                            />
+                          )}
+                        </Stack>
 
                         {hasStoreRatingOrReview && (
                           <Stack direction="row" alignItems="center" spacing={1}>
@@ -805,7 +832,7 @@ const Top = (props) => {
                   zIndex: 999,
                 }}
               >
-                <Typography fontSize="13px" fontWeight="600" textAlign="center">
+                <Typography fontSize={{ xs: "10px", sm: "13px" }} fontWeight={{ xs: "500",md:"600" }} textAlign="center">
                   {`${storeDetails?.discount?.discount}% ${text1}  ${getAmountWithSign(
                     storeDetails?.discount?.min_purchase
                   )} ${max} ${getAmountWithSign(

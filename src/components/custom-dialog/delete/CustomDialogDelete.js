@@ -20,7 +20,7 @@ import {
 import { CustomPaperForCustomDialogDelete } from "./CustomDialogDelete.style";
 
 const CustomDialogDelete = (props) => {
-  const { open, onClick, onClose, onSuccess } = props;
+  const { open, onClick, onClose, onSuccess,title,subTitle } = props;
 
   const { t } = useTranslation();
 
@@ -39,13 +39,13 @@ const CustomDialogDelete = (props) => {
             {/*</ImageContainer>*/}
             <DialogTitle id="alert-dialog-title">
               <CustomTypographyAlign variant="h4" align="center">
-                {t("Are Your Sure You Want to Delete This Zone ?")}
+                {t(title)}
               </CustomTypographyAlign>
             </DialogTitle>
             <DialogContent>
               <CustomTypographyAlign variant="body1" align="center">
                 <DialogContentText id="alert-dialog-description">
-                  {t("This operation cannot be undone")}
+                  {t(subTitle)}
                 </DialogContentText>
               </CustomTypographyAlign>
             </DialogContent>

@@ -11,6 +11,14 @@ import couponImagePercentage from "./assets/couponPer.png";
 import CouponVector from "./CouponVector";
 import CouponButtonComponent from "./CouponButtonComponent";
 import moment from "moment/moment";
+import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge";
+
+const StoreNameWithBadge = ({ store }) => (
+  <>
+    ({store?.name}
+    <VerifiedStoreBadge verified={store?.verified_seller} fontSize="10px" />)
+  </>
+);
 
 export const CouponButtonStyle = styled(Button)(({ theme }) => ({
   width: "111px",
@@ -45,14 +53,15 @@ const Coupon = (props) => {
       return (
         <>
           {t("Only for some specific zones")}{" "}
-          {coupon?.store && `(${coupon?.store?.name})`}
+          {coupon?.store && <StoreNameWithBadge store={coupon?.store} />}
         </>
       );
     }
     if (coupon?.coupon_type === "free_delivery") {
       return (
         <>
-          {t("Free delivery")} {coupon?.store && `(${coupon?.store?.name})`}
+          {t("Free delivery")}{" "}
+          {coupon?.store && <StoreNameWithBadge store={coupon?.store} />}
         </>
       );
     }
@@ -60,14 +69,15 @@ const Coupon = (props) => {
       return (
         <>
           {t("Only for First Order")}{" "}
-          {coupon?.store && `(${coupon?.store?.name})`}
+          {coupon?.store && <StoreNameWithBadge store={coupon?.store} />}
         </>
       );
     }
     if (coupon?.coupon_type === "default") {
       return (
         <>
-          {coupon?.coupon_type} {coupon?.store && `(${coupon?.store?.name})`}
+          {coupon?.coupon_type}{" "}
+          {coupon?.store && <StoreNameWithBadge store={coupon?.store} />}
         </>
       );
     }

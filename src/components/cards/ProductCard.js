@@ -81,6 +81,7 @@ import QuickView, { PrimaryToolTip } from "./QuickView";
 import SpecialCard, { FoodHalalHaram, FoodVegNonVegFlag } from "./SpecialCard";
 import NextImage from "components/NextImage";
 import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
+import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge";
 
 export const CardWrapper = styled(Card)(
   ({
@@ -736,7 +737,10 @@ const ProductCard = (props) => {
               {item?.generic_name[0]}
             </Typography>
           ) : (
-            <Body2 text={item?.store_name} component="h4" />
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Body2 text={item?.store_name} component="h4" />
+              <VerifiedStoreBadge verified={item?.verified_seller} fontSize="14px" />
+            </Stack>
           )}
         </CustomBoxFullWidth>
         {item?.unit_type ? (
@@ -854,13 +858,16 @@ const ProductCard = (props) => {
             <FoodVegNonVegFlag veg={item?.veg === 0 ? "false" : "true"} />
           ) : null}
         </CustomStackFullWidth>
-        <Typography
-          color="text.secondary"
-          variant={isSmall ? "body2" : "body1"}
-          component="h4"
-        >
-          {item?.store_name}
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Typography
+            color="text.secondary"
+            variant={isSmall ? "body2" : "body1"}
+            component="h4"
+          >
+            {item?.store_name}
+          </Typography>
+          <VerifiedStoreBadge verified={item?.verified_seller} fontSize="14px" />
+        </Stack>
         {/* </CustomStackFullWidth> */}
         <CustomStackFullWidth
           direction="row"
@@ -901,8 +908,12 @@ const ProductCard = (props) => {
         spacing={0.6}
         p={item?.module_type === "pharmacy" ? "5px 16px 16px 16px" : "1rem"}
       >
-        <Body2 text={item?.store_name} component="h4" />
-
+        {item?.module_type !== "pharmacy" && (
+          <Stack direction="row" alignItems="center" spacing={0.5}>
+            <Body2 text={item?.store_name} component="h4" />
+            <VerifiedStoreBadge verified={item?.verified_seller} fontSize="14px" />
+          </Stack>
+        )}
 
         {isEllipsed ? (
           <PrimaryToolTip text={item?.name} placement="bottom" arrow="false">
@@ -952,7 +963,10 @@ const ProductCard = (props) => {
         // p="1rem"
         p="0 4px"
       >
-        <Body2 text={item?.store_name} />
+        <Stack direction="row" alignItems="center" spacing={0.5}>
+          <Body2 text={item?.store_name} />
+          <VerifiedStoreBadge verified={item?.verified_seller} fontSize="14px" />
+        </Stack>
         {isEllipsed ? (
           <PrimaryToolTip text={item?.name} placement="bottom" arrow="false">
             <Box ref={textRef}>
@@ -1030,7 +1044,10 @@ const ProductCard = (props) => {
         p="1rem"
 
       >
-        <Body2 paddingTop="5px" text={item?.store_name} component="h4" />
+        <Stack direction="row" alignItems="center" spacing={0.5} paddingTop="5px">
+          <Body2 text={item?.store_name} component="h4" />
+          <VerifiedStoreBadge verified={item?.verified_seller} fontSize="14px" />
+        </Stack>
         {isEllipsed ? (
           <PrimaryToolTip text={item?.name} placement="bottom" arrow="false">
             <Box ref={textRef}>
@@ -1227,8 +1244,10 @@ const ProductCard = (props) => {
                 {item?.module?.module_type === "pharmacy" && (
                   <Stack
                     width="100%"
+                    direction="row"
                     alignItems="center"
                     justifyContent="center"
+                    spacing={0.5}
                     padding={{
                       xs: "3px 3px 8px 3px",
                       md: "3px 3px 3px 3px",
@@ -1245,7 +1264,8 @@ const ProductCard = (props) => {
                     }}
                     component="h4"
                   >
-                    {item?.store_name}
+                    <span>{item?.store_name}</span>
+                    <VerifiedStoreBadge verified={item?.verified_seller} fontSize="14px" />
                   </Stack>
                 )}
                 {handleBadge()}

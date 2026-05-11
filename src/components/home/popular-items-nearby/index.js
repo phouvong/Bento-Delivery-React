@@ -162,7 +162,7 @@ const PopularItemsNearby = ({ title, subTitle }) => {
           <CustomStackFullWidth
             alignItems="center"
             justyfyContent="center"
-            mt={{ xs: "10x", md: "16px" }}
+            mt={{ xs: "10x", md: "0px" }}
             spacing={1}
           >
             {isLoading ? (

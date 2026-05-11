@@ -1,4 +1,11 @@
-import { Grid, Stack, Typography } from "@mui/material";
+import { alpha, Box, Grid, Stack, Typography } from "@mui/material";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
+import InStockTag from "../../product-details/InStockTag";
+import {
+  getAvailableStock,
+  isVariationAvailable,
+} from "../../product-details/product-details-section/helperFunction";
 
 import {
   CustomFavICon,
@@ -14,11 +21,31 @@ import {
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
 import { getImageUrl, isAvailable } from "utils/CustomFunctions";
-import CustomImageContainer from "../../CustomImageContainer";
 import CustomRatingBox from "../../CustomRatingBox";
 import { FoodHalalHaram, FoodVegNonVegFlag } from "../../cards/SpecialCard";
 import NotAvailableCard from "./NotAvailableCard";
+import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge";
 import React from "react";
+import FoodModalMediaPreview from "./FoodModalMediaPreview";
+
+const RemainingStock = ({ qty = 0 }) => {
+  const { t } = useTranslation();
+  return (
+    <Box
+      sx={{
+        padding: "3px 10px",
+        backgroundColor: (theme) => alpha(theme.palette.info.blue, 0.1),
+        color: (theme) => alpha(theme.palette.info.blue, 1),
+        fontSize: "12px",
+        borderRadius: "5px",
+        fontWeight: "400",
+        textAlign: "center",
+      }}
+    >
+      {t("Only")} {qty} {t("Products Left")}
+    </Box>
+  );
+};
 
 const FoodDetailsManager = (props) => {
   const {
@@ -35,6 +62,27 @@ const FoodDetailsManager = (props) => {
 
     handleRouteToStore,
   } = props;
+
+  const { showLowStockCount, minimumStockForWarning } = useMemo(() => {
+    const store = product?.store_details ?? modalData?.[0]?.store_details;
+    return {
+      showLowStockCount: Number(store?.show_low_stock_count) === 1,
+      minimumStockForWarning: Number(store?.minimum_stock_for_warning) || 0,
+    };
+  }, [product?.store_details, modalData]);
+
+
+  const renderStockBadge = (item) => {
+    if (!item) return null;
+    if (!isVariationAvailable(item)) return null;
+    const availableStock = getAvailableStock(item);
+    if (availableStock <= 0) return null;
+    const cartQuantity = item?.quantity || 0;
+    const currentStock = Math.max(0, availableStock - (cartQuantity - 1));
+    const showWarning =
+      showLowStockCount && minimumStockForWarning >= currentStock;
+    return showWarning ? <RemainingStock qty={currentStock} /> : <InStockTag />;
+  };
   return (
     <Grid container direction="row">
       <Grid item xs={12} md={12} position="relative">
@@ -42,7 +90,7 @@ const FoodDetailsManager = (props) => {
         {modalData?.length > 0 &&
           !isAvailable(
             modalData[0]?.available_time_starts,
-            modalData[0]?.available_time_ends
+            modalData[0]?.available_time_ends,
           ) && (
             <CustomOverlayBox height="40%" top="126px">
               <NotAvailableCard
@@ -56,30 +104,42 @@ const FoodDetailsManager = (props) => {
             </CustomOverlayBox>
           )}
 
-        <CustomImageContainer
-          src={modalData[0]?.image_full_url}
-          borderRadius=".3rem"
-          width="100%"
+        <FoodModalMediaPreview
+          imageUrl={modalData[0]?.images_full_url}
+          product={modalData[0]}
           height="200px"
-          alt="The house from the offer."
-          objectfit="cover"
           aspectRatio="2/1"
+          borderRadius=".3rem"
+          alt="The house from the offer."
         />
         <CustomStackForFoodModal width="100%" spacing={2}>
           <Stack spacing={1.4} alignItems="start">
-            {!product?.available_date_ends && Number(product?.avg_rating) > 0 && (
-              <CustomRatingBox rating={product?.avg_rating} />
-            )}
+            {!product?.available_date_ends &&
+              Number(product?.avg_rating) > 0 && (
+                <CustomRatingBox rating={product?.avg_rating} />
+              )}
             {router.pathname !== `/store/[id]` ? (
-              <Typography
-                sx={{ cursor: "pointer" }}
-                fontSize="14px"
-                fontWeight="400"
-                color={theme.palette.whiteContainer.main}
-                onClick={handleRouteToStore}
-              >
-                {product?.store_name}
-              </Typography>
+              <Stack direction="row" alignItems="center" spacing={0.5}>
+                <Typography
+                  sx={{ cursor: "pointer" }}
+                  fontSize="14px"
+                  fontWeight="400"
+                  color={theme.palette.whiteContainer.main}
+                  onClick={handleRouteToStore}
+                >
+                  {product?.store_name}
+                </Typography>
+                <VerifiedStoreBadge
+                  verified={
+                    product?.store_details?.verified_seller ??
+                    product?.verified_seller ??
+                    modalData?.[0]?.store_details?.verified_seller ??
+                    modalData?.[0]?.verified_seller
+                  }
+                  color="#ffffff"
+                  fontSize="16px"
+                />
+              </Stack>
             ) : null}
           </Stack>
           {!product?.available_date_ends && (
@@ -114,6 +174,7 @@ const FoodDetailsManager = (props) => {
               <Typography fontSize="16px" fontWeight="500">
                 {modalData.length > 0 && modalData[0].name}
               </Typography>
+              {modalData?.length > 0 && renderStockBadge(modalData[0])}
               {modalData.length > 0 &&
                 modalData[0]?.module?.module_type === "food" &&
                 configData?.toggle_veg_non_veg && (

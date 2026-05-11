@@ -1,4 +1,6 @@
 import React from "react";
+import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
+
 import {
   CustomStackFullWidth,
   StoreImageBox,
@@ -15,6 +17,7 @@ import { removeWishListStore } from "redux/slices/wishList";
 import toast from "react-hot-toast";
 import { useWishListStoreDelete } from "api-manage/hooks/react-query/wish-list/useWishListStoreDelete";
 import { useRouter } from "next/router";
+import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge";
 const StoreWishCard = ({ data, setSideDrawerOpen }) => {
   const router = useRouter();
   const theme = useTheme();
@@ -39,18 +42,7 @@ const StoreWishCard = ({ data, setSideDrawerOpen }) => {
     });
   };
   const handleCLick = (e) => {
-    router.push(
-      {
-        pathname: "/store/[id]",
-        query: {
-          id: `${storeIdOrSlug}`,
-          module_id: `${moduleId}`,
-          store_zone_id: `${data?.zone_id}`,
-        },
-      },
-
-    );
-
+    handleStoreRedirect(data, router, moduleId);
     setSideDrawerOpen(false);
   };
   return (
@@ -74,9 +66,12 @@ const StoreWishCard = ({ data, setSideDrawerOpen }) => {
         </StoreImageBox>
 
         <Stack width="0px" flexGrow="1" justifyContent="center" spacing={0.5}>
-          <Typography fontWeight="500" fontSize="14px">
-            {data?.name}
-          </Typography>
+          <Stack direction="row" alignItems="center" spacing={0.5}>
+            <Typography fontWeight="500" fontSize="14px">
+              {data?.name}
+            </Typography>
+            <VerifiedStoreBadge verified={data?.verified_seller} fontSize="14px" />
+          </Stack>
           <CustomRatings
             ratingValue={data?.avg_rating}
             readOnly="true"

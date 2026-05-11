@@ -181,3 +181,11 @@ export const isVariationAvailable = (productDetailsData) => {
     return true;
   }
 };
+
+export const getAvailableStock = (productDetailsData) => {
+  const selectedVariation = productDetailsData?.selectedOption?.[0];
+  if (selectedVariation && typeof selectedVariation.stock === "number") {
+    return selectedVariation.stock;
+  }
+  return productDetailsData?.stock ?? 0;
+};

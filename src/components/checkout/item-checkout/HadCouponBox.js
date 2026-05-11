@@ -43,9 +43,11 @@ const HadCouponBox = ({ removeCoupon, couponInfo }) => {
 					</Typography>
 				</Typography>
 				<Typography fontSize="10px" color={theme.palette.neutral[400]}>
-					{couponInfo?.discount_type === "amount"
-						? `${getAmountWithSign(couponInfo?.discount)} off`
-						: `${couponInfo?.discount}%off`}
+					{couponInfo?.coupon_type === "free_delivery"
+						? t("Free Delivery")
+						: couponInfo?.discount_type === "amount"
+							? `${getAmountWithSign(couponInfo?.discount)} off`
+							: `${couponInfo?.discount}%off`}
 				</Typography>
 			</Stack>
 			<IconButton onClick={removeCoupon}>

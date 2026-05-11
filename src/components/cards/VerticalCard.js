@@ -1,5 +1,6 @@
 import { alpha, styled, Typography } from "@mui/material";
-import { Box } from "@mui/system";
+import { Box, Stack } from "@mui/system";
+import VerifiedStoreBadge from "./VerifiedStoreBadge";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { getAmountWithSign } from "../../helper-functions/CardHelpers";
@@ -128,7 +129,10 @@ const VerticalCard = (props) => {
         )}
       </ImageWrapper>
       <Box sx={{ marginTop: "10px", marginBottom: "6px" }}>
-        <Body2 text={item?.store_name} />
+        <Stack direction="row" alignItems="center">
+          <Body2 text={item?.store_name} />
+          <VerifiedStoreBadge verified={item?.verified_seller} fontSize="14px" />
+        </Stack>
       </Box>
       <Box sx={{ marginBottom: "8px" }}>
         <H3 text={item?.name} />

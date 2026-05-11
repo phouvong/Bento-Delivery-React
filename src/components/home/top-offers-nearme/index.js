@@ -137,12 +137,11 @@ const TopOffersNearMe = ({ title}) => {
             alignItems="center"
             justyfyContent="center"
             sx={{
-              paddingTop: { xs: "0px", sm: "20px" },
               borderRadius: "10px",
               backgroundColor: (theme) =>
                 alpha(theme.palette.primary.main, 0.1),
+              mt:"10px"
             }}
-            mb="10px"
             spacing={1}
             onMouseEnter={() => setIsHover(true)}
             onMouseLeave={() => setIsHover(false)}

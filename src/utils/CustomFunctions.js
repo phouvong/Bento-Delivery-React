@@ -25,9 +25,16 @@ export const getNumberWithConvertedDecimalPoint = (
 
 export const isAvailable = (start, end) => {
   const startTime = moment(start, "HH:mm:ss");
-  const endTime = moment(end, "HH:mm:ss");
+  let endTime = moment(end, "HH:mm:ss");
   let currentTime = moment();
-  return moment(currentTime).isBetween(startTime, endTime);
+  // Schedule crosses midnight (e.g. 12:12 PM → 12:12 AM next day)
+  if (endTime.isSameOrBefore(startTime)) {
+    endTime = endTime.add(1, "day");
+    if (currentTime.isBefore(startTime)) {
+      currentTime = currentTime.add(1, "day");
+    }
+  }
+  return currentTime.isBetween(startTime, endTime, null, "[)");
 };
 
 export const handleTotalAmountWithAddons = (
@@ -63,7 +70,7 @@ export const getIndexFromArrayByComparision = (arrayOfObjects, object) => {
 
 export const calculateItemBasePrice = (item, selectedOptions) => {
   let basePrice = item?.price;
-  if (selectedOptions.length > 0) {
+  if (selectedOptions?.length > 0) {
     selectedOptions?.forEach((option) => {
       if (option.isSelected === true) {
         basePrice += Number.parseInt(option?.optionPrice);

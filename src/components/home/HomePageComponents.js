@@ -266,7 +266,9 @@ const HomePageComponents = ({ configData, landingPageData }) => {
               <TaxiSearchPanel position="relative" />
             </Box>
           )}
-          <Box width="100%">{getModuleWiseComponents()}</Box>
+          <Box width="100%" sx={{ mt: "34px" }}>
+            {getModuleWiseComponents()}
+            </Box>
         </CustomStackFullWidth>
 
         {open && (

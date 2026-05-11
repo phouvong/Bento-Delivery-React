@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Typography, useTheme } from "@mui/material";
+import { alpha, Typography, useTheme } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import { isAvailable } from "../../utils/CustomFunctions";
@@ -13,12 +13,12 @@ const OverLay = ({ isScheduled, theme, t, thisText, endText, endText1 }) => (
       bottom: 0,
       left: 0,
       width: "100%",
-      background: (theme) => theme.palette.primary.overLay,
-      opacity: "0.5",
+      background: (theme) => alpha(theme.palette.primary.overLay, 0.5),
       // color: (theme) => theme.palette.neutral[100],
       padding: "6px",
       alignItems: "center",
       justifyContent: "center",
+      zIndex: "220",
       //borderRadius: borderRadius ? borderRadius : ".5rem",
     }}
   >

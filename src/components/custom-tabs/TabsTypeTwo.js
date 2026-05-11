@@ -33,6 +33,9 @@ const TabsTypeTwo = (props) => {
               <CustomTypography
                 active={currentTab === index ? "true" : "false"}
                 onClick={() => setCurrentTab(index, item)}
+                sx={{
+                  fontSize: { xs: "13px", sm: "14px", md: "14px" },
+                }}
               >
                 {t(item?.name)}
               </CustomTypography>

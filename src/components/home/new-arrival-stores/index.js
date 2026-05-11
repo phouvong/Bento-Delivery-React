@@ -255,7 +255,7 @@ const NewArrivalStores = () => {
   };
 
   return (
-    <HomeComponentsWrapper sx={{ paddingTop: "5px", gap: "1rem" }}>
+    <HomeComponentsWrapper sx={{ gap: "1rem" }}>
       {getLayout()}
     </HomeComponentsWrapper>
   );

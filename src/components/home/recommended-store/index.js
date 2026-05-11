@@ -17,12 +17,19 @@ import { useGetRecommendStores } from "api-manage/hooks/react-query/store/useGet
 
 
 const SliderWrapper = styled(CustomBoxFullWidth)(({ theme }) => ({
+  "& .slick-track": {
+    marginLeft: 0,
+    marginRight: "auto",
+  },
   "& .slick-slide": {
-    padding: "0 10px", // Set the desired padding value
+    paddingRight: "10px",
+  },
+  "& .slick-slide:first-child": {
+    paddingLeft: 0,
   },
   [theme.breakpoints.down("sm")]: {
     "& .slick-slide": {
-      padding: "0px", // Set the desired padding value
+      paddingRight: "8px",
     },
   },
 }));
@@ -112,12 +119,6 @@ const RecommendedStore = () => {
 
   const sliderItems = (
     <SliderWrapper
-      sx={{
-        "& .slick-slide": {
-          paddingRight: { xs: "10px", sm: "20px" },
-          paddingY: "10px",
-        },
-      }}
       onMouseEnter={() => setIsSliderHovered(true)}
       onMouseLeave={() => setIsSliderHovered(false)}
     >
@@ -171,8 +172,8 @@ const RecommendedStore = () => {
   };
 
   return (
-    <HomeComponentsWrapper sx={{ paddingTop: "5px", gap: "1rem" }}>
-      {popularData?.stores?.length > 0 ? getLayout() : null}
+    <HomeComponentsWrapper sx={{ gap: "1rem" }}>
+      {(popularIsLoading || popularData?.stores?.length > 0) ? getLayout() : null}
     </HomeComponentsWrapper>
   );
 };

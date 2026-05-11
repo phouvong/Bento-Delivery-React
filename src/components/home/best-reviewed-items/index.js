@@ -266,7 +266,6 @@ console.log({uniqueCategories});
               <CustomStackFullWidth
                 alignItems={isSmall ? "center" : "flex-start"}
                 justyfyContent="center"
-                mt="30px"
                 spacing={1}
               >
                 <H2 text={title} textAlign="left" component="h2" />
@@ -369,7 +368,7 @@ console.log({uniqueCategories});
           ) : (
             <>
               {bestReviewedItems && filteredData.length > 0 && (
-                <HomeComponentsWrapper sx={{ paddingTop: "1rem" }}>
+                <HomeComponentsWrapper>
                   <CustomStackFullWidth
                     direction="row"
                     alignItems="center"

@@ -11,6 +11,13 @@ import OrganicTag from "../../organic-tag";
 import ProductImageView from "./ProductImageView";
 import ProductInformation from "./ProductInformation";
 import { getImageUrl } from "utils/CustomFunctions";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useAddToWishlist } from "api-manage/hooks/react-query/wish-list/useAddWishList";
+import { useWishListDelete } from "api-manage/hooks/react-query/wish-list/useWishListDelete";
+import { addWishList, removeWishListItem } from "redux/slices/wishList";
+import toast from "react-hot-toast";
+import { not_logged_in_message } from "utils/toasterMessages";
 
 export const handleDiscountChip = (product, t) => {
   if (product?.discount !== 0) {
@@ -28,7 +35,6 @@ export const handleDiscountChip = (product, t) => {
       );
     }
   }
-
 };
 const ProductDetailsSection = ({
   productDetailsData,
@@ -36,13 +42,73 @@ const ProductDetailsSection = ({
   handleModalClose,
   productUpdate,
   modalmanage,
-  addToWishlistHandler,
-  removeFromWishlistHandler,
-  isWishlisted,
+  addToWishlistHandler: addToWishlistHandlerProp,
+  removeFromWishlistHandler: removeFromWishlistHandlerProp,
+  isWishlisted: isWishlistedProp,
 }) => {
   const { t } = useTranslation();
+  const reduxDispatch = useDispatch();
+  const [isWishlistedInternal, setIsWishlistedInternal] = useState(false);
+  const { mutate: addFavoriteMutation } = useAddToWishlist();
+  const { mutate: deleteFavoriteMutation } = useWishListDelete();
+
+  const isWishlisted = isWishlistedProp ?? isWishlistedInternal;
+
+  const addToWishlistHandler =
+    addToWishlistHandlerProp ??
+    ((e) => {
+      e.stopPropagation();
+      let token = undefined;
+      if (typeof window !== "undefined") {
+        token = localStorage.getItem("token");
+      }
+      if (token) {
+        addFavoriteMutation(productDetailsData?.id, {
+          onSuccess: (response) => {
+            if (response) {
+              reduxDispatch(addWishList(productDetailsData));
+              setIsWishlistedInternal(true);
+              toast.success(response?.message);
+            }
+          },
+          onError: (error) => {
+            toast.error(error?.response?.data?.message);
+          },
+        });
+      } else {
+        toast.error(t(not_logged_in_message));
+      }
+    });
+
+  const removeFromWishlistHandler =
+    removeFromWishlistHandlerProp ??
+    ((e) => {
+      e.stopPropagation();
+      deleteFavoriteMutation(productDetailsData?.id, {
+        onSuccess: (res) => {
+          reduxDispatch(removeWishListItem(productDetailsData?.id));
+          setIsWishlistedInternal(false);
+          toast.success(res?.message, { id: "wishlist" });
+        },
+        onError: (error) => {
+          toast.error(error?.response?.data?.message);
+        },
+      });
+    });
   const productImage = productDetailsData?.image_full_url;
-  const productThumbImage = productDetailsData?.images_full_url;
+  const productThumbImage = [
+    productImage,
+    ...(productDetailsData?.images_full_url || []),
+  ];
+  const videoMeta = productDetailsData?.video_preview_available
+    ? {
+        previewType: productDetailsData?.video_preview_type,
+        thumbnailUrl: productDetailsData?.video_thumbnail_url,
+        modalType: productDetailsData?.video_preview_modal_type,
+        modalUrl: productDetailsData?.video_preview_modal_url,
+        inlineUrl: productDetailsData?.video_preview_url,
+      }
+    : null;
   const imageBaseUrl = productDetailsData?.isCampaignItem
     ? "campaign_image_url"
     : "item_image_url";
@@ -79,6 +145,7 @@ const ProductDetailsSection = ({
               removeFromWishlistHandler={removeFromWishlistHandler}
               isWishlisted={isWishlisted}
               productDetailsData={productDetailsData}
+              videoMeta={videoMeta}
             />
           )}
         </Grid>
@@ -103,7 +170,6 @@ const ProductDetailsSection = ({
       </Grid>
     );
   };
-
   return <CustomStackFullWidth>{handleModal()}</CustomStackFullWidth>;
 };
 

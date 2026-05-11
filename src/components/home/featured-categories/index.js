@@ -502,7 +502,7 @@ const FeaturedCategories = () => {
   };
 
   return (
-    <CustomBoxFullWidth sx={{ mt: "20px" }}>
+    <CustomBoxFullWidth>
       {isLoading ? (
         <HomeComponentsWrapper>
           <SliderCustom
@@ -537,7 +537,7 @@ const FeaturedCategories = () => {
                       paddingBottom: {
                         xs: "5px",
                         sm: "10px",
-                        md: "20px !important",
+                        
                       },
                     },
                   },

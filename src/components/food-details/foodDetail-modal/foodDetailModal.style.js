@@ -8,6 +8,7 @@ export const FoodDetailModalStyle = styled(Box)(({ theme, foodmodal }) => ({
   transform: "translate(-50%, -50%)",
   maxWidth: foodmodal ? "459px" : "922px",
   maxHeight: "100%",
+  minHeight: foodmodal ? "320px" : "auto",
   width: "100%",
   padding: foodmodal ? "0%" : "1.7%",
   borderRadius: "10px",

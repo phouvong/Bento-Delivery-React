@@ -21,10 +21,13 @@ import RunningCampaigns from "../running-campaigns";
 import SpecialFoodOffers from "../special-food-offers";
 import Stores from "../stores";
 import VisitAgain from "../visit-again";
+import TrendingBites from "../trending-bites";
 import PharmacyStaticBanners from "./pharmacy/pharmacy-banners/PharmacyStaticBanners";
 import TopOffersNearMe from "../top-offers-nearme";
 import RecommendedStore from "components/home/recommended-store";
+import MobileAppBanner from "components/home/MobileAppBanner";
 
+const SECTION_GAP = 3;
 const menus = ["All", "Beauty", "Bread & Juice", "Drinks", "Milks"];
 const Grocery = (props) => {
   const { configData } = props;
@@ -63,10 +66,17 @@ const Grocery = (props) => {
   }, [visitedStores, newStore?.stores, getModuleId()]);
 
   const isSmallScreen = useMediaQuery('(max-width:600px)');
-  console.log({orderDetailsModalOpen});
+
   return (
-    <Grid container spacing={1}>
-      <Grid item xs={12} sx={{ marginTop: { xs: "-10px", sm: "10px" } }}>
+    <Grid
+      container
+      rowSpacing={SECTION_GAP}
+      sx={{
+        "& > .MuiGrid-item:has(> *:empty)": { display: "none" },
+        "& > .MuiGrid-item:empty": { display: "none" },
+      }}
+    >
+      <Grid item xs={12}>
         <CustomContainer>
           <FeaturedCategories configData={configData} />
         </CustomContainer>
@@ -76,7 +86,7 @@ const Grocery = (props) => {
           <RecommendedStore />
         </CustomContainer>
       </Grid>
-      {token && (<Grid item xs={12} mb={3}>
+      {token && (<Grid item xs={12}>
         {isSmallScreen ? (
           <VisitAgain
             configData={configData}
@@ -98,7 +108,7 @@ const Grocery = (props) => {
           </CustomContainer>
         )}
       </Grid>)}
-      <Grid item xs={12} mb={3}>
+      <Grid item xs={12}>
         <CustomContainer>
           <PaidAds />
         </CustomContainer>
@@ -114,6 +124,11 @@ const Grocery = (props) => {
       <Grid item xs={12}>
         <CustomContainer>
           <PharmacyStaticBanners />
+        </CustomContainer>
+      </Grid>
+      <Grid item xs={12}>
+        <CustomContainer>
+          <TrendingBites title="Trending Bites" />
         </CustomContainer>
       </Grid>
       <Grid item xs={12}>
@@ -142,7 +157,7 @@ const Grocery = (props) => {
         </CustomContainer>
       </Grid>
 
-      <Grid item xs={12} mt="10px">
+      <Grid item xs={12}>
         <CustomContainer>
           <RunningCampaigns />
         </CustomContainer>
@@ -152,7 +167,7 @@ const Grocery = (props) => {
           <LoveItem />
         </CustomContainer>
       </Grid>
-      <Grid item xs={12} mb={2}>
+      <Grid item xs={12}>
         {isSmallScreen ? (
           <Coupons />
         ) : (
@@ -172,6 +187,11 @@ const Grocery = (props) => {
         </CustomContainer>
       </Grid>
 
+      <Grid item xs={12}>
+        <CustomContainer>
+          <MobileAppBanner />
+        </CustomContainer>
+      </Grid>
       <Grid item xs={12}>
         <CustomContainer>
           <Stores />

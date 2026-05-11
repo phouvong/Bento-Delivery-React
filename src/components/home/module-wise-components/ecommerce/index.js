@@ -21,12 +21,16 @@ import Stores from "../../stores";
 import VisitAgain from "../../visit-again";
 import FeaturedStores from "../pharmacy/featured-stores";
 import PharmacyStaticBanners from "../pharmacy/pharmacy-banners/PharmacyStaticBanners";
+import TrendingBites from "../../trending-bites";
 import CampaignBanners from "./CampaignBanners";
 import FeaturedCategoriesWithFilter from "./FeaturedCategoriesWithFilter";
 import NewArrivals from "./NewArrivals";
 import SinglePoster from "./SinglePoster";
 import TopOffersNearMe from "components/home/top-offers-nearme";
 import RecommendedStore from "components/home/recommended-store";
+import MobileAppBanner from "components/home/MobileAppBanner";
+
+const SECTION_GAP = 3;
 
 const Shop = ({ configData }) => {
   const menus = ["All", "Beauty", "Bread & Juice", "Drinks", "Milks"];
@@ -77,8 +81,15 @@ const Shop = ({ configData }) => {
   }, [visitedStores, newStore?.stores, getModuleId()]);
 
   return (
-    <Grid container gap={1}>
-      <Grid item xs={12} sx={{ marginTop: { xs: "-10px", sm: "10px" } }}>
+    <Grid
+      container
+      rowSpacing={SECTION_GAP}
+      sx={{
+        "& > .MuiGrid-item:has(> *:empty)": { display: "none" },
+        "& > .MuiGrid-item:empty": { display: "none" },
+      }}
+    >
+      <Grid item xs={12}>
         <CustomContainer>
           <FeaturedCategories configData={configData} />
         </CustomContainer>
@@ -91,6 +102,11 @@ const Shop = ({ configData }) => {
       <Grid item xs={12}>
         <CustomContainer>
           <PharmacyStaticBanners />
+        </CustomContainer>
+      </Grid>
+      <Grid item xs={12}>
+        <CustomContainer>
+          <TrendingBites title="Trending Bites" />
         </CustomContainer>
       </Grid>
       <Grid item xs={12}>
@@ -183,6 +199,11 @@ const Shop = ({ configData }) => {
       <Grid item xs={12}>
         <CustomContainer>
           <SinglePoster bannerData={data} />
+        </CustomContainer>
+      </Grid>
+      <Grid item xs={12}>
+        <CustomContainer>
+          <MobileAppBanner />
         </CustomContainer>
       </Grid>
       <Grid item xs={12}>

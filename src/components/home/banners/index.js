@@ -193,7 +193,7 @@ const Banners = ({ feature }) => {
     <>
       <CustomStackFullWidth
         sx={{
-          mt: "10px",
+          mt:"10px",
           "& .slick-list": {
             marginRight: { xs: "-10px", sm: "-20px" },
           },

@@ -16,6 +16,7 @@ import {
 import ViewMore from "../ViewMore";
 import NavStoreShimmer from "./NavStoreShimmer";
 import { getCurrentModuleType } from "../../../../helper-functions/getCurrentModuleType";
+import VerifiedStoreBadge from "../../../../components/cards/VerifiedStoreBadge";
 
 const NavNewStore = () => {
   const { configData } = useSelector((state) => state.configData);
@@ -51,6 +52,8 @@ const NavNewStore = () => {
               return (
                 <Stack
                   key={store.id}
+                  direction="row"
+                  alignItems="center"
                   width="100%"
                   onClick={() => handleClick(store)}
                 >
@@ -69,6 +72,7 @@ const NavNewStore = () => {
                   >
                     {store.name}
                   </CustomTypographyGray>
+                  <VerifiedStoreBadge verified={store?.verified_seller} fontSize="14px" />
                 </Stack>
               );
             })}

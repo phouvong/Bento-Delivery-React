@@ -17,6 +17,7 @@ import { getModuleId } from "helper-functions/getModuleId";
 import { getStoresOrRestaurants } from "helper-functions/getStoresOrRestaurants";
 import { setPopularStores } from "redux/slices/storedData";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge";
 
 const NavPopularStore = () => {
   const { t } = useTranslation();
@@ -67,6 +68,8 @@ const NavPopularStore = () => {
                 return (
                   <Stack
                     key={store.id}
+                    direction="row"
+                    alignItems="center"
                     width="100%"
                     onClick={() => handleClick(store)}
                   >
@@ -89,6 +92,7 @@ const NavPopularStore = () => {
                     >
                       {store.name}
                     </CustomTypographyGray>
+                    <VerifiedStoreBadge verified={store?.verified_seller} fontSize="14px" />
                   </Stack>
                 );
               })}

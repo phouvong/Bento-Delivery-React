@@ -16,12 +16,15 @@ import FeaturedCategories from "../../featured-categories";
 import RunningCampaigns from "../../running-campaigns";
 import Stores from "../../stores";
 import VisitAgain from "../../visit-again";
+import TrendingBites from "../../trending-bites";
 import CommonConditions from "./common-conditions";
 import FeaturedStores from "./featured-stores";
 import PharmacyStaticBanners from "./pharmacy-banners/PharmacyStaticBanners";
 import TopOffersNearMe from "components/home/top-offers-nearme";
 import RecommendedStore from "components/home/recommended-store";
+import MobileAppBanner from "components/home/MobileAppBanner";
 
+const SECTION_GAP = 3;
 const menus = ["All", "New", "Baby Care", "Womans Care", "Mens"];
 
 const Pharmacy = ({ configData }) => {
@@ -63,8 +66,15 @@ const Pharmacy = ({ configData }) => {
   }, [visitedStores, newStore?.stores, getModuleId()]);
 
   return (
-    <Grid container gap={1}>
-      <Grid item xs={12} sx={{ marginTop: "10px" }}>
+    <Grid
+      container
+      rowSpacing={SECTION_GAP}
+      sx={{
+        "& > .MuiGrid-item:has(> *:empty)": { display: "none" },
+        "& > .MuiGrid-item:empty": { display: "none" },
+      }}
+    >
+      <Grid item xs={12}>
         <CustomContainer>
           <FeaturedCategories configData={configData} />
         </CustomContainer>
@@ -79,7 +89,11 @@ const Pharmacy = ({ configData }) => {
           <PharmacyStaticBanners />
         </CustomContainer>
       </Grid>
-
+      <Grid item xs={12}>
+        <CustomContainer>
+          <TrendingBites title="Trending Bites" />
+        </CustomContainer>
+      </Grid>
       <Grid item xs={12}>
         <CustomContainer>
           <VisitAgain
@@ -137,6 +151,11 @@ const Pharmacy = ({ configData }) => {
         </CustomContainer>
       </Grid>
    
+      <Grid item xs={12}>
+        <CustomContainer>
+          <MobileAppBanner />
+        </CustomContainer>
+      </Grid>
       <Grid
         item
         xs={12}

@@ -16,7 +16,7 @@ import {
 import { t } from "i18next";
 import OrderCalculationShimmer from "../item-checkout/OrderCalculationShimmer";
 import PrescriptionOrderCalculation from "../../Prescription/PrescriptionOrderCalculation";
-import PrescriptionUpload from "../../Prescription/PrescriptionUpload";
+import MultiPrescriptionRoot from "./MultiPrescriptionRoot";
 import {
   getDigitalMethodFromZone,
   handleDistance,
@@ -44,7 +44,7 @@ const PrescriptionCheckout = ({ storeId ,page}) => {
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const [orderType, setOrderType] = useState("delivery");
   const [address, setAddress] = useState(undefined);
-  const [prescriptionImages, setPrescriptionImages] = useState(null);
+  const [prescriptionImages, setPrescriptionImages] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState("");
   const [unavailable_item_note, setUnavailable_item_note] = useState(null);
   const [delivery_instruction, setDelivery_instruction] = useState(null);
@@ -241,7 +241,7 @@ const PrescriptionCheckout = ({ storeId ,page}) => {
               payableAmount={payableAmount}
             />
           )}
-          <PrescriptionUpload
+          <MultiPrescriptionRoot
             prescriptionImages={prescriptionImages}
             setPrescriptionImages={setPrescriptionImages}
           />

@@ -4,6 +4,7 @@ import { ChatUserTop } from "./Chat.style";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import { t } from "i18next";
+import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge";
 
 const ConversationInfoTop = ({
   receiver,
@@ -95,22 +96,34 @@ const ConversationInfoTop = ({
                   {deliveryman_name}
                 </Typography>
               ) : (
-                <Typography
-                  textAlign="left"
-                  color={theme.palette.neutral[1000]}
-                  fontSize="16px"
-                  fontWeight="600"
-                >
-                  {receiver?.sender_type === "customer"
-                    ? receiver?.receiver?.f_name.concat(
-                        " ",
-                        receiver?.receiver?.l_name
-                      ) || " "
-                    : receiver?.sender?.f_name.concat(
-                        " ",
-                        receiver?.sender?.l_name
-                      ) || " "}
-                </Typography>
+                <Stack direction="row" alignItems="center">
+                  <Typography
+                    textAlign="left"
+                    color={theme.palette.neutral[1000]}
+                    fontSize="16px"
+                    fontWeight="600"
+                  >
+                    {receiver?.sender_type === "customer"
+                      ? receiver?.receiver?.f_name.concat(
+                          " ",
+                          receiver?.receiver?.l_name
+                        ) || " "
+                      : receiver?.sender?.f_name.concat(
+                          " ",
+                          receiver?.sender?.l_name
+                        ) || " "}
+                  </Typography>
+                  {receiverType === "vendor" && (
+                    <VerifiedStoreBadge
+                      verified={
+                        receiver?.sender_type === "customer"
+                          ? receiver?.receiver?.verified_seller
+                          : receiver?.sender?.verified_seller
+                      }
+                      fontSize="16px"
+                    />
+                  )}
+                </Stack>
               )}
             </>
           )}

@@ -94,7 +94,6 @@ const LoveItem = (props) => {
         <CustomStackFullWidth
             alignItems="center"
             justyfyContent="center"
-            mt="30px"
             spacing={1}
         >
           <CustomStackFullWidth

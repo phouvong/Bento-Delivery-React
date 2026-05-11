@@ -12,7 +12,7 @@ import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
 const Wrapper = styled(Box)(({ theme }) => ({
   cursor: "pointer",
   width: "122px",
-  height: "183px",
+  height: "175px",
   backgroundColor: theme.palette.background.default,
   borderRadius: "60px",
   transition: "all ease 0.3s",

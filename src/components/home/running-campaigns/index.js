@@ -1,6 +1,8 @@
 import { Box } from "@mui/system";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { handleProductRedirect } from "helper-functions/handleProductRedirect";
+
 import { useDispatch, useSelector } from "react-redux";
 import useGetItemCampaigns from "../../../api-manage/hooks/react-query/useGetItemCampaigns";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
@@ -24,28 +26,18 @@ const RunningCampaigns = () => {
   const router = useRouter();
   const { runningCampaigns } = useSelector((state) => state.storedData);
   const dispatch = useDispatch();
- 
+  console.log({data});
+  
+
   useEffect(() => {
     dispatch(setRunningCampaigns(data));
   }, [data]);
   const handleClick = (product) => {
+    console.log({campaignsData});
+    
     if (getCurrentModuleType() === "ecommerce") {
       dispatch(setCampaignItem(product));
-      router.push(
-        {
-          pathname: "/product/[id]",
-          query: {
-            id: `${product?.slug ? product?.slug : product?.id}`,
-            module_id: `${getModuleId()}`,
-            product_type: "campaign",
-          },
-        },
-        undefined,
-        { shallow: true }
-      ).then(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
-
+      handleProductRedirect(product, router, "campaign");
     } else {
       setCampaignsData(product);
       setOpenModal(true);

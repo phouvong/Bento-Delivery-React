@@ -10,6 +10,7 @@ import { CustomBoxFullWidth } from "../../styled-components/CustomStyles.style";
 import CustomImageContainer from "../CustomImageContainer";
 import Body2 from "../typographies/Body2";
 import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
+import VerifiedStoreBadge from "./VerifiedStoreBadge";
 
 const Wrapper = styled(CustomBoxFullWidth)(({ theme, hover }) => ({
 	position: "relative",
@@ -101,14 +102,17 @@ const PharmacyFeaturedStoreCard = (props) => {
 									placement="bottom"
 									arrow="false"
 								>
-									<Typography
-										variant="subtitle1"
-										className={classes.singleLineEllipsis}
-										maxHeight="20px"
-										component="h3"
-									>
-										{data?.name}
-									</Typography>
+									<Stack direction="row" alignItems="center">
+										<Typography
+											variant="subtitle1"
+											className={classes.singleLineEllipsis}
+											maxHeight="20px"
+											component="h3"
+										>
+											{data?.name}
+										</Typography>
+										<VerifiedStoreBadge verified={data?.verified_seller} fontSize="16px" />
+									</Stack>
 								</PrimaryToolTip>
 								<Body2 text={data?.address} />
 								<Typography

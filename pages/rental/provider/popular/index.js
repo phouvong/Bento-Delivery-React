@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import SEO from "../../../../src/components/seo";
 import {useTranslation} from "react-i18next";
@@ -12,6 +12,10 @@ import { processMetadata } from "utils/fetchPageMetaData";
 
 
 const Index = ({ configData, metaData }) => {
+  const [title, setTitle] = useState("Popular Stores");
+  useEffect(() => {
+    setTitle(getCurrentModuleType() === "rental" ? "Popular Providers" : "Popular Stores");
+  }, []);
 const metadata = processMetadata(metaData, {
     title: `Popular Stores - ${configData?.business_name}`,
     description: metaData?.description || '',
@@ -36,7 +40,7 @@ const metadata = processMetadata(metaData, {
               configData={configData}
               t={t}
               storeType="popular"
-              title={getCurrentModuleType() === "rental"?"Popular Providers":"Popular Stores"}
+              title={title}
             />
           </CustomContainer>
         </PageDetailsWrapper>

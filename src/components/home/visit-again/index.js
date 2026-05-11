@@ -240,31 +240,30 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
   return (
     <>
       <CustomStackFullWidth
-        alignItems={getModuleWiseData?.()?.mainPosition}
-        justyfyContent={getModuleWiseData?.()?.mainPosition}
-        mt={isSmallScreen ? "2px" : "16px"}
+        alignItems="flex-start"
+        justyfyContent="flex-start"
         spacing={{ xs: 2, md: 1 }}
         paddingX={{ xs: 2, md: 0 }}
 
       >
         {isSmallScreen ? (
-          <CustomContainer>
+          <>
             <CustomStackFullWidth
-              alignItems={getModuleWiseData?.()?.mainPosition}
-              justyfyContent={getModuleWiseData?.()?.mainPosition}
-              mt="10px"
+              alignItems="flex-start"
+              justyfyContent="flex-start"
               spacing={1}
+              sx={{pb:"10px"}}
             >
               <H1 text={getModuleWiseData?.()?.heading} component="h2" />
               {isVisited && (
                 <Subtitle1
-                  textAlign={getModuleWiseData?.()?.mainPosition}
+                  textAlign="left"
                   text={getModuleWiseData?.()?.subHeading}
                   component="p"
                 />
               )}
             </CustomStackFullWidth>
-          </CustomContainer>
+          </>
         ) : (
           <>
             <H1 text={getModuleWiseData?.()?.heading} component="h2" />

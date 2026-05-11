@@ -191,10 +191,10 @@ const PaidAds = () => {
           <Box
             sx={{
               backgroundImage: "url('/static/paidAdds.png')",
-              marginTop: "10px",
               backgroundRepeat: "no-repeat",
               backgroundSize: "cover",
               borderRadius: "10px",
+              marginTop: "10px",
             }}
           >
             <Box

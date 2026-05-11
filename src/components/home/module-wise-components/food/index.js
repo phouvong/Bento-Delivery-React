@@ -19,9 +19,13 @@ import RunningCampaigns from "../../running-campaigns";
 import SpecialFoodOffers from "../../special-food-offers";
 import Stores from "../../stores";
 import VisitAgain from "../../visit-again";
+import TrendingBites from "../../trending-bites";
 import FeaturedCategoriesWithFilter from "../ecommerce/FeaturedCategoriesWithFilter";
 import TopOffersNearMe from "components/home/top-offers-nearme";
 import RecommendedStore from "components/home/recommended-store";
+import MobileAppBanner from "components/home/MobileAppBanner";
+
+const SECTION_GAP = 3;
 
 const FoodModule = (props) => {
   const { configData } = props;
@@ -71,8 +75,15 @@ const FoodModule = (props) => {
   }, [visitedStores, newStore?.stores, getModuleId()]);
 
   return (
-    <Grid container gap={1}>
-      <Grid item xs={12} sx={{ marginTop: { xs: "-10px", sm: "10px" } }}>
+    <Grid
+      container
+      rowSpacing={SECTION_GAP}
+      sx={{
+        "& > .MuiGrid-item:has(> *:empty)": { display: "none" },
+        "& > .MuiGrid-item:empty": { display: "none" },
+      }}
+    >
+      <Grid item xs={12}>
         <CustomContainer>
           <FeaturedCategories configData={configData} />
         </CustomContainer>
@@ -119,6 +130,11 @@ const FoodModule = (props) => {
 
       <Grid item xs={12}>
         <CustomContainer>
+          <TrendingBites title="Trending Bites" />
+        </CustomContainer>
+      </Grid>
+      <Grid item xs={12}>
+        <CustomContainer>
           <Banners />
         </CustomContainer>
       </Grid>
@@ -146,6 +162,11 @@ const FoodModule = (props) => {
       <Grid item xs={12}>
         <CustomContainer>
           <FeaturedCategoriesWithFilter title="Featured Categories" />
+        </CustomContainer>
+      </Grid>
+      <Grid item xs={12}>
+        <CustomContainer>
+          <MobileAppBanner />
         </CustomContainer>
       </Grid>
       <Grid item xs={12}>

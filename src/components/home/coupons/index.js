@@ -141,7 +141,6 @@ const Coupons = (props) => {
           sx={{
             background: (theme) => background(theme),
             backgroundSize: "cover", // Optional: Adjust the background size to cover the box
-            marginTop: "2rem",
             borderRadius: { xs: "0px", md: "5px" },
             padding: { xs: "25px", md: "15px" },
             minHeight: "135px",
