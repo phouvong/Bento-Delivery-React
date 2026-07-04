@@ -89,5 +89,8 @@
   },
   "resolutions": {
     "@swc/helpers": "^0.5.0"
+  },
+  "engines": {
+    "node": "24.x"
   }
 }
