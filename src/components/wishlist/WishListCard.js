@@ -100,9 +100,8 @@ const WishListCard = ({ item, onOpenModal }) => {
   };
   const addToCartHandler = () => {
     if (cartList.length > 0) {
-      const isStoreExist = cartList.find(
-        (item) => item?.store_id === state?.modalData[0]?.store_id
-      );
+      // Multi-store carts allowed — always proceed with add.
+      const isStoreExist = true;
 
       if (isStoreExist) {
         const itemObject = {
@@ -117,10 +116,13 @@ const WishListCard = ({ item, onOpenModal }) => {
           quantity: state?.modalData[0]?.quantity,
           variation: [],
         };
-        addToMutate(itemObject, {
-          onSuccess: handleSuccess,
-          onError: onErrorResponse,
-        });
+        addToMutate(
+          { postData: itemObject, store_id: state.modalData[0]?.store_id },
+          {
+            onSuccess: handleSuccess,
+            onError: onErrorResponse,
+          }
+        );
       } else {
         if (cartList.length !== 0) {
           handleClearCartModalOpen();
@@ -139,10 +141,13 @@ const WishListCard = ({ item, onOpenModal }) => {
         quantity: state?.modalData[0]?.quantity,
         variation: [],
       };
-      addToMutate(itemObject, {
-        onSuccess: handleSuccess,
-        onError: onErrorResponse,
-      });
+      addToMutate(
+        { postData: itemObject, store_id: state.modalData[0]?.store_id },
+        {
+          onSuccess: handleSuccess,
+          onError: onErrorResponse,
+        }
+      );
     }
   };
   const addToCart = (e) => {

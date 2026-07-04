@@ -127,14 +127,15 @@ const CustomPopupButtonBox = styled(Box)(({ theme }) => ({
   position: "fixed",
   cursor: "pointer",
   display: "flex",
-  bottom: "23px",
-  right: "5%",
+  bottom: "calc(10% + 72px)",
+  right: "24px",
   zIndex: "999",
   [theme.breakpoints.down("lg")]: {
-    bottom: "63px",
+    bottom: "calc(10% + 72px)",
   },
   [theme.breakpoints.down("sm")]: {
-    bottom: "53px",
+    bottom: "150px",
+    right: "16px",
     img: {
       width: "50px",
       height: "50px",
@@ -156,18 +157,19 @@ const CustomOverlay = styled(Box)(({ theme }) => ({
 }));
 const CustomPopupBox = styled(Box)(({ theme }) => ({
   position: "fixed",
-  bottom: "100px",
-  right: "23px",
+  bottom: "calc(10% + 160px)",
+  right: "24px",
   zIndex: "99999",
   overflowY: "auto",
   width: "293px",
-  maxHeight: "calc(100dvh - 200px)",
+  maxHeight: "calc(100dvh - 280px)",
   [theme.breakpoints.down("lg")]: {
-    bottom: "130px",
+    bottom: "calc(10% + 160px)",
   },
   [theme.breakpoints.down("sm")]: {
-    bottom: "110px",
-    maxHeight: "calc(100dvh - 170px)",
+    bottom: "210px",
+    right: "16px",
+    maxHeight: "calc(100dvh - 240px)",
   },
 }));
 const CustomOfferBox = styled(Box)(({ theme }) => ({

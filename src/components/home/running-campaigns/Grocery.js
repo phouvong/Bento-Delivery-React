@@ -10,14 +10,13 @@ const ImageContainer = styled(Box)(({ theme }) => ({
   position: "relative",
   width: "100%",
   borderRadius: "8px",
-  maxHeight: "190px",
-  maxWidth: "200px",
+  maxWidth: "160px",
+  aspectRatio: "1 / 1",
   overflow: "hidden",
-  img:{
-    width:"100%",
-    height: "100%",},
-  [theme.breakpoints.up("md")]: {
-    height: "190px",
+  "& img": {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
   },
   "&:hover img": {
     transform: "scale(1.04)",
@@ -58,8 +57,8 @@ const Grocery = (props) => {
               <NextImage
                 src={item?.image_full_url}
                 alt={item?.title}
-                height={190}
-                width={200}
+                height={160}
+                width={160}
                 objectFit="cover"
               />
             </ImageContainer>

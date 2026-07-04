@@ -1,5 +1,22 @@
 import { store } from "redux/store";
 
+/**
+ * Format a plain number (non-currency) using config's digit_after_decimal_point.
+ * Safe against null / undefined / string / NaN inputs — returns "" for invalid values.
+ *
+ * @param {number|string|null|undefined} value
+ * @param {number} [fallbackDecimals=2]  used when config is not yet loaded
+ * @returns {string}
+ */
+export const formatNumber = (value, fallbackDecimals = 2) => {
+  if (value == null || value === "") return "";
+  const num = Number(value);
+  if (isNaN(num)) return "";
+  const { configData } = store?.getState()?.configData || {};
+  const decimals = Number.parseInt(configData?.digit_after_decimal_point ?? fallbackDecimals);
+  return num.toFixed(isNaN(decimals) ? fallbackDecimals : decimals);
+};
+
 // export const getAmountWithSign = (amount, needDecimal = true) => {
 //   const stores = store?.getState();
 //   const { configData } = stores?.configData || {};
@@ -47,16 +64,20 @@ export const getDiscountedAmount = (
   storeDiscount,
   quantity
 ) => {
+  console.log({discount,discountType})
   //product wise discount
   let mainPrice = price;
   let q = quantity ? quantity : 1;
   if (discount > 0) {
     if (discountType === "amount") {
       mainPrice = price - discount * q;
+console.log({mainPrice,price});
     } else if (discountType === "percent" || discountType === "fixed") {
       mainPrice = price - (discount / 100) * price;
     }
   }
+  
+  
   return mainPrice;
 };
 export const getSelectedAddOn = (add_ons) => {

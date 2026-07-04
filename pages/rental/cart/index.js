@@ -9,6 +9,7 @@ import { useGetConfigData } from "../../../src/api-manage/hooks/useGetConfigData
 import { setConfigData } from "../../../src/redux/slices/configData";
 import { useEffect } from "react";
 import RentalCartPage from "../../../src/components/home/module-wise-components/rental/components/rental-cart/RentalCartPage";
+import SimpleMobileHeader from "components/common/SimpleMobileHeader";
 import { NoSsr } from "@mui/material";
 
 const index = () => {
@@ -42,6 +43,7 @@ const index = () => {
         configData={configData}
       />
       <MainLayout configData={configData} landingPageData={landingPageData}>
+        <SimpleMobileHeader title="Cart" />
         <NoSsr>
           <RentalCartPage />
         </NoSsr>

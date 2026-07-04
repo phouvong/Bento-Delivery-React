@@ -67,7 +67,7 @@ const TextWrapper = styled(Box)(({ theme }) => ({
 
 /* ===================== COMPONENT ===================== */
 
-const PharmacyCategoryCard = ({ image, title, id, onlyshimmer }) => {
+const PharmacyCategoryCard = ({ image, title, id, slug, onlyshimmer }) => {
   const [hover, setHover] = useState(false);
   const { ref: textRef, isEllipsed } = useTextEllipsis(title);
   const router = useRouter();
@@ -79,12 +79,9 @@ const PharmacyCategoryCard = ({ image, title, id, onlyshimmer }) => {
   return (
     <Link
       href={{
-        pathname: "/search",
+        pathname: `/home/category/${slug || id}`,
         query: {
-          search: "category",
           id,
-          name: title,
-          data_type: "category",
           ...(moduleValue ? { module: String(moduleValue) } : {}),
         },
       }}

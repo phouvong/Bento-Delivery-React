@@ -65,6 +65,7 @@ export const recommendSettings = {
   speed: 500,
   slidesToShow: 2,
   slidesToScroll: 1,
+  swipeToSlide: true,
   initialSlide: 0,
   nextArrow: <NextArrow />,
   prevArrow: <PrevArrow />,
@@ -75,6 +76,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 3,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
         // dots: true
       },
@@ -84,6 +86,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 3,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
         // dots: true
       },
@@ -93,6 +96,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 3,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
         // dots: true
       },
@@ -102,6 +106,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 2.5,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
         // dots: true
       },
@@ -111,6 +116,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 2.5,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
         // dots: true
       },
@@ -120,6 +126,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 2.5,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
         // dots: true
       },
@@ -129,6 +136,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 2.5,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
         // dots: true
       },
@@ -138,6 +146,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 2,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
         // dots: true
       },
@@ -147,6 +156,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 2,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
         // dots: true
       },
@@ -156,6 +166,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 1.5,
         slidesToScroll: 1,
+        swipeToSlide: true,
         // initialSlide: 2
         infinite: false,
       },
@@ -165,6 +176,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 1,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -173,6 +185,7 @@ export const recommendSettings = {
       settings: {
         slidesToShow: 1,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
         // dots: true
       },

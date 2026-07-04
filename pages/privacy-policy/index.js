@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import CssBaseline from "@mui/material/CssBaseline";
 import MainLayout from "../../src/components/layout/MainLayout";
+import SimpleMobileHeader from "components/common/SimpleMobileHeader";
 import PolicyPage from "../../src/components/policy-page";
 import useGetPolicyPage from "../../src/api-manage/hooks/react-query/useGetPolicyPage";
 import SEO from "../../src/components/seo";
@@ -48,6 +49,7 @@ const Index = ({ configData,metaData }) => {
         configData={configData}
       />
       <MainLayout configData={configData} >
+        <SimpleMobileHeader title="Privacy Policy" />
         <PolicyPage
           data={data}
           title={t("Privacy Policy")}

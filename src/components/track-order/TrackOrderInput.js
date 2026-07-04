@@ -3,7 +3,7 @@ import {
   CustomPaperBigCard,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
-import {Grid, Stack, Typography} from "@mui/material";
+import { Grid, Stack, Typography } from "@mui/material";
 import { t } from "i18next";
 import CustomTextFieldWithFormik from "../form-fields/CustomTextFieldWithFormik";
 import CustomPhoneInput from "../custom-component/CustomPhoneInput";
@@ -14,16 +14,16 @@ import { PrimaryButton } from "../Map/map.style";
 import TrackOrderDetails from "./TrackOrderDetails";
 import { getGuestId } from "helper-functions/getToken";
 import useGetTrackOrderData from "../../api-manage/hooks/react-query/order/useGetTrackOrderData";
-import {useDispatch, useSelector} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import Router from "next/router";
 import { useGetTripDetails } from "api-manage/hooks/react-query/useGetTripDetails";
 
-const TrackOrderInput = ({ configData }) => {
+const TrackOrderInput = ({ configData, pt = "62px" }) => {
   const dispatch = useDispatch();
   const [showOrderDetails, setShowOrderDetails] = useState(false);
+  const [didSearchTrip, setDidSearchTrip] = useState(false);
   const { selectedModule } = useSelector((state) => state.utilsData);
-
 
   const trackOrderFormik = useFormik({
     initialValues: {
@@ -35,6 +35,7 @@ const TrackOrderInput = ({ configData }) => {
         dispatch(setGuestUserInfo(values));
         setShowOrderDetails(true);
         if (getModule()?.module_type === "rental") {
+          setDidSearchTrip(true);
           refetchData();
         } else {
           refetchTrackOrder();
@@ -50,9 +51,9 @@ const TrackOrderInput = ({ configData }) => {
     trackOrderFormik.setFieldValue("contact_person_number", `+${value}`);
   };
   const guestId = getGuestId();
-  const handleSuccess=()=>{
-    setShowOrderDetails(true)
-  }
+  const handleSuccess = () => {
+    setShowOrderDetails(true);
+  };
   const {
     refetch: refetchTrackOrder,
     data: trackOrderData,
@@ -62,7 +63,7 @@ const TrackOrderInput = ({ configData }) => {
     trackOrderFormik?.values?.contact_person_number,
     guestId,
     setShowOrderDetails,
-    handleSuccess
+    handleSuccess,
   );
   const {
     data: tripDetails,
@@ -70,35 +71,78 @@ const TrackOrderInput = ({ configData }) => {
     isFetching,
   } = useGetTripDetails(trackOrderFormik?.values?.order_id);
   useEffect(() => {
-    if (tripDetails) {
+    if (didSearchTrip && tripDetails) {
       Router.push(`/rental/trip-status/${tripDetails?.id}?from=""`);
     }
-  }, [tripDetails]);
+  }, [tripDetails, didSearchTrip]);
 
   return (
-    <CustomStackFullWidth pt="40px" spacing={2} >
-      <Stack sx={{minHeight:"262px",justifyContent:"center",
-        width:"100%",
-        background:theme=>theme.palette.neutral[100],
-        borderRadius:"8px",padding:"20px 0"
-      }}>
-        <Typography
-          align="center"
-          paddingBottom="30px"
-          fontSize="20px"
-          fontWeight="600"
+    <CustomStackFullWidth pt={pt} spacing={2}>
+      <Stack
+        spacing={3}
+        alignItems="center"
+        sx={{
+          width: "100%",
+          backgroundColor: "background.paper",
+          borderRadius: "12px",
+          boxShadow: (theme) => theme.shadows[1],
+          py: { xs: 3, md: 6 },
+          px: { xs: 2, md: 8 },
+        }}
+      >
+        {/* Title */}
+        <Stack spacing={1} alignItems="center">
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: "24px", md: "32px" },
+              lineHeight: 1.1,
+              letterSpacing: "-0.64px",
+              color: "neutral.1050",
+              textAlign: "center",
+            }}
+          >
+            {selectedModule?.module_type === "rental"
+              ? t("Track Your Trip")
+              : t("Track Your Order")}
+          </Typography>
+          <Typography
+            sx={{
+              fontWeight: 400,
+              fontSize: "16px",
+              lineHeight: 1.3,
+              letterSpacing: "-0.48px",
+              color: "neutral.500",
+              textAlign: "center",
+            }}
+          >
+            {selectedModule?.module_type === "rental"
+              ? t("Enter your trip ID and phone number to get live updates")
+              : t("Enter your order ID and phone number to get live updates")}
+          </Typography>
+        </Stack>
 
+        {/* Form */}
+        <form
+          noValidate
+          onSubmit={trackOrderFormik.handleSubmit}
+          style={{ width: "100%" }}
         >
-          {selectedModule?.module_type==="rental"?t("Track Your Trip"):t("Track Your Order")}
-        </Typography>
-        <form noValidate onSubmit={trackOrderFormik.handleSubmit}>
           <Grid container spacing={2} paddingX={{ xs: ".5rem", md: "2rem" }}>
             <Grid item xs={12} md={5}>
               <CustomTextFieldWithFormik
-                placeholder={selectedModule?.module_type==="rental"? t("Enter your trip id"):t("Enter your order id")}
+                placeholder={
+                  selectedModule?.module_type === "rental"
+                    ? t("Enter your trip id")
+                    : t("Enter your order id")
+                }
                 required="true"
                 type="text"
-                label={selectedModule?.module_type==="rental"?t("Trip Id"):t("Order Id")}
+                label={
+                  selectedModule?.module_type === "rental"
+                    ? t("Trip Id")
+                    : t("Order Id")
+                }
                 touched={trackOrderFormik.touched.order_id}
                 errors={trackOrderFormik.errors.order_id}
                 fieldProps={trackOrderFormik.getFieldProps("order_id")}
@@ -106,7 +150,7 @@ const TrackOrderInput = ({ configData }) => {
                 value={trackOrderFormik.values.order_id}
               />
             </Grid>
-            <Grid item xs={12} md={5}>
+            <Grid item xs={12} md={4}>
               <CustomPhoneInput
                 value={trackOrderFormik.values.contact_person_number}
                 onHandleChange={numberHandler}
@@ -119,11 +163,29 @@ const TrackOrderInput = ({ configData }) => {
                 borderRadius="8px"
               />
             </Grid>
-            <Grid item xs={12} md={2}>
-              <PrimaryButton type="submit">{selectedModule?.module_type==="rental" ? t("Search Trip"):t("Search Order")}</PrimaryButton>
+            <Grid item xs={12} md={3}>
+              <PrimaryButton type="submit">
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  justifyContent="center"
+                  gap="6px"
+                  sx={{ whiteSpace: "nowrap" }}
+                >
+                  <i
+                    className="fi fi-rr-search"
+                    style={{ fontSize: 15, lineHeight: 1, display: "flex" }}
+                  />
+                  {selectedModule?.module_type === "rental"
+                    ? t("Search Trip")
+                    : t("Search Order")}
+                </Stack>
+              </PrimaryButton>
             </Grid>
           </Grid>
         </form>
+
+        {/* Results */}
         {trackOrderData && showOrderDetails && (
           <TrackOrderDetails
             trackOrderFormik={trackOrderFormik}

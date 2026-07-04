@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { alpha, Button, Skeleton, Stack, Typography, useTheme } from "@mui/material";
+import {
+  alpha,
+  Button,
+  Skeleton,
+  Stack,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 import Router from "next/router";
@@ -25,7 +32,14 @@ import { getAmountWithSign } from "helper-functions/CardHelpers";
 import { useGetFailedPayment } from "api-manage/hooks/react-query/useGetFailedPayment";
 import { cod_exceeds_message } from "utils/toasterMessages";
 
-const CheckoutFailedCard = ({ id, handleOrderDetailsClose, amount, setOpenPaymentMethod, setPaymentFailedData, refetchTrackData }) => {
+const CheckoutFailedCard = ({
+  id,
+  handleOrderDetailsClose,
+  amount,
+  setOpenPaymentMethod,
+  setPaymentFailedData,
+  refetchTrackData,
+}) => {
   const theme = useTheme();
   const [openModal, setOpenModal] = useState(false);
   const [cancelReason, setCancelReason] = useState(null);
@@ -33,22 +47,19 @@ const CheckoutFailedCard = ({ id, handleOrderDetailsClose, amount, setOpenPaymen
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { data: cancelReasonsData, refetch } = useGetOrderCancelReason();
-  console.log({ id })
+  console.log({ id });
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
-  const { refetch: refetchFailedPayment, data: failPayment } = useGetFailedPayment(
-    id,
-    (res) => {
+  const { refetch: refetchFailedPayment, data: failPayment } =
+    useGetFailedPayment(id, (res) => {
       console.log(res);
       if (res) {
         setPaymentFailedData?.(res);
       }
-    }
-  );
+    });
   useEffect(() => {
     if (!id) return;
-    refetchFailedPayment()
+    refetchFailedPayment();
   }, [id]);
-
 
   useEffect(() => {
     refetch().then();
@@ -81,7 +92,7 @@ const CheckoutFailedCard = ({ id, handleOrderDetailsClose, amount, setOpenPaymen
     toast.success(response.data.message);
     dispatch(setClearCart());
     setOpenModal(false);
-    refetchTrackData?.()
+    refetchTrackData?.();
     //Router.push("/home", undefined, { shallow: true });
     handleOrderDetailsClose?.();
   };
@@ -101,7 +112,7 @@ const CheckoutFailedCard = ({ id, handleOrderDetailsClose, amount, setOpenPaymen
     handleCancelSuccess();
     //setOpenModal(true);
   };
-  console.log(failPayment)
+  console.log(failPayment);
   const handleOnSuccess = () => {
     if (failPayment?.maximum_cod_order_amount > failPayment?.order_amount) {
       paymentMethodUpdateMutation(formData, {
@@ -171,7 +182,12 @@ const CheckoutFailedCard = ({ id, handleOrderDetailsClose, amount, setOpenPaymen
               fontWeight="700"
               color={theme.palette.neutral[1000]}
             >
-              {getAmountWithSign(failPayment?.partially_paid_amount > 0 ? failPayment?.order_amount - failPayment?.partially_paid_amount : failPayment?.order_amount)}
+              {getAmountWithSign(
+                failPayment?.partially_paid_amount > 0
+                  ? failPayment?.order_amount -
+                      failPayment?.partially_paid_amount
+                  : failPayment?.order_amount
+              )}
             </Typography>
           </Box>
           <Typography sx={{ maxWidth: "235px" }}>
@@ -185,7 +201,6 @@ const CheckoutFailedCard = ({ id, handleOrderDetailsClose, amount, setOpenPaymen
               onClick={() => {
                 setOpenPaymentMethod?.(true);
                 handleOrderDetailsClose?.();
-
               }}
               sx={{ maxWidth: "250px" }}
             >
@@ -213,7 +228,10 @@ const CheckoutFailedCard = ({ id, handleOrderDetailsClose, amount, setOpenPaymen
             onClick={() => handleOrderFail()}
             loading={cancelLoading}
           >
-            {t("Cancel Order")}
+            {failPayment?.module?.module_type === "parcel" ||
+            failPayment?.module_type === "parcel"
+              ? t("Cancel Parcel")
+              : t("Cancel Order")}
           </LoadingButton>
         </Stack>
       </Stack>

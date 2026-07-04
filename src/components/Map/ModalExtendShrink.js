@@ -17,6 +17,9 @@ const Wrapper = styled(IconButton)(({ theme, isXSmall }) => ({
   justifyContent: "center",
   cursor: "pointer",
   maxWidth: "38px",
+  pt:"10px"
+  
+ 
 }));
 const ModalExtendShrink = (props) => {
   const { isModalExpand, setIsModalExpand, t } = props;

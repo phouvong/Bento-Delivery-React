@@ -52,10 +52,12 @@ const PaymentMethod = ({
           getParcelPayment={getParcelPayment}
           setOpen={setOpen}
           setSelectedPaymentMethod={setSelectedPaymentMethod}
+          payableAmount={payableAmount}
+          walletBalance={walletBalance}
         />
       ) : (
         <OtherModulePayment
-          failed={ failed}
+          failed={failed}
           changeAmount={changeAmount}
           setChangeAmount={setChangeAmount}
           setPaymentMethod={setPaymentMethod}

@@ -58,7 +58,7 @@ const MapModal = ({
   fromReceiver,
   fromStore,
   selectedLocation,
-  fromparcel
+  fromparcel,
 }) => {
   const router = useRouter();
   const theme = useTheme();
@@ -82,6 +82,7 @@ const MapModal = ({
   const [isLoadingCurrentLocation, setLoadingCurrentLocation] = useState(false);
   const [currentLocation, setCurrentLocation] = useState({});
   const [rerenderMap, setRerenderMap] = useState(false);
+  const [zoomToLocationToken, setZoomToLocationToken] = useState(0);
   const [zoneIdEnabled, setZoneIdEnabled] = useState(true);
   const [loadingAuto, setLoadingAuto] = useState(false);
   const [isDisablePickButton, setDisablePickButton] = useState(false);
@@ -94,6 +95,8 @@ const MapModal = ({
     searchKey,
     enabled
   );
+  console.log({ predictions });
+
   const dispatch = useDispatch();
   const { coords, isGeolocationAvailable, isGeolocationEnabled, getPosition } =
     useGeolocated({
@@ -105,13 +108,28 @@ const MapModal = ({
     });
 
   useEffect(() => {
-    if (places) {
-      const tempData = places?.suggestions?.map((item) => ({
-        place_id: item?.placePrediction?.placeId,
-        description: `${item?.placePrediction?.structuredFormat?.mainText?.text}, ${item?.placePrediction?.structuredFormat?.secondaryText?.text}`,
-      }));
-      setPredictions(tempData);
-    }
+    if (!places) return;
+    // Support both API shapes — `suggestions` (Places Autocomplete v2)
+    // and `predictions` (legacy). Never leave `predictions` undefined or
+    // the Autocomplete crashes on `.map()`.
+    const list = Array.isArray(places?.suggestions)
+      ? places.suggestions.map((item) => ({
+          place_id: item?.placePrediction?.placeId,
+          description: `${
+            item?.placePrediction?.structuredFormat?.mainText?.text ?? ""
+          }${
+            item?.placePrediction?.structuredFormat?.secondaryText?.text
+              ? `, ${item.placePrediction.structuredFormat.secondaryText.text}`
+              : ""
+          }`,
+        }))
+      : Array.isArray(places?.predictions)
+      ? places.predictions.map((item) => ({
+          place_id: item?.place_id,
+          description: item?.description ?? "",
+        }))
+      : [];
+    setPredictions(list);
   }, [places]);
   const { data: geoCodeResults, refetch: refetchCurrentLocation } =
     useGetGeoCode(location, geoLocationEnable);
@@ -126,6 +144,14 @@ const MapModal = ({
       });
     }
   }, [geoCodeResults]);
+
+  // Reflect the resolved address in the search input — fires on initial
+  // geocode, after picking a suggestion (which triggers a new geocode),
+  // after dragging the pin, and after the "use current location" button.
+  useEffect(() => {
+    const desc = currentLocationValue?.description;
+    if (desc) setSearchKey(desc);
+  }, [currentLocationValue?.description]);
   const {
     data: zoneData,
     error: errorLocation,
@@ -190,7 +216,11 @@ const MapModal = ({
   const onSuccessHandler = (response) => {
     dispatch(setWishList(response));
   };
-  const { refetch: wishlistRefetch } = useWishListGet(onSuccessHandler);
+  const { refetch: wishlistRefetch } = useWishListGet(
+    {},
+    false,
+    onSuccessHandler
+  );
   const { refetch: rentalWishlistRefetch } = useGetWishList(onSuccessHandler);
   const handlePickLocationOnClick = () => {
     if (zoneId && geoCodeResults && location) {
@@ -230,7 +260,6 @@ const MapModal = ({
             window.location.reload();
             handleClose();
           }
-
         } else if (location && selectedModule) {
           window.location.reload();
           handleClose();
@@ -262,6 +291,10 @@ const MapModal = ({
             timeout: 500,
           },
         }}
+        // CustomModal (used by GetLocationAlert + others) pins itself at
+        // zIndex: 1500. Sit above that so the map isn't covered by the
+        // dialog that opened it.
+        sx={{ zIndex: 1600 }}
       >
         <CustomBoxWrapper
           expand={isModalExpand ? "true" : "false"}
@@ -270,7 +303,7 @@ const MapModal = ({
             padding: { xs: "15px", md: "1.5rem" },
             borderRadius: isModalExpand ? "0px" : { xs: "8px", md: "20px" },
             position: "relative",
-            minHeight: "400px"
+            minHeight: "400px",
           }}
         >
           <IconButton
@@ -319,24 +352,49 @@ const MapModal = ({
                     fullWidth
                     freeSolo
                     id="combo-box-demo"
-                    getOptionLabel={(option) => option.description}
-                    options={predictions}
+                    getOptionLabel={(option) =>
+                      typeof option === "string"
+                        ? option
+                        : option?.description || ""
+                    }
+                    // Server-side suggestions: skip MUI's client-side
+                    // substring filter so backend results render as-is.
+                    filterOptions={(x) => x}
+                    options={predictions || []}
                     onChange={(event, value) => {
                       if (value) {
-                        if (value !== "" && typeof value === "string") {
+                        if (typeof value === "string") {
                           setLoadingAuto(true);
-                          const value = predictions[0];
-                          handleLocationSelection(value);
+                          handleLocationSelection(predictions?.[0]);
                         } else {
                           handleLocationSelection(value);
                         }
                       }
                       setPlaceDetailsEnabled(true);
                     }}
+                    // Controlled input — without this, the input text snaps
+                    // back to `currentLocationValue.description` (geocoded
+                    // address) whenever it resolves, swallowing the user's
+                    // typing. `searchKey` is the source of truth here.
+                    inputValue={searchKey}
+                    onInputChange={(event, newInputValue, reason) => {
+                      if (reason === "reset") return;
+                      setSearchKey(newInputValue);
+                      setEnabled(!!newInputValue);
+                    }}
                     clearOnBlur={false}
                     value={currentLocationValue}
                     loading={placesIsLoading}
                     loadingText={t("Search suggestions are loading...")}
+                    // The parent Modal pins itself at zIndex 1600. MUI's
+                    // Autocomplete popper defaults to theme.zIndex.modal
+                    // (1300), so the suggestion dropdown was rendering
+                    // BEHIND the modal — visible in the DOM but hidden
+                    // from view. Float it above the modal.
+                    slotProps={{ popper: { sx: { zIndex: 1700 } } }}
+                    componentsProps={{
+                      popper: { sx: { zIndex: 1700 } },
+                    }}
                     renderInput={(params) => (
                       <SearchLocationTextField
                         sx={{
@@ -375,7 +433,6 @@ const MapModal = ({
                   color: (theme) => theme.palette.neutral[1000],
                   p: "5px",
                   position: "relative",
-
                 }}
               >
                 <LocationView>
@@ -407,6 +464,7 @@ const MapModal = ({
                     setPlaceDescription={setPlaceDescription}
                     isModalExpand={isModalExpand}
                     setIsModalExpand={setIsModalExpand}
+                    zoomToLocationToken={zoomToLocationToken}
                   />
                 ) : (
                   <CustomStackFullWidth
@@ -442,6 +500,9 @@ const MapModal = ({
                     isLoadingCurrentLocation={isLoadingCurrentLocation}
                     isGeolocationEnabled={isGeolocationEnabled}
                     fromMapModal={true}
+                    onZoomRequest={() =>
+                      setZoomToLocationToken((prev) => prev + 1)
+                    }
                   />
                 </WrapperCurrentLocationPick>
               </CustomBoxFullWidth>
@@ -460,10 +521,10 @@ const MapModal = ({
                 onClick={handleClose}
                 variant="outlined"
                 sx={{
-                  width: { xs: "100%", md: "auto" },   // 👈 full width only mobile
+                  width: { xs: "100%", md: "auto" }, // 👈 full width only mobile
                   minWidth: { md: "150px" },
-                  backgroundColor: theme => theme.palette.neutral[300],
-                  color: theme => theme.palette.neutral[1000],
+                  backgroundColor: (theme) => theme.palette.neutral[300],
+                  color: (theme) => theme.palette.neutral[1000],
                 }}
               >
                 {t("Cancel")}
@@ -476,7 +537,7 @@ const MapModal = ({
                   variant="contained"
                   color="error"
                   sx={{
-                    width: { xs: "100%", md: "auto" },  // 👈 full width only mobile
+                    width: { xs: "100%", md: "auto" }, // 👈 full width only mobile
                     minWidth: { md: "150px" },
                   }}
                   onClick={() => {
@@ -491,12 +552,11 @@ const MapModal = ({
               ) : (
                 <Button
                   disabled={
-                    isLoading ||
-                    !geoCodeResults?.results[0]?.formatted_address
+                    isLoading || !geoCodeResults?.results[0]?.formatted_address
                   }
                   variant="contained"
                   sx={{
-                    width: { xs: "100%", md: "auto" },  // 👈 full width only mobile
+                    width: { xs: "100%", md: "auto" }, // 👈 full width only mobile
                     minWidth: { md: "150px" },
                   }}
                   onClick={() => handlePickLocationOnClick()}
@@ -505,8 +565,6 @@ const MapModal = ({
                 </Button>
               )}
             </CustomStackFullWidth>
-
-
           </CustomStackFullWidth>
         </CustomBoxWrapper>
       </Modal>
@@ -516,6 +574,7 @@ const MapModal = ({
           closeModal={handleCloseModuleModal}
           disableAutoFocus={disableAutoFocus}
           zoneId={zoneId}
+          autoSelect
         />
       )}
     </>

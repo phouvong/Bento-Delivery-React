@@ -48,6 +48,7 @@ const BannerWrapper = styled(Box)(({ theme }) => ({
     zIndex: 0,
   },
   [theme.breakpoints.down("sm")]: {
+    borderRadius: "0px",
     padding: "16px",
   },
 }));
@@ -83,12 +84,44 @@ const MobileAppBanner = () => {
   const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
   const { data } = useGetAppDownloadSection();
-console.log({data});
+  console.log({ data });
 
   const sectionEnabled = Number(data?.download_user_app_section_status) === 1;
   const title = data?.download_user_app_title || DEFAULT_TITLE;
   const { playstore_url, apple_store_url } =
     data?.download_user_app_links ?? {};
+
+  const handleAndroidClick = () => {
+    if (!playstore_url) return;
+    const ua = navigator.userAgent || navigator.vendor || "";
+    const isAndroid = /android/i.test(ua);
+    if (isAndroid) {
+      const fallback = encodeURIComponent(playstore_url);
+      window.location.href = `intent://open/#Intent;package=com.sixamtech.sixam_mart_user;S.browser_fallback_url=${fallback};end`;
+    } else {
+      window.open(playstore_url, "_blank", "noopener,noreferrer");
+    }
+  };
+
+  const handleIosClick = () => {
+    if (!apple_store_url) return;
+    const ua = navigator.userAgent || navigator.vendor || "";
+    const isIos = /iphone|ipad|ipod/i.test(ua);
+    if (isIos) {
+      let appOpened = false;
+      const onVisibilityChange = () => {
+        if (document.hidden) appOpened = true;
+      };
+      document.addEventListener("visibilitychange", onVisibilityChange);
+      window.location.href = window.location.origin;
+      setTimeout(() => {
+        document.removeEventListener("visibilitychange", onVisibilityChange);
+        if (!appOpened) window.location.href = apple_store_url;
+      }, 2500);
+    } else {
+      window.open(apple_store_url, "_blank", "noopener,noreferrer");
+    }
+  };
 
   if (!sectionEnabled || dismissed) return null;
 
@@ -102,25 +135,26 @@ console.log({data});
           top: 8,
           right: 8,
           zIndex: 2,
-          color: "#ffffff",
+          color: "#949494",
           "&:hover": { backgroundColor: "rgba(255,255,255,0.1)" },
         }}
       >
-        <CloseIcon fontSize="small" />
+        {/* <CloseIcon fontSize="small" /> */}
+        <i className="fi fi-rr-cross-circle"></i>
       </IconButton>
 
       {/* Mobile layout: column — QR top, title, buttons bottom */}
       <Stack
-        sx={{ display: { xs: "flex", sm: "none" }, position: "relative", zIndex: 1, width: "100%" }}
+        sx={{
+          display: { xs: "flex", sm: "none" },
+          position: "relative",
+          zIndex: 1,
+          width: "100%",
+        }}
         direction="column"
         alignItems="center"
         gap={1.5}
       >
-        <QRCodeClient
-          playStoreLink={playstore_url || ""}
-          appStoreLink={apple_store_url || ""}
-          size={80}
-        />
         <Typography
           variant="h6"
           fontWeight={600}
@@ -132,7 +166,7 @@ console.log({data});
         </Typography>
         <Stack direction="row" gap={1} flexWrap="wrap" justifyContent="center">
           {playstore_url && (
-            <StoreButton onClick={() => window.open(playstore_url, "_blank")}>
+            <StoreButton onClick={handleAndroidClick}>
               <Stack direction="row" alignItems="center" gap={0.8}>
                 <NextImage
                   src={playstoreIcon?.src}
@@ -150,7 +184,7 @@ console.log({data});
             </StoreButton>
           )}
           {apple_store_url && (
-            <StoreButton onClick={() => window.open(apple_store_url, "_blank")}>
+            <StoreButton onClick={handleIosClick}>
               <Stack direction="row" alignItems="center" gap={0.8}>
                 <Box
                   component="img"
@@ -180,7 +214,11 @@ console.log({data});
         alignItems="center"
         justifyContent="space-between"
         width="100%"
-        sx={{ display: { xs: "none", sm: "flex" }, position: "relative", zIndex: 1 }}
+        sx={{
+          display: { xs: "none", sm: "flex" },
+          position: "relative",
+          zIndex: 1,
+        }}
       >
         <Stack gap={1.5} flex={1}>
           <Typography
@@ -193,7 +231,7 @@ console.log({data});
           </Typography>
           <Stack direction="row" alignItems="center" gap={4} flexWrap="wrap">
             {playstore_url && (
-              <StoreButton onClick={() => window.open(playstore_url, "_blank")}>
+              <StoreButton onClick={handleAndroidClick}>
                 <Stack direction="row" alignItems="center" gap={0.8}>
                   <NextImage
                     src={playstoreIcon?.src}
@@ -211,7 +249,9 @@ console.log({data});
               </StoreButton>
             )}
             {apple_store_url && (
-              <StoreButton onClick={() => window.open(apple_store_url, "_blank")}>
+              <StoreButton
+                onClick={handleIosClick}
+              >
                 <Stack direction="row" alignItems="center" gap={0.8}>
                   <Box
                     component="img"

@@ -5,6 +5,7 @@ export const settings = {
   infinite: true,
   slidesToShow: 5,
   slidesToScroll: 1,
+  swipeToSlide: true,
   cssEase: "ease-in-out",
   autoplay: true,
   speed: 800,
@@ -15,6 +16,7 @@ export const settings = {
       settings: {
         slidesToShow: 4,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -22,6 +24,7 @@ export const settings = {
       settings: {
         slidesToShow: 3.5,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -29,6 +32,7 @@ export const settings = {
       settings: {
         slidesToShow: 3.2,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -36,6 +40,7 @@ export const settings = {
       settings: {
         slidesToShow: 3,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -43,6 +48,7 @@ export const settings = {
       settings: {
         slidesToShow: 1.7,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -50,6 +56,7 @@ export const settings = {
       settings: {
         slidesToShow: 1.6,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -57,6 +64,7 @@ export const settings = {
       settings: {
         slidesToShow: 1,
         slidesToScroll: 1.5,
+        swipeToSlide: true,
       },
     },
   ],

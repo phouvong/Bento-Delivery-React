@@ -89,7 +89,7 @@ const AddUserInfo = ({ formSubmitHandler, loginInfo, isLoading, userInfo }) => {
     <>
       <CustomStackFullWidth
         spacing={3}
-        sx={{ maxWidth: "400px", padding: "2rem" }}
+        sx={{ maxWidth: "100%", padding: "2rem" }}
       >
         <CustomStackFullWidth alignItems="center">
           <CustomImageContainer
@@ -233,7 +233,7 @@ const AddUserInfo = ({ formSubmitHandler, loginInfo, isLoading, userInfo }) => {
                 sx={{
                   mt: 1,
                   mb: 3.5,
-                  maxWidth: "400px",
+                  maxWidth: "100%",
                   height: "45px",
                 }}
                 loading={isLoading}

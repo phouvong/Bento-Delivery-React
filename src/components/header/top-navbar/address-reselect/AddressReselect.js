@@ -113,6 +113,7 @@ const AddressReselect = ({ location, setOpenDrawer }) => {
         alignItems="center"
         justifyContent="flex-end"
         sx={{
+          cursor: "pointer",
           color: (theme) => theme.palette.neutral[1000],
           maxWidth: { xs: "230px", sm: "280px" },
         }}
@@ -127,7 +128,7 @@ const AddressReselect = ({ location, setOpenDrawer }) => {
                   <Tooltip
                     title={t("Sharing your location improves search accuracy and delivery estimates for smoother order delivery.")}
                     arrow
-                    placement="bottom-end"
+                    placement="bottom-start"
                     open={tooltipOpen}
                     disableHoverListener
                     disableFocusListener
@@ -135,23 +136,28 @@ const AddressReselect = ({ location, setOpenDrawer }) => {
                     TransitionProps={{ timeout: 0 }}
                     slotProps={{
                       popper: {
-                        sx: {
-                          zIndex: 9999,
-                          //left: { xs: '30px !important', sm: '0px!important' },
-                        }
+                        sx: { zIndex: 9999 },
+                        modifiers: [
+                          { name: "offset", options: { offset: [0, 4] } },
+                        ],
                       },
                       tooltip: {
                         sx: {
-                          marginInlineStart: "10px",
+                          bgcolor: (t) => t.palette.mode === "dark" ? t.palette.neutral[700] : "#303030",
+                          color: "#f3f3f3",
+                          textTransform: "none",
+                          fontSize: "14px",
+                          fontWeight: 400,
+                          lineHeight: 1.3,
+                          padding: "8px 12px",
+                          borderRadius: "8px",
+                          maxWidth: "320px",
                           textAlign: "left",
-                          bgcolor: theme => alpha(theme.palette.neutral[1000], .8),
-                          color: theme => theme.palette.neutral[100],
-                          textTransform: 'none',
-                          fontSize: '13px',
-                          padding: '10px',
-                          maxWidth: '350px',
-                          '& .MuiTooltip-arrow': {
-                            color: theme => alpha(theme.palette.neutral[1000], .8),
+                          boxShadow: "0px 4px 8px rgba(0,0,0,0.1), 0px 16px 16px rgba(0,0,0,0.05)",
+                          "& .MuiTooltip-arrow": {
+                            color: (t) => t.palette.mode === "dark" ? t.palette.neutral[700] : "#303030",
+                            left: "8px !important",
+                            transform: "none !important",
                           },
                         },
                       },
@@ -168,10 +174,9 @@ const AddressReselect = ({ location, setOpenDrawer }) => {
                         minWidth: "174px"
                       }}
                     >
-                      <RoomIcon
-                        fontSize="small"
-                        color="primary"
-                        style={{ width: '16px', height: '16px' }}
+                      <i
+                        className="fi fi-rs-marker"
+                        style={{ fontSize: "16px", display: "flex", lineHeight: 1, color: "inherit" }}
                       />
                       <AddressTypographyGray align="left">
                         {t('Select your location')}
@@ -185,11 +190,9 @@ const AddressReselect = ({ location, setOpenDrawer }) => {
             )
           ) : (
             <CustomStackFullWidth direction="row" alignItems="center" spacing={1}>
-              <RoomIcon
-                sx={{
-                  fontSize: { xs: "16px", sm: "20px" },
-                }}
-                color="primary"
+              <i
+                className="fi fi-rs-marker"
+                style={{ fontSize: "16px", display: "flex", lineHeight: 1, color: "inherit" }}
               />
               <Typography
                 fontSize={{ xs: "12px", sm: "16px" }}

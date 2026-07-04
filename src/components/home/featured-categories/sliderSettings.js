@@ -1,7 +1,13 @@
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import React, { useState } from "react";
 import { ButtonLeft, ButtonRight } from "./index";
-import { alpha, styled, useMediaQuery, useTheme, keyframes } from "@mui/material";
+import {
+  alpha,
+  styled,
+  useMediaQuery,
+  useTheme,
+  keyframes,
+} from "@mui/material";
 import { Box } from "@mui/system";
 import { getLanguage } from "../../../helper-functions/getLanguage";
 import PrevIcon from "../../icons/PrevIcon";
@@ -26,33 +32,36 @@ const slideRight = keyframes`
   100% { transform: translateX(3px); }
 `;
 
-const ButtonContainer = styled(Box)(({ theme, right, isdisabled, ishovered }) => ({
-  top: 0,
-  height: "100%",
-  width: "73px",
-  background:
-    right === "true"
-      ? theme.direction === "ltr"
-        ? `linear-gradient(270deg, ${theme.palette.neutral[100]} 0%, rgba(255, 255, 255, 0) 100%)`
-        : `linear-gradient(270deg,  rgba(255, 255, 255, 0) 0%, ${theme.palette.neutral[100]} 100%)`
-      : theme.direction === "ltr"
-      ? `linear-gradient(to right, ${theme.palette.neutral[100]} 0%, rgba(255, 255, 255, 0) 100%)`
-      : `linear-gradient(to left, rgba(255, 255, 255, 0) 0%, ${theme.palette.neutral[100]} 100%)`,
+const ButtonContainer = styled(Box)(
+  ({ theme, right, isdisabled, ishovered }) => ({
+    top: 0,
+    height: "100%",
+    width: "73px",
+    background:
+      right === "true"
+        ? theme.direction === "ltr"
+          ? `linear-gradient(270deg, ${theme.palette.neutral[100]} 0%, rgba(255, 255, 255, 0) 100%)`
+          : `linear-gradient(270deg,  rgba(255, 255, 255, 0) 0%, ${theme.palette.neutral[100]} 100%)`
+        : theme.direction === "ltr"
+        ? `linear-gradient(to right, ${theme.palette.neutral[100]} 0%, rgba(255, 255, 255, 0) 100%)`
+        : `linear-gradient(to left, rgba(255, 255, 255, 0) 0%, ${theme.palette.neutral[100]} 100%)`,
 
-  zIndex: 1,
-  right: right === "true" && 0,
-  left: right !== "true" && 0,
-  position: "absolute",
-  alignItems: "center",
-  justifyContent: "center",
-  display: isdisabled ? "none" : "flex",
-  opacity: ishovered ? 1 : 0,
-  transition: "opacity 0.3s ease-in-out",
-  [theme.breakpoints.down("sm")]: {
-    display: "none",
-  },
-}));
+    zIndex: 1,
+    right: right === "true" ? -8 : "auto",
+    left: right !== "true" ? -8 : "auto",
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: right === "true" ? "flex-end" : "flex-start",
+    display: isdisabled ? "none" : "flex",
+    opacity: ishovered ? 1 : 0,
+    transition: "opacity 0.3s ease-in-out",
+    [theme.breakpoints.down("sm")]: {
+      display: "none",
+    },
+  }),
+);
 const PrevWrapper = styled(Box)(({ theme, isdisabled, isarrowhovered }) => ({
+  position: "absolute",
   zIndex: 1,
   top: "40%",
   left: 0,
@@ -62,32 +71,35 @@ const PrevWrapper = styled(Box)(({ theme, isdisabled, isarrowhovered }) => ({
   width: "40px",
   height: "40px",
   borderRadius: "50%",
-  backgroundColor: isarrowhovered ? theme.palette.primary.main : theme.palette.neutral[100],
+  backgroundColor: theme.palette.neutral[100],
   cursor: "pointer",
   transition: "all 0.3s ease",
-  animation: isarrowhovered ? "none" : `${slideLeft} 0.8s ease-in-out infinite alternate`,
+  animation: isarrowhovered
+    ? "none"
+    : `${slideLeft} 0.8s ease-in-out infinite alternate`,
   "&:hover": {
-    backgroundColor: theme.palette.primary.main,
     transform: "scale(1.05)",
   },
 }));
 
 const NextWrapper = styled(Box)(({ theme, isdisabled, isarrowhovered }) => ({
+  position: "absolute",
   top: "40%",
   zIndex: 1,
-  right: 8,
+  right: 0,
   display: isdisabled ? "none" : "flex",
   alignItems: "center",
   justifyContent: "center",
   width: "40px",
   height: "40px",
   borderRadius: "50%",
-  backgroundColor: isarrowhovered ? theme.palette.primary.main : theme.palette.neutral[100],
+  backgroundColor: theme.palette.neutral[100],
   cursor: "pointer",
   transition: "all 0.3s ease",
-  animation: isarrowhovered ? "none" : `${slideRight} 0.8s ease-in-out infinite alternate`,
+  animation: isarrowhovered
+    ? "none"
+    : `${slideRight} 0.8s ease-in-out infinite alternate`,
   "&:hover": {
-    backgroundColor: theme.palette.primary.main,
     transform: "scale(1.05)",
   },
 }));
@@ -114,16 +126,16 @@ const Next = ({ onClick, className, displayNoneOnMobile, isHovered }) => {
         {getLanguage() === "rtl" ? (
           <ChevronLeftIcon
             sx={{
-              fontSize: "24px",
-              color: isArrowHovered ? "white" : theme.palette.neutral[600],
+              fontSize: { xs: "18px", md: "24px" },
+              color: theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
           />
         ) : (
           <ChevronRightIcon
             sx={{
-              fontSize: "24px",
-              color: isArrowHovered ? "white" : theme.palette.neutral[600],
+              fontSize: { xs: "18px", md: "24px" },
+              color: theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
           />
@@ -155,16 +167,16 @@ const Prev = ({ onClick, className, displayNoneOnMobile, isHovered }) => {
         {getLanguage() === "rtl" ? (
           <ChevronRightIcon
             sx={{
-              fontSize: "24px",
-              color: isArrowHovered ? "white" : theme.palette.neutral[600],
+              fontSize: { xs: "18px", md: "24px" },
+              color: theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
           />
         ) : (
           <ChevronLeftIcon
             sx={{
-              fontSize: "24px",
-              color: isArrowHovered ? "white" : theme.palette.neutral[600],
+              fontSize: { xs: "18px", md: "24px" },
+              color: theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
           />
@@ -175,65 +187,83 @@ const Prev = ({ onClick, className, displayNoneOnMobile, isHovered }) => {
 };
 
 // Enhanced White Arrow Components with hover effects
-const EnhancedWhiteButtonContainer = styled(Box)(({ theme, right, isdisabled, ishovered }) => ({
-  top: 0,
-  height: "100%",
-  width: "73px",
-  background: "inherit",
-  zIndex: 1,
-  right: right === "true" && 0,
-  left: right !== "true" && 0,
-  position: "absolute",
-  alignItems: "center",
-  justifyContent: "center",
-  display: isdisabled ? "none" : "flex",
-  opacity: ishovered ? 1 : 0,
-  transition: "opacity 0.3s ease-in-out",
-  [theme.breakpoints.down("sm")]: {
-    display: "none",
-  },
-}));
+const EnhancedWhiteButtonContainer = styled(Box)(
+  ({ theme, right, isdisabled, ishovered }) => ({
+    top: 0,
+    height: "100%",
+    width: "73px",
+    background:
+      right === "true"
+        ? `linear-gradient(to right, transparent, ${theme.palette.background.default})`
+        : `linear-gradient(to right, ${theme.palette.background.default}, transparent)`,
+    zIndex: 1,
+    right: right === "true" ? -8 : "auto",
+    left: right !== "true" ? -8 : "auto",
+    position: "absolute",
+    alignItems: "center",
+    justifyContent: right === "true" ? "flex-end" : "flex-start",
+    display: isdisabled ? "none" : "flex",
+    opacity: ishovered ? 1 : 0,
+    transition: "opacity 0.3s ease-in-out",
+    [theme.breakpoints.down("sm")]: {
+      display: "none",
+    },
+  }),
+);
 
-const EnhancedWhitePrevWrapper = styled(Box)(({ theme, isdisabled, isarrowhovered, width, height }) => ({
-  zIndex: 1,
-  top: "50%",
-  left: "0px",
-  display: isdisabled ? "none" : "flex",
-  backgroundColor: isarrowhovered ? theme.palette.primary.main : theme.palette.neutral[100],
-  borderRadius: "50%",
-  height: height ? height : "38px",
-  width: width ? width : "38px",
-  alignItems: "center",
-  justifyContent: "center",
-  cursor: "pointer",
-  transition: "all 0.3s ease",
-  animation: isarrowhovered ? "none" : `${slideLeft} 0.8s ease-in-out infinite alternate`,
-  "&:hover": {
-    backgroundColor: theme.palette.primary.main,
-    transform: "scale(1.05)",
-  },
-}));
+const EnhancedWhitePrevWrapper = styled(Box)(
+  ({ theme, isdisabled, isarrowhovered, width, height }) => ({
+    zIndex: 1,
+    top: "50%",
+    left: "0px",
+    display: isdisabled ? "none" : "flex",
+    backgroundColor: theme.palette.neutral[100],
+    borderRadius: "50%",
+    height: height ? height : "38px",
+    width: width ? width : "38px",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    animation: isarrowhovered
+      ? "none"
+      : `${slideLeft} 0.8s ease-in-out infinite alternate`,
+    "&:hover": {
+      transform: "scale(1.05)",
+    },
+  }),
+);
 
-const EnhancedWhiteNextWrapper = styled(Box)(({ theme, isdisabled, isarrowhovered, width, height }) => ({
-  zIndex: 1,
-  right: 0,
-  display: isdisabled ? "none" : "flex",
-  backgroundColor: isarrowhovered ? theme.palette.primary.main : theme.palette.neutral[100],
-  borderRadius: "50%",
-  height: height ? height : "38px",
-  width: width ? width : "38px",
-  alignItems: "center",
-  justifyContent: "center",
-  cursor: "pointer",
-  transition: "all 0.3s ease",
-  animation: isarrowhovered ? "none" : `${slideRight} 0.8s ease-in-out infinite alternate`,
-  "&:hover": {
-    backgroundColor: theme.palette.primary.main,
-    transform: "scale(1.05)",
-  },
-}));
+const EnhancedWhiteNextWrapper = styled(Box)(
+  ({ theme, isdisabled, isarrowhovered, width, height }) => ({
+    zIndex: 1,
+    right: 0,
+    display: isdisabled ? "none" : "flex",
+    backgroundColor: theme.palette.neutral[100],
+    borderRadius: "50%",
+    height: height ? height : "38px",
+    width: width ? width : "38px",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    transition: "all 0.3s ease",
+    animation: isarrowhovered
+      ? "none"
+      : `${slideRight} 0.8s ease-in-out infinite alternate`,
+    "&:hover": {
+      transform: "scale(1.05)",
+    },
+  }),
+);
 
-const EnhancedWhiteNext = ({ onClick, className, displayNoneOnMobile, width, height, isHovered }) => {
+const EnhancedWhiteNext = ({
+  onClick,
+  className,
+  displayNoneOnMobile,
+  width,
+  height,
+  isHovered,
+}) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const displayNone = isSmall ? (displayNoneOnMobile ? true : false) : false;
@@ -259,7 +289,7 @@ const EnhancedWhiteNext = ({ onClick, className, displayNoneOnMobile, width, hei
           <ChevronLeftIcon
             sx={{
               fontSize: "30px",
-              color: isArrowHovered ? "white" : theme.palette.neutral[600],
+              color: theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
           />
@@ -267,7 +297,7 @@ const EnhancedWhiteNext = ({ onClick, className, displayNoneOnMobile, width, hei
           <ChevronRightIcon
             sx={{
               fontSize: "30px",
-              color: isArrowHovered ? "white" : theme.palette.neutral[600],
+              color: theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
           />
@@ -277,7 +307,14 @@ const EnhancedWhiteNext = ({ onClick, className, displayNoneOnMobile, width, hei
   );
 };
 
-const EnhancedWhitePrev = ({ onClick, className, displayNoneOnMobile, width, height, isHovered }) => {
+const EnhancedWhitePrev = ({
+  onClick,
+  className,
+  displayNoneOnMobile,
+  width,
+  height,
+  isHovered,
+}) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const displayNone = isSmall ? (displayNoneOnMobile ? true : false) : false;
@@ -302,7 +339,7 @@ const EnhancedWhitePrev = ({ onClick, className, displayNoneOnMobile, width, hei
           <ChevronRightIcon
             sx={{
               fontSize: "30px",
-              color: isArrowHovered ? "white" : theme.palette.neutral[600],
+              color: theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
           />
@@ -310,7 +347,7 @@ const EnhancedWhitePrev = ({ onClick, className, displayNoneOnMobile, width, hei
           <ChevronLeftIcon
             sx={{
               fontSize: "30px",
-              color: isArrowHovered ? "white" : theme.palette.neutral[600],
+              color: theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
           />
@@ -320,29 +357,10 @@ const EnhancedWhitePrev = ({ onClick, className, displayNoneOnMobile, width, hei
   );
 };
 
-export const moduleWiseNext = (isHovered) => {
-  switch (getCurrentModuleType()) {
-    case ModuleTypes.GROCERY:
-      return <Next displayNoneOnMobile isHovered={isHovered} />;
-    case ModuleTypes.PHARMACY:
-      return <EnhancedWhiteNext displayNoneOnMobile isHovered={isHovered} />;
-    case ModuleTypes.ECOMMERCE:
-      return <Next displayNoneOnMobile isHovered={isHovered} />;
-    case ModuleTypes.FOOD:
-      return <EnhancedWhiteNext displayNoneOnMobile isHovered={isHovered} />;
-  }
-};
+export const moduleWiseNext = (isHovered) => (
+  <EnhancedWhiteNext displayNoneOnMobile isHovered={isHovered} />
+);
 
-export const moduleWisePrev = (isHovered) => {
-  switch (getCurrentModuleType()) {
-    case ModuleTypes.GROCERY:
-      return <Prev displayNoneOnMobile isHovered={isHovered} />;
-    case ModuleTypes.PHARMACY:
-      return <EnhancedWhitePrev displayNoneOnMobile isHovered={isHovered} />;
-    case ModuleTypes.ECOMMERCE:
-      return <Prev displayNoneOnMobile isHovered={isHovered} />;
-    case ModuleTypes.FOOD:
-      return <EnhancedWhitePrev displayNoneOnMobile isHovered={isHovered} />;
-  }
-};
-
+export const moduleWisePrev = (isHovered) => (
+  <EnhancedWhitePrev displayNoneOnMobile isHovered={isHovered} />
+);

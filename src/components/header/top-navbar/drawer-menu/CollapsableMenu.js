@@ -53,13 +53,10 @@ const CollapsableMenu = ({
         });
       } else {
         router.push({
-          pathname: "/search",
+          pathname: `/home/category/${slug || id}`,
           query: {
-            search: "category",
-            id: id,
+            id,
             module: `${getModuleId()}`,
-            name: btoa(name),
-            data_type: "category",
           },
         });
       }

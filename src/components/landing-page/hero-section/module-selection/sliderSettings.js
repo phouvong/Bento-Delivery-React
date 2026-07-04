@@ -4,12 +4,14 @@ export const settings = {
   speed: 500,
   slidesToShow: 3,
   slidesToScroll: 1,
+  swipeToSlide: true,
   responsive: [
     {
       breakpoint: 760,
       settings: {
         slidesToShow: 3.5,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -18,6 +20,7 @@ export const settings = {
       settings: {
         slidesToShow: 3,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -26,6 +29,7 @@ export const settings = {
       settings: {
         slidesToShow: 2.5,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -34,6 +38,7 @@ export const settings = {
       settings: {
         slidesToShow: 2,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -41,6 +46,7 @@ export const settings = {
       settings: {
         slidesToShow: 1.5,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
   ],

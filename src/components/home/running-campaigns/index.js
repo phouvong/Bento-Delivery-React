@@ -1,3 +1,5 @@
+import { t } from "i18next";
+import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -96,7 +98,18 @@ const RunningCampaigns = () => {
           {data?.length > 0 ? (
             <HomeComponentsWrapper alignItems="flex-start">
               {data?.length > 0 && (
-                <H2 text="Just For You" textAlign="left" component="h2" />
+                <Typography
+                  sx={{
+                    fontSize: { xs: "18px", md: "24px" },
+                    fontWeight: 700,
+                    color: "neutral.1050",
+                    lineHeight: 1.1,
+                    letterSpacing: "-1.2px",
+                  }}
+                  component="h2"
+                >
+                  {t("Just For You")}
+                </Typography>
               )}
               <Box sx={{ width: "100%", mt: "1rem" }}>
                 {getModuleWiseView()}

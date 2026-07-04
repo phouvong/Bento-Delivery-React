@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import FacebookLogin from "react-facebook-login/dist/facebook-login-render-props";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
@@ -31,6 +31,7 @@ const FbLoginComp = (props) => {
     setMedium,
     loginMutation,
     setLoginInfo,
+    isLandingVariant,
   } = props;
   const { userInfo, jwtToken } = useSelector(
     (state) => state.fbCredentialsStore
@@ -228,7 +229,34 @@ const FbLoginComp = (props) => {
         autoLoad={false}
         fields="name,email,picture"
         callback={responseFacebook}
-        render={(renderProps) => <>{handleView(renderProps.onClick)}</>}
+        render={(renderProps) =>
+          isLandingVariant ? (
+            <Box
+              onClick={renderProps.onClick}
+              sx={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                py: "13px",
+                borderRadius: "12px",
+                border: "1px solid",
+                borderColor: "divider",
+                backgroundColor: "background.paper",
+                cursor: "pointer",
+              }}
+            >
+              <Box
+                component="img"
+                src={googleLatest.src}
+                alt="facebook"
+                sx={{ width: 20, height: 20, objectFit: "contain" }}
+              />
+            </Box>
+          ) : (
+            <>{handleView(renderProps.onClick)}</>
+          )
+        }
       />
       <CustomModal
         openModal={openOtpModal}

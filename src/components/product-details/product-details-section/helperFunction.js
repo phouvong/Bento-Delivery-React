@@ -126,6 +126,7 @@ export const getItemDataForAddToCart = (
   return {
     guest_id: guest_id,
     cart_id: values?.cartItemId,
+    store_id: values?.store_id ?? values?.store?.id,
     model: values?.available_date_starts ? "ItemCampaign" : "Item",
     add_on_ids:
       values?.add_ons?.length > 0

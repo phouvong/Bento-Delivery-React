@@ -23,21 +23,37 @@ const toBase64 = (str) =>
     ? Buffer.from(str).toString("base64")
     : window.btoa(str);
 
+// `next/image` rejects anything that isn't absolute (http/https) or
+// root-relative ("/foo.png"). Some backend responses come back as a bare
+// filename like "2025-12-28-...webp" — surface those as the placeholder
+// instead of letting next/image throw "Failed to parse src ..." at runtime.
+const sanitizeSrc = (raw, fallback) => {
+  if (!raw) return fallback;
+  if (typeof raw !== "string") return raw; // StaticImageData / import — leave as-is
+  const trimmed = raw.trim();
+  if (!trimmed) return fallback;
+  if (trimmed.startsWith("/")) return trimmed;
+  if (trimmed.startsWith("data:")) return trimmed;
+  if (trimmed.startsWith("blob:")) return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return fallback;
+};
+
 const NextImage = ({
-   src,
-   altSrc = placeholder,
-   alt = "Image",
-   width,
-   height,
-   objectFit,
-   borderRadius,
-   aspectRatio,
-   ...props
- }) => {
-  const [currentSrc, setCurrentSrc] = useState(src || altSrc);
+  src,
+  altSrc = placeholder,
+  alt = "Image",
+  width,
+  height,
+  objectFit,
+  borderRadius,
+  aspectRatio,
+  ...props
+}) => {
+  const [currentSrc, setCurrentSrc] = useState(sanitizeSrc(src, altSrc));
 
   useEffect(() => {
-    setCurrentSrc(src || altSrc);
+    setCurrentSrc(sanitizeSrc(src, altSrc));
   }, [src, altSrc]);
 
   const handleError = () => {
@@ -61,9 +77,10 @@ const NextImage = ({
       height={height}
       alt={alt}
       onError={handleError}
-      placeholder={`data:image/svg+xml;base64,${toBase64(shimmer(width, height))}`}
+      placeholder={`data:image/svg+xml;base64,${toBase64(
+        shimmer(width, height)
+      )}`}
       style={style}
-
       {...props}
     />
   );

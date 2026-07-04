@@ -1,5 +1,6 @@
 import {
   Box,
+  ClickAwayListener,
   IconButton,
   Tooltip,
   Typography,
@@ -47,14 +48,11 @@ const LightTooltip = styled(({ className, ...props }) => (
   <Tooltip {...props} classes={{ popper: className }} />
 ))(({ theme }) => ({
   [`& .${tooltipClasses.tooltip}`]: {
-    minWidth: "430px",
+    width: "min(430px, calc(100vw - 32px))",
     backgroundColor: theme.palette.neutral[100],
     color: theme.palette.neutral[1000],
     boxShadow: theme.shadows[1],
     fontSize: 11,
-    [theme.breakpoints.down("sm")]: {
-      minWidth: "380px",
-    },
   },
 }));
 
@@ -63,6 +61,7 @@ const MultiPrescriptionRoot = ({
   setPrescriptionImages,
 }) => {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
   const { mutate: saveFilesMutate } = useSaveFiles();
   const theme = useTheme();
 
@@ -177,10 +176,9 @@ const MultiPrescriptionRoot = ({
 
   const list = () => (
     <CustomStackFullWidth
-      minWidth={{ xs: "350px", sm: "400px" }}
       p="10px"
       gap="10px"
-      sx={{ backgroundColor: theme.palette.neutral[100] }}
+      sx={{ backgroundColor: theme.palette.neutral[100], width: "100%" }}
     >
       <Typography fontWeight={500}>{t("Why upload prescription -")}</Typography>
       <ol
@@ -269,14 +267,30 @@ const MultiPrescriptionRoot = ({
         >
           {t("Prescription")}{" "}
         </Typography>
-        <LightTooltip TransitionComponent={Zoom} title={<div>{list()}</div>}>
-          <IconButton>
-            <InfoOutlinedIcon
-              color="primary.main"
-              sx={{ height: "18px", width: "18px" }}
-            />
-          </IconButton>
-        </LightTooltip>
+        <ClickAwayListener onClickAway={() => setTooltipOpen(false)}>
+          <div>
+            <LightTooltip
+              TransitionComponent={Zoom}
+              title={<div>{list()}</div>}
+              open={tooltipOpen}
+              placement="bottom-end"
+              disableFocusListener
+              disableHoverListener
+              disableTouchListener
+              PopperProps={{
+                disablePortal: true,
+                modifiers: [{ name: "preventOverflow", options: { padding: 16 } }],
+              }}
+            >
+              <IconButton onClick={() => setTooltipOpen((prev) => !prev)}>
+                <InfoOutlinedIcon
+                  color="primary.main"
+                  sx={{ height: "18px", width: "18px" }}
+                />
+              </IconButton>
+            </LightTooltip>
+          </div>
+        </ClickAwayListener>
       </CustomStackFullWidth>
 
       <Stack

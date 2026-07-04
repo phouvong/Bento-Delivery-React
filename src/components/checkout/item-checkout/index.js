@@ -13,6 +13,7 @@ import { useOfflinePayment } from "api-manage/hooks/react-query/offlinePayment/u
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { getStoresOrRestaurants } from "helper-functions/getStoresOrRestaurants";
 import { getGuestId, getToken } from "helper-functions/getToken";
+import { getAmountWithSign } from "helper-functions/CardHelpers";
 import moment from "moment/moment";
 import Router from "next/router";
 import React, { useEffect, useMemo, useReducer, useState, useRef } from "react";
@@ -51,7 +52,6 @@ import useGetOfflinePaymentOptions from "../../../api-manage/hooks/react-query/o
 import useGetVehicleCharge from "../../../api-manage/hooks/react-query/order-place/useGetVehicleCharge";
 import useGetStoreDetails from "../../../api-manage/hooks/react-query/store/useGetStoreDetails";
 import useGetMostTrips from "../../../api-manage/hooks/react-query/useGetMostTrips";
-import ItemSelectWithChip from "../../ItemSelectWithChip";
 import CustomModal from "../../modal";
 import { handleValuesFromCartItems } from "../../product-details/product-details-section/helperFunction";
 import { CouponTitle } from "../CheckOut.style";
@@ -60,8 +60,8 @@ import SinglePrescriptionUpload from "../Prescription/SinglePrescriptionUpload";
 import MultiPrescriptionRoot from "../Prescription/MultiPrescriptionRoot";
 import AddPaymentMethod from "./AddPaymentMethod";
 import CheckoutStepper from "./CheckoutStepper";
-import Cutlery from "./Cutlery";
 import DeliveryDetails from "./DeliveryDetails";
+import InstantDelivery from "./InstantDelivery";
 import HaveCoupon from "./HaveCoupon";
 import OrderCalculation from "./OrderCalculation";
 import OrderSummaryDetails from "./OrderSummaryDetails";
@@ -69,7 +69,6 @@ import PartialPayment from "./PartialPayment";
 import PartialPaymentModal from "./PartialPaymentModal";
 import PlaceOrder from "./PlaceOrder";
 import { INITIAL_STATE, scheduleReducer } from "./ScheduleReducer";
-import { deliveryInstructions, productUnavailableData } from "./demoData";
 import OfflineForm from "./offline-payment/OfflineForm";
 import useGetCashBackAmount from "api-manage/hooks/react-query/cashback/useGetCashBackAmount";
 import { ModuleTypes } from "helper-functions/moduleTypes";
@@ -126,6 +125,10 @@ const ItemCheckout = (props) => {
   const [paymentMethod, setPaymentMethod] = useState("");
   const [numberOfDay, setDayNumber] = useState(getDayNumber(today));
   const [couponDiscount, setCouponDiscount] = useState(null);
+  // Express / standard / slightly_delay choice from the radio-card row below
+  // DeliveryDetails. Shape: { id, deliveryType, surcharge }. Null when the
+  // zone doesn't expose `delivery_options` or order isn't delivery.
+  const [selectedDeliveryOption, setSelectedDeliveryOption] = useState(null);
   const [scheduleAt, setScheduleAt] = useState("now");
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [taxAmount, setTaxAmount] = useState(0);
@@ -154,6 +157,14 @@ const ItemCheckout = (props) => {
   const { profileInfo } = useSelector((state) => state.profileInfo);
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
   const { offlinePaymentInfo } = useSelector((state) => state.offlinePayment);
+  // Preferences captured from StoreCartSidebar (packaging / cutlery /
+  // unavailable-item choice). Default to safe values when the slice is
+  // unset so legacy flows still work.
+  const cartPrefs = useSelector((state) => state.cart?.cartPrefs) || {
+    extraPackaging: false,
+    addCutlery: false,
+    unavailableChoice: "remove",
+  };
   const [dDistance, setDDistance] = useState(null);
   const token = getToken();
   const dispatch = useDispatch();
@@ -174,12 +185,24 @@ const ItemCheckout = (props) => {
         .oneOf([Yup.ref("password"), null], t("Passwords must match")),
     }),
   });
+  console.log({ couponDiscount });
 
   const currentModuleType = getCurrentModuleType();
   const storeId =
     page === "campaign"
       ? campaignItemList?.[0]?.store_id
       : cartList?.[0]?.store_id;
+
+  const clearMonthlySubKey = (sid) => {
+    if (typeof window === "undefined") return;
+    const moduleId = JSON.parse(localStorage.getItem("module") || "null")?.id;
+    const resolvedStoreId = sid || storeId;
+    if (moduleId && resolvedStoreId) {
+      localStorage.removeItem(
+        `monthly_subscribe_${moduleId}_${resolvedStoreId}`
+      );
+    }
+  };
   const { data: storeData, refetch } = useGetStoreDetails(storeId);
   const { data: tripsData } = useGetMostTrips();
   const { mutate: offlineMutate, isLoading: offlinePaymentLoading } =
@@ -221,8 +244,9 @@ const ItemCheckout = (props) => {
     {
       retry: 1,
       enabled: Boolean(currentLatLng?.lat && currentLatLng?.lng),
-    },
+    }
   );
+  console.log({ zoneData, storeData });
 
   const {
     data: distanceData,
@@ -234,13 +258,13 @@ const ItemCheckout = (props) => {
     {
       enabled: true,
       onError: onErrorResponse,
-    },
+    }
   );
 
   const tempDistance = handleDistance(
     distanceData?.data,
     { latitude: storeData?.latitude, longitude: storeData?.longitude },
-    address,
+    address
   );
   useEffect(() => {
     setDDistance(Number(distanceData?.data?.distanceMeters) / 1000);
@@ -262,7 +286,7 @@ const ItemCheckout = (props) => {
   //order post api
   const { mutate: orderMutation, isLoading: orderLoading } = useMutation(
     "order-place",
-    OrderApi.placeOrder,
+    OrderApi.placeOrder
   );
   const userOnSuccessHandler = (res) => {};
   const { isLoading: customerLoading, data: customerData } = useQuery(
@@ -271,8 +295,10 @@ const ItemCheckout = (props) => {
     {
       onSuccess: userOnSuccessHandler,
       onError: onSingleErrorResponse,
-    },
+    }
   );
+
+  console.log({ address });
 
   useEffect(() => {
     const currentLatLng = JSON.parse(localStorage.getItem("currentLatLng"));
@@ -292,7 +318,7 @@ const ItemCheckout = (props) => {
       cartList,
       couponDiscount,
       storeData?.tax,
-      storeData,
+      storeData
     );
     setTaxAmount(taxAmount);
   }, [cartList, couponDiscount, storeData]);
@@ -302,7 +328,7 @@ const ItemCheckout = (props) => {
       cartList,
       couponDiscount,
       taxAmount,
-      storeData,
+      storeData
     );
     setTotalOrderAmount(total_order_amount);
   }, [cartList, couponDiscount, taxAmount]);
@@ -322,7 +348,7 @@ const ItemCheckout = (props) => {
       } catch (error) {
         toast.error(
           error?.response?.data?.message ||
-            t("Failed to process offline payment"),
+            t("Failed to process offline payment")
         );
       }
     }
@@ -404,6 +430,16 @@ const ItemCheckout = (props) => {
       formData.append("payment_method", isDigital);
       formData.append("order_type", orderType);
 
+      // Delivery-speed selection (express / standard / slightly_delay).
+      // Skipped when a free-delivery coupon is applied — surcharge is moot.
+      if (
+        selectedDeliveryOption?.id != null &&
+        couponDiscount?.coupon_type !== "free_delivery"
+      ) {
+        formData.append("delivery_id", selectedDeliveryOption.id);
+        formData.append("delivery_type", selectedDeliveryOption.deliveryType);
+      }
+
       formData.append("store_id", storeData?.id);
       if (couponDiscount?.code) {
         formData.append("coupon_code", couponDiscount?.code);
@@ -415,7 +451,7 @@ const ItemCheckout = (props) => {
       formData.append("discount_amount", getProductDiscount(productList));
       formData.append(
         "distance",
-        handleDistance(distanceData?.data, originData, address),
+        handleDistance(distanceData?.data, originData, address)
       );
       formData.append("order_amount", totalAmount);
       formData.append("dm_tips", deliveryTip);
@@ -429,7 +465,7 @@ const ItemCheckout = (props) => {
       formData.append("guest_id", guestId);
       formData.append(
         "is_buy_now",
-        page === "buy_now" || page === "campaign" ? 1 : 0,
+        page === "buy_now" || page === "campaign" ? 1 : 0
       );
       formData.append("house", token ? address?.house : guestUserInfo?.house);
       formData.append("floor", token ? address?.floor : guestUserInfo?.floor);
@@ -440,7 +476,7 @@ const ItemCheckout = (props) => {
           ? address?.contact_person_name
             ? address?.contact_person_name
             : profileInfo?.name
-          : guestUserInfo?.contact_person_name,
+          : guestUserInfo?.contact_person_name
       );
       formData.append(
         "contact_person_number",
@@ -448,15 +484,15 @@ const ItemCheckout = (props) => {
           ? address?.contact_person_number
             ? address?.contact_person_number
             : profileInfo?.phone
-          : `+${guestUserInfo?.contact_person_number}`,
+          : `+${guestUserInfo?.contact_person_number}`
       );
       formData.append(
         "contact_person_email",
-        guestUserInfo?.contact_person_email,
+        guestUserInfo?.contact_person_email
       );
       if (prescriptionImages?.length > 0) {
         const filterBinaryImages = prescriptionImages.filter(
-          (img) => !img.name,
+          (img) => !img.name
         );
         const filterUrlImages = prescriptionImages.filter((img) => img.name);
         filterBinaryImages?.length &&
@@ -468,15 +504,33 @@ const ItemCheckout = (props) => {
             formData.append("saved_images[]", image?.name);
           });
       }
+      const resolvedPackagingAmount = cartPrefs?.extraPackaging
+        ? packagingCharge > 0
+          ? packagingCharge
+          : 0
+        : 0;
+      formData.append("extra_packaging_amount", resolvedPackagingAmount);
+      formData.append("cutlery", cartPrefs?.addCutlery ? 1 : cutlery ? 1 : 0);
       formData.append(
-        "extra_packaging_amount",
-        packagingCharge > 0 ? packagingCharge : 0,
+        "unavailable_item_note",
+        cartPrefs?.unavailableChoice ?? unavailable_item_note ?? ""
       );
+      if (cartPrefs?.monthlySubscribe) {
+        formData.append("monthly_subscribe", 1);
+      }
       formData.append("create_new_user", check ? 1 : 0);
       formData.append("is_guest", token ? 0 : 1);
       formData.append("password", formik.values.password);
       return formData;
     } else {
+      const resolvedCutlery = cartPrefs?.addCutlery ? 1 : cutlery ? 1 : 0;
+      const resolvedUnavailableNote =
+        cartPrefs?.unavailableChoice ?? unavailable_item_note;
+      const resolvedPackagingAmount = cartPrefs?.extraPackaging
+        ? packagingCharge > 0
+          ? packagingCharge
+          : 0
+        : 0;
       return {
         cart: JSON.stringify(carts),
         ...address,
@@ -494,8 +548,8 @@ const ItemCheckout = (props) => {
         distance: dDistance || tempDistance,
         order_amount: totalAmount,
         dm_tips: deliveryTip,
-        cutlery: cutlery,
-        unavailable_item_note: unavailable_item_note,
+        cutlery: resolvedCutlery,
+        unavailable_item_note: resolvedUnavailableNote,
         delivery_instruction: delivery_instruction,
         guest_id: guestId,
         contact_person_name: token
@@ -508,17 +562,26 @@ const ItemCheckout = (props) => {
             ? address?.contact_person_number
               ? address?.contact_person_number
               : profileInfo?.phone
-            : `${guestUserInfo?.contact_person_number}`,
+            : `${guestUserInfo?.contact_person_number}`
         ),
         contact_person_email: guestUserInfo?.contact_person_email,
         house: token ? address?.house : guestUserInfo?.house,
         floor: token ? address?.floor : guestUserInfo?.floor,
         road: token ? address?.road : guestUserInfo?.road,
-        extra_packaging_amount: packagingCharge > 0 ? packagingCharge : 0,
+        extra_packaging_amount: resolvedPackagingAmount,
+        ...(cartPrefs?.monthlySubscribe && { monthly_subscribe: 1 }),
         create_new_user: check ? 1 : 0,
         password: formik.values.password,
         is_guest: token ? 0 : 1,
         bring_change_amount: changeAmount,
+        // Delivery-speed selection (express / standard / slightly_delay).
+        // Spread conditionally so free-delivery coupons skip the surcharge
+        // fields entirely and the backend uses base delivery only.
+        ...(selectedDeliveryOption?.id != null &&
+          couponDiscount?.coupon_type !== "free_delivery" && {
+            delivery_id: selectedDeliveryOption.id,
+            delivery_type: selectedDeliveryOption.deliveryType,
+          }),
       };
     }
   };
@@ -582,6 +645,7 @@ const ItemCheckout = (props) => {
                   customerData?.data?.id ?? guest_id
                 }&callback=${callBackUrl},`;
                 localStorage.setItem("totalAmount", totalAmount);
+                clearMonthlySubKey(storeId);
                 dispatch(setClearCart());
                 Router.push(url);
               } else if (paymentMethod === "wallet") {
@@ -604,7 +668,7 @@ const ItemCheckout = (props) => {
                 error?.response?.data?.errors?.forEach((item) =>
                   toast.error(item.message, {
                     position: "bottom-right",
-                  }),
+                  })
                 );
               },
             });
@@ -627,9 +691,9 @@ const ItemCheckout = (props) => {
                       ? address?.contact_person_number
                         ? address?.contact_person_number
                         : profileInfo?.phone
-                      : `${guestUserInfo?.contact_person_number}`,
+                      : `${guestUserInfo?.contact_person_number}`
                   ),
-                }),
+                })
               );
               dispatch(setOrderDetailsModalOpen(true));
               dispatch(setGuestUserInfo(null));
@@ -665,7 +729,7 @@ const ItemCheckout = (props) => {
               //dispatch(setClearCart());
               Router.push(url, undefined, { shallow: true });
             } else if (paymentMethod === "offline_payment") {
-              toast.success("Order is successful placed", {
+              toast.success(t("Order is successful placed"), {
                 id: paymentMethod,
               });
 
@@ -678,9 +742,9 @@ const ItemCheckout = (props) => {
                       ? address?.contact_person_number
                         ? address?.contact_person_number
                         : profileInfo?.phone
-                      : `${guestUserInfo?.contact_person_number}`,
+                      : `${guestUserInfo?.contact_person_number}`
                   ),
-                }),
+                })
               );
               //setOrderSuccess(true);
               //setOfflineCheck(true);
@@ -691,7 +755,7 @@ const ItemCheckout = (props) => {
                   query: { page: page, method: "offline" },
                 },
                 undefined,
-                { shallow: true },
+                { shallow: true }
               );
             } else {
               setOrderId(response?.data?.order_id);
@@ -703,10 +767,11 @@ const ItemCheckout = (props) => {
                       ? address?.contact_person_number
                         ? address?.contact_person_number
                         : profileInfo?.phone
-                      : `${guestUserInfo?.contact_person_number}`,
+                      : `${guestUserInfo?.contact_person_number}`
                   ),
-                }),
+                })
               );
+              clearMonthlySubKey(storeId);
               setOrderSuccess(true);
               dispatch(setOrderDetailsModal(true));
             }
@@ -720,7 +785,7 @@ const ItemCheckout = (props) => {
               error?.response?.data?.errors?.forEach((item) =>
                 toast.error(item.message, {
                   position: "bottom-right",
-                }),
+                })
               );
             },
           });
@@ -729,15 +794,15 @@ const ItemCheckout = (props) => {
     } else {
       toast.error(
         t(
-          "One or more item is not available for the chosen preferable schedule time.",
-        ),
+          "One or more item is not available for the chosen preferable schedule time."
+        )
       );
     }
   };
 
   const storeCloseToast = () =>
     toast.error(
-      t(`${getStoresOrRestaurants().slice(0, -1)} is closed. Try again later.`),
+      t(`${getStoresOrRestaurants().slice(0, -1)} is closed. Try again later.`)
     );
   //totalAmount
   const handlePlaceOrderBasedOnAvailability = () => {
@@ -751,9 +816,10 @@ const ItemCheckout = (props) => {
         if (totalAmount <= codLimit) {
           handlePlaceOrder();
         } else {
-          toast.error(t(cod_exceeds_message), {
-            duration: 5000,
-          });
+          toast.error(
+            `${t(cod_exceeds_message)} ${getAmountWithSign(codLimit)}`,
+            { duration: 5000 }
+          );
         }
       } else {
         handlePlaceOrder();
@@ -766,7 +832,7 @@ const ItemCheckout = (props) => {
       const todayInNumber = moment().weekday();
       let isOpen = false;
       let filteredSchedules = storeData?.schedules.filter(
-        (item) => item.day === todayInNumber,
+        (item) => item.day === todayInNumber
       );
       let isAvailableNow = [];
 
@@ -822,7 +888,7 @@ const ItemCheckout = (props) => {
           },
         },
         undefined,
-        { shallow: false },
+        { shallow: false }
       );
     }
   };
@@ -942,19 +1008,6 @@ const ItemCheckout = (props) => {
     setUsePartialPayment(false);
     setOpenModal(false);
   };
-  const handleCutlery = (status) => {
-    if (status) {
-      setCutlery(1);
-    } else {
-      setCutlery(1);
-    }
-  };
-  const handleItemUnavailableNote = (value) => {
-    setUnavailable_item_note(value);
-  };
-  const handleDeliveryInstructionNote = (value) => {
-    setDelivery_instruction(value);
-  };
   useEffect(() => {
     if (paymentMethod !== "wallet") {
       setSwitchToWallet(false);
@@ -962,7 +1015,7 @@ const ItemCheckout = (props) => {
   }, [paymentMethod]);
   const handleBadWeatherUi = (zoneWiseData) => {
     const currentZoneInfo = zoneWiseData?.find(
-      (item) => item.id === storeData?.zone_id,
+      (item) => item.id === storeData?.zone_id
     );
 
     if (currentZoneInfo) {
@@ -1010,7 +1063,17 @@ const ItemCheckout = (props) => {
     } else {
       setPackagingCharge(0);
     }
-  }, [isPackaging]);
+  }, [isPackaging, storeData?.extra_packaging_amount]);
+
+  // Seed the local toggle from the sidebar's preference so a user who opted
+  // in on the store page stays opted-in here without having to toggle again.
+  useEffect(() => {
+    if (cartPrefs?.extraPackaging === true) {
+      setIsPackaging(true);
+    } else if (cartPrefs?.extraPackaging === false) {
+      setIsPackaging(false);
+    }
+  }, [cartPrefs?.extraPackaging]);
   const isZoneDigital = getDigitalMethodFromZone(storeData?.zone_id, zoneData);
 
   const hasOnlyPaymentMethod = () => {
@@ -1024,7 +1087,7 @@ const ItemCheckout = (props) => {
     ) {
       setPaymentMethod(configData?.active_payment_method_list[0]?.gateway);
       setPaymentMethodImage(
-        configData?.active_payment_method_list[0]?.gateway_image_full_url,
+        configData?.active_payment_method_list[0]?.gateway_image_full_url
       );
     }
   };
@@ -1061,7 +1124,9 @@ const ItemCheckout = (props) => {
       {method === "offline" ? (
         <Grid container mb="2rem" paddingTop={{ xs: "1.5rem", md: "2.5rem" }}>
           <Grid item xs={12} md={12}>
-            <CheckoutStepper />
+            <Typography variant="h5" fontWeight="600">
+              {t("Offline Payment Information")}
+            </Typography>
             <CustomStackFullWidth
               marginTop={{ xs: "1.5rem", md: "2.5rem" }}
               alignItems="center"
@@ -1090,14 +1155,72 @@ const ItemCheckout = (props) => {
           container
           spacing={3}
           mb="2rem"
-          paddingTop={{ xs: "1.5rem", md: "2.5rem" }}
+          paddingTop={{ xs: "1.5rem", md: "1rem" }}
         >
           <Grid item xs={12} md={7}>
             <Stack
               spacing={{ xs: 2, sm: 2, md: 3 }}
               pb={{ xs: "1rem", sm: "2rem", md: "4rem" }}
             >
-              <CheckoutStepper />
+              <CheckoutStepper storeData={storeData} />
+              <DeliveryDetails
+                storeData={storeData}
+                setOrderType={setOrderType}
+                orderType={orderType}
+                setAddress={setAddress}
+                address={address}
+                customDispatch={customDispatch}
+                scheduleTime={state.scheduleTime}
+                setDayNumber={setDayNumber}
+                setDeliveryTip={setDeliveryTip}
+                handleChange={handleChange}
+                today={today}
+                tomorrow={tomorrow}
+                numberOfDay={numberOfDay}
+                configData={configData}
+                setScheduleAt={setScheduleAt}
+                formik={formik}
+                passwordHandler={passwordHandler}
+                confirmPasswordHandler={confirmPasswordHandler}
+                check={check}
+                setCheck={setCheck}
+                isHomeDelivery={
+                  configData?.home_delivery_status && storeData?.delivery
+                }
+                zoneData={zoneData}
+                deliveryFee={deliveryFee}
+                couponDiscount={couponDiscount}
+                selectedDeliveryOption={selectedDeliveryOption}
+                setSelectedDeliveryOption={setSelectedDeliveryOption}
+              />
+
+              {Number.parseInt(configData?.dm_tips_status) === 1 &&
+                orderType !== "take_away" && (
+                  <DeliveryManTip
+                    orderType={orderType}
+                    deliveryTip={deliveryTip}
+                    setDeliveryTip={setDeliveryTip}
+                    isSmall={isSmall}
+                    tripsData={tripsData}
+                    setUsePartialPayment={setUsePartialPayment}
+                  />
+                )}
+              {storeData && token && (
+                <HaveCoupon
+                  store_id={storeData?.id}
+                  setCouponDiscount={setCouponDiscount}
+                  counponRemove={couponRemove}
+                  couponDiscount={couponDiscount}
+                  totalAmount={totalAmount}
+                  deliveryFee={deliveryFee}
+                  deliveryTip={deliveryTip}
+                  setSwitchToWallet={setSwitchToWallet}
+                  walletBalance={customerData?.data?.wallet_balance}
+                  payableAmount={payableAmount}
+                  min_order_amount={storeData?.minimum_order}
+                />
+              )}
+
               {zoneData && (
                 <AddPaymentMethod
                   setPaymentMethod={setPaymentMethod}
@@ -1125,48 +1248,22 @@ const ItemCheckout = (props) => {
                 />
               )}
 
-              <DeliveryDetails
-                storeData={storeData}
-                setOrderType={setOrderType}
-                orderType={orderType}
-                setAddress={setAddress}
-                address={address}
-                customDispatch={customDispatch}
-                scheduleTime={state.scheduleTime}
-                setDayNumber={setDayNumber}
-                setDeliveryTip={setDeliveryTip}
-                handleChange={handleChange}
-                today={today}
-                tomorrow={tomorrow}
-                numberOfDay={numberOfDay}
-                configData={configData}
-                setScheduleAt={setScheduleAt}
-                formik={formik}
-                passwordHandler={passwordHandler}
-                confirmPasswordHandler={confirmPasswordHandler}
-                check={check}
-                setCheck={setCheck}
-                isHomeDelivery={
-                  configData?.home_delivery_status && storeData?.delivery
-                }
-              />
-
-              {Number.parseInt(configData?.dm_tips_status) === 1 &&
-                orderType !== "take_away" && (
-                  <DeliveryManTip
-                    orderType={orderType}
-                    deliveryTip={deliveryTip}
-                    setDeliveryTip={setDeliveryTip}
-                    isSmall={isSmall}
-                    tripsData={tripsData}
-                    setUsePartialPayment={setUsePartialPayment}
-                  />
-                )}
-
               <Grid item md={12} xs={12}></Grid>
             </Stack>
           </Grid>
-          <Grid item xs={12} md={5} height="auto">
+          <Grid
+            item
+            xs={12}
+            md={5}
+            height="auto"
+            sx={{
+              position: { md: "sticky" },
+              top: { md: "50px" },
+              alignSelf: { md: "flex-start" },
+              maxHeight: { md: "calc(100vh - 32px)" },
+              // overflowY: { md: "auto" },
+            }}
+          >
             <CustomStackFullWidth>
               {currentModuleType === "pharmacy" && (
                 <div
@@ -1182,18 +1279,14 @@ const ItemCheckout = (props) => {
               )}
               <CustomPaperBigCard
                 height="auto"
-                padding={isSmall ? "0px" : "1.25rem"}
-                noboxshadow={isSmall && "true"}
-                backgroundcolor={isSmall && theme.palette.background.default}
+                padding={isSmall ? "1rem" : "1.25rem"}
               >
                 <Stack justifyContent="space-between">
-                  <CouponTitle textAlign="left">
-                    {t("Order Summary")}
-                  </CouponTitle>
+                  <CouponTitle textAlign="left">{t("Billing")}</CouponTitle>
                   {zoneData && handleBadWeatherUi(zoneData?.data?.zone_data)}
                   <SimpleBar
                     style={{
-                      maxHeight: "500px",
+                      maxHeight: "180px",
                       width: "100%",
                     }}
                   >
@@ -1206,35 +1299,7 @@ const ItemCheckout = (props) => {
                       isSmall={isSmall}
                     />
                   </SimpleBar>
-                  {storeData && token && (
-                    <HaveCoupon
-                      store_id={storeData?.id}
-                      setCouponDiscount={setCouponDiscount}
-                      counponRemove={couponRemove}
-                      couponDiscount={couponDiscount}
-                      totalAmount={totalAmount}
-                      deliveryFee={deliveryFee}
-                      deliveryTip={deliveryTip}
-                      setSwitchToWallet={setSwitchToWallet}
-                      walletBalance={customerData?.data?.wallet_balance}
-                      payableAmount={payableAmount}
-                      min_order_amount={storeData?.minimum_order}
-                    />
-                  )}
 
-                  {getCurrentModuleType() === "food" && storeData?.cutlery && (
-                    <Cutlery isChecked={cutlery} handleChange={handleCutlery} />
-                  )}
-                  <ItemSelectWithChip
-                    title="If Any Product is not available"
-                    data={productUnavailableData}
-                    handleChange={handleItemUnavailableNote}
-                  />
-                  <ItemSelectWithChip
-                    title="Add More Delivery Instruction"
-                    data={deliveryInstructions}
-                    handleChange={handleDeliveryInstructionNote}
-                  />
                   <OrderCalculation
                     usePartialPayment={usePartialPayment}
                     cartList={page === "campaign" ? campaignItemList : cartList}
@@ -1270,6 +1335,7 @@ const ItemCheckout = (props) => {
                     customerData={customerData}
                     initVauleEx={storeData?.extra_packaging_amount}
                     isLoading={isLoading}
+                    selectedDeliveryOption={selectedDeliveryOption}
                     scheduleAt={scheduleAt}
                   />
 
@@ -1297,8 +1363,8 @@ const ItemCheckout = (props) => {
                 payableAmount={payableAmount}
                 agree={agreeToWallet}
                 reject={notAgreeToWallet}
-                colorTitle=" Want to pay via your wallet ? "
-                title="You can pay the full amount with your wallet."
+                colorTitle={t("Want to pay via your wallet?")}
+                title={t("You can pay the full amount with your wallet.")}
                 remainingBalance={
                   customerData?.data?.wallet_balance - payableAmount
                 }
@@ -1314,8 +1380,10 @@ const ItemCheckout = (props) => {
                 payableAmount={payableAmount}
                 agree={agreeToPartial}
                 reject={notAgreeToPartial}
-                colorTitle=" Want to pay partially with wallet ? "
-                title="You do not have sufficient balance to pay full amount via wallet."
+                colorTitle={t("Want to pay partially with wallet?")}
+                title={t(
+                  "You do not have sufficient balance to pay full amount via wallet."
+                )}
               />
             </CustomModal>
           )}

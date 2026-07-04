@@ -9,12 +9,20 @@ import toast from "react-hot-toast";
 import { not_logged_in_message } from "utils/toasterMessages";
 import CustomImageContainer from "components/CustomImageContainer";
 import prescription from "../store-details/assets/Frame.png";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
 const AnimatedContainer = styled(Box, {
   shouldForwardProp: (prop) => prop !== "expanded",
 })(({ theme, expanded }) => ({
   position: "fixed",
-  right: "10%",
+  [theme.breakpoints.up("md")]: {
+    display: "none",
+  },
+  // Anchor to the centered container's right edge (maxWidth 1320px) instead of
+  // a viewport percentage, so the button keeps its distance from the content
+  // even when the browser is zoomed in/out. On viewports narrower than the
+  // container the calc goes negative, so clamp to a small inset.
+  right: "max(16px, calc((100vw - 1320px) / 2))",
   top: "80%",
   bottom: { xs: 100, md: 40 },
   cursor: "pointer",
@@ -33,7 +41,7 @@ const AnimatedContainer = styled(Box, {
     gap: "10px",
   },
 }));
-const Prescription = ({ storeId, expanded }) => {
+const Prescription = ({ storeId, storeSlug, expanded }) => {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
 
@@ -48,10 +56,16 @@ const Prescription = ({ storeId, expanded }) => {
     }
   };
   const handleRoute = () => {
+    const moduleType = getCurrentModuleType();
     router.push(
       {
         pathname: "/checkout",
-        query: { page: "prescription", store_id: storeId },
+        query: {
+          page: "prescription",
+          store_id: storeId,
+          ...(storeSlug && { store_slug: storeSlug }),
+          ...(moduleType && { module: moduleType }),
+        },
       },
       undefined,
       { shallow: true }

@@ -41,7 +41,7 @@ export const restoreSettings = (serverSettings = null) => {
 
   const cookieTheme = getThemeFromCookie(document.cookie);
   const resolvedTheme =
-    cookieTheme || settings?.theme || getPreferredTheme() || "light";
+    cookieTheme || settings?.theme || "light";
 
   return {
     ...initialSettings,

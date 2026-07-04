@@ -2,6 +2,7 @@ import { NoSsr } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import React, { useEffect, useState } from "react";
 import MainLayout from "../../src/components/layout/MainLayout";
+import SimpleMobileHeader from "components/common/SimpleMobileHeader";
 import SEO from "../../src/components/seo";
 import CustomContainer from "../../src/components/container";
 import DeliveryManComponent from "../../src/components/deliveryman-registration/DeliveryManComponent";
@@ -46,6 +47,7 @@ const Index = ({ metaData }) => {
         configData={configData}
       />
       <MainLayout configData={configData} >
+        <SimpleMobileHeader title="Deliveryman Application" />
         <NoSsr>
           <CustomContainer>
             <DeliveryManComponent

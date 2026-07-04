@@ -1,14 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { alpha, Stack, Typography } from "@mui/material";
-
-import RemoveIcon from "@mui/icons-material/Remove";
-import AddIcon from "@mui/icons-material/Add";
-import { useTheme } from "@mui/material/styles";
-import {
-  CustomFab,
-  CustomStackFullWidth,
-} from "../../../styled-components/CustomStyles.style";
+import { alpha, Stack, Typography, useTheme } from "@mui/material";
+import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
 import { t } from "i18next";
 import {
   getAmountWithSign,
@@ -16,161 +9,141 @@ import {
 } from "../../../helper-functions/CardHelpers";
 import { Box } from "@mui/system";
 
+const QuantityButton = ({ onClick, disabled, icon, ariaLabel, theme }) => (
+  <Box
+    role="button"
+    aria-label={ariaLabel}
+    aria-disabled={disabled}
+    onClick={disabled ? undefined : onClick}
+    sx={{
+      width: 36,
+      height: 36,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      borderRadius: "8px",
+      cursor: disabled ? "not-allowed" : "pointer",
+      color: disabled
+        ? alpha(theme.palette.text.secondary, 0.4)
+        : theme.palette.neutral?.[1050] ?? theme.palette.text.primary,
+      transition: "color 0.15s ease",
+      flexShrink: 0,
+      "&:hover": disabled
+        ? undefined
+        : { backgroundColor: theme.palette.action.hover },
+    }}
+  >
+    <i
+      className={icon}
+      style={{ fontSize: "16px", display: "flex", lineHeight: 1 }}
+    />
+  </Box>
+);
+
 const IncrementDecrementManager = (props) => {
   const { decrementQuantity, incrementQuantity, modalData, productUpdate } =
     props;
   const theme = useTheme();
-  const getModule = () => {
-    return JSON.parse(window.localStorage.getItem("module"));
-  };
+
+  const totalAmount = modalData
+    ? getAmountWithSign(
+        getDiscountedAmount(
+          modalData?.totalPrice,
+          modalData?.discount,
+          modalData?.discount_type,
+          modalData?.store_discount,
+          modalData?.quantity
+        )
+      )
+    : "";
 
   return (
-    <CustomStackFullWidth spacing={2}>
-      <Stack direction="row" spacing={1} alignItems="center">
-        <Typography fontWeight="400" color="customColor.textGray">
-          {t("Unit")} :
-        </Typography>
-        <Typography fontWeight="500">{modalData?.unit_type}</Typography>
-      </Stack>
-      <CustomStackFullWidth
-        key={modalData}
-        direction={productUpdate ? "column" : "row"}
-        spacing={2}
-        alignItems={productUpdate ? "flex-start" : "center"}
-        justifyContent="flex-start"
+    <CustomStackFullWidth>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{
+          px: { xs: 1.5, md: 1.5 },
+          py: { xs: 1, md: 1.25 },
+          
+          borderRadius: "10px",
+          backgroundColor: theme.palette.background.paper,
+        }}
       >
-        <Stack direction="row" spacing={4} alignItems="center">
-          {/*<Typography fontWeight="400" color="customColor.textGray">*/}
-          {/*  {t("Quantity")} :*/}
-          {/*</Typography>*/}
-          <Stack
-            direction="row"
-            alignIems="center"
-            justifyContent="space-between"
+        <Stack direction="row" spacing={1} alignItems="baseline">
+          <Typography
             sx={{
-              minWidth: { xs: "117px", sm: "130px", md: "142px" },
-              backgroundColor:
-                getModule()?.module_type === "pharmacy"
-                  ? theme.palette.background.custom5
-                  : (theme) => alpha(theme.palette.neutral[200], 0.2),
+              fontSize: { xs: "13px", md: "14px" },
+              fontWeight: 500,
+              color: theme.palette.text.secondary,
             }}
-            borderRadius={
-              getModule()?.module_type === "pharmacy" ||
-              getModule()?.module_type === "grocery"
-                ? "5px"
-                : "13%"
-            }
-            padding={
-              getModule()?.module_type === "pharmacy" ||
-              getModule()?.module_type === "grocery"
-                ? "5px"
-                : "0px"
-            }
           >
-            <CustomFab
-              onClick={decrementQuantity}
-              aria-label="remove"
-              disabled={modalData?.totalPrice === 0 || modalData?.quantity <= 1}
-              sx={{
-                color:
-                  getModule()?.module_type === "pharmacy" ||
-                  getModule()?.module_type === "grocery"
-                    ? (theme) => theme.palette.neutral[1000]
-                    : (theme) => alpha(theme.palette.primary.main, 0.9),
-                backgroundColor:
-                  getModule()?.module_type === "pharmacy" ||
-                  getModule()?.module_type === "grocery"
-                    ? (theme) => theme.palette.background.custom5
-                    : (theme) => alpha(theme.palette.primary.main, 0.2),
-                boxShadow:
-                  getModule()?.module_type === "pharmacy" ||
-                  getModule()?.module_type === "grocery"
-                    ? "none"
-                    : "0px 2px 6px rgb(100 116 139 / 12%)",
-                borderRadius:
-                  getModule()?.module_type === "pharmacy" ||
-                  getModule()?.module_type === "grocery"
-                    ? "0px"
-                    : "50%",
-                "&:hover": {
-                  backgroundColor:
-                    getModule()?.module_type === "pharmacy" ||
-                    getModule()?.module_type === "grocery"
-                      ? (theme) => alpha(theme.palette.neutral[200], 0.2)
-                      : (theme) => alpha(theme.palette.primary.main, 0.4),
-                },
-              }}
-            >
-              <RemoveIcon size="small" />
-            </CustomFab>
-            <Stack alignItems="center" justifyContent="center">
-              <Typography variant="body1" fontWeight="500" textAlign="center">
-                {modalData?.quantity < 10 && "0"}
-                {modalData?.quantity}
-              </Typography>
-            </Stack>
-            <CustomFab
-              color="primary"
-              aria-label="add"
-              onClick={incrementQuantity}
-              module_type={getModule()?.module_type}
-              sx={{
-                color:
-                  getModule()?.module_type === "pharmacy" ||
-                  getModule()?.module_type === "grocery"
-                    ? (theme) => theme.palette.neutral[1000]
-                    : (theme) => theme.palette.neutral[100],
-                backgroundColor:
-                  getModule()?.module_type === "pharmacy" ||
-                  getModule()?.module_type === "grocery"
-                    ? theme.palette.background.custom5
-                    : (theme) => theme.palette.primary.main,
-                borderRadius:
-                  getModule()?.module_type === "pharmacy" ||
-                  getModule()?.module_type === "grocery"
-                    ? "0px"
-                    : "50%",
-                boxShadow:
-                  getModule()?.module_type === "pharmacy" ||
-                  getModule()?.module_type === "grocery"
-                    ? "none"
-                    : "0px 2px 6px rgb(100 116 139 / 12%)",
-                "&:hover": {
-                  backgroundColor:
-                    getModule()?.module_type === "pharmacy" &&
-                    getModule()?.module_type === "grocery"
-                      ? (theme) => alpha(theme.palette.neutral[200], 0.2)
-                      : (theme) => alpha(theme.palette.primary.main, 0.7),
-                },
-              }}
-            >
-              <AddIcon size="small" />
-            </CustomFab>
-          </Stack>
+            {t("Total")}
+          </Typography>
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: "16px", md: "18px" },
+              color: theme.palette.text.primary,
+            }}
+          >
+            {totalAmount}
+          </Typography>
         </Stack>
+
         <Stack
           direction="row"
-          witdh="100%"
-          spacing={1}
-          paddingLeft={productUpdate ? "none" : { sm: "0px", md: "45px" }}
+          alignItems="center"
+          gap="4px"
+          sx={{
+            p: "4px",
+            backgroundColor: theme.palette.background.secondary,
+            borderRadius: "8px",
+            flexShrink: 0,
+          }}
         >
-          <Typography fontWeight="500" fontSize={{ xs: "12px", md: "14px" }}>
-            {t("Total Price")}:
-          </Typography>
-          <Typography fontWeight="500" fontSize={{ xs: "12px", md: "14px" }}>
-            {modalData &&
-              getAmountWithSign(
-                getDiscountedAmount(
-                  modalData?.totalPrice,
-                  modalData?.discount,
-                  modalData?.discount_type,
-                  modalData?.store_discount,
-                  modalData?.quantity
-                )
-              )}
-          </Typography>
+          <QuantityButton
+            onClick={decrementQuantity}
+            disabled={modalData?.totalPrice === 0 || modalData?.quantity <= 1}
+            icon="fi fi-rr-minus-small"
+            ariaLabel="decrease quantity"
+            theme={theme}
+          />
+          <Box
+            sx={{
+              width: 36,
+              height: 36,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: theme.palette.background.paper,
+              borderRadius: "6px",
+              flexShrink: 0,
+            }}
+          >
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: "18px",
+                letterSpacing: "-0.54px",
+                lineHeight: 1.1,
+                fontVariantNumeric: "tabular-nums",
+                color: "neutral.1050",
+                userSelect: "none",
+              }}
+            >
+              {modalData?.quantity}
+            </Typography>
+          </Box>
+          <QuantityButton
+            onClick={incrementQuantity}
+            icon="fi fi-rr-plus-small"
+            ariaLabel="increase quantity"
+            theme={theme}
+          />
         </Stack>
-      </CustomStackFullWidth>
+      </Stack>
     </CustomStackFullWidth>
   );
 };

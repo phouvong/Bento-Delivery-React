@@ -1,234 +1,93 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { alpha, Button, Skeleton, Stack } from "@mui/material";
-import { useState } from "react";
-import { useTranslation } from "react-i18next";
-import Slider from "react-slick";
-import { getLanguage } from "helper-functions/getLanguage";
+import { useRef, useState } from "react";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
-  SliderCustom,
 } from "styled-components/CustomStyles.style";
-import { RTL } from "../../rtl";
-import SpecialOfferCardShimmer from "../../Shimmer/SpecialOfferCardSimmer";
-import H2 from "../../typographies/H2";
-import { createEnhancedArrows } from "../../common/EnhancedSliderArrows";
-import { HomeComponentsWrapper } from "../HomePageComponents";
-import CustomContainer from "components/container";
+import { Skeleton, Typography, styled } from "@mui/material";
+import { t } from "i18next";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import NewStoreCardSkeleton from "components/Shimmer/NewStoreCardSkeleton";
+import { HomeComponentsWrapper } from "components/home/HomePageComponents";
+import SliderSectionHeader from "components/common/SliderSectionHeader";
+import NewStoreCard from "components/cards/newCard/NewStoreCard";
 import useGetTopOffers from "api-manage/hooks/react-query/product-details/useGetTopOffers";
-import CustomImageContainer from "components/CustomImageContainer";
-import fire_image from "../../../assets/fire.svg";
-import StoreCard from "components/cards/StoreCard";
-import Link from "next/link";
 
-const TopOffersNearMe = ({ title}) => {
-  const { t } = useTranslation();
-  const type=""
-  const sortBy=""
-  const searchKey=""
+const SliderWrapper = styled(CustomBoxFullWidth)(({ theme }) => ({
+  "& .slick-track": {
+    marginLeft: 0,
+    marginRight: "auto",
+  },
+  "& .slick-slide": {
+    paddingRight: "20px",
+  },
+  "& .slick-slide:first-child": {
+    paddingLeft: 0,
+  },
+  "& .slick-slide > div > *": {
+    width: "100% !important",
+  },
+  [theme.breakpoints.down("sm")]: {
+    "& .slick-slide": { paddingRight: "12px" },
+  },
+}));
 
+const TopOffersNearMe = ({ title }) => {
+  const slider = useRef(null);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const { data, isLoading: popularIsLoading } = useGetTopOffers("", "", "");
 
-  const { data, refetch, isLoading, isFetching } = useGetTopOffers(sortBy,searchKey,type);
-
-  const [isHover, setIsHover] = useState(false);
-  const lanDirection = getLanguage() ? getLanguage() : "ltr";
-  // useEffect(() => {
-  //   refetch();
-  // }, []);
-  const settings = {
+  const enhancedSettings = {
     dots: false,
-    infinite: data?.stores?.length > 3 ? true : false,
+    infinite: false,
+    speed: 500,
     slidesToShow: 4,
     slidesToScroll: 1,
-    initialSlide: 0, // Ensure it always starts from the first slide
-    autoplay: true,
-    speed: 800,
-    autoplaySpeed: 4000,
-    variableHeight: true,
-    ...createEnhancedArrows(isHover, { 
-      displayNoneOnMobile: true,
-      variant: "primary",
-      noBackground: true
-    }),
+    swipeToSlide: true,
+    arrows: false,
     responsive: [
-      {
-        breakpoint: 2000,
-        settings: {
-          slidesToShow: 4,
-          slidesToScroll: 1,
-          infinite: data?.stores?.length > 4 ? true : false,
-        },
-      },
-      {
-        breakpoint: 1600,
-        settings: {
-          slidesToShow: 4,
-          slidesToScroll: 1,
-          infinite: data?.stores?.length > 4 ? true : false,
-        },
-      },
-      {
-        breakpoint: 1200,
-        settings: {
-          slidesToShow: 4,
-          slidesToScroll: 1,
-          infinite: data?.stores?.length > 4 ? true : false,
-        },
-      },
-      {
-        breakpoint: 992,
-        settings: {
-          slidesToShow: 3.5,
-          infinite: data?.stores?.length > 3 ? true : false,
-        },
-      },
-      {
-        breakpoint: 821,
-        settings: {
-          slidesToShow: 3.2,
-          infinite: data?.stores?.length > 3 ? true : false,
-        },
-      },
-      {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 2,
-          infinite: data?.stores?.length > 3 ? true : false,
-        },
-      },
-      {
-        breakpoint: 576,
-        settings: {
-          slidesToShow: 1,
-          infinite: data?.stores?.length > 2 ? true : false,
-        },
-      },
-      {
-        breakpoint: 480,
-        settings: {
-          slidesToShow: 1,
-          infinite: data?.stores?.length > 1 ? true : false,
-        },
-      },
-      {
-        breakpoint: 360, // Add a new breakpoint for smaller devices
-        settings: {
-          slidesToShow: 1,
-          infinite: data?.stores?.length > 1 ? true : false,
-        },
-      },
+      { breakpoint: 1450, settings: { slidesToShow: 4, slidesToScroll: 1, infinite: false , swipeToSlide: true} },
+      { breakpoint: 1024, settings: { slidesToShow: 4, slidesToScroll: 1, infinite: false , swipeToSlide: true} },
+      { breakpoint: 760,  settings: { slidesToShow: 3, slidesToScroll: 2, infinite: false , swipeToSlide: true} },
+      { breakpoint: 695,  settings: { slidesToShow: 2, slidesToScroll: 2, initialSlide: 2, infinite: false , swipeToSlide: true} },
+      { breakpoint: 600,  settings: { slidesToShow: 2, slidesToScroll: 2, initialSlide: 2, infinite: false , swipeToSlide: true} },
+      { breakpoint: 480,  settings: { slidesToShow: 1.4, slidesToScroll: 1, initialSlide: 1, infinite: false , swipeToSlide: true} },
+      { breakpoint: 340,  settings: { slidesToShow: 1.2, slidesToScroll: 1, initialSlide: 1, infinite: false , swipeToSlide: true} },
     ],
   };
 
+  const stores = data?.stores ?? [];
+
+  if (!popularIsLoading && !stores.length) return null;
+
   return (
-    <>
-      {data?.stores?.length > 0 && (
-        <HomeComponentsWrapper
-          onMouseEnter={() => setIsHover(true)}
-          onMouseLeave={() => setIsHover(false)}
-          sx={{
-            cursor: "pointer",
-            ".slick-slide": {
-              padding: "0 5px",
-            },
-          }}
-        >
-          <CustomStackFullWidth
-            alignItems="center"
-            justyfyContent="center"
-            sx={{
-              borderRadius: "10px",
-              backgroundColor: (theme) =>
-                alpha(theme.palette.primary.main, 0.1),
-              mt:"10px"
-            }}
-            spacing={1}
-            onMouseEnter={() => setIsHover(true)}
-            onMouseLeave={() => setIsHover(false)}
-          >
-            <CustomContainer>
-              <CustomStackFullWidth
-                alignItems="center"
-                justifyContent="space-between"
-                direction="row"
-                marginTop={{ xs: "10px" }}
-              >
-                {isFetching ? (
-                  <Skeleton variant="text" width="110px" />
-                ) : (
-                  <Stack direction="row" spacing={1} alignItems="center">
-                    <CustomImageContainer
-                      src={fire_image.src}
-                      width="26px"
-                      height="26px"
-                    />
-                    <H2 text={title ? title : t("Special Offer")} />
-                  </Stack>
-                )}
-                {isFetching  ? (
-                  <Skeleton width="100px" variant="80px" />
-                ) : (
-                  <Link
-                    href={{
-                      pathname: "/store/top-offer-nearby",
-                    }}
-                  >
-                    <Button
-                      sx={{
-                        transition: "all ease 0.5s",
-                        textTransform: "capitalize",
-                        "&:hover": {
-                          letterSpacing: "0.03em",
-                        },
-                        padding: { xs: "0px 0px", md: "9px 16px" },
-                      }}
-                    >
-                      {t("See all")}
-                    </Button>
-                  </Link>
-                )}
-              </CustomStackFullWidth>
-            </CustomContainer>
-            <RTL direction={lanDirection}>
-              <CustomBoxFullWidth
-                sx={{
-                  padding: {
-                    xs: "10px 10px 10px 10px",
-                    md: "5px 20px 20px 20px",
-                  },
-                }}
-              >
-                <>
-                  {isFetching  ? (
-                    <Slider {...settings}>
-                      {[...Array(5)].map((item, index) => {
-                        return <SpecialOfferCardShimmer key={index} />;
-                      })}
-                    </Slider>
-                  ) : (
-                    <SliderCustom>
-                      <Slider {...settings}>
-                        {data?.stores?.map((item, index) => {
-                          return (
-                            <StoreCard
-                              key={index}
-                              item={item}
-                              specialCard="true"
-                              topoffer
-                              imageUrl={item?.cover_photo_full_url}
-                            />
-                          );
-                        })}
-                      </Slider>
-                    </SliderCustom>
-                  )}
-                </>
-              </CustomBoxFullWidth>
-            </RTL>
-          </CustomStackFullWidth>
-        </HomeComponentsWrapper>
-      )}
-    </>
+    <HomeComponentsWrapper sx={{ gap: "1rem" }}>
+      <SliderSectionHeader
+        sliderRef={slider}
+        currentSlide={currentSlide}
+        totalSlides={stores.length}
+        slidesToShow={4}
+        sx={{ mb: "1rem" }}
+        heading={
+          popularIsLoading ? (
+            <Skeleton variant="text" width="160px" />
+          ) : (
+            <Typography sx={{ fontSize: { xs: "18px", md: "24px" }, fontWeight: 700, color: "neutral.1050", lineHeight: 1.1, letterSpacing: "-1.2px" }}>
+              {title ? t(title) : t("Top Picks Near You")}
+            </Typography>
+          )
+        }
+      />
+      <SliderWrapper>
+        <Slider {...enhancedSettings} ref={slider} afterChange={(idx) => setCurrentSlide(idx)}>
+          {popularIsLoading
+            ? [...Array(4)].map((_, i) => <NewStoreCardSkeleton key={i} />)
+            : stores.map((item, index) => (
+                <NewStoreCard key={index} variant="normal" item={item} imageUrl={item?.cover_photo_full_url} />
+              ))}
+        </Slider>
+      </SliderWrapper>
+    </HomeComponentsWrapper>
   );
 };
 

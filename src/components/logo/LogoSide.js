@@ -6,7 +6,7 @@ const LogoSide = ({ configData, width, height, objectFit }) => {
     <Stack
       direction="row"
       alignItems="center"
-      width="150px"
+      width="fit-content"
       justifyContent="flex-start"
     >
       <CustomLogo

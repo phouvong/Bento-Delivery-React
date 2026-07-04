@@ -30,7 +30,7 @@ import ErrorIcon from "@mui/icons-material/Error";
 import { setSelectedModule } from "redux/slices/utils";
 import { setCartList } from "redux/slices/cart";
 import useGetBookingList from "api-manage/hooks/react-query/useGetBookingList";
-import useGetAllCartList from "api-manage/hooks/react-query/add-cart/useGetAllCartList";
+import useGetGroupedCart from "api-manage/hooks/react-query/add-cart/useGetGroupedCart";
 import { handleProductValueWithOutDiscount } from "utils/CustomFunctions";
 import { getSelectedVariations } from "components/header/second-navbar/SecondNavbar";
 import { getGuestId } from "helper-functions/getToken";
@@ -38,6 +38,7 @@ import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import useDeleteAllCarts from "api-manage/hooks/react-query/useDeleteAllCarts";
 import toast from "react-hot-toast";
 import { getModuleId } from "helper-functions/getModuleId";
+import { saveModuleParam } from "utils/moduleParamManager";
 
 export const CustomPaper = styled(Paper)(({ theme }) => ({
   //minWidth: "500px",
@@ -100,7 +101,8 @@ export const ModuleSelection = ({
   fromsignup,
   disableAutoFocus,
   setOpenModuleSelection,
-  zoneId
+  zoneId,
+  autoSelect = false,
 }) => {
   const router = useRouter();
   const [openModal, setOpenModal] = useState(true);
@@ -148,7 +150,7 @@ export const ModuleSelection = ({
     data: cartListData,
     refetch: cartListRefetch,
     isLoading,
-  } = useGetAllCartList(getGuestId(), cartListSuccessHandler);
+  } = useGetGroupedCart();
 
   const bookingSuccess = (res) => {
     dispatch(setCartList(res));
@@ -161,8 +163,6 @@ export const ModuleSelection = ({
     isLoading: bookingListsIsLoading,
     refetch: bookingRefetch,
   } = useGetBookingList(getGuestId(), bookingSuccess);
-
-
 
   const isXSmall = useMediaQuery(theme.breakpoints.down("sm"));
   useEffect(() => {
@@ -180,11 +180,14 @@ export const ModuleSelection = ({
 
   const handleItemOnClick = (item) => {
     localStorage.setItem("module", JSON.stringify(item));
+    saveModuleParam(item?.id, item?.slug);
     dispatch(setSelectedModule(item));
     if (cartList?.carts?.length > 0 && item?.module_type === "rental") {
       const pickupZoneIds = cartList?.carts[0]?.provider?.pickup_zone_id;
       const targetZoneIds = Array.isArray(zoneId) ? zoneId : JSON.parse(zoneId);
-      const inZone = targetZoneIds.some(id => pickupZoneIds?.includes(id.toString()));
+      const inZone = targetZoneIds.some((id) =>
+        pickupZoneIds?.includes(id.toString()),
+      );
       if (inZone) {
         toast.success(t("Location set successfully"));
         pushHomeWithModule(item);
@@ -194,15 +197,19 @@ export const ModuleSelection = ({
         mutate(null, {
           onSuccess: (res) => {
             dispatch(setCartList(res));
-            toast.error(t("Your cart has been cleared as the selected zone does not support the previous pickup point."));
+            toast.error(
+              t(
+                "Your cart has been cleared as the selected zone does not support the previous pickup point.",
+              ),
+            );
             pushHomeWithModule(item);
             setOpenModal(false);
             closeModal?.();
           },
           onError: (error) => {
             toast.error(error.response.data.message);
-          }
-        })
+          },
+        });
       }
     } else {
       pushHomeWithModule(item);
@@ -213,7 +220,9 @@ export const ModuleSelection = ({
   const handleSingleModule = (data) => {
     dispatch(setSelectedModule(data));
     localStorage.setItem("module", JSON.stringify(data));
+    saveModuleParam(data?.id, data?.slug);
     setOpenModuleSelection?.(false);
+    closeModal?.(); // close parent modal (MapModal) — removes the backdrop overlay
     pushHomeWithModule(data);
   };
   let currentZoneIds = undefined;
@@ -229,9 +238,16 @@ export const ModuleSelection = ({
     }
   }
   const modulesToShow = currentZoneIds ? zoneWiseModule(data) : data;
-  console.log("modulesToShow", modulesToShow, currentZoneIds, data);
-  const innerContent = () => {
+  useEffect(() => {
+    if (!autoSelect || !data?.length) return;
+    const first = modulesToShow?.[0];
+    if (!first) return;
+    handleSingleModule(first);
+  }, [autoSelect, data]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  if (autoSelect) return null;
+
+  const innerContent = () => {
     if (modulesToShow?.length === 0) {
       return (
         <CustomModal openModal={openModal} handleClose={handleCloseModal}>
@@ -302,7 +318,6 @@ export const ModuleSelection = ({
                                   display: "-webkit-box",
                                   WebkitLineClamp: "1",
                                   WebkitBoxOrient: "vertical",
-
                                 }}
                               >
                                 {item?.module_name}
@@ -324,7 +339,6 @@ export const ModuleSelection = ({
         </CustomModal>
       );
     }
-
   };
 
   return <>{innerContent()}</>;

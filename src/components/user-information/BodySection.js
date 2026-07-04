@@ -7,6 +7,7 @@ import ProfileTab from "./ProfileTab";
 import Divider from "@mui/material/Divider";
 import ProfileBody from "./ProfileBody";
 import Address from "../address";
+import AddAddressComponent from "../address/add-new-address/AddAddressComponent";
 import { menuData } from "../header/second-navbar/account-popover/menuData";
 import Router from "next/router";
 import { useMediaQuery, useTheme } from "@mui/material";
@@ -38,43 +39,50 @@ const BodySection = ({
         query: { page: item?.name },
       },
       undefined,
-      { shallow: true }
+      { shallow: true },
     );
-
   };
   return (
-    <CustomStackFullWidth spacing={4} >
-      <CustomPaperBigCard
-        padding={page === "my-orders" || page === "inbox" ? "0px" : "10px"}
-        noboxshadow={
-          isSmall
-            ? page === "my-orders" || page === "inbox"
-              ? "true"
-              : ""
-            : "true"
-        }
-        backgroundcolor={
-          isSmall &&
-          (page === "my-orders" || page === "inbox") &&
-          theme.palette.background.default
-        }
-      >
-        {!isSmall && userToken && (
-          <ProfileTab
-            deleteUserHandler={deleteUserHandler}
-            isLoadingDelete={isLoadingDelete}
-            accountDeleteStatus={accountDeleteStatus}
-            setAccountDeleteStatus={setAccountDeleteStatus}
-            page={page}
-            menuData={menuData}
-            handlePage={handleActivePage}
-            setEditProfile={setEditProfile}
-          />
-        )}
-        {!isSmall && <Divider />}
-
+    <CustomStackFullWidth spacing={4}>
+      {/* Personal Details card — hidden on profile-settings (only show addAddress form) */}
+      {page === "addresses" ? (
+        addAddress && (
+          <CustomPaperBigCard padding="10px" noboxshadow={isSmall ? "" : "true"}>
+            <AddAddressComponent
+              setAddAddress={setAddAddress}
+              configData={configData}
+              editAddress={editAddress}
+              addressRefetch={refetch}
+              setEditAddress={setEditAddress}
+            />
+          </CustomPaperBigCard>
+        )
+      ) : page === "profile-settings" ? (
+        addAddress && (
+          <CustomPaperBigCard padding="10px" noboxshadow={isSmall ? "" : "true"}>
+            <ProfileBody
+              key={`${page}-${orderId || "no-order"}`}
+              page={page}
+              configData={configData}
+              orderId={orderId}
+              editProfile={editProfile}
+              setEditProfile={setEditProfile}
+              addAddress={addAddress}
+              setAddAddress={setAddAddress}
+              editAddress={editAddress}
+              refetch={refetch}
+              setEditAddress={setEditAddress}
+              deleteUserHandler={deleteUserHandler}
+              accountDeleteStatus={accountDeleteStatus}
+              setAccountDeleteStatus={setAccountDeleteStatus}
+              isLoadingDelete={isLoadingDelete}
+            />
+          </CustomPaperBigCard>
+        )
+      ) : page === "track-order" ? (
+        /* Track order has its own card UI — no outer profile card/padding/border */
         <ProfileBody
-          key={`${page}-${orderId || 'no-order'}`}
+          key={`${page}-${orderId || "no-order"}`}
           page={page}
           configData={configData}
           orderId={orderId}
@@ -85,10 +93,48 @@ const BodySection = ({
           editAddress={editAddress}
           refetch={refetch}
           setEditAddress={setEditAddress}
+          deleteUserHandler={deleteUserHandler}
+          accountDeleteStatus={accountDeleteStatus}
+          setAccountDeleteStatus={setAccountDeleteStatus}
+          isLoadingDelete={isLoadingDelete}
         />
-      </CustomPaperBigCard>
+      ) : (
+        <CustomPaperBigCard
+          padding={page === "my-orders" || page === "inbox" || page === "monthly-cart-list" || page === "coupons" ? "0px" : "10px"}
+          noboxshadow={
+            isSmall
+              ? page === "my-orders" || page === "inbox" || page === "monthly-cart-list" || page === "coupons"
+                ? "true"
+                : ""
+              : "true"
+          }
+          backgroundcolor={
+            isSmall &&
+            (page === "my-orders" || page === "inbox" || page === "monthly-cart-list" || page === "coupons") &&
+            theme.palette.background.default
+          }
+        >
+          <ProfileBody
+            key={`${page}-${orderId || "no-order"}`}
+            page={page}
+            configData={configData}
+            orderId={orderId}
+            editProfile={editProfile}
+            setEditProfile={setEditProfile}
+            addAddress={addAddress}
+            setAddAddress={setAddAddress}
+            editAddress={editAddress}
+            refetch={refetch}
+            setEditAddress={setEditAddress}
+            deleteUserHandler={deleteUserHandler}
+            accountDeleteStatus={accountDeleteStatus}
+            setAccountDeleteStatus={setAccountDeleteStatus}
+            isLoadingDelete={isLoadingDelete}
+          />
+        </CustomPaperBigCard>
+      )}
 
-      {page === "profile-settings" && !editProfile && !addAddress && (
+      {(page === "profile-settings" || page === "addresses") && !addAddress && (
         <CustomPaperBigCard padding="10px" noboxshadow={isSmall ? "" : "true"}>
           <Address
             configData={configData}

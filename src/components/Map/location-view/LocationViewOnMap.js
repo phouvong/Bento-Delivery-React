@@ -21,8 +21,10 @@ const LocationViewOnMap = (props) => {
     storeDetails,
     isFooter,
   } = props;
+
   const theme = useTheme();
   const [userLocation, setUserLocation] = useState({});
+  const [userAddress, setUserAddress] = useState("");
   const [rerenderMap, setRerenderMap] = useState(false);
   const { coords } = useGeolocated({
     positionOptions: {
@@ -44,11 +46,14 @@ const LocationViewOnMap = (props) => {
     }
   };
   let currentLatLng = undefined;
+  let storedAddress = "";
   if (typeof window !== "undefined") {
     currentLatLng = JSON.parse(window.localStorage.getItem("currentLatLng"));
+    storedAddress = window.localStorage.getItem("location") || "";
   }
   useEffect(() => {
     setUserLocation(currentLatLng);
+    setUserAddress(storedAddress);
   }, []);
 
   const handleCurrentLocation = () => {
@@ -57,12 +62,13 @@ const LocationViewOnMap = (props) => {
     }
     setRerenderMap((prvMap) => !prvMap);
   };
+
   return (
     <CustomModal openModal={open} handleClose={handleClose}>
       <Paper
         sx={{
           position: "relative",
-          width: { xs: "300px", sm: "450px", md: "550px" },
+          width: { xs: "100%", sm: "450px", md: "550px" },
           p: "15px",
         }}
       >
@@ -80,30 +86,23 @@ const LocationViewOnMap = (props) => {
         >
           <CloseIcon sx={{ fontSize: "16px" }} />
         </IconButton>
-        <CustomStackFullWidth>
-          {!isFooter && (
-            <Stack mb="10px">
-              <CustomImageContainer
-                src={storeDetails?.cover_photo_full_url}
-                objectfit="cover"
-                height="200px"
-              />
-              <Stack mt="10px" direction="row" justifyContent="space-between">
-                <Stack>
-                  <Typography fontSize="18px" fontWeight={500}>
-                    {storeDetails?.name}
-                  </Typography>
-                  <Typography fontSize="14px" fontWeight={500}>
-                    {address}
-                  </Typography>
-                </Stack>
-                <RoundedIconButton onClick={openGoogleMaps}>
-                  <DirectionsIcon color="primary" />
-                </RoundedIconButton>
-              </Stack>
-            </Stack>
+        <CustomStackFullWidth spacing={1}>
+          {storeDetails?.address && (
+            <Typography
+              sx={{
+                fontSize: { xs: "12px", md: "13px" },
+                fontWeight: 500,
+                color: theme.palette.text.secondary,
+                px: "4px",
+                pt: "2px",
+                pb: "4px",
+                wordBreak: "break-word",
+                lineHeight: 1.4,
+              }}
+            >
+              {storeDetails?.address}
+            </Typography>
           )}
-
           <Stack position="relative">
             <MapComponent
               latitude={latitude}
@@ -111,6 +110,8 @@ const LocationViewOnMap = (props) => {
               deliveryManLat={userLocation?.lat}
               deliveryManLng={userLocation?.lng}
               isFooter={isFooter}
+              resAddress={storeDetails?.address}
+              userAddress={userAddress}
             />
             {/*<RoundedIconButton*/}
             {/*  sx={{*/}

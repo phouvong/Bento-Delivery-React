@@ -205,7 +205,7 @@ const HeroLocationForm = () => {
   const onSuccessHandler = (response) => {
     dispatch(setWishList(response));
   };
-  const { refetch: wishlistRefetch } = useWishListGet(onSuccessHandler);
+  const { refetch: wishlistRefetch } = useWishListGet({}, false, onSuccessHandler);
   const setLocationEnable = async () => {
     setGeoLocationEnable(true);
     setZoneIdEnabled(true);
@@ -407,6 +407,7 @@ const HeroLocationForm = () => {
           closeModal={handleCloseModuleModal}
           setOpenModuleSelection={setOpenModuleSelection}
           disableAutoFocus
+          autoSelect
         />
       )}
     </>

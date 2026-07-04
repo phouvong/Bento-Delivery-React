@@ -1,7 +1,3 @@
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import PauseIcon from "@mui/icons-material/Pause";
 import {
   IconButton,
   NoSsr,
@@ -10,7 +6,6 @@ import {
   useTheme,
 } from "@mui/material";
 import { Box, Stack } from "@mui/system";
-import { FoodHalalHaram } from "components/cards/SpecialCard";
 import CustomModal from "../../modal";
 import { useEffect, useRef, useState } from "react";
 import ReactImageMagnify from "react-image-magnify";
@@ -25,14 +20,29 @@ import VideoPlayer from "./VideoPlayer";
 
 const ChildrenImageWrapper = styled(Box)(({ theme, index, image_index }) => ({
   cursor: "pointer",
-  border: index === image_index && `2px solid ${theme.palette.primary.main}`,
-  borderRadius: ".3rem",
+  border:
+    index === image_index
+      ? `1px solid ${theme.palette.primary.main}`
+      : `1px solid ${theme.palette.divider}`,
+  borderRadius: "10px",
   boxSizing: "border-box",
-  height: "100%",
   width: "100%",
-  //filter: "drop-shadow(0px 3.41085px 8.52713px rgba(0, 0, 0, 0.1))",
+  maxWidth: "52px",
+  aspectRatio: "1 / 1",
+  height: "auto",
+  maxHeight: "48px",
+  margin: "0 auto",
+  [theme.breakpoints.up("md")]: {
+    maxWidth: "56px",
+    maxHeight: "52px",
+  },
   position: "relative",
-  minHeight: "60px",
+  overflow: "hidden",
+  backgroundColor: theme.palette.background.paper,
+  transition: "border-color 0.15s ease, transform 0.15s ease",
+  "&:hover": {
+    borderColor: theme.palette.primary.main,
+  },
 }));
 
 const VIDEO_SENTINEL = "__VIDEO__";
@@ -79,6 +89,8 @@ const ProductImageView = ({
   isWishlisted,
   productDetailsData,
   videoMeta,
+  containerRadius = "12px",
+  onClose,
 }) => {
   const hasVideo = !!videoMeta;
   const [preViewImage, setPreViewImage] = useState(null);
@@ -157,6 +169,7 @@ const ProductImageView = ({
   }, [isVideoSelected, videoMeta?.inlineUrl]);
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const tempProduct = productImage;
   useEffect(() => {
     setPreViewImage(tempProduct);
@@ -169,13 +182,21 @@ const ProductImageView = ({
   const handleClick = (item, index) => {
     if (item === VIDEO_SENTINEL) {
       setIsVideoSelected(true);
-      setImageIndex(index);
     } else {
       setIsVideoSelected(false);
       setPreViewImage(item);
-      setImageIndex(index);
     }
+    setImageIndex(index);
   };
+
+  const goToSlide = (next) => {
+    if (next < 0 || next >= allThumbs.length) return;
+    handleClick(allThumbs[next], next);
+  };
+
+  const goPrev = () => goToSlide(imageIndex - 1);
+  const goNext = () => goToSlide(imageIndex + 1);
+
   const borderColor = theme.palette.primary.main;
   return (
     <Stack justifyContent="flex-start" spacing={2} width="100%" sx={{}}>
@@ -183,209 +204,338 @@ const ProductImageView = ({
         <Stack sx={{ position: "relative" }}>
           <Stack
             position="absolute"
-            right="10px"
-            top={{ xs: "48px", sm: "48px", md: "10px" }}
+            right={{ xs: "12px", md: "10px" }}
+            top={{ xs: "12px", md: "10px" }}
             zIndex="99"
           >
-            {isWishlisted ? (
-              <IconButton
-                sx={{
-                  backgroundColor: (theme) => theme.palette.neutral[300],
+            <IconButton
+              onClick={(e) =>
+                isWishlisted
+                  ? removeFromWishlistHandler(e)
+                  : addToWishlistHandler(e)
+              }
+              sx={{
+                width: 36,
+                height: 36,
+                borderRadius: { xs: "50%", md: "8px" },
+                backgroundColor: theme.palette.background.paper,
+                boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
+                "&:hover": {
+                  backgroundColor: theme.palette.background.paper,
+                  boxShadow: "0 3px 8px rgba(0,0,0,0.16)",
+                },
+              }}
+            >
+              <i
+                className={isWishlisted ? "fi fi-sr-heart" : "fi fi-rr-heart"}
+                style={{
+                  fontSize: "16px",
+                  display: "flex",
+                  lineHeight: 1,
+                  color: borderColor,
                 }}
-                onClick={(e) => removeFromWishlistHandler(e)}
-              >
-                <FavoriteIcon
-                  style={{
-                    width: "15px",
-                    height: "15px",
-                    color: borderColor,
-                  }}
-                />
-              </IconButton>
-            ) : (
+              />
+            </IconButton>
+          </Stack>
+          <Box
+            sx={{
+              position: "relative",
+              width: "100%",
+              height: { xs: "282px", md: "282px" },
+              aspectRatio: { xs: "auto", md: "1 / 1" },
+              borderRadius: containerRadius,
+              overflow: "hidden",
+            }}
+          >
+            {/* Close button — mobile only, scrolls with content */}
+            {onClose && isMobile && (
               <IconButton
+                onClick={onClose}
+                size="small"
                 sx={{
-                  backgroundColor: (theme) => theme.palette.neutral[300],
+                  position: "absolute",
+                  top: 12,
+                  left: 12,
+                  zIndex: 5,
+                  width: 28,
+                  height: 28,
+                  padding: 0,
+                  backgroundColor: "rgba(0,0,0,0.35)",
+                  borderRadius: "50%",
+                  "&:hover": { backgroundColor: "rgba(0,0,0,0.55)" },
                 }}
-                onClick={(e) => addToWishlistHandler(e)}
               >
-                <FavoriteBorderIcon
+                <i
+                  className="fi fi-rr-cross-small"
                   style={{
-                    width: "15px",
-                    height: "15px",
-                    color: borderColor,
+                    fontSize: 16,
+                    display: "flex",
+                    lineHeight: 1,
+                    color: "#fff",
                   }}
                 />
               </IconButton>
             )}
-          </Stack>
-          {isVideoSelected && hasVideo ? (
             <Box
-              className="magnify-container"
-              onClick={
-                videoMeta?.previewType === "upload" ? openVideoModal : undefined
-              }
               sx={{
                 position: "relative",
-                cursor:
-                  videoMeta?.previewType === "upload" ? "pointer" : "default",
                 width: "100%",
+                height: { xs: "282px", md: "282px" },
+                aspectRatio: { xs: "auto", md: "1 / 1" },
                 overflow: "hidden",
-                display: "flex !important",
-                alignItems: "center",
-                justifyContent: "center",
+                "& .magnify-container": {
+                  position: "absolute",
+                  inset: 0,
+                  width: "100% !important",
+                  height: "100% !important",
+                },
+                "& .magnify-container > div": {
+                  width: "100% !important",
+                  height: "100% !important",
+                  borderRadius: containerRadius,
+                  overflow: "hidden",
+                },
+                "& .magnify-image": {
+                  width: "100% !important",
+                  height: "100% !important",
+                  objectFit: "cover",
+                  borderRadius: containerRadius,
+                },
               }}
             >
-              {videoMeta.previewType === "upload" && videoMeta.inlineUrl ? (
-                <video
-                  key={videoMeta.inlineUrl}
-                  ref={inlineVideoRef}
-                  src={videoMeta.inlineUrl}
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  preload="auto"
-                  onPlay={() => setIsInlineVideoPlaying(true)}
-                  onPause={() => setIsInlineVideoPlaying(false)}
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    pointerEvents: "none",
-                  }}
-                />
-              ) : videoMeta.previewType === "embed" && videoMeta.inlineUrl ? (
-                <iframe
-                  key={videoMeta.inlineUrl}
-                  src={buildEmbedAutoplayUrl(videoMeta.inlineUrl)}
-                  title="Product video preview"
-                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                  allowFullScreen
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  loading="eager"
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    width: "100%",
-                    height: "100%",
-                    border: 0,
-                    pointerEvents: "none",
-                  }}
-                />
-              ) : (
-                // <Box
-                //   component="img"
-                //   src={videoMeta.thumbnailUrl}
-                //   alt="Video preview"
-                //   sx={{
-                //     position: "absolute",
-                //     inset: 0,
-                //     width: "100%",
-                //     height: "100%",
-                //     objectFit: "cover",
-                //     pointerEvents: "none",
-                //   }}
-                // />
-                <iframe
-                  src={buildEmbedAutoplayUrl(videoMeta.modalUrl)}
-                  title={productDetailsData?.name || "Product Video"}
-                  allow="autoplay; encrypted-media; picture-in-picture"
-                  // allowFullScreen
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    width: "100%",
-                    height: "100%",
-                    border: 0,
-                    pointerEvents: "auto",
-                  }}
-                />
-              )}
-              {videoMeta.previewType === "upload" && videoMeta.inlineUrl ? (
+              {isVideoSelected && hasVideo ? (
                 <Box
-                  onClick={toggleInlineVideo}
+                  onClick={
+                    videoMeta?.previewType === "upload"
+                      ? openVideoModal
+                      : undefined
+                  }
                   sx={{
-                    position: "absolute",
-                    inset: 0,
-                    margin: "auto",
-                    zIndex: 2,
-                    width: 56,
-                    height: 56,
-                    borderRadius: "50%",
-                    backgroundColor: "rgba(0,0,0,0.55)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    cursor: "pointer",
-                    transition: "background-color 0.2s",
-                    "&:hover": { backgroundColor: "rgba(0,0,0,0.75)" },
+                    position: "relative",
+                    width: "100%",
+                    height: { xs: "282px", md: "282px" },
+                    aspectRatio: { xs: "auto", md: "1 / 1" },
+                    cursor:
+                      videoMeta?.previewType === "upload"
+                        ? "pointer"
+                        : "default",
+                    overflow: "hidden",
+                    borderRadius: "12px",
+                    backgroundColor: theme.palette.neutral?.[100] || "#f5f5f5",
                   }}
                 >
-                  {isInlineVideoPlaying ? (
-                    <PauseIcon sx={{ color: "#fff", fontSize: 30 }} />
+                  {videoMeta?.previewType === "upload" &&
+                  videoMeta?.inlineUrl ? (
+                    <video
+                      key={videoMeta.inlineUrl}
+                      ref={inlineVideoRef}
+                      src={videoMeta.inlineUrl}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="auto"
+                      onPlay={() => setIsInlineVideoPlaying(true)}
+                      onPause={() => setIsInlineVideoPlaying(false)}
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        pointerEvents: "none",
+                      }}
+                    />
+                  ) : videoMeta?.previewType === "embed" &&
+                    videoMeta?.inlineUrl ? (
+                    <iframe
+                      key={videoMeta.inlineUrl}
+                      src={buildEmbedAutoplayUrl(videoMeta.inlineUrl)}
+                      title="Product video preview"
+                      allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                      allowFullScreen
+                      referrerPolicy="strict-origin-when-cross-origin"
+                      loading="eager"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        border: 0,
+                        pointerEvents: "none",
+                      }}
+                    />
                   ) : (
-                    <PlayArrowIcon
-                      sx={{ color: "#fff", fontSize: 30, ml: "2px" }}
+                    <iframe
+                      src={buildEmbedAutoplayUrl(videoMeta?.modalUrl)}
+                      title={productDetailsData?.name || "Product Video"}
+                      allow="autoplay; encrypted-media; picture-in-picture"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        border: 0,
+                        pointerEvents: "auto",
+                      }}
                     />
                   )}
+                  {videoMeta?.previewType === "upload" &&
+                  videoMeta?.inlineUrl ? (
+                    <Box
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleInlineVideo(e);
+                      }}
+                      sx={{
+                        position: "absolute",
+                        inset: 0,
+                        margin: "auto",
+                        zIndex: 2,
+                        width: 64,
+                        height: 64,
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(255,255,255,0.92)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.18)",
+                        transition: "transform 0.2s ease",
+                        "&:hover": { transform: "scale(1.05)" },
+                      }}
+                    >
+                      <i
+                        className={
+                          isInlineVideoPlaying
+                            ? "fi fi-sr-pause"
+                            : "fi fi-sr-play"
+                        }
+                        style={{
+                          color: "#1a1a1a",
+                          fontSize: 24,
+                          display: "flex",
+                          lineHeight: 1,
+                          marginLeft: isInlineVideoPlaying ? 0 : 3,
+                        }}
+                      />
+                    </Box>
+                  ) : null}
                 </Box>
-              ) : null}
-            </Box>
-          ) : (
-            <>
-              <ReactImageMagnify
-                className="magnify-container"
-                {...{
-                  smallImage: {
-                    alt: "image",
-                    isFluidWidth: true,
-                    src: preViewImage,
-                    objectFit: "cover",
-                  },
-                  imageClassName: "magnify-image",
-                  largeImage: {
-                    src: preViewImage,
-                    width: 1200,
-                    height: 1800,
-                    objectFit: "cover",
-                  },
-                  enlargedImageContainerStyle: {
-                    backgroundColor: theme.palette.neutral[100],
-                    zIndex: "1500",
-                  },
-                  enlargedImageContainerDimensions: {
-                    width: "150%",
-                    height: "100%",
-                  },
-                  enlargedImagePosition: isSmall ? "over" : "beside",
-                  enlargedImageContainerClassName:
-                    getLanguage() === "rtl" && "rtl-large-image",
-                }}
-              />
-              {productDetailsData?.halal_tag_status &&
-              productDetailsData?.is_halal ? (
-                <FoodHalalHaram width={30} />
               ) : (
-                ""
+                <ReactImageMagnify
+                  className="magnify-container"
+                  {...{
+                    smallImage: {
+                      alt: "image",
+                      isFluidWidth: true,
+                      src: preViewImage,
+                      objectFit: "cover",
+                    },
+                    imageClassName: "magnify-image",
+                    largeImage: {
+                      src: preViewImage,
+                      width: 1200,
+                      height: 1800,
+                      objectFit: "cover",
+                    },
+                    enlargedImageContainerStyle: {
+                      backgroundColor: theme.palette.neutral[100],
+                      zIndex: "1500",
+                    },
+                    enlargedImageContainerDimensions: {
+                      width: "150%",
+                      height: "100%",
+                    },
+                    enlargedImagePosition: isSmall ? "over" : "beside",
+                    enlargedImageContainerClassName:
+                      getLanguage() === "rtl" && "rtl-large-image",
+                  }}
+                />
               )}
-            </>
-          )}
+
+              {/* prev/next arrows pinned to bottom-left */}
+              {allThumbs.length > 1 && (
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  sx={{
+                    position: "absolute",
+                    bottom: 12,
+                    left: 12,
+                    zIndex: 3,
+                  }}
+                >
+                  <IconButton
+                    onClick={goPrev}
+                    disabled={imageIndex <= 0}
+                    sx={{
+                      width: 30,
+                      height: 30,
+                      backgroundColor: theme.palette.background.paper,
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                      "&.Mui-disabled": {
+                        opacity: 0.5,
+                        backgroundColor: theme.palette.background.paper,
+                      },
+                      "&:hover": {
+                        backgroundColor: theme.palette.background.paper,
+                        boxShadow: "0 3px 8px rgba(0,0,0,0.2)",
+                      },
+                    }}
+                  >
+                    <i
+                      className="fi fi-rs-angle-small-left"
+                      style={{
+                        fontSize: "14px",
+                        display: "flex",
+                        lineHeight: 1,
+                        color: theme.palette.text.primary,
+                      }}
+                    />
+                  </IconButton>
+                  <IconButton
+                    onClick={goNext}
+                    disabled={imageIndex >= allThumbs.length - 1}
+                    sx={{
+                      width: 30,
+                      height: 30,
+                      backgroundColor: theme.palette.background.paper,
+                      boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
+                      "&.Mui-disabled": {
+                        opacity: 0.5,
+                        backgroundColor: theme.palette.background.paper,
+                      },
+                      "&:hover": {
+                        backgroundColor: theme.palette.background.paper,
+                        boxShadow: "0 3px 8px rgba(0,0,0,0.2)",
+                      },
+                    }}
+                  >
+                    <i
+                      className="fi fi-rs-angle-small-right"
+                      style={{
+                        fontSize: "14px",
+                        display: "flex",
+                        lineHeight: 1,
+                        color: theme.palette.text.primary,
+                      }}
+                    />
+                  </IconButton>
+                </Stack>
+              )}
+            </Box>
+          </Box>
         </Stack>
       </NoSsr>
 
       {allThumbs?.length > 0 && (
         <SliderCustom
           sx={{
-            margin: {
-              xs: "58px 0px 0px 0px !important",
-              sm: "40px 0px 0px 0px !important",
-              md: "10px 0px 0px 0px !important",
-            },
+            margin: "12px 0px 0px 0px !important",
+            "& .slick-list": { padding: "2px 0" },
             "& .slick-track": { display: "flex", alignItems: "stretch" },
-            "& .slick-slide": { height: "auto" },
+            "& .slick-slide": { height: "auto", padding: "0 4px" },
             "& .slick-slide > div": { height: "100%" },
           }}
         >
@@ -408,7 +558,7 @@ const ProductImageView = ({
                         alignItems: "center",
                         justifyContent: "center",
                         overflow: "hidden",
-                        borderRadius: ".3rem",
+                        backgroundColor: "#2a2a2a",
                       }}
                     >
                       {videoMeta?.previewType === "upload" &&
@@ -423,6 +573,7 @@ const ProductImageView = ({
                             width: "100%",
                             height: "100%",
                             objectFit: "cover",
+                            opacity: 0.55,
                             pointerEvents: "none",
                           }}
                         />
@@ -437,25 +588,37 @@ const ProductImageView = ({
                             width: "100%",
                             height: "100%",
                             objectFit: "cover",
+                            opacity: 0.55,
                             pointerEvents: "none",
                           }}
                         />
                       )}
                       <Box
                         sx={{
-                          position: "relative",
-                          zIndex: 1,
-                          width: 24,
-                          height: 24,
+                          position: "absolute",
+                          top: "50%",
+                          left: "50%",
+                          transform: "translate(-50%, -50%)",
+                          zIndex: 2,
+                          width: 18,
+                          height: 18,
                           borderRadius: "50%",
-                          backgroundColor: "rgba(255,255,255,0.88)",
+                          backgroundColor: "rgba(255,255,255,0.92)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
+                          boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
                         }}
                       >
-                        <PlayArrowIcon
-                          sx={{ color: "#1a1a1a", fontSize: 16, ml: "2px" }}
+                        <i
+                          className="fi fi-sr-play"
+                          style={{
+                            color: "#1a1a1a",
+                            fontSize: 9,
+                            display: "flex",
+                            lineHeight: 1,
+                            marginLeft: "1.5px",
+                          }}
                         />
                       </Box>
                     </Box>

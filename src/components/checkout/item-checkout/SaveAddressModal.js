@@ -45,7 +45,7 @@ const SaveAddressModal = (props) => {
 
 	return (
 		<Stack
-			width={{ xs: "300px", sm: "400px", md: "458px" }}
+			width={{ xs: "100%", sm: "400px", md: "458px" }}
 			padding={{ xs: "1rem", sm: "1rem", md: "1.8rem" }}
 			spacing={{ xs: 1.3, sm: 1.5, md: 2.5 }}
 		>

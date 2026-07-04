@@ -1,5 +1,6 @@
 import { styled } from "@mui/material/styles";
-import { alpha, Button, Card, Typography, useTheme } from "@mui/material";
+import { alpha, Button, Card, Chip, Typography, useTheme } from "@mui/material";
+import WorkspacePremiumRoundedIcon from "@mui/icons-material/WorkspacePremiumRounded";
 import { Stack } from "@mui/system";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
 import { useTranslation } from "react-i18next";
@@ -41,6 +42,28 @@ const Coupon = (props) => {
   const { t } = useTranslation();
   const theme = useTheme();
 
+  // Pro-customer coupon detection. Primary signal is `coupon_type` (sits
+  // alongside "default", "first_order", "free_delivery", etc.). Backend also
+  // ships `customer_id` as a JSON-stringified array — fall back to that in
+  // case the type field is left as "default" but the audience is restricted.
+  const parsedCustomerIds = (() => {
+    const raw = coupon?.customer_id;
+    if (Array.isArray(raw)) return raw.map(String);
+    if (typeof raw === "string") {
+      try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed.map(String) : [];
+      } catch {
+        return [];
+      }
+    }
+    return [];
+  })();
+  const isProCoupon =
+    coupon?.coupon_type === "pro_customer" ||
+    parsedCustomerIds.includes("pro_customer") ||
+    parsedCustomerIds.includes("pro");
+
   const couponType = (coupon) => {
     if (coupon?.coupon_type === "store_wise") {
       return (
@@ -69,6 +92,14 @@ const Coupon = (props) => {
       return (
         <>
           {t("Only for First Order")}{" "}
+          {coupon?.store && <StoreNameWithBadge store={coupon?.store} />}
+        </>
+      );
+    }
+    if (coupon?.coupon_type === "pro_customer") {
+      return (
+        <>
+          {t("Only for Pro members")}{" "}
           {coupon?.store && <StoreNameWithBadge store={coupon?.store} />}
         </>
       );
@@ -116,6 +147,7 @@ const Coupon = (props) => {
     <Card
       elevation={9}
       sx={{
+        position: "relative",
         padding: ".5rem",
         boxShadow: `0px 2px 10px -3px ${(theme) =>
           alpha(theme.palette.primary.main, 0.1)}`,
@@ -123,6 +155,28 @@ const Coupon = (props) => {
         backdropFilter: "blur(5px)",
       }}
     >
+      {isProCoupon && (
+        <Chip
+          icon={
+            <WorkspacePremiumRoundedIcon sx={{ fontSize: "14px !important" }} />
+          }
+          label={t("Pro")}
+          size="small"
+          sx={{
+            position: "absolute",
+            top: 6,
+            right: 6,
+            height: "20px",
+            fontSize: "10px",
+            fontWeight: 700,
+            letterSpacing: "0.3px",
+            color: "#fff",
+            backgroundColor: theme.palette.primary.main,
+            "& .MuiChip-icon": { color: "#fff", ml: "4px" },
+            "& .MuiChip-label": { px: "6px" },
+          }}
+        />
+      )}
       <Stack alignItems="center" direction="row">
         <Stack alignItems="center" justifyContent="center" width="220px">
           {imageHandler()}

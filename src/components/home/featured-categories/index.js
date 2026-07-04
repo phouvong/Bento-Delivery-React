@@ -1,130 +1,148 @@
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useState } from "react";
+import { t } from "i18next";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
 import {
   CustomBoxFullWidth,
   SliderCustom,
 } from "styled-components/CustomStyles.style";
-import { styled } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
+import { Skeleton, Typography } from "@mui/material";
+import { useSelector } from "react-redux";
 import Slider from "react-slick";
 import { useGetFeaturedCategories } from "api-manage/hooks/react-query/all-category/all-categorys";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
-import { setFeaturedCategories } from "redux/slices/storedData";
-import { CustomButtonPrimary } from "styled-components/CustomButtons.style";
 import FoodCategoryCard from "../../cards/FoodCategoryCard";
-import PharmacyCategoryCard from "../../cards/PharmacyCategoryCard";
-import ShopCategoryCard from "../../cards/ShopCategoryCard";
 import { HomeComponentsWrapper } from "../HomePageComponents";
-import FeaturedItemCard from "./card";
-import { moduleWiseNext, moduleWisePrev } from "./sliderSettings";
-
-export const ButtonLeft = styled(CustomButtonPrimary)(
-  ({ theme, language_direction }) => ({
-    minWidth: "20px",
-    width: "10px",
-    height: "30px",
-    borderRadius: "50%",
-    transform: language_direction === "rtl" && "rotate(180deg)",
-  })
-);
-export const ButtonRight = styled(CustomButtonPrimary)(({ theme }) => ({
-  minWidth: "20px",
-  width: "10px",
-  height: "30px",
-  borderRadius: "50%",
-  color: "black",
-  background: theme.palette.neutral[200],
-  "&:hover": {
-    background: theme.palette.neutral[400],
-  },
-}));
+import SliderSectionHeader from "components/common/SliderSectionHeader";
 
 const FeaturedCategories = () => {
-  const dispatch = useDispatch();
   const { featuredCategories } = useSelector((state) => state.storedData);
   const slider = useRef(null);
-  const { data, isFetched, refetch, isLoading } = useGetFeaturedCategories();
-  const [isSliderHovered, setIsSliderHovered] = React.useState(false);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const { data, isLoading } = useGetFeaturedCategories();
 
-  const moduleWiseCard = () => {
-    switch (getCurrentModuleType()) {
-      case ModuleTypes.GROCERY:
-        return (
-          <CustomBoxFullWidth
-            sx={{
-              "& .slick-slider": {
+  const totalSlides = data?.data?.length ?? 0;
 
-              },
-            }}
-            onMouseEnter={() => setIsSliderHovered(true)}
-            onMouseLeave={() => setIsSliderHovered(false)}
-          >
-            <Slider {...settings} ref={slider}>
-              {[...data?.data].reverse().map((item, index) => {
-                return (
-                  <FeaturedItemCard
-                    key={index}
-                    image={item?.image_full_url}
-                    title={item?.name}
-                    id={item?.id}
-                    slug={item?.slug}
-                  />
-                );
-              })}
-            </Slider>
-          </CustomBoxFullWidth>
-        );
-      case ModuleTypes.PHARMACY:
-        return (
-          <div
-            onMouseEnter={() => setIsSliderHovered(true)}
-            onMouseLeave={() => setIsSliderHovered(false)}
-          >
-            <Slider {...settings} ref={slider}>
-              {[...data?.data].reverse()?.map((item, index) => {
-                return (
-                  <PharmacyCategoryCard
-                    key={index}
-                    image={item?.image_full_url}
-                    title={item?.name}
-                    slug={item?.slug}
-                    id={item?.id}
-                  />
-                );
-              })}
-            </Slider>
-          </div>
-        );
-      case ModuleTypes.ECOMMERCE:
-        return (
-          <div
-            onMouseEnter={() => setIsSliderHovered(true)}
-            onMouseLeave={() => setIsSliderHovered(false)}
-          >
-            <Slider {...shopCategorySliderSettings} ref={slider}>
-              {data?.data?.map((item, index) => {
-                return (
-                  <ShopCategoryCard
-                    key={index}
-                    imageUrl={item?.image_full_url}
-                    item={item}
-                  />
-                );
-              })}
-            </Slider>
-          </div>
-        );
-      case ModuleTypes.FOOD:
-        return (
-          <div
-            onMouseEnter={() => setIsSliderHovered(true)}
-            onMouseLeave={() => setIsSliderHovered(false)}
-          >
+  const foodCategorySliderSettings = {
+    dots: false,
+    infinite: featuredCategories.length >= 7,
+    speed: 300,
+    slidesToShow: 8.4,
+    slidesToScroll: 3,
+    swipeToSlide: true,
+    arrows: false,
+    responsive: [
+      {
+        breakpoint: 1450,
+        settings: {
+          slidesToShow: 8.4,
+          slidesToScroll: 3,
+          swipeToSlide: true,
+          infinite: featuredCategories.length >= 8,
+        },
+      },
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 7.8,
+          slidesToScroll: 3,
+          swipeToSlide: true,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 500,
+        settings: {
+          slidesToShow: 4.5,
+          slidesToScroll: 1,
+          swipeToSlide: true,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 400,
+        settings: {
+          slidesToShow: 4.5,
+          slidesToScroll: 1,
+          swipeToSlide: true,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 350,
+        settings: {
+          slidesToShow: 4,
+          slidesToScroll: 1,
+          swipeToSlide: true,
+          infinite: false,
+        },
+      },
+    ],
+  };
+
+  const sliderSx = {
+    "& .slick-slider": {
+      "& .slick-list": {
+        margin: { xs: "0", md: "0 -6px" },
+      },
+      "& .slick-slide": {
+        padding: { xs: "0px", md: "6px" },
+        paddingBottom: { xs: "5px", sm: "10px" },
+      },
+    },
+  };
+
+  const sectionTitle = {
+    [ModuleTypes.FOOD]: t("Find Your Flavour"),
+    [ModuleTypes.GROCERY]: t("Shop by Categories"),
+    [ModuleTypes.PHARMACY]: t("Shop by Categories"),
+    [ModuleTypes.ECOMMERCE]: t("Explore Categories"),
+  }[getCurrentModuleType()] ?? t("Find Your Flavour");
+
+  return (
+    <CustomBoxFullWidth>
+      {isLoading ? (
+        <HomeComponentsWrapper>
+          <SliderCustom sx={sliderSx}>
             <Slider {...foodCategorySliderSettings} ref={slider}>
-              {data?.data?.map((item, index) => {
-                return (
+              {[...Array(9)]?.map((_, index) => (
+                <FoodCategoryCard key={index} onlyshimmer />
+              ))}
+            </Slider>
+          </SliderCustom>
+        </HomeComponentsWrapper>
+      ) : (
+        data?.data &&
+        data?.data.length > 0 && (
+          <HomeComponentsWrapper sx={{ gap: "1rem" }}>
+            <SliderSectionHeader
+              sliderRef={slider}
+              currentSlide={currentSlide}
+              totalSlides={totalSlides}
+              slidesToShow={8.4}
+              heading={
+                <Typography
+                  sx={{
+                    fontSize: { xs: "14px", md: "24px" },
+                    fontWeight: 700,
+                    color: "neutral.1050",
+                    lineHeight: 1.1,
+                    letterSpacing: "-0.48px",
+                    display: { xs: "none", sm: "block" },
+                  }}
+                >
+                  {sectionTitle}
+                </Typography>
+              }
+            />
+            <SliderCustom sx={sliderSx}>
+              <Slider
+                {...foodCategorySliderSettings}
+                ref={slider}
+                afterChange={(idx) => setCurrentSlide(idx)}
+              >
+                {data?.data?.map((item) => (
                   <FoodCategoryCard
                     key={item?.id}
                     id={item?.id}
@@ -134,421 +152,9 @@ const FeaturedCategories = () => {
                     categoryImageUrl={item?.image_full_url}
                     height="40px"
                   />
-                );
-              })}
-            </Slider>
-          </div>
-        );
-    }
-  };
-
-  const moduleWiseCardShimmer = () => {
-    switch (getCurrentModuleType()) {
-      case ModuleTypes.GROCERY:
-        return (
-          <CustomBoxFullWidth
-            onMouseEnter={() => setIsSliderHovered(true)}
-            onMouseLeave={() => setIsSliderHovered(false)}
-
-          >
-            <Slider {...settings} ref={slider}>
-              {[...Array(10)]?.map((item, index) => {
-                return <FeaturedItemCard key={index} onlyshimmer />;
-              })}
-            </Slider>
-          </CustomBoxFullWidth>
-        );
-
-      case ModuleTypes.PHARMACY:
-        return (
-          <div
-            onMouseEnter={() => setIsSliderHovered(true)}
-            onMouseLeave={() => setIsSliderHovered(false)}
-          >
-            <Slider {...settings} ref={slider}>
-              {[...Array(10)]?.map((_, index) => {
-                return <PharmacyCategoryCard key={index} onlyshimmer />;
-              })}
-            </Slider>
-          </div>
-        );
-      case ModuleTypes.ECOMMERCE:
-        return (
-          <div
-            onMouseEnter={() => setIsSliderHovered(true)}
-            onMouseLeave={() => setIsSliderHovered(false)}
-          >
-            <Slider {...shopCategorySliderSettings} ref={slider}>
-              {[...Array(6)]?.map((_, index) => {
-                return <ShopCategoryCard key={index} onlyshimmer />;
-              })}
-            </Slider>
-          </div>
-        );
-      case ModuleTypes.FOOD:
-        return (
-          <div
-            onMouseEnter={() => setIsSliderHovered(true)}
-            onMouseLeave={() => setIsSliderHovered(false)}
-          >
-            <Slider {...foodCategorySliderSettings} ref={slider}>
-              {[...Array(8)]?.map((item, index) => {
-                return <FoodCategoryCard key={index} onlyshimmer />;
-              })}
-            </Slider>
-          </div>
-        );
-    }
-  };
-
-  const shopCategorySliderSettings = {
-    dots: false,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 5,
-    slidesToScroll: 1,
-    nextArrow: moduleWiseNext(isSliderHovered),
-    prevArrow: moduleWisePrev(isSliderHovered),
-
-    responsive: [
-      {
-        breakpoint: 1450,
-        settings: {
-          slidesToShow: 5,
-          slidesToScroll: 3,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 1210,
-        settings: {
-          slidesToShow: 4.5,
-          slidesToScroll: 3,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 1100,
-        settings: {
-          slidesToShow: 4,
-          slidesToScroll: 3,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 4,
-          slidesToScroll: 2,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 980,
-        settings: {
-          slidesToShow: 3.8,
-          slidesToScroll: 3,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 840,
-        settings: {
-          slidesToShow: 3.2,
-          slidesToScroll: 2,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 785,
-        settings: {
-          slidesToShow: 3,
-          slidesToScroll: 2,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 730,
-        settings: {
-          slidesToShow: 2.5,
-          slidesToScroll: 1,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 630,
-        settings: {
-          slidesToShow: 2.3,
-          slidesToScroll: 1,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 570,
-        settings: {
-          slidesToShow: 2.1,
-          slidesToScroll: 1,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 520,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 500,
-        settings: {
-          slidesToShow: 1.8,
-          slidesToScroll: 1,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 460,
-        settings: {
-          slidesToShow: 1.6,
-          slidesToScroll: 1,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 400,
-        settings: {
-          slidesToShow: 1.5,
-          slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 374,
-        settings: {
-          slidesToShow: 1.4,
-          slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 280,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-        },
-      },
-    ],
-  };
-
-  const settings = {
-    dots: false,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 8.5,
-
-    nextArrow: moduleWiseNext(isSliderHovered),
-    prevArrow: moduleWisePrev(isSliderHovered),
-    currentSlide: 0,
-    rtl: true,
-
-    responsive: [
-      {
-        breakpoint: 1650,
-        settings: {
-          slidesToShow: 8,
-          //slidesToScroll: 3,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 1450,
-        settings: {
-          slidesToShow: 7,
-          //slidesToScroll: 3,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 6.5,
-          //slidesToScroll: 2,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 840,
-        settings: {
-          slidesToShow: 6.5,
-          //slidesToScroll: 2,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 790,
-        settings: {
-          slidesToShow: 6,
-          //slidesToScroll: 3,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 700,
-        settings: {
-          slidesToShow: 5,
-          //slidesToScroll: 2,
-          initialSlide: 2,
-        },
-      },
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 4.2,
-          //slidesToScroll: 2,
-          initialSlide: 2,
-        },
-      },
-      {
-        breakpoint: 475,
-        settings: {
-          slidesToShow: 3.9,
-          //slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 450,
-        settings: {
-          slidesToShow: 3.7,
-          //slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 420,
-        settings: {
-          slidesToShow: 3.3,
-          //slidesToScroll: 1,
-        },
-      },
-      {
-        breakpoint: 375,
-        settings: {
-          slidesToShow: 2.7,
-          //slidesToScroll: 1,
-        },
-      },
-    ],
-  };
-
-  const foodCategorySliderSettings = {
-    dots: false,
-    infinite: featuredCategories.length >= 7,
-    speed: 500,
-    slidesToShow: 7,
-    slidesToScroll: 3,
-    // autoplay: true,
-    nextArrow: moduleWiseNext(isSliderHovered),
-    prevArrow: moduleWisePrev(isSliderHovered),
-    responsive: [
-      {
-        breakpoint: 1450,
-        settings: {
-          slidesToShow: 8,
-          slidesToScroll: 3,
-          infinite: featuredCategories.length >= 8,
-        },
-      },
-      {
-        breakpoint: 1024,
-        settings: {
-          slidesToShow: 6,
-          slidesToScroll: 3,
-          infinite: featuredCategories.length >= 6,
-        },
-      },
-      {
-        breakpoint: 850,
-        settings: {
-          slidesToShow: 5,
-          slidesToScroll: 3,
-          infinite: featuredCategories.length >= 5,
-        },
-      },
-      {
-        breakpoint: 790,
-        settings: {
-          slidesToShow: 4.5,
-          slidesToScroll: 3,
-          infinite: featuredCategories.length >= 5,
-        },
-      },
-
-      {
-        breakpoint: 600,
-        settings: {
-          slidesToShow: 7,
-          slidesToScroll: 3,
-          initialSlide: 2,
-          infinite: featuredCategories.length >= 7,
-        },
-      },
-      {
-        breakpoint: 500,
-        settings: {
-          slidesToShow: 5,
-          slidesToScroll: 3,
-          infinite: featuredCategories.length >= 5,
-        },
-      },
-    ],
-  };
-
-  return (
-    <CustomBoxFullWidth>
-      {isLoading ? (
-        <HomeComponentsWrapper>
-          <SliderCustom
-            sx={{
-              "& .slick-slider": {
-                "& .slick-slide": {
-                  padding: { xs: "0px", md: "6px" },
-                  paddingBottom: {
-                    xs: "5px",
-                    sm: "10px",
-                    md: "20px !important",
-                  },
-                },
-              },
-            }}
-            onMouseEnter={() => setIsSliderHovered(true)}
-            onMouseLeave={() => setIsSliderHovered(false)}
-          >
-            {moduleWiseCardShimmer()}
-          </SliderCustom>
-        </HomeComponentsWrapper>
-      ) : (
-        data?.data &&
-        data?.data.length > 0 && (
-          <HomeComponentsWrapper>
-            {data?.data && data?.data.length > 0 && (
-              <SliderCustom
-                sx={{
-                  "& .slick-slider": {
-                    "& .slick-slide": {
-                      padding: { xs: "0px", md: "6px" },
-                      paddingBottom: {
-                        xs: "5px",
-                        sm: "10px",
-                        
-                      },
-                    },
-                  },
-                }}
-                onMouseEnter={() => setIsSliderHovered(true)}
-                onMouseLeave={() => setIsSliderHovered(false)}
-              >
-                {moduleWiseCard()}
-                {/*{moduleWiseCardShimmer()}*/}
-              </SliderCustom>
-            )}
+                ))}
+              </Slider>
+            </SliderCustom>
           </HomeComponentsWrapper>
         )
       )}

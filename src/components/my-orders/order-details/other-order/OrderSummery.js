@@ -11,7 +11,7 @@ import {
   Button,
 } from "@mui/material";
 import adminImage from "../../../../../public/static/profile/fi_4460756 (1).png";
-import { Stack } from "@mui/system";
+import { Box, Stack } from "@mui/system";
 import { FoodHalalHaram } from "components/cards/SpecialCard";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
 import React, { memo, useEffect, useState } from "react";
@@ -30,6 +30,7 @@ import PrescriptionOrderCalculation from "../prescription-order/PerscriptionOrde
 import PrescriptionOrderSummery from "../prescription-order/PrescriptionOrderSummery";
 import SingleOrderAttachment from "../singleOrderAttachment";
 import InstructionBox from "./InstructionBox";
+import StatusBadge from "components/common/StatusBadge";
 import OrderCalculation from "./OrderCalculation";
 import { getImageUrl } from "utils/CustomFunctions";
 import { WrapperForCustomDialogConfirm } from "components/custom-dialog/confirm/CustomDialogConfirm.style";
@@ -136,30 +137,20 @@ const OrderSummery = (props) => {
         <Grid container pr={{ xs: "0px", sm: "0px", md: "40px" }}>
           <Grid container item md={8} xs={12}>
             <Grid item xs={12} sm={12} md={12}>
-              {/* {!data?.prescription_order &&
-                trackOrderData?.module_type === "pharmacy" &&
-                trackOrderData?.order_attachment_full_url && trackOrderData?.attachment && (
-                  <SingleOrderAttachment
-                    title="Prescription"
-                    trackOrderData={trackOrderData}
-                    configData={configData}
-                  />
-                )} */}
-
               {!data?.prescription_order &&
-                trackOrderData?.module_type === "pharmacy" &&
-                trackOrderData?.order_attachment_full_url &&
-                trackOrderData?.order_attachment_full_url?.length &&
-                trackOrderData?.order_attachment && (
-                  <SingleOrderAttachment
-                    title="Prescription"
-                    trackOrderData={trackOrderData}
-                    configData={configData}
-                  />
-                )}
-              {data?.prescription_order && (
+              trackOrderData?.module_type === "pharmacy" &&
+              trackOrderData?.order_attachment_full_url &&
+              trackOrderData?.order_attachment_full_url?.length &&
+              trackOrderData?.order_attachment ? (
+                <SingleOrderAttachment
+                  title="Prescription"
+                  trackOrderData={trackOrderData}
+                  configData={configData}
+                />
+              ) : null}
+              {data?.prescription_order ? (
                 <PrescriptionOrderSummery data={data} />
-              )}
+              ) : null}
               {data &&
                 data?.length > 0 &&
                 data?.map((product) => (
@@ -260,169 +251,260 @@ const OrderSummery = (props) => {
               sm={12}
               md={12}
               pl={{ xs: "0px", sm: "20px", md: "25px" }}
+              mt="8px"
             >
-              <CustomStackFullWidth
-                direction={{ xs: "column", md: "row" }}
+              {/* Address + Payment + Cutlery — 2-column grid on sm+ */}
+              <Box
                 sx={{
-                  flexWrap: "wrap",
-                  //justifyContent: "space-between",
-                  padding: { xs: "0px , 20px", md: "0px 25px" },
-                  gap: { xs: "10px", md: "0px" },
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", sm: "1fr 2fr" },
+                  gridTemplateRows: "auto",
+                  gap: "12px",
+                  alignItems: "start",
                 }}
               >
-                <Stack spacing={1}>
-                  <Typography
-                    fontSize={{ xs: "14px", md: "16px" }}
-                    fontWeight="500"
-                  >
-                    {t("Address")}
-                  </Typography>
-                  <Typography
-                    fontSize={{ xs: "12px", md: "14px" }}
-                    fontWeight="400"
-                    color={theme.palette.neutral[500]}
-                    width="215px"
-                    lineHeight="25px"
-                  >
-                    {trackOrderData?.delivery_address?.address}
-                  </Typography>
-                </Stack>
-                {!isSmall && (
+                {/* Left column: Address + Cutlery stacked */}
+                <Stack gap="12px">
+                  {/* Address card */}
                   <Stack
-                    sx={{
-                      borderLeft: (theme) =>
-                        `3px solid ${alpha(theme.palette.neutral[400], 0.2)}`,
-                      paddingLeft: "30px",
-
-                      height: "100p%",
-                    }}
-                  ></Stack>
-                )}
-                <Stack flex={1}>
-                  <Stack
-                    width="100%"
                     spacing={1}
-                    flexDirection="row"
-                    justifyContent="space-between"
+                    sx={{
+                      border: (t) =>
+                        `1px solid ${alpha(t.palette.neutral[400], 0.2)}`,
+                      borderRadius: "14px",
+                      padding: { xs: "14px", md: "16px" },
+                    }}
                   >
-                    <Stack gap="12px" width="100%">
+                    <Typography
+                      sx={{
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        letterSpacing: "0.5px",
+                        textTransform: "uppercase",
+                        color:
+                          theme.palette.neutral?.[500] ||
+                          theme.palette.text.secondary,
+                      }}
+                    >
+                      {t("Delivery Address")}
+                    </Typography>
+                    {trackOrderData?.delivery_address?.contact_person_name && (
+                      <Typography
+                        sx={{
+                          fontSize: "14px",
+                          fontWeight: 700,
+                          color: theme.palette.text.primary,
+                          textTransform: "capitalize",
+                        }}
+                      >
+                        {trackOrderData.delivery_address.contact_person_name}
+                      </Typography>
+                    )}
+                    <Typography
+                      sx={{
+                        fontSize: "13px",
+                        fontWeight: 500,
+                        color: theme.palette.text.primary,
+                        lineHeight: 1.55,
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {trackOrderData?.delivery_address?.address || "—"}
+                    </Typography>
+                  </Stack>
+
+                  {/* Cutlery card (inside left column) — food orders only */}
+                  {trackOrderData?.module_type === "food" &&
+                    trackOrderData?.cutlery && (
                       <Stack
-                        direction="row"
-                        alignItems="center"
-                        justifyContent="space-between"
-                        width="100%"
+                        spacing={1}
+                        sx={{
+                          border: (t) =>
+                            `1px solid ${alpha(t.palette.neutral[400], 0.2)}`,
+                          borderRadius: "14px",
+                          padding: { xs: "14px", md: "16px" },
+                        }}
                       >
                         <Typography
-                          fontSize={{ xs: "14px", md: "16px" }}
-                          fontWeight="500"
-                        >
-                          {t("Payment")}
-                        </Typography>
-                        <Typography
-                          fontSize={{ xs: "14px", md: "14px" }}
-                          fontWeight="500"
-                          color={theme.palette.primary.main}
                           sx={{
-                            padding: "3px 5px",
-                            backgroundColor: alpha(
-                              theme.palette.primary.main,
-                              0.2,
-                            ),
-                            borderRadius: "5px",
-                            textTransform: "capitalize",
+                            fontSize: "11px",
+                            fontWeight: 700,
+                            letterSpacing: "0.5px",
+                            textTransform: "uppercase",
+                            color:
+                              theme.palette.neutral?.[500] ||
+                              theme.palette.text.secondary,
                           }}
                         >
-                          {trackOrderData?.payment_status.replace("_", " ")}
+                          {t("Cutlery")}
                         </Typography>
-                      </Stack>
-                      {trackOrderData?.payment_method ? (
-                        <CustomStackFullWidth flexDirection="row">
-                          <CashSvg />
-                          <Typography
-                            padding={"0px 10px"}
-                            fontSize={{ xs: "12px", md: "14px" }}
-                            fontWeight="400"
-                            color={theme.palette.neutral[500]}
-                            width="215px"
-                            lineHeight="25px"
-                            textTransform="capitalize"
-                          >
-                            {t(
-                              trackOrderData?.payment_method.replaceAll(
-                                "_",
-                                " ",
-                              ),
-                            )}
-                          </Typography>
-                        </CustomStackFullWidth>
-                      ) : (
-                        <Skeleton width="100px" variant="text" />
-                      )}
-                      {isPaymentFailed() && (
-                        <Typography
-                          sx={{ maxWidth: "336px" }}
-                          fontSize={{ xs: "12px", md: "14px" }}
-                          fontWeight="400"
-                          color={theme.palette.neutral[500]}
+                        <Box
+                          sx={{
+                            display: "inline-flex",
+                            alignSelf: "flex-start",
+                            px: 1.25,
+                            py: 0.5,
+                            borderRadius: "999px",
+                            backgroundColor: alpha(
+                              theme.palette.success.main,
+                              0.12,
+                            ),
+                            color: theme.palette.success.main,
+                            border: `1px solid ${alpha(
+                              theme.palette.success.main,
+                              0.25,
+                            )}`,
+                            fontSize: "12px",
+                            fontWeight: 700,
+                            textTransform: "capitalize",
+                            lineHeight: 1.4,
+                          }}
                         >
-                          {t(
-                            "Your payment was incomplete. Please choose an option below to complete your transaction.",
-                          )}
-                        </Typography>
-                      )}
-                      {isPaymentFailed() && (
-                        <Stack direction="row" spacing={1} width="100%">
-                          {getToken() && (
-                            <Button
-                              variant="contained"
-                              fullWidth
-                              onClick={() => setOpenPaymentMethod(true)}
+                          {t("Included")}
+                        </Box>
+                      </Stack>
+                    )}
+                </Stack>
+
+                {/* Payment card (right column, spans full height) */}
+                <Stack
+                  spacing={1.25}
+                  sx={{
+                    border: (t) =>
+                      `1px solid ${alpha(t.palette.neutral[400], 0.2)}`,
+                    borderRadius: "14px",
+                    padding: { xs: "14px", md: "16px" },
+                  }}
+                >
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    justifyContent="space-between"
+                    gap={1}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: "11px",
+                        fontWeight: 700,
+                        letterSpacing: "0.5px",
+                        textTransform: "uppercase",
+                        color:
+                          theme.palette.neutral?.[500] ||
+                          theme.palette.text.secondary,
+                      }}
+                    >
+                      {t("Payment")}
+                    </Typography>
+                    <Stack direction="row" alignItems="center" gap="6px">
+                      <StatusBadge
+                        status={trackOrderData?.payment_status}
+                        label={(() => {
+                          const s =
+                            trackOrderData?.payment_status?.replace(
+                              /_/g,
+                              " ",
+                            ) ?? "";
+                          return s.charAt(0).toUpperCase() + s.slice(1);
+                        })()}
+                      />
+                      {trackOrderData?.payment_method === "offline_payment" &&
+                        trackOrderData?.offline_payment && (
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            gap={0.5}
+                            onClick={handleClickOffline}
+                            sx={{ cursor: "pointer" }}
+                          >
+                            <Typography
+                              component="span"
+                              fontSize="11px"
+                              sx={{
+                                textTransform: "capitalize",
+                                px: "8px",
+                                py: "2px",
+                                borderRadius: "999px",
+                                backgroundColor: alpha(
+                                  buttonBackgroundColor(),
+                                  0.14,
+                                ),
+                                color: buttonBackgroundColor(),
+                                fontWeight: 700,
+                                border: `1px solid ${alpha(
+                                  buttonBackgroundColor(),
+                                  0.3,
+                                )}`,
+                              }}
                             >
-                              {t("Pay Now")}
-                            </Button>
-                          )}
-                          <LoadingButton
-                            variant="outlined"
-                            loading={repayOrderLoading}
-                            fullWidth
-                            onClick={handlePayment}
-                          >
-                            {t("Switch to COD")}
-                          </LoadingButton>
-                        </Stack>
-                      )}
-                    </Stack>
-                    {trackOrderData?.payment_method === "offline_payment" &&
-                      trackOrderData?.offline_payment && (
-                        <Stack alignItems="flex-end" gap="5px">
-                          <Typography
-                            component="span"
-                            fontSize="12px"
-                            sx={{
-                              textTransform: "capitalize",
-                              padding: "4px",
-                              marginLeft: "15px",
-                              borderRadius: "3px",
-                              backgroundColor: buttonBackgroundColor(),
-                              color: theme.palette.whiteContainer.main,
-                              fontWeight: "600",
-                              marginTop: "-8px",
-                            }}
-                          >
-                            {/* {trackData?.order_status.replace("_", " ")} */}
-                            {trackOrderData?.offline_payment?.data?.status}
-                          </Typography>
-                          {trackOrderData?.offline_payment &&
-                          trackOrderData?.payment_method ===
-                            "offline_payment" ? (
+                              {trackOrderData?.offline_payment?.data?.status}
+                            </Typography>
                             <ExpandMoreIcon
-                              onClick={handleClickOffline}
-                              sx={{ cursor: "pointer" }}
+                              sx={{
+                                fontSize: "20px",
+                                color: theme.palette.neutral[500],
+                                transform: openOfflineDetails
+                                  ? "rotate(180deg)"
+                                  : "none",
+                                transition: "transform 0.2s ease",
+                              }}
                             />
-                          ) : null}
-                        </Stack>
-                      )}
+                          </Stack>
+                        )}
+                    </Stack>
                   </Stack>
+
+                  {trackOrderData?.payment_method ? (
+                    <Stack direction="row" alignItems="center" gap="8px">
+                      <CashSvg />
+                      <Typography
+                        sx={{
+                          fontSize: "14px",
+                          fontWeight: 700,
+                          color: theme.palette.text.primary,
+                          textTransform: "capitalize",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        {t(trackOrderData?.payment_method.replaceAll("_", " "))}
+                      </Typography>
+                    </Stack>
+                  ) : (
+                    <Skeleton width="100px" variant="text" />
+                  )}
+
+                  {isPaymentFailed() && (
+                    <Typography
+                      fontSize={{ xs: "12px", md: "13px" }}
+                      fontWeight="400"
+                      color={theme.palette.neutral[500]}
+                    >
+                      {t(
+                        "Your payment was incomplete. Please choose an option below to complete your transaction.",
+                      )}
+                    </Typography>
+                  )}
+                  {isPaymentFailed() && (
+                    <Stack direction="row" spacing={1} width="100%">
+                      {getToken() && (
+                        <Button
+                          variant="contained"
+                          fullWidth
+                          onClick={() => setOpenPaymentMethod(true)}
+                        >
+                          {t("Pay Now")}
+                        </Button>
+                      )}
+                      <LoadingButton
+                        variant="outlined"
+                        loading={repayOrderLoading}
+                        fullWidth
+                        onClick={handlePayment}
+                      >
+                        {t("Switch to COD")}
+                      </LoadingButton>
+                    </Stack>
+                  )}
+
                   {openOfflineDetails &&
                     (trackOrderData?.payment_method === "offline_payment" ||
                       partialWithOffline) && (
@@ -445,7 +527,7 @@ const OrderSummery = (props) => {
                         direction="row"
                         spacing={1}
                         width="100%"
-                        marginTop="15px"
+                        marginTop="8px"
                       >
                         <LoadingButton
                           variant="outlined"
@@ -506,43 +588,7 @@ const OrderSummery = (props) => {
                     </CustomModal>
                   )}
                 </Stack>
-                {!isSmall && trackOrderData?.unavailable_item_note && (
-                  <Stack
-                    sx={{
-                      borderLeft: (theme) =>
-                        `3px solid ${alpha(theme.palette.neutral[400], 0.2)}`,
-                      paddingLeft: "30px",
-
-                      height: "100px",
-                    }}
-                  ></Stack>
-                )}
-
-                {trackOrderData?.cutlery && (
-                  <Stack
-                    spacing={1}
-                    sx={{ ":last-child": { marginLeft: "0px" } }}
-                  >
-                    <Typography
-                      fontSize={{ xs: "14px", md: "16px" }}
-                      fontWeight="500"
-                      textTransform="capitalize"
-                    >
-                      {t("Cutlery")}
-                    </Typography>
-                    <Typography
-                      fontSize={{ xs: "12px", md: "14px" }}
-                      fontWeight="400"
-                      color={theme.palette.neutral[500]}
-                      width="215px"
-                      lineHeight="25px"
-                      textTransform="capitalize"
-                    >
-                      {t("Yes")}
-                    </Typography>
-                  </Stack>
-                )}
-              </CustomStackFullWidth>
+              </Box>
             </Grid>
             <Grid
               item

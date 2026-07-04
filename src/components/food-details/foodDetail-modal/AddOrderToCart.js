@@ -1,15 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { alpha, Grid, Stack, Typography, useTheme } from "@mui/material";
-import { PrimaryButton } from "../../Map/map.style";
-import { useDispatch, useSelector } from "react-redux";
-import { useAddToWishlist } from "../../../api-manage/hooks/react-query/wish-list/useAddWishList";
-import {
-  addWishList,
-  removeWishListItem,
-} from "../../../redux/slices/wishList";
-import toast from "react-hot-toast";
-import { not_logged_in_message } from "../../../utils/toasterMessages";
-import { useWishListDelete } from "../../../api-manage/hooks/react-query/wish-list/useWishListDelete";
+import React from "react";
+import { Button, Stack, Typography, alpha, useTheme } from "@mui/material";
 import moment from "moment";
 import Loading from "../../custom-loading/Loading";
 
@@ -19,270 +9,119 @@ const AddOrderToCart = (props) => {
     product,
     t,
     addToCard,
-    orderNow,
-    router,
     isScheduled,
     isLoading,
     updateIsLoading,
+    requiresSelection,
+    requiredLabel,
   } = props;
-  const [wishListCount, setWishListCount] = useState(
-    product?.wishlist_count || 0
-  );
   const theme = useTheme();
-  const handleBuyNowClick = () => {
-    addToCard?.("buy_now");
+
+  const handleBuyNowClick = () => addToCard?.("buy_now");
+  const inCart = isInCart?.(product?.id);
+
+  const primaryButtonSx = {
+    flex: 1,
+    height: 44,
+    borderRadius: "10px",
+    textTransform: "none",
+    fontWeight: 700,
+    fontSize: { xs: "13px", md: "14px" },
+    boxShadow: "none",
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.background.paper,
+    "&:hover": {
+      boxShadow: "none",
+      backgroundColor: theme.palette.primary.dark,
+    },
+    "&.Mui-disabled": {
+      color: theme.palette.text.secondary,
+      backgroundColor: alpha(theme.palette.text.primary, 0.08),
+    },
   };
 
-  const { wishLists } = useSelector((state) => state.wishList);
-  const dispatch = useDispatch();
-  let token = undefined;
-  if (typeof window !== "undefined") {
-    token = localStorage.getItem("token");
+  const buyNowSx = {
+    ...primaryButtonSx,
+    backgroundColor:
+      theme.palette.customColor?.buyButton || theme.palette.warning.light,
+    color: theme.palette.text.primary,
+    "&:hover": {
+      backgroundColor:
+        theme.palette.customColor?.buyButton || theme.palette.warning.main,
+      boxShadow: "none",
+    },
+  };
+
+  if (isScheduled === "false") {
+    return (
+      <Stack
+        spacing={0.5}
+        alignItems="center"
+        justifyContent="center"
+        sx={{
+          backgroundColor: alpha(theme.palette.primary.main, 0.12),
+          borderRadius: "10px",
+          py: 1,
+          px: 1.5,
+          width: "100%",
+        }}
+      >
+        <Typography fontSize="14px" fontWeight={700}>
+          {t("Not Available now")}
+        </Typography>
+        <Stack
+          direction="row"
+          alignItems="center"
+          spacing={0.5}
+          flexWrap="wrap"
+          justifyContent="center"
+        >
+          <Typography fontSize="12px">{t("Available will be")}</Typography>
+          <Typography fontSize="12px" fontWeight={600}>
+            {`${moment(product?.available_time_starts, ["HH:mm"]).format(
+              "hh:mm a"
+            )} - ${moment(product?.available_time_ends, ["HH:mm"]).format(
+              "hh:mm a"
+            )}`}
+          </Typography>
+        </Stack>
+      </Stack>
+    );
   }
-  const isInWishList = (id) => {
-    return !!wishLists?.item?.find((wishItem) => wishItem.id === id);
-  };
 
-  const { mutate: addFavoriteMutation } = useAddToWishlist();
-  const addToFavorite = (e) => {
-    if (token) {
-      addFavoriteMutation(product?.id, {
-        onSuccess: (response) => {
-          if (response) {
-            dispatch(addWishList(product));
-            toast.success(response?.message);
-            setWishListCount(wishListCount + 1);
-          }
-        },
-        onError: (error) => {
-          toast.error(error.response.data.message);
-        },
-      });
-    } else toast.error(t(not_logged_in_message));
-  };
+  const addToCartLabel = updateIsLoading
+    ? null
+    : inCart
+    ? t("Update to Cart")
+    : t("Add to Cart");
 
-  const onSuccessHandlerForDelete = (res) => {
-    dispatch(removeWishListItem(product?.id));
-    toast.success(res.message, {
-      id: "wishlist",
-    });
-    setWishListCount(wishListCount - 1);
-  };
-  const { mutate } = useWishListDelete();
-  const deleteWishlistItem = () => {
-    mutate(product?.id, {
-      onSuccess: onSuccessHandlerForDelete,
-      onError: (error) => {
-        toast.error(error.response.data.message);
-      },
-    });
-  };
-  useEffect(() => {}, [wishListCount]);
+  const showRequiredCta = requiresSelection;
+  const ctaLabel = showRequiredCta
+    ? requiredLabel || t("Choose Required Option")
+    : addToCartLabel;
+  const ctaDisabled = showRequiredCta || isLoading || updateIsLoading;
+  const showButtonLoader = isLoading || updateIsLoading;
+
   return (
-    <>
-      {isScheduled ? (
-        isScheduled === "true" ? (
-          <Grid container spacing={2}>
-            <Grid item xs={6} sm={6} md={6}>
-              <PrimaryButton
-                fullWidth
-                onClick={() => handleBuyNowClick()}
-                sx={{
-                  backgroundColor: theme.palette.customColor.buyButton,
-                  color: "black",
-                  fontSize: {
-                    xs: "12px",
-                  },
-                }}
-              >
-                {t("Buy Now")}
-              </PrimaryButton>
-            </Grid>
-            <Grid item xs={6} sm={6} md={6}>
-              {isInCart(product?.id) && (
-                <PrimaryButton onClick={() => addToCard()}>
-                  {updateIsLoading ? (
-                    <Stack
-                      height="25px"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <Loading />
-                    </Stack>
-                  ) : (
-                    t("Update to cart")
-                  )}
-                </PrimaryButton>
-              )}
-              {!isInCart(product?.id) && (
-                <PrimaryButton onClick={() => addToCard()} loading={isLoading}>
-                  {t("Add to Cart")}
-                </PrimaryButton>
-              )}
-            </Grid>
-            {/*<Grid item xs={2} sm={2}>*/}
-            {/*  {!isInWishList(product?.id) && (*/}
-            {/*    <Button variant="outlined" onClick={addToFavorite}>*/}
-            {/*      <Stack direction="row" spacing={1} alignItems="center">*/}
-            {/*        <FavoriteBorderOutlinedIcon />*/}
-            {/*        <Typography>{wishListCount}</Typography>*/}
-            {/*      </Stack>*/}
-            {/*    </Button>*/}
-            {/*  )}*/}
-            {/*  {isInWishList(product?.id) && (*/}
-            {/*    <Button*/}
-            {/*      variant="outlined"*/}
-            {/*      fullWidth*/}
-            {/*      onClick={deleteWishlistItem}*/}
-            {/*    >*/}
-            {/*      <Stack direction="row" spacing={1} alignItems="center">*/}
-            {/*        <FavoriteIcon color="primary" />*/}
-            {/*        <Typography>{wishListCount}</Typography>*/}
-            {/*      </Stack>*/}
-            {/*    </Button>*/}
-            {/*  )}*/}
-            {/*</Grid>*/}
-          </Grid>
+    <Stack direction="row" spacing={1.25} sx={{ width: "100%" }}>
+      <Button onClick={handleBuyNowClick} disabled={ctaDisabled} sx={buyNowSx}>
+        {t("Buy Now")}
+      </Button>
+      <Button
+        onClick={() => addToCard()}
+        disabled={ctaDisabled}
+        sx={primaryButtonSx}
+      >
+        {showButtonLoader ? (
+          <Stack height="22px" alignItems="center" justifyContent="center">
+            <Loading />
+          </Stack>
         ) : (
-          <Grid
-            container
-            spacing={2}
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Grid item xs={12} sm={12} md={12}>
-              <Stack
-                spacing={0.5}
-                alignItems="center"
-                justifyContent="center"
-                sx={{
-                  backgroundColor: (theme) =>
-                    alpha(theme.palette.primary.main, 0.2),
-                  borderRadius: "8px",
-                  paddingY: { xs: "5px", sm: ".5rem" },
-                  paddingX: { xs: "5px", sm: ".5rem" },
-                }}
-              >
-                <Typography variant="h6">{t("Not Available now")}</Typography>
-                <Stack
-                  direction="row"
-                  alignItems="center"
-                  justifyContent="center"
-                  spacing={1}
-                  flexWrap="wrap"
-                  gap="5px"
-                >
-                  <Typography>{t("Available will be")}</Typography>
-                  <Typography>{`${moment(product.available_time_starts, [
-                    "HH:mm",
-                  ]).format("hh:mm a")} - ${moment(
-                    product.available_time_ends,
-                    ["HH:mm"]
-                  ).format("hh:mm a")}`}</Typography>
-                </Stack>
-              </Stack>
-            </Grid>
-            {/*<Grid item xs={4} sm={2} justifySelf="center">*/}
-            {/*  {!isInWishList(product?.id) && (*/}
-            {/*    <Button variant="outlined" fullWidth onClick={addToFavorite}>*/}
-            {/*      <Stack direction="row" spacing={1} alignItems="center">*/}
-            {/*        <FavoriteBorderOutlinedIcon />*/}
-            {/*        /!*<Typography>{wishListCount}</Typography>*!/*/}
-            {/*      </Stack>*/}
-            {/*    </Button>*/}
-            {/*  )}*/}
-            {/*  {isInWishList(product?.id) && (*/}
-            {/*    <Button*/}
-            {/*      variant="outlined"*/}
-            {/*      fullWidth*/}
-            {/*      onClick={deleteWishlistItem}*/}
-            {/*    >*/}
-            {/*      <Stack direction="row" spacing={1} alignItems="center">*/}
-            {/*        <FavoriteIcon color="primary" />*/}
-            {/*        /!*<Typography>{wishListCount}</Typography>*!/*/}
-            {/*      </Stack>*/}
-            {/*    </Button>*/}
-            {/*  )}*/}
-            {/*</Grid>*/}
-          </Grid>
-        )
-      ) : (
-        <Grid container spacing={2}>
-          <Grid item xs={6} sm={6} md={6}>
-            <PrimaryButton
-              fullWidth
-              onClick={() => handleBuyNowClick()}
-              sx={{
-                color: "black",
-                backgroundColor: theme.palette.customColor.buyButton,
-                fontSize: {
-                  xs: "12px",
-                },
-              }}
-            >
-              {t("Buy Now")}
-            </PrimaryButton>
-          </Grid>
-          <Grid item xs={6} sm={6} md={6}>
-            {isInCart(product?.id) && (
-              <PrimaryButton
-                onClick={() => addToCard()}
-                sx={{ width: 200, fontSize: { xs: "12px", md: "14px" } }}
-              >
-                {updateIsLoading ? (
-                  <Stack
-                    height="25px"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Loading />
-                  </Stack>
-                ) : (
-                  t("Update to cart")
-                )}
-              </PrimaryButton>
-            )}
-            {!isInCart(product?.id) && (
-              <PrimaryButton
-                onClick={() => addToCard()}
-                loading={isLoading}
-                sx={{ fontSize: { xs: "12px", md: "14px" } }}
-              >
-                {isLoading ? (
-                  <Stack
-                    height="25px"
-                    alignItems="center"
-                    justifyContent="center"
-                  >
-                    <Loading />
-                  </Stack>
-                ) : (
-                  t("Add to Cart")
-                )}
-              </PrimaryButton>
-            )}
-          </Grid>
-          {/*<Grid item xs={2} sm={2}>*/}
-          {/*  {!isInWishList(product?.id) && (*/}
-          {/*    <Button variant="outlined" fullWidth onClick={addToFavorite}>*/}
-          {/*      <Stack direction="row" spacing={1} alignItems="center">*/}
-          {/*        <FavoriteBorderOutlinedIcon />*/}
-          {/*        /!*<Typography>{wishListCount}</Typography>*!/*/}
-          {/*      </Stack>*/}
-          {/*    </Button>*/}
-          {/*  )}*/}
-          {/*  {isInWishList(product?.id) && (*/}
-          {/*    <Button variant="outlined" fullWidth onClick={deleteWishlistItem}>*/}
-          {/*      <Stack direction="row" spacing={1} alignItems="center">*/}
-          {/*        <FavoriteIcon color="primary" />*/}
-          {/*        /!*<Typography>{wishListCount}</Typography>*!/*/}
-          {/*      </Stack>*/}
-          {/*    </Button>*/}
-          {/*  )}*/}
-          {/*</Grid>*/}
-        </Grid>
-      )}
-    </>
+          ctaLabel
+        )}
+      </Button>
+    </Stack>
   );
 };
+
 export default AddOrderToCart;

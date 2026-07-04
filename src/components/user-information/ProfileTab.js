@@ -31,11 +31,12 @@ const ProfileTab = ({
   const tabMenu = menuData?.filter((item) => item?.id !== 10);
   const dispatch = useDispatch();
   const router = useRouter();
-  const { configData ,modules} = useSelector((state) => state.configData);
+  const { configData, modules } = useSelector((state) => state.configData);
   const handleClick = (item) => {
     handlePage(item);
     setEditProfile?.(false);
   };
+console.log({configData});
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [deleteModal, setDeleteModal] = useState(false);
@@ -74,8 +75,13 @@ const ProfileTab = ({
           if (
             (configData?.customer_wallet_status === 0 && item.id === 4) ||
             (configData?.loyalty_point_status === 0 && item.id === 5) ||
-            (configData?.ref_earning_status === 0 && item.id === 6) || 
-            (!modules?.find((item) => item?.module_type === 'rental') && item.id === 3) || (modules?.find((item) => item?.module_type === 'rental')?.status === 0 && item.id === 3)
+            (configData?.ref_earning_status === 0 && item.id === 6) ||
+            (!modules?.find((item) => item?.module_type === "rental") &&
+              item.id === 3) ||
+            (modules?.find((item) => item?.module_type === "rental")?.status ===
+              0 &&
+              item.id === 3) ||
+            (configData?.pro_member_status === 1 && item.id === 11)
           ) {
             return null;
           } else {

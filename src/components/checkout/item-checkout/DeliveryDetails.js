@@ -3,21 +3,18 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import { DeliveryCaption } from "../CheckOut.style";
 import DeliveryAddress from "../delivery-address";
 import { Stack } from "@mui/system";
-import { DeliveryOptionButton } from "styled-components/CustomButtons.style";
-import homeImg from "../assets/image 1256.png";
-import takeaway from "../assets/takeaway.png";
-import schedule from "../assets/schedule.png";
-import CustomImageContainer from "../../CustomImageContainer";
 import {
-	Checkbox,
-	FormControlLabel,
-	Grid,
-	InputAdornment,
-	Typography,
-	useMediaQuery,
+  Box,
+  Button,
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  InputAdornment,
+  Typography,
+  useMediaQuery,
+  alpha,
 } from "@mui/material";
 import { useTheme } from "@emotion/react";
 import RestaurantScheduleTime from "./RestaurantScheduleTime";
@@ -25,179 +22,164 @@ import RestaurantScheduleTime from "./RestaurantScheduleTime";
 import CustomTextFieldWithFormik from "components/form-fields/CustomTextFieldWithFormik";
 import { getToken } from "helper-functions/getToken";
 import LockIcon from "@mui/icons-material/Lock";
+import InstantDelivery from "./InstantDelivery";
+import DeliverySpeedOptions from "./DeliverySpeedOptions";
 
 const DeliveryDetails = (props) => {
-	const {
-		storeData,
-		setOrderType,
-		orderType,
-		setAddress,
-		address,
-		configData,
-		forprescription,
-		setDeliveryTip,
-		customDispatch,
-		scheduleTime,
-		setDayNumber,
-		handleChange,
-		today,
-		tomorrow,
-		numberOfDay,
-		setScheduleAt,
-		formik,
-		confirmPasswordHandler,
-		passwordHandler,
-		check,
-		setCheck,
-		isHomeDelivery,
-		page
-	} = props;
-	const { t } = useTranslation();
-	const theme = useTheme();
-	const isSmall = useMediaQuery("(max-width:490px)");
-	const [anchorEl, setAnchorEl] = React.useState(null);
+  const {
+    storeData,
+    setOrderType,
+    orderType,
+    setAddress,
+    address,
+    configData,
+    forprescription,
+    setDeliveryTip,
+    customDispatch,
+    scheduleTime,
+    setDayNumber,
+    handleChange,
+    today,
+    tomorrow,
+    numberOfDay,
+    setScheduleAt,
+    formik,
+    confirmPasswordHandler,
+    passwordHandler,
+    check,
+    setCheck,
+    isHomeDelivery,
+    page,
+    zoneData,
+    deliveryFee,
+    couponDiscount,
+    selectedDeliveryOption,
+    setSelectedDeliveryOption,
+  } = props;
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const isSmall = useMediaQuery("(max-width:490px)");
+  const [anchorEl, setAnchorEl] = React.useState(null);
 
-	const handleClick = (event) => {
-		setOrderType("schedule_order");
-		setAnchorEl(event.currentTarget);
-	};
+  const handleClick = (event) => {
+    setOrderType("schedule_order");
+    setAnchorEl(event.currentTarget);
+  };
 
-	const handleClose = () => {
-		setAnchorEl(null);
-	};
-	const open = Boolean(anchorEl);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const open = Boolean(anchorEl);
 
-	const handleOrderType = (value) => {
-		if (value === "take_away") {
-			setDeliveryTip(0);
-		}
-		setOrderType(value);
-	};
-	const handleCheckbox = (e) => {
-		setCheck(e.target.checked);
-	};
-	return (
-		<CustomStackFullWidth spacing={{ xs: 1.5, md: 3 }}>
-			<DeliveryCaption const id="demo-row-radio-buttons-group-label">
-				{t("Delivery Options")}
-			</DeliveryCaption>
-			{storeData &&  (
-				<Stack
-					direction="row"
-					width="100%"
-					justifyContent={{ xs: "flex-start", md: "space-between" }}
-					gap={{ xs: "5px", md: "10px" }}
-					sx={{ flexWrap: { xs: "wrap", sm: "wrap", md: "nowrap" } }}
-				>
-					{ isHomeDelivery && (
-						<DeliveryOptionButton
-							fullwidth="true"
-							orderType={orderType === "delivery"}
-							onClick={() => handleOrderType("delivery")}
-							hover="true" // Use the hover prop here
-							sx={{
-								"&:hover": {
-									color: (theme) =>
-										theme.palette.whiteContainer.main,
-								},
-							}}
-						>
-							<CustomImageContainer
-								src={homeImg.src}
-								width="30px"
-								height="30px"
-								smWidth="20px"
-								smHeight="20px"
-							/>
-							<Typography
-								className="text"
-								fontSize={{ xs: "12px", md: "14px" }}
-								fontWeight={
-									orderType === "delivery" ? "600" : "400"
-								}
-								color={
-									orderType === "delivery"
-										? theme.palette.whiteContainer.main
-										: theme.palette.neutral[700]
-								}
-							>
-								{t("Home Delivery")}
-							</Typography>
-						</DeliveryOptionButton>
-					)}
+  const handleOrderType = (value) => {
+    if (value === "take_away") {
+      setDeliveryTip(0);
+    }
+    setOrderType(value);
+  };
+  const handleCheckbox = (e) => {
+    setCheck(e.target.checked);
+  };
+  const orderTypeOptions = [
+    isHomeDelivery && {
+      value: "delivery",
+      label: t("Home Delivery"),
+      onClick: () => handleOrderType("delivery"),
+    },
+    !forprescription &&
+      configData?.takeaway_status === 1 &&
+      storeData?.take_away && {
+        value: "take_away",
+        label: t("Take Away"),
+        onClick: () => handleOrderType("take_away"),
+      },
+    !forprescription &&
+      storeData?.schedule_order &&
+      getToken() && {
+        value: "schedule_order",
+        label: t("Schedule Delivery"),
+        onClick: handleClick,
+      },
+  ].filter(Boolean);
 
-					{!forprescription && configData?.takeaway_status === 1 ? (
-						<>
-							{storeData?.take_away && (
-								<DeliveryOptionButton
-									fullwidth="true"
-									orderType={orderType === "take_away"}
-									onClick={() => handleOrderType("take_away")}
-								>
-									{" "}
-									<CustomImageContainer
-										src={takeaway.src}
-										width="30px"
-										height="30px"
-										smWidth="20px"
-										smHeight="20px"
-									/>
-									<Typography
-										className="text"
-										fontSize={{ xs: "12px", md: "14px" }}
-										fontWeight={
-											orderType === "take_away"
-												? "600"
-												: "400"
-										}
-										color={
-											orderType === "take_away"
-												? theme.palette.whiteContainer
-														.main
-												: theme.palette.neutral[700]
-										}
-									>
-										{t("I’ll Pick It Up MySelf")}
-									</Typography>
-								</DeliveryOptionButton>
-							)}
-						</>
-					) : null}
-					{!forprescription &&  storeData?.schedule_order && getToken() && (
-						<DeliveryOptionButton
-							fullwidth="true"
-							orderType={orderType === "schedule_order"}
-							onClick={handleClick}
-						>
-							{" "}
-							<CustomImageContainer
-								src={schedule.src}
-								width="30px"
-								height="30px"
-								smWidth="20px"
-								smHeight="20px"
-							/>
-							<Typography
-								className="text"
-								fontSize={{ xs: "12px", md: "14px" }}
-								fontWeight={
-									orderType === "schedule_order"
-										? "600"
-										: "400"
-								}
-								color={
-									orderType === "schedule_order"
-										? theme.palette.whiteContainer.main
-										: theme.palette.neutral[700]
-								}
-							>
-								{t("Schedule Delivery")}
-							</Typography>
-						</DeliveryOptionButton>
-					)}
-				</Stack>
-			)}
-			{orderType === "schedule_order" && (
+  const pillButtonSx = (selected) => ({
+    flex: { xs: 1, md: "none" },
+    minWidth: { xs: 0, md: 140 },
+    px: { xs: 0.75, md: 3 },
+    py: { xs: 0.75, md: 1 },
+    borderRadius: "8px",
+    textTransform: "none",
+    fontWeight: selected ? 600 : 500,
+    fontSize: { xs: "12px", md: "14px" },
+    boxShadow: "none",
+    backgroundColor: selected ? theme.palette.primary.main : "transparent",
+    color: selected
+      ? theme.palette.whiteContainer.main
+      : theme.palette.neutral[700],
+    "&:hover": {
+      backgroundColor: selected
+        ? theme.palette.primary.dark
+        : alpha(theme.palette.primary.main, 0.08),
+      boxShadow: "none",
+    },
+  });
+
+  return (
+    <CustomStackFullWidth spacing={{ xs: 1.5, md: 3 }}>
+      {storeData && orderTypeOptions.length > 0 && (
+        <Box
+          sx={{
+            width: "100%",
+            backgroundColor: theme.palette.background.paper,
+            borderRadius: { xs: "10px", md: "14px" },
+            boxShadow: `0 1px 4px ${alpha("#000", 0.06)}`,
+            px: { xs: 2, md: 3 },
+            py: { xs: 1.5, md: 2 },
+          }}
+        >
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            alignItems={{ xs: "flex-start", sm: "center" }}
+            justifyContent="space-between"
+            gap={{ xs: 1.5, sm: 2 }}
+            width="100%"
+          >
+            <Typography
+              sx={{
+                fontWeight: 700,
+                fontSize: { xs: "14px", md: "16px" },
+                color: theme.palette.text.primary,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {t("Choose Order Type")}
+            </Typography>
+            <Stack
+              direction="row"
+              gap={{ xs: 0.5, md: 1 }}
+              flexWrap="nowrap"
+              width={{ xs: "100%", sm: "auto" }}
+              justifyContent={{ xs: "stretch", sm: "flex-end" }}
+            >
+              {orderTypeOptions.map((option) => {
+                const selected = orderType === option.value;
+                return (
+                  <Button
+                    key={option.value}
+                    onClick={option.onClick}
+                    variant={selected ? "contained" : "text"}
+                    disableElevation
+                    sx={pillButtonSx(selected)}
+                  >
+                    {option.label}
+                  </Button>
+                );
+              })}
+            </Stack>
+          </Stack>
+        </Box>
+      )}
+      {orderType === "schedule_order" && (
 				<RestaurantScheduleTime
 					storeData={storeData}
 					handleChange={handleChange}
@@ -208,93 +190,30 @@ const DeliveryDetails = (props) => {
 					setScheduleAt={setScheduleAt}
 				/>
 			)}
-			<DeliveryAddress
-				setAddress={setAddress}
-				address={address}
-				configData={configData}
-				storeZoneId={storeData?.zone_id}
-				orderType={orderType}
-			/>
-			{!getToken() &&
-				configData?.centralize_login?.manual_login_status === 1 && (
-					<Stack>
-						<Stack>
-							<FormControlLabel
-								onChange={(e) => handleCheckbox(e)}
-								control={<Checkbox checked={check} />}
-								label={
-									<Typography
-										fontWeight="500"
-										fontSize="16px"
-										color={theme.palette.neutral[1000]}
-									>
-										{t("Create account with exiting info.")}
-									</Typography>
-								}
-							/>
-						</Stack>
-						{check && (
-							<Grid container spacing={2} pt="10px">
-								<Grid item sm={12} md={6}>
-									<CustomTextFieldWithFormik
-										required="true"
-										type="password"
-										label={t("Password")}
-										placeholder={t("Password")}
-										touched={formik.touched.password}
-										errors={formik.errors.password}
-										fieldProps={formik.getFieldProps(
-											"password"
-										)}
-										onChangeHandler={passwordHandler}
-										value={formik.values.password}
-										startIcon={
-											<InputAdornment position="start">
-												<LockIcon
-													sx={{
-														color: (theme) =>
-															theme.palette
-																.neutral[400],
-													}}
-												/>
-											</InputAdornment>
-										}
-									/>
-								</Grid>
-								<Grid item sm={12} md={6}>
-									<CustomTextFieldWithFormik
-										label={t("Confirm Password")}
-										required="true"
-										type="password"
-										placeholder={t("Confirm Password")}
-										touched={
-											formik.touched.confirm_password
-										}
-										errors={formik.errors.confirm_password}
-										fieldProps={formik.getFieldProps(
-											"confirm_password"
-										)}
-										onChangeHandler={confirmPasswordHandler}
-										value={formik.values.confirm_password}
-										startIcon={
-											<InputAdornment position="start">
-												<LockIcon
-													sx={{
-														color: (theme) =>
-															theme.palette
-																.neutral[400],
-													}}
-												/>
-											</InputAdornment>
-										}
-									/>
-								</Grid>
-							</Grid>
-						)}
-					</Stack>
-				)}
-		</CustomStackFullWidth>
-	);
+      <DeliverySpeedOptions
+        storeData={storeData}
+        zoneData={zoneData}
+        orderType={orderType}
+        deliveryFee={deliveryFee}
+        couponDiscount={couponDiscount}
+        selectedDeliveryOption={selectedDeliveryOption}
+        setSelectedDeliveryOption={setSelectedDeliveryOption}
+      />
+
+      <DeliveryAddress
+        setAddress={setAddress}
+        address={address}
+        configData={configData}
+        storeZoneId={storeData?.zone_id}
+        orderType={orderType}
+        formik={formik}
+        passwordHandler={passwordHandler}
+        confirmPasswordHandler={confirmPasswordHandler}
+        check={check}
+        setCheck={setCheck}
+      />
+    </CustomStackFullWidth>
+  );
 };
 
 DeliveryDetails.propTypes = {};

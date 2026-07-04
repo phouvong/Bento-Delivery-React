@@ -1,4 +1,4 @@
-import { IconButton, NoSsr, styled, Typography, useTheme } from "@mui/material";
+import { IconButton, NoSsr, Typography, useTheme } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import React, { useEffect, useReducer, useState } from "react";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
@@ -33,7 +33,7 @@ import {
   moduleSelected,
   SigninSuccessFull,
 } from "utils/toasterMessages";
-import useGetAllCartList from "../../../api-manage/hooks/react-query/add-cart/useGetAllCartList";
+import useGetGroupedCart from "../../../api-manage/hooks/react-query/add-cart/useGetGroupedCart";
 import useGetProfile from "../../../api-manage/hooks/react-query/profile/useGetProfile";
 import { getSelectedVariations } from "../../header/second-navbar/SecondNavbar";
 import { ModuleSelection } from "../../landing-page/hero-section/module-selection";
@@ -75,6 +75,8 @@ const SignIn = ({
   verificationId,
   sendOTP,
   handleClose,
+  forceStatus,
+  onBack,
 }) => {
   const router = useRouter();
   const previousRouteName = router.query.from;
@@ -152,11 +154,7 @@ const SignIn = ({
     }
   };
 
-  const {
-    data,
-    refetch: cartListRefetch,
-    isLoading,
-  } = useGetAllCartList(cartListSuccessHandler);
+  const { data, refetch: cartListRefetch, isLoading } = useGetGroupedCart();
 
   const bookingSuccess = (res) => {
     dispatch(setCartList(res));
@@ -199,7 +197,11 @@ const SignIn = ({
   };
 
   const { refetch: profileRefetch } = useGetProfile(userOnSuccessHandler);
-  const { refetch: wishlistRefetch } = useWishListGet(onSuccessHandler);
+  const { refetch: wishlistRefetch } = useWishListGet(
+    {},
+    false,
+    onSuccessHandler
+  );
   const { refetch: rentalWishlistRefetch } = useGetWishList(onSuccessHandler);
 
   const handleTokenAfterSignIn = async (response) => {
@@ -339,20 +341,19 @@ const SignIn = ({
   };
 
   const rememberMeHandleChange = (e) => {
-    setIsRemember(e.target.checked)
-  }
+    setIsRemember(e.target.checked);
+  };
   useEffect(() => {
-    let userDatafor = undefined
-    if (typeof window !== 'undefined') {
-      userDatafor = JSON.parse(localStorage.getItem('userDatafor'))
+    let userDatafor = undefined;
+    if (typeof window !== "undefined") {
+      userDatafor = JSON.parse(localStorage.getItem("userDatafor"));
     }
-    if(userDatafor){
-      setIsRemember(true)
+    if (userDatafor) {
+      setIsRemember(true);
     }
-  }, [])
+  }, []);
   const { centralize_login } = configData || {};
   const getActiveLoginType = () => {
-
     if (centralize_login) {
       const { otp_login_status, manual_login_status, social_login_status } =
         centralize_login;
@@ -366,15 +367,22 @@ const SignIn = ({
         },
       });
     }
-  }
-const onlyOtp=centralize_login?.otp_login_status && !centralize_login?.manual_login_status && !centralize_login?.social_login_status
+  };
+  const onlyOtp =
+    centralize_login?.otp_login_status &&
+    !centralize_login?.manual_login_status &&
+    !centralize_login?.social_login_status;
 
   useEffect(() => {
-    getActiveLoginType()
+    getActiveLoginType();
   }, []);
 
   useEffect(() => {
-    getActiveLoginStatus(state, loginDispatch);
+    if (forceStatus) {
+      loginDispatch({ type: ACTIONS.setStatus, payload: forceStatus });
+    } else {
+      getActiveLoginStatus(state, loginDispatch);
+    }
   }, [state.activeLoginType]);
 
   const otpLoginFormik = useFormik({
@@ -411,14 +419,14 @@ const onlyOtp=centralize_login?.otp_login_status && !centralize_login?.manual_lo
 
   const handleSignUp = () => {
     setModalFor("sign-up");
-    //handleClose();
   };
   useEffect(() => {
-    if (modalFor === "sign-up") {
+    // Old flow: close SignIn modal when switching to sign-up.
+    // New AuthModal flow (onBack defined) handles sign-up internally — skip.
+    if (!onBack && modalFor === "sign-up") {
       handleClose();
     }
   }, [modalFor]);
-
 
   const handleFormBasedOnDirection = () => {
     const commonSignInFormProps = {
@@ -502,8 +510,8 @@ const onlyOtp=centralize_login?.otp_login_status && !centralize_login?.manual_lo
               cursor: "pointer",
             }}
           >
-          {t("Sign Up")}
-        </span>
+            {t("Sign Up")}
+          </span>
         </CustomStackFullWidth>
       </CustomStackFullWidth>
     );
@@ -517,7 +525,7 @@ const onlyOtp=centralize_login?.otp_login_status && !centralize_login?.manual_lo
       </>
     );
 
-    if(state?.status && state?.activeLoginType){
+    if (state?.status && state?.activeLoginType) {
       switch (state.status) {
         case "otp":
           return (
@@ -538,8 +546,11 @@ const onlyOtp=centralize_login?.otp_login_status && !centralize_login?.manual_lo
         case "manual":
           return (
             <Stack width="100%">
-              <SignInForm {...commonSignInFormProps} only handleSignUp={handleSignUp} />
-              
+              <SignInForm
+                {...commonSignInFormProps}
+                only
+                handleSignUp={handleSignUp}
+              />
             </Stack>
           );
 
@@ -601,6 +612,195 @@ const onlyOtp=centralize_login?.otp_login_status && !centralize_login?.manual_lo
       }
     }
   };
+  // ── New Figma layout (used when coming from AuthLanding) ──────────────────
+  if (onBack) {
+    const isOtpMode = forceStatus === "otp";
+    return (
+      <>
+        <NoSsr>
+          <Box
+            sx={{
+              position: "relative",
+              backgroundColor: "background.paper",
+              borderRadius: "20px",
+              overflow: "hidden",
+              width: { xs: "100%", sm: "450px" },
+              margin: "0 auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Back button — pinned to the top-left corner of the modal */}
+            <IconButton
+              onClick={onBack}
+              size="small"
+              sx={{
+                position: "absolute",
+                top: 10,
+                left: 0,
+                p: "8px",
+                borderRadius: "16px",
+                zIndex: 2,
+              }}
+            >
+              <i
+                className="fi fi-rr-arrow-small-left"
+                style={{ fontSize: "20px", lineHeight: 1, display: "flex" }}
+              />
+            </IconButton>
+
+            {/* Close button — pinned to the top-right corner of the modal */}
+            <IconButton
+              onClick={handleClose}
+              size="small"
+              sx={{
+                position: "absolute",
+                top: 10,
+                right: 0,
+                p: "8px",
+                borderRadius: "16px",
+                zIndex: 2,
+              }}
+            >
+              <CloseIcon sx={{ fontSize: "20px" }} />
+            </IconButton>
+
+            {/* Content — top padding leaves room for the absolute corner icons */}
+            <Stack
+              sx={{ gap: "20px", pt: "56px", pb: "56px", px: "32px", flex: 1 }}
+            >
+              {/* Title */}
+              <Stack sx={{ gap: "4px" }}>
+                <Typography
+                  sx={{
+                    fontSize: "20px",
+                    fontWeight: 700,
+                    letterSpacing: "-0.6px",
+                    lineHeight: 1.1,
+                    color: theme.palette.neutral?.[1050] ?? "text.primary",
+                  }}
+                >
+                  {isOtpMode
+                    ? t("Login With OTP")
+                    : t("Login With Email/Phone")}
+                </Typography>
+                <Typography
+                  sx={{
+                    fontSize: "14px",
+                    fontWeight: 400,
+                    letterSpacing: "-0.42px",
+                    lineHeight: 1.2,
+                    color: "text.secondary",
+                  }}
+                >
+                  {isOtpMode
+                    ? t("Use your registered phone number to get OTP")
+                    : t("Use your registered email/phone number to login")}
+                </Typography>
+              </Stack>
+
+              {/* Form */}
+              {isOtpMode ? (
+                <form
+                  noValidate
+                  onSubmit={otpLoginFormik.handleSubmit}
+                  style={{ flex: 1, display: "flex", flexDirection: "column" }}
+                >
+                  <Stack sx={{ gap: "32px", pt: "16px", flex: 1 }}>
+                    {/* Input + button */}
+                    <Stack sx={{ gap: "24px", flex: 1 }}>
+                      <OtpLogin
+                        otpHandleChange={otpHandleChange}
+                        otpLoginFormik={otpLoginFormik}
+                        configData={configData}
+                        isLoading={loginIsLoading}
+                        handleClick={handleClick}
+                        rememberMeHandleChange={rememberMeHandleChange}
+                        handleClose={handleClose}
+                        isRemember={isRemember}
+                        getActiveLoginType={getActiveLoginType}
+                        onlyOtp={onlyOtp}
+                        inlineLayout
+                      />
+                    </Stack>
+
+                    {/* Footer */}
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="center"
+                      sx={{ gap: "4px" }}
+                    >
+                      <Typography
+                        sx={{
+                          fontSize: "14px",
+                          fontWeight: 400,
+                          letterSpacing: "-0.42px",
+                          lineHeight: 1.2,
+                          color: "text.secondary",
+                        }}
+                      >
+                        {t("New to {{name}}?", {
+                          name: configData?.business_name,
+                        })}
+                      </Typography>
+                      <Typography
+                        onClick={handleSignUp}
+                        sx={{
+                          fontSize: "14px",
+                          fontWeight: 600,
+                          letterSpacing: "-0.42px",
+                          lineHeight: 1.2,
+                          color: theme.palette.info?.blue ?? "#3979e0",
+                          cursor: "pointer",
+                        }}
+                      >
+                        {t("Sign Up")}
+                      </Typography>
+                    </Stack>
+                  </Stack>
+                </form>
+              ) : (
+                <SignInForm
+                  isApiCalling={isApiCalling}
+                  configData={configData}
+                  handleOnChange={handleOnChange}
+                  passwordHandler={passwordHandler}
+                  loginFormik={loginFormik}
+                  lanDirection={lanDirection?.direction}
+                  rememberMeHandleChange={rememberMeHandleChange}
+                  isLoading={loginIsLoading}
+                  handleClick={handleClick}
+                  handleClose={handleClose}
+                  isRemember={isRemember}
+                  only
+                  handleSignUp={handleSignUp}
+                  newLayout
+                />
+              )}
+            </Stack>
+          </Box>
+        </NoSsr>
+
+        <CustomModal
+          handleClose={() => setOpenOtpModal(false)}
+          openModal={openOtpModal}
+        >
+          <OtpForm
+            data={otpData?.type ? otpData?.type : loginFormik?.values?.phone}
+            formSubmitHandler={otpFormSubmitHandler}
+            isLoading={isLoadingOtpVerifyApi || fireIsLoading}
+            recaptcha="recaptcha-container"
+            loginValue={loginValue}
+            reSendOtp={formSubmitHandler}
+            handleClose={() => setOpenOtpModal(false)}
+          />
+        </CustomModal>
+      </>
+    );
+  }
+  // ── End new Figma layout ───────────────────────────────────────────────────
+
   return (
     <>
       <NoSsr>
@@ -668,7 +868,6 @@ const onlyOtp=centralize_login?.otp_login_status && !centralize_login?.manual_lo
           handleClose={() => setOpenOtpModal(false)}
         />
       </CustomModal>
-      
     </>
   );
 };

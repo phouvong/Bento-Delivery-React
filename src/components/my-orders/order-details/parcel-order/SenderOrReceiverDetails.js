@@ -11,7 +11,7 @@ import { formatPhoneNumber } from "utils/CustomFunctions";
 const SenderOrReceiverDetails = (props) => {
   const { address, phone, title, image, name } = props;
   return (
-    <Stack spacing={2.5}>
+    <Stack spacing={2.5} sx={{ flex: 1, minWidth: 0, maxWidth: { xs: "100%", md: "300px" } }}>
       <Typography
         fontSize={{ xs: "12px", md: "16px" }}
         fontWeight="500"
@@ -28,7 +28,7 @@ const SenderOrReceiverDetails = (props) => {
           src={image.src}
           objectfit="cover"
         />
-        <Stack spacing={0.5} width={{ xs: "100%", md: "250px" }}>
+        <Stack spacing={0.5} sx={{ flex: 1, minWidth: 0 }}>
           <Typography
             sx={{ fontWeight: "600" }}
             color="primary.main"

@@ -36,7 +36,7 @@ export const Card = styled(Box)(({ theme }) => ({
   },
 }));
 
-const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
+const FeaturedItemCard = ({ image, title, id, slug, onlyshimmer }) => {
   const router = useRouter();
   const [hover, setHover] = useState(false);
   const { ref: textRef, isEllipsed } = useTextEllipsis(title);
@@ -44,21 +44,18 @@ const FeaturedItemCard = ({ image, title, id, onlyshimmer }) => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down("sm"));
   const isExtraSmallScreen = useMediaQuery(theme.breakpoints.down("xs"));
-const queryModule = router?.query?.module || router?.query?.module_id;
+  const queryModule = router?.query?.module || router?.query?.module_id;
   const moduleValue = Array.isArray(queryModule)
     ? queryModule[0]
     : queryModule || getModuleId();
+
   return (
     <Link
       href={{
-        pathname: "/search",
+        pathname: `/home/category/${slug || id}`,
         query: {
-          search: "category",
-          id: id,
-         
-          name: title && title,
-          data_type: "category",
-          ...(moduleValue ? { module: String(moduleValue) } : {})
+          id,
+          ...(moduleValue ? { module: String(moduleValue) } : {}),
         },
       }}
       passHref
@@ -94,7 +91,7 @@ const queryModule = router?.query?.module || router?.query?.module_id;
         <Stack
           sx={{
             position: "relative",
-            height: { xs: "95px", md: "110px" },
+            height: { xs: "85px", md: "110px" },
             width: "100%",
             img: {
               width: "100%",

@@ -155,7 +155,7 @@ const TrackOrder = ({ configData, trackOrderData }) => {
     },
     {
       label: ` ${
-        trackOrderData?.module?.module_type === "food" ? "foods" : "items"
+        trackOrderData?.module?.module_type === "food" ? "Foods" : "Items"
       } is on the way`,
       time: trackOrderData?.picked_up,
       img: outForDelivery.src,
@@ -179,7 +179,10 @@ const TrackOrder = ({ configData, trackOrderData }) => {
       setActStep(3);
     } else if (trackOrderData?.order_status === "picked_up") {
       setActStep(4);
-    } else if (trackOrderData?.order_status === "delivered" || trackOrderData?.order_status==="returned") {
+    } else if (
+      trackOrderData?.order_status === "delivered" ||
+      trackOrderData?.order_status === "returned"
+    ) {
       setActStep(5);
     }
   };

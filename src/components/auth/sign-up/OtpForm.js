@@ -23,7 +23,7 @@ import CustomImageContainer from "components/CustomImageContainer";
 import { maskSensitiveInfo } from "utils/CustomFunctions";
 import CloseIcon from "@mui/icons-material/Close";
 import otpImage from "../asset/SMS.png";
-import {useSelector} from "react-redux";
+import { useSelector } from "react-redux";
 
 const OtpForm = ({
   data,
@@ -36,7 +36,7 @@ const OtpForm = ({
   const theme = useTheme();
   const { t } = useTranslation();
   const { configData } = useSelector((state) => state.configData);
-  const isDemo= configData?.demo
+  const isDemo = configData?.demo;
 
   const [otp, setOtp] = useState("");
   const otpFormik = useFormik({
@@ -134,10 +134,9 @@ const OtpForm = ({
         />
         <Stack>
           <Typography textAlign="center" fontSize="12px" color="textSecondary">
-            {t(
-              `We’ve sent a verification code to ${maskSensitiveInfo(data)}
-                          `
-            )}
+            {t("We’ve sent a verification code to {{contact}}", {
+              contact: maskSensitiveInfo(data),
+            })}
           </Typography>
 
           {configData?.demo && (
@@ -150,7 +149,6 @@ const OtpForm = ({
               {t("For demo purpose use otp 123456")}
             </Typography>
           )}
-
         </Stack>
 
         {/* <Typography>{data?.phone}</Typography> */}

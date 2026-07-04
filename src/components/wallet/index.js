@@ -117,7 +117,7 @@ const Wallet = (props) => {
             borderRight: { md: `1px solid ${theme.palette.divider}` },
           }}
         >
-          <Stack spacing={{ xs: 2, md: 5 }} maxWidth="338px">
+          <Stack spacing={{ xs: 2, md: 5 }} maxWidth={{ xs: "100%", md: "338px" }}>
             {isSmall && (
               <Stack direction="row" justifyContent="space-between">
                 <Typography

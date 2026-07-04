@@ -1,11 +1,9 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
-import { Typography, useTheme } from "@mui/material";
+import { Typography, useTheme, alpha } from "@mui/material";
 import { t } from "i18next";
 import { Stack } from "@mui/system";
-import { CustomColorBox, CustomSizeBox } from "../ProductDetails.style";
-import CheckIcon from "@mui/icons-material/Check";
-import { ACTION, initialState, reducer } from "./states";
+import { CustomSizeBox } from "../ProductDetails.style";
 
 const getSelectedIndex = (options, selectedOptions) => {
   let index = 0;
@@ -16,19 +14,20 @@ const getSelectedIndex = (options, selectedOptions) => {
   });
   return index;
 };
+
 const VariationsManager = ({ productDetailsData, handleChoices }) => {
   const theme = useTheme();
-  const borderColor = theme.palette.primary.main;
   const [choice, setChoice] = useState(null);
   const [value, setValue] = useState(
     productDetailsData?.choice_options?.map((i) => ({
       type: i?.title,
       value:
         i?.options[
-        getSelectedIndex(i?.options, productDetailsData?.selectedOption?.[0])
+          getSelectedIndex(i?.options, productDetailsData?.selectedOption?.[0])
         ],
     }))
   );
+
   const handleClick = (values, index, choice) => {
     setValue((prev) => {
       prev[index].value = values;
@@ -36,9 +35,11 @@ const VariationsManager = ({ productDetailsData, handleChoices }) => {
     });
     setChoice(choice);
   };
+
   useEffect(() => {
     handleChoice(value);
   }, [value]);
+
   const handleChoice = (value) => {
     let finalVariation = "";
     value.forEach((item) => (finalVariation += item.value));
@@ -52,41 +53,85 @@ const VariationsManager = ({ productDetailsData, handleChoices }) => {
       handleChoices(option[0], choice);
     }
   };
+
   return (
-    <CustomStackFullWidth spacing={1.4}>
-      {productDetailsData?.choice_options?.map((choice, choiceIndex) => (
-        <CustomStackFullWidth key={choiceIndex}>
-          <Stack direction="row" spacing={0.5} alignItems="center">
-            <Typography fontWeight="600" paddingBottom="3px">
-              {choice?.title}
-            </Typography>
-            {/*<Typography fontWeight="600">:</Typography>*/}
-            {/*<Typography fontWeight="400">{state.productColor}</Typography>*/}
-          </Stack>
-          <CustomStackFullWidth direction="row" spacing={2}>
-            {choice?.options?.map((item, index) => (
-              <CustomSizeBox
-                key={index}
-                onClick={() => handleClick(item, choiceIndex, choice)}
-                size={item}
-                productsize={value[choiceIndex]?.value}
+    <CustomStackFullWidth
+      spacing={2}
+      sx={{
+        p: { xs: 2, md: 2.5 },
+        borderRadius: "12px",
+        border: `1px solid ${alpha(theme.palette.text.primary, 0.1)}`,
+        backgroundColor: theme.palette.background.paper,
+      }}
+    >
+      {productDetailsData?.choice_options?.map((choiceItem, choiceIndex) => {
+        const selectedValue = value?.[choiceIndex]?.value;
+
+        return (
+          <CustomStackFullWidth spacing={1} key={choiceIndex}>
+            <Stack direction="row" spacing={0.75} alignItems="center">
+              <Typography
+                sx={{
+                  fontWeight: 600,
+                  fontSize: { xs: "13px", md: "14px" },
+                  color: theme.palette.text.primary,
+                }}
               >
-                <Typography fontSize={{ xs: "12px", sm: "14px" }}>
-                  {item}
+                {choiceItem?.title}
+              </Typography>
+              {selectedValue && (
+                <Typography
+                  sx={{
+                    fontWeight: 500,
+                    fontSize: { xs: "13px", md: "14px" },
+                    color: theme.palette.primary.main,
+                  }}
+                >
+                  ({selectedValue})
                 </Typography>
-              </CustomSizeBox>
-            ))}
+              )}
+            </Stack>
+
+            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+              {choiceItem?.options?.map((item, index) => (
+                <CustomSizeBox
+                  key={index}
+                  onClick={() => handleClick(item, choiceIndex, choiceItem)}
+                  size={item}
+                  productsize={selectedValue}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: "14px",
+                      fontWeight: 500,
+                      color: "inherit",
+                      letterSpacing: "-0.42px",
+                      lineHeight: 1.1,
+                      whiteSpace: "nowrap",
+                      textTransform: "capitalize",
+                    }}
+                  >
+                    {item}
+                  </Typography>
+                </CustomSizeBox>
+              ))}
+            </Stack>
           </CustomStackFullWidth>
-        </CustomStackFullWidth>
-      ))}
+        );
+      })}
+
       {productDetailsData?.selectedOption?.length > 0 &&
-        productDetailsData?.selectedOption?.[0]?.stock == 0 ? (
-        <Typography color="red">
-          *{t("This variation is out of stock")}
-        </Typography>
-      ) : (
-        <Typography></Typography>
-      )}
+        productDetailsData?.selectedOption?.[0]?.stock == 0 && (
+          <Typography
+            sx={{
+              color: theme.palette.error.main,
+              fontSize: "12px",
+              fontWeight: 500,
+            }}
+          >
+            *{t("This variation is out of stock")}
+          </Typography>
+        )}
     </CustomStackFullWidth>
   );
 };

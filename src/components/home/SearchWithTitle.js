@@ -1,4 +1,4 @@
-import { Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
@@ -104,16 +104,18 @@ const SearchWithTitle = (props) => {
       {moduleType === "parcel" ? (
         <TrackParcelFromHomePage />
       ) : moduleType === "rental" ? null : (
-        <ManageSearch
-          zoneid={zoneid}
-          token={token}
-          maxwidth="false"
-          fullWidth
-          searchQuery={searchQuery}
-          name={name}
-          query={query}
-          currentTab={currentTab}
-        />
+        <Box sx={{ width: "100%", maxWidth: "800px", mx: "auto" }}>
+          <ManageSearch
+            zoneid={zoneid}
+            token={token}
+            maxwidth="false"
+            fullWidth
+            searchQuery={searchQuery}
+            name={name}
+            query={query}
+            currentTab={currentTab}
+          />
+        </Box>
       )}
     </CustomStackFullWidth>
   );

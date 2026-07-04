@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {alpha, Box, Stack, Typography, useTheme} from "@mui/material";
+import { alpha, Box, Stack, Typography, useTheme } from "@mui/material";
 import {
   CustomPaperBigCard,
   CustomStackFullWidth,
@@ -11,26 +11,30 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import OtpInput from "react-otp-input";
 
 import * as Yup from "yup";
-import {useForgotPassword} from "api-manage/hooks/react-query/forgot-password/useForgotPassword";
-import {onErrorResponse} from "api-manage/api-error-response/ErrorResponses";
+import { useForgotPassword } from "api-manage/hooks/react-query/forgot-password/useForgotPassword";
+import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import toast from "react-hot-toast";
 
-const OtpForm = ({ data, formSubmitHandler, isLoading,forgotPassword,reSendOtp ,configData}) => {
-
+const OtpForm = ({
+  data,
+  formSubmitHandler,
+  isLoading,
+  forgotPassword,
+  reSendOtp,
+  configData,
+}) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const [otp, setOtp] = useState("");
-  const [counter, setCounter] = useState(60) // Start at 30 seconds
-  const [isResendDisabled, setIsResendDisabled] = useState(true)
+  const [counter, setCounter] = useState(60); // Start at 30 seconds
+  const [isResendDisabled, setIsResendDisabled] = useState(true);
   const otpFormik = useFormik({
     //here reset_token is otp inputs
     initialValues: {
       reset_token: "",
       phone: data?.phone,
-      email:data?.email,
-      verification_method:data?.verification_method,
-
-
+      email: data?.email,
+      verification_method: data?.verification_method,
     },
     validationSchema: Yup.object({
       reset_token: Yup.string().required(t("field is empty")),
@@ -47,12 +51,12 @@ const OtpForm = ({ data, formSubmitHandler, isLoading,forgotPassword,reSendOtp ,
   useEffect(() => {
     // Timer function to decrease counter every second
     if (counter > 0) {
-      const timer = setTimeout(() => setCounter(counter - 1), 1000)
-      return () => clearTimeout(timer) // Cleanup the timer on unmount
+      const timer = setTimeout(() => setCounter(counter - 1), 1000);
+      return () => clearTimeout(timer); // Cleanup the timer on unmount
     } else {
-      setIsResendDisabled(false) // Enable resend after countdown
+      setIsResendDisabled(false); // Enable resend after countdown
     }
-  }, [counter])
+  }, [counter]);
   const onSuccessHandler = (res) => {
     if (res) {
       if (res?.errors?.length > 0) {
@@ -67,33 +71,40 @@ const OtpForm = ({ data, formSubmitHandler, isLoading,forgotPassword,reSendOtp ,
       //toast.success(res.message);
     }
   };
-  const { mutate:sendOtpMutate, isLoading:sendOtpLoading } = useForgotPassword({
-    onSuccessHandler,
-    onError: (errors) => {
-      onErrorResponse(errors);
-    },
-  });
+  const { mutate: sendOtpMutate, isLoading: sendOtpLoading } =
+    useForgotPassword({
+      onSuccessHandler,
+      onError: (errors) => {
+        onErrorResponse(errors);
+      },
+    });
 
   const handleResendClick = () => {
     if (!isResendDisabled) {
-      const tempValue={
+      const tempValue = {
         phone: data?.phone,
-        email:data?.email,
-        verification_method:data?.verification_method
-
-      }
-      reSendOtp(tempValue,onSuccessHandler,sendOtpMutate)
-      setCounter(60) // Reset counter to 30 seconds
-      setIsResendDisabled(true)
+        email: data?.email,
+        verification_method: data?.verification_method,
+      };
+      reSendOtp(tempValue, onSuccessHandler, sendOtpMutate);
+      setCounter(60); // Reset counter to 30 seconds
+      setIsResendDisabled(true);
       // Add logic to trigger resend code action here (API call, etc.)
     }
-  }
+  };
   return (
     <CustomStackFullWidth>
       <CustomStackFullWidth>
         <Stack alignItems="center" justifyContent="center">
-          <Typography fontSize="14px" marginTop="10px" color={alpha(theme.palette.neutral[400],.7)}>{t(`We’ve sent a verification code to ${data?.email}`)}</Typography>
-
+          <Typography
+            fontSize="14px"
+            marginTop="10px"
+            color={alpha(theme.palette.neutral[400], 0.7)}
+          >
+            {t("We’ve sent a verification code to {{contact}}", {
+              contact: data?.email,
+            })}
+          </Typography>
         </Stack>
         {configData?.demo && (
           <Typography
@@ -106,11 +117,7 @@ const OtpForm = ({ data, formSubmitHandler, isLoading,forgotPassword,reSendOtp ,
           </Typography>
         )}
         <form noValidate onSubmit={otpFormik.handleSubmit}>
-          <Stack
-            padding="0 20px"
-            alignItems="center"
-            justifyContent="center"
-          >
+          <Stack padding="0 20px" alignItems="center" justifyContent="center">
             <Box
               sx={{
                 mt: 1,
@@ -125,7 +132,7 @@ const OtpForm = ({ data, formSubmitHandler, isLoading,forgotPassword,reSendOtp ,
                   background: "transparent",
                   color: theme.palette.primary.main,
                   fontSize: "32px",
-                  borderRadius:"4px",
+                  borderRadius: "4px",
                   outline: "none",
                   height: "36px",
                   border: "1px solid " + theme.palette.primary.main,
@@ -136,17 +143,20 @@ const OtpForm = ({ data, formSubmitHandler, isLoading,forgotPassword,reSendOtp ,
                 value={otp}
                 onChange={setOtp}
                 numInputs={6}
-                renderInput={(props) => <input {...props}
-                                               style={{
-                                                 fontSize: '20px', // 👈 Change font size here
-                                                 width: '35px',
-                                                 height: '40px',
-                                                 textAlign: 'center',
-                                                 margin: '0 4px',
-                                                 border: "1px solid " + theme.palette.primary.main,
-                                                 borderRadius: '4px',
-                                               }}
-                />}
+                renderInput={(props) => (
+                  <input
+                    {...props}
+                    style={{
+                      fontSize: "20px", // 👈 Change font size here
+                      width: "35px",
+                      height: "40px",
+                      textAlign: "center",
+                      margin: "0 4px",
+                      border: "1px solid " + theme.palette.primary.main,
+                      borderRadius: "4px",
+                    }}
+                  />
+                )}
               />
             </Box>
 
@@ -162,31 +172,33 @@ const OtpForm = ({ data, formSubmitHandler, isLoading,forgotPassword,reSendOtp ,
             </LoadingButton>
           </Stack>
         </form>
-        {forgotPassword && (<Stack direction="row" justifyContent="space-between">
-          <Typography fontSize="12px" color={alpha(theme.palette.neutral[400],.7)}>
-            {t("Didn’t receive the code?")}
-          </Typography>
-          <Typography
-            fontSize="12px"
-            fontWeight="600"
-            color={
-              isResendDisabled
-                ? theme.palette.neutral[500]
-                : theme.palette.primary.main
-            }
-            onClick={handleResendClick}
-            sx={{
-              cursor: isResendDisabled
-                ? 'not-allowed'
-                : 'pointer',
-            }}
-          >
-            {isResendDisabled
-              ? `${t('Resend it')} (${counter}s)`
-              : t('Resend it')}
-          </Typography>
-        </Stack>)}
-
+        {forgotPassword && (
+          <Stack direction="row" justifyContent="space-between">
+            <Typography
+              fontSize="12px"
+              color={alpha(theme.palette.neutral[400], 0.7)}
+            >
+              {t("Didn’t receive the code?")}
+            </Typography>
+            <Typography
+              fontSize="12px"
+              fontWeight="600"
+              color={
+                isResendDisabled
+                  ? theme.palette.neutral[500]
+                  : theme.palette.primary.main
+              }
+              onClick={handleResendClick}
+              sx={{
+                cursor: isResendDisabled ? "not-allowed" : "pointer",
+              }}
+            >
+              {isResendDisabled
+                ? `${t("Resend it")} (${counter}s)`
+                : t("Resend it")}
+            </Typography>
+          </Stack>
+        )}
       </CustomStackFullWidth>
     </CustomStackFullWidth>
   );

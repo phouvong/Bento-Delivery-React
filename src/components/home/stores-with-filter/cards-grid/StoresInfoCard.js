@@ -5,6 +5,8 @@ import { IconButton, Paper, styled, Typography, useTheme } from "@mui/material";
 import { Box, Stack } from "@mui/system";
 import { t } from "i18next";
 import Link from "next/link";
+import { getStoreRedirectURL } from "helper-functions/handleStoreRedirect";
+
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
@@ -136,11 +138,7 @@ const StoresInfoCard = (props) => {
         </>
       )}
       <Link
-        href={{
-          pathname: "/store/[id]",
-          query: { id: `${id}`, module_id: `${moduleId}` },
-          store_zone_id: `${data?.zone_id}`,
-        }}
+        href={getStoreRedirectURL(data, moduleId)}
       >
         <CardWrapper>
           <CustomStackFullWidth

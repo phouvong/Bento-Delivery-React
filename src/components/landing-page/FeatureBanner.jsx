@@ -135,6 +135,7 @@ const Banners = ({ landingPageData, isSmall }) => {
     infinite: infiniteManage(),
     slidesToShow: 2,
     slidesToScroll: 1,
+    swipeToSlide: true,
     autoplay: true,
     speed: 2000,
     autoplaySpeed: 3000,
@@ -145,6 +146,7 @@ const Banners = ({ landingPageData, isSmall }) => {
         settings: {
           slidesToShow: 2,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
       {
@@ -152,6 +154,7 @@ const Banners = ({ landingPageData, isSmall }) => {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
+          swipeToSlide: true,
           initialSlide: 1,
         },
       },
@@ -160,6 +163,7 @@ const Banners = ({ landingPageData, isSmall }) => {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
     ],

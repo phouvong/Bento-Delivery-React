@@ -3,20 +3,24 @@ import {
   LeftArrowStyle,
   RightArrowStyle,
 } from "../../home/best-reviewed-items/brt.style";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
-import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
-import { alpha, IconButton, styled } from "@mui/material";
+import { IconButton, styled } from "@mui/material";
 
 export const RoundedIconButton = styled(IconButton)(({ theme }) => ({
-  borderRadius: "4px",
+  width: 32,
+  height: 32,
+  borderRadius: "50%",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
-  backgroundColor: theme.palette.neutral[100],
+  backgroundColor: theme.palette.background.paper,
+  boxShadow: "0 2px 6px rgba(0,0,0,0.12)",
+  color: theme.palette.text.primary,
   ":hover": {
-    backgroundColor: theme.palette.neutral[300],
+    backgroundColor: theme.palette.background.paper,
+    boxShadow: "0 3px 8px rgba(0,0,0,0.18)",
   },
 }));
+
 const PrevArrow = ({ onClick, className }) => {
   const language_direction = JSON.parse(localStorage.getItem("settings"));
 
@@ -27,16 +31,15 @@ const PrevArrow = ({ onClick, className }) => {
       sx={{ display: className?.includes("slick-disabled") && "none" }}
     >
       <RoundedIconButton>
-        <ArrowBackIosNewIcon
-          style={{
-            width: "20px",
-            height: "20px",
-          }}
+        <i
+          className="fi fi-rs-angle-small-left"
+          style={{ fontSize: "16px", display: "flex", lineHeight: 1 }}
         />
       </RoundedIconButton>
     </LeftArrowStyle>
   );
 };
+
 const NextArrow = ({ onClick, className }) => {
   const language_direction = JSON.parse(localStorage.getItem("settings"));
   return (
@@ -49,11 +52,9 @@ const NextArrow = ({ onClick, className }) => {
       }}
     >
       <RoundedIconButton>
-        <ArrowForwardIosIcon
-          style={{
-            width: "20px",
-            height: "20px",
-          }}
+        <i
+          className="fi fi-rs-angle-small-right"
+          style={{ fontSize: "16px", display: "flex", lineHeight: 1 }}
         />
       </RoundedIconButton>
     </RightArrowStyle>
@@ -71,47 +72,20 @@ export const ProductsThumbnailsSettings = {
 
   responsive: [
     {
-      breakpoint: 450,
-      settings: {
-        slidesToShow: 3.5,
-      },
-    },
-
-    {
-      breakpoint: 650,
-      settings: {
-        slidesToShow: 5,
-      },
+      breakpoint: 400,
+      settings: { slidesToShow: 5 },
     },
     {
-      breakpoint: 750,
-      settings: {
-        slidesToShow: 7,
-      },
+      breakpoint: 600,
+      settings: { slidesToShow: 6 },
     },
     {
-      breakpoint: 1000,
-      settings: {
-        slidesToShow: 3,
-      },
+      breakpoint: 900,
+      settings: { slidesToShow: 7 },
     },
     {
-      breakpoint: 1150,
-      settings: {
-        slidesToShow: 5,
-      },
-    },
-    {
-      breakpoint: 1300,
-      settings: {
-        slidesToShow: 5,
-      },
-    },
-    {
-      breakpoint: 1600,
-      settings: {
-        slidesToShow: 5.3,
-      },
+      breakpoint: 1200,
+      settings: { slidesToShow: 5 },
     },
   ],
 };

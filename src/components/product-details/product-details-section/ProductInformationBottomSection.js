@@ -4,15 +4,15 @@ import { PrimaryButton } from "../../Map/map.style";
 import {
   alpha,
   Button,
+  CircularProgress,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import FavoriteBorderOutlinedIcon from "@mui/icons-material/FavoriteBorderOutlined";
+import LoadingButton from "@mui/lab/LoadingButton";
 import { useSelector } from "react-redux";
 
 import { useRouter } from "next/router";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import {
   setBuyNowItemList,
   setCampaignItemList,
@@ -22,17 +22,12 @@ import { useWishListDelete } from "../../../api-manage/hooks/react-query/wish-li
 import { removeWishListItem } from "../../../redux/slices/wishList";
 import NotAvailableCard from "./NotAvailableCard";
 import { getCurrentModuleType } from "../../../helper-functions/getCurrentModuleType";
-import Loading from "../../custom-loading/Loading";
 import { isVariationAvailable } from "components/product-details/product-details-section/helperFunction";
 import GetLocationAlert from "components/GetLocationAlert";
 import CustomModal from "components/modal";
 
 export const BottomStack = styled(Stack)(({ theme }) => ({
-  [theme.breakpoints.down("sm")]: {
-    boxShadow: "0px -4px 4px 0px rgba(0, 0, 0, 0.05)",
-    borderRadius: "0px 0px 10px 10px",
-    padding: "14px",
-  },
+  width: "100%",
 }));
 
 const ProductInformationBottomSection = ({
@@ -64,22 +59,21 @@ const ProductInformationBottomSection = ({
       )
     );
 
+  // Match by product id + store_id only. Variation is intentionally NOT
+  // compared here: the modal usually auto-selects the first variation on
+  // open, which often doesn't match what's already in cart — that would
+  // keep the button stuck on "Add to Cart" even when the item is in cart.
+  // String-coerce both sides so number-vs-string id/store_id mismatches
+  // (a common shape inconsistency between detail API and cart API) match.
   const isInCart = (id) => {
-    if (cartList?.length > 0) {
-      const isInCart = cartList?.find(
-        (item) =>
-          item?.id === id &&
-          JSON.stringify(item?.selectedOption) ===
-            JSON.stringify(productDetailsData?.selectedOption)
-      );
-      if (isInCart) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return false;
-    }
+    if (!(cartList?.length > 0)) return false;
+    const storeIdToMatch = productDetailsData?.store_id;
+    return !!cartList?.find(
+      (item) =>
+        String(item?.id) === String(id) &&
+        (storeIdToMatch == null ||
+          String(item?.store_id) === String(storeIdToMatch))
+    );
   };
   const router = useRouter();
 
@@ -127,7 +121,7 @@ const ProductInformationBottomSection = ({
         variationErrorToast();
       } else {
         handleRedirect();
-        handleModalClose();
+        handleModalClose?.();
       }
     } else {
       handleRedirect();
@@ -176,7 +170,15 @@ const ProductInformationBottomSection = ({
           onClick={() => deleteWishlistItem(productDetailsData?.id)}
         >
           <Stack direction="row" spacing={1} alignItems="center">
-            <FavoriteIcon />
+            <i
+              className="fi fi-sr-heart"
+              style={{
+                fontSize: "16px",
+                display: "flex",
+                lineHeight: 1,
+                color: theme.palette.primary.main,
+              }}
+            />
             <Typography>{wishListCount}</Typography>
           </Stack>
         </Button>
@@ -184,7 +186,14 @@ const ProductInformationBottomSection = ({
       {!isInWishList(productDetailsData?.id) && (
         <Button variant="outlined" onClick={addToFavorite}>
           <Stack direction="row" spacing={1} alignItems="center">
-            <FavoriteBorderOutlinedIcon />
+            <i
+              className="fi fi-rr-heart"
+              style={{
+                fontSize: "16px",
+                display: "flex",
+                lineHeight: 1,
+              }}
+            />
             <Typography>{wishListCount}</Typography>
           </Stack>
         </Button>
@@ -192,72 +201,153 @@ const ProductInformationBottomSection = ({
     </>
   );
 
+  const cartActionSx = {
+    flex: 1,
+    minWidth: 0,
+    height: "44px",
+    maxHeight: "44px",
+    px: 2,
+    borderRadius: "10px",
+    textTransform: "none",
+    fontWeight: 600,
+    fontSize: { xs: "13px", md: "14px" },
+    boxShadow: "none",
+    backgroundColor: alpha(
+      theme.palette.neutral?.[400] || theme.palette.text.secondary,
+      0.12
+    ),
+    color: theme.palette.text.primary,
+    border: `1px solid ${alpha(theme.palette.text.primary, 0.2)}`,
+    "&:hover": {
+      boxShadow: "none",
+      backgroundColor: alpha(
+        theme.palette.neutral?.[400] || theme.palette.text.secondary,
+        0.2
+      ),
+      borderColor: alpha(theme.palette.text.primary, 0.28),
+    },
+  };
+
+  const buyNowSx = {
+    flex: 1,
+    minWidth: 0,
+    height: "44px",
+    maxHeight: "44px",
+    px: 2,
+    borderRadius: "10px",
+    textTransform: "none",
+    fontWeight: 700,
+    fontSize: { xs: "13px", md: "14px" },
+    boxShadow: "none",
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.background.paper,
+    "&:hover": {
+      boxShadow: "none",
+      backgroundColor: theme.palette.primary.dark,
+    },
+  };
+
   const actionsHandler = () => (
-    <BottomStack direction="row" width="100%" gap={2.5}>
-      {productDetailsData?.stock > 0 &&
-      isVariationAvailable(productDetailsData) ? (
-        <PrimaryButton
-          onClick={() => handleRedirectToCheckoutClick()}
-          sx={{
-            backgroundColor: theme.palette.customColor.buyButton,
-            color: "black",
-            width: {
-              xs: "100%",
-              sm: productDetailsData?.isCampaignItem ? "100%" : 200,
-            },
-            "&:hover": {
-              color: "black",
-              backgroundColor: alpha(theme.palette.customColor.buyButton, 0.6),
-            },
-          }}
-        >
-          {productDetailsData?.isCampaignItem ? t("Order Now") : t("Buy Now")}
-        </PrimaryButton>
-      ) : (
-        <PrimaryButton
-          onClick={() => handleRedirectToCheckoutClick()}
-          sx={{
-            backgroundColor: theme.palette.customColor.buyButton,
-            color: "black",
-            width: "50%",
-          }}
-          disabled={
-            productDetailsData?.stock === 0 ||
-            !isVariationAvailable(productDetailsData)
-          }
-        >
-          <Typography color={alpha(theme.palette.error.main, 0.7)} variant="h7">
-            {t("Out of Stock")}
-          </Typography>
-        </PrimaryButton>
-      )}
+    <BottomStack direction="row" width="100%" gap={1.5}>
       {!productDetailsData?.isCampaignItem && (
         <>
           {!isInCart(productDetailsData?.id) &&
             productDetailsData?.stock > 0 &&
             isVariationAvailable(productDetailsData) && (
-              <PrimaryButton
+              <LoadingButton
                 onClick={() => handleVariationAvailability("add")}
-                sx={{ width: 200, fontSize: { xs: "12px", md: "14px" } }}
                 disabled={productDetailsData?.stock === 0}
+                loading={isLoading}
+                loadingPosition="end"
+                loadingIndicator={
+                  <CircularProgress
+                    size={15}
+                    sx={{ color: theme.palette.text.primary }}
+                  />
+                }
+                endIcon={<span />}
+                sx={{
+                  ...cartActionSx,
+                  "&.MuiLoadingButton-loading": {
+                    backgroundColor: alpha(
+                      theme.palette.neutral?.[400] || theme.palette.text.secondary,
+                      0.12
+                    ),
+                    color: theme.palette.text.primary,
+                  },
+                  "& .MuiLoadingButton-loadingIndicatorEnd": {
+                    position: "relative",
+                    right: 0,
+                    ml: 1,
+                  },
+                }}
               >
-                {isLoading ? <Loading /> : t("Add to Cart")}
-              </PrimaryButton>
+                {t("Add to Cart")}
+              </LoadingButton>
             )}
           {isInCart(productDetailsData?.id) && (
-            <PrimaryButton
+            <LoadingButton
               onClick={() =>
                 handleVariationAvailability(
                   "update",
                   isInCart(productDetailsData?.id)
                 )
               }
-              sx={{ width: 200, fontSize: { xs: "12px", md: "14px" } }}
+              loading={updateIsLoading}
+              loadingPosition="end"
+              loadingIndicator={
+                <CircularProgress
+                  size={15}
+                  sx={{ color: theme.palette.text.primary }}
+                />
+              }
+              endIcon={<span />}
+              sx={{
+                ...cartActionSx,
+                "&.MuiLoadingButton-loading": {
+                  backgroundColor: alpha(
+                    theme.palette.neutral?.[400] || theme.palette.text.secondary,
+                    0.12
+                  ),
+                  color: theme.palette.text.primary,
+                },
+                "& .MuiLoadingButton-loadingIndicatorEnd": {
+                  position: "relative",
+                  right: 0,
+                  ml: 1,
+                },
+              }}
             >
-              {updateIsLoading ? <Loading /> : t("Update To Cart")}
-            </PrimaryButton>
+              {t("Update To Cart")}
+            </LoadingButton>
           )}
         </>
+      )}
+
+      {productDetailsData?.stock > 0 &&
+      isVariationAvailable(productDetailsData) ? (
+        <Button onClick={() => handleRedirectToCheckoutClick()} sx={buyNowSx}>
+          {productDetailsData?.isCampaignItem ? t("Order Now") : t("Buy Now")}
+        </Button>
+      ) : (
+        <Button
+          onClick={() => handleRedirectToCheckoutClick()}
+          disabled={
+            productDetailsData?.stock === 0 ||
+            !isVariationAvailable(productDetailsData)
+          }
+          sx={{
+            ...buyNowSx,
+            backgroundColor: alpha(theme.palette.error.main, 0.12),
+            color: theme.palette.error.main,
+            "&:hover": {
+              backgroundColor: alpha(theme.palette.error.main, 0.18),
+              boxShadow: "none",
+            },
+          }}
+        >
+          {t("Out of Stock")}
+        </Button>
       )}
     </BottomStack>
   );
@@ -288,12 +378,12 @@ const ProductInformationBottomSection = ({
           {t("prescription is required")}
         </Typography>
       )}
-       <CustomModal
-                openModal={openLocationAlert}
-                handleClose={() => setOpenLocationAlert(false)}
-              >
-                <GetLocationAlert setOpenAlert={setOpenLocationAlert} />
-              </CustomModal>
+      <CustomModal
+        openModal={openLocationAlert}
+        handleClose={() => setOpenLocationAlert(false)}
+      >
+        <GetLocationAlert setOpenAlert={setOpenLocationAlert} />
+      </CustomModal>
     </>
   );
 };

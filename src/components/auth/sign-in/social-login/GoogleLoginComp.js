@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 import { google_client_id } from "utils/staticCredential";
 import { Stack, styled } from "@mui/system";
 import CustomImageContainer from "components/CustomImageContainer";
-import { alpha, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { alpha, Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import googleLatest from "../../asset/Google_Logo.png";
 import { t } from "i18next";
 import { getGuestId } from "helper-functions/getToken";
@@ -34,6 +34,7 @@ const GoogleLoginComp = (props) => {
     setMedium,
     loginMutation,
     setLoginInfo,
+    isLandingVariant,
   } = props;
   const theme = useTheme();
   const [loginValue, setLoginValue] = useState(null);
@@ -120,12 +121,6 @@ const GoogleLoginComp = (props) => {
         );
       },
     });
-
-    const handleRegistrationOnSuccess = (token) => {
-      //registration on success func remaining
-      setOpenModal(false);
-      handleSuccess(token);
-    };
   };
   useEffect(() => {
     // Initialize Google button
@@ -227,6 +222,44 @@ const GoogleLoginComp = (props) => {
         return null;
     }
   };
+
+  if (isLandingVariant) {
+    return (
+      <Box sx={{ width: "100%", position: "relative" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            py: "13px",
+            borderRadius: "12px",
+            border: "1px solid",
+            borderColor: "divider",
+            backgroundColor: "background.paper",
+            cursor: "pointer",
+          }}
+        >
+          <Box
+            component="img"
+            src={googleLatest.src}
+            alt="google"
+            sx={{ width: 20, height: 20, objectFit: "contain" }}
+          />
+        </Box>
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            filter: "opacity(0)",
+            zIndex: 9999,
+            cursor: "pointer",
+          }}
+        >
+          <div ref={buttonDiv} />
+        </div>
+      </Box>
+    );
+  }
 
   return (
     <Stack

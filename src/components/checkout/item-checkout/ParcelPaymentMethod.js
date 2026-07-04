@@ -3,12 +3,9 @@ import LoadingButton from "@mui/lab/LoadingButton";
 import {
   Box,
   Button,
-  Checkbox,
-  FormControl,
-  FormControlLabel,
+  Divider,
   Grid,
   Radio,
-  RadioGroup,
   Stack,
   Tooltip,
   Typography,
@@ -20,42 +17,82 @@ import CustomImageContainer from "components/CustomImageContainer";
 import { getToken } from "helper-functions/getToken";
 import { t } from "i18next";
 import { useRouter } from "next/router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setOfflineInfoStep,
   setOfflineMethod,
 } from "redux/slices/offlinePaymentData";
-import SimpleBar from "simplebar-react";
-import {
-  CustomFormControlLabel,
-  CustomStackFullWidth,
-} from "styled-components/CustomStyles.style";
-import { CustomButtonStack, DeliveryCaption } from "../CheckOut.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
+import { getAmountWithSign } from "helper-functions/CardHelpers";
 import PaymentMethodCard from "../PaymentMethodCard";
-import OfflinePaymentIcon from "../assets/OfflinePaymentIcon";
 import cashOnDelivery from "../assets/cod2.svg";
 import wallet from "../assets/wallet.svg";
-import { CustomButtonPrimary } from "styled-components/CustomButtons.style";
 
-const OfflineButton = styled(Button)(({ theme, value, paymentMethod }) => ({
-  padding: "15px 15px",
-  border: "1px solid #E4F4FF",
-  filter: `drop-shadow(-1px 1px 0px ${alpha(theme.palette.info.light, 0.2)})`,
-  gap: "5px",
-  color:
-    value?.id === paymentMethod?.id
-      ? theme.palette.whiteContainer.main
-      : theme.palette.neutral[1000],
-  background:
-    value?.id === paymentMethod?.id
-      ? theme.palette.primary.main
-      : theme.palette.neutral[100],
+const OfflineButton = styled(Button)(({ theme, value, paymentMethod }) => {
+  const isActive = value?.id === paymentMethod?.id;
+  return {
+    minHeight: "36px",
+    padding: "6px 14px",
+    borderRadius: "999px",
+    textTransform: "none",
+    fontSize: "13px",
+    fontWeight: 600,
+    lineHeight: 1.2,
+    border: `1px solid ${
+      isActive
+        ? theme.palette.primary.main
+        : alpha(theme.palette.neutral[400], 0.25)
+    }`,
+    boxShadow: "none",
+    color: isActive ? theme.palette.primary.main : theme.palette.text.primary,
+    background: isActive
+      ? alpha(theme.palette.primary.main, 0.08)
+      : theme.palette.background.paper,
+    "&:hover": {
+      background: alpha(theme.palette.primary.main, 0.12),
+      borderColor: theme.palette.primary.main,
+      color: theme.palette.primary.main,
+      boxShadow: "none",
+    },
+  };
+});
+
+// Reusable card wrapper for wallet / COD rows
+const PaymentCard = styled(Stack)(({ theme, selected }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  gap: "10px",
+  padding: "14px 12px",
+  height: "100%",
+  borderRadius: "10px",
+  cursor: "pointer",
+  border: `1px solid ${
+    selected
+      ? alpha(theme.palette.primary.main, 0.4)
+      : alpha(theme.palette.neutral[400], 0.25)
+  }`,
+  backgroundColor: selected
+    ? alpha(theme.palette.primary.main, 0.06)
+    : theme.palette.background.paper,
+  transition: "border-color 0.15s, background-color 0.15s",
   "&:hover": {
-    color: theme.palette.whiteContainer.main,
-    background: theme.palette.primary.main,
+    borderColor: alpha(theme.palette.primary.main, 0.4),
+    backgroundColor: alpha(theme.palette.primary.main, 0.04),
   },
 }));
+
+const IconCircle = styled(Stack)(({ bgcolor }) => ({
+  width: 36,
+  height: 36,
+  borderRadius: "50%",
+  justifyContent: "center",
+  alignItems: "center",
+  flexShrink: 0,
+  backgroundColor: bgcolor,
+}));
+
 const ParcelPaymentMethod = (props) => {
   const {
     paymentMethod,
@@ -73,25 +110,47 @@ const ParcelPaymentMethod = (props) => {
     getParcelPayment,
     setOpen,
     setSelectedPaymentMethod,
+    payableAmount,
+    walletBalance,
   } = props;
+
   const token = getToken();
   const router = useRouter();
   const theme = useTheme();
   const divRef = useRef(null);
   const dispatch = useDispatch();
   const { offlineMethod, offlineInfoStep } = useSelector(
-    (state) => state.offlinePayment
+    (state) => state.offlinePayment,
   );
   const [isCheckedOffline, setIsCheckedOffline] = useState(
-    offlineMethod !== "" ? true : false
+    offlineMethod !== "" ? true : false,
   );
   const [openOfflineOptions, setOpenOfflineOptions] = useState(false);
 
-  const handleClickOffline = () => {
-    setOpenOfflineOptions(!openOfflineOptions);
-    // Scroll to the endpoint of the div
-    divRef.current.scrollIntoView({ behavior: "smooth", block: "end" });
-  };
+  // When user switches away from offline payment, collapse the nested options
+  // so the next click on "Pay Offline" opens + selects in one tap.
+  useEffect(() => {
+    if (!isCheckedOffline) {
+      setOpenOfflineOptions(false);
+    }
+  }, [isCheckedOffline]);
+
+  // ── Derived visibility flags ────────────────────────────────────────────
+  const showWallet =
+    configData?.customer_wallet_status === 1 &&
+    token &&
+    paidBy !== "receiver" &&
+    forprescription !== "true" &&
+    walletBalance > 0;
+
+  const showCOD =
+    configData?.cash_on_delivery && getParcelPayment()[0]?.cash_on_delivery;
+
+  // Full-width when the sibling card is absent
+  const walletGridSm = showCOD ? 6 : 12;
+  const codGridSm = showWallet ? 6 : 12;
+
+  // ── Handlers (unchanged) ────────────────────────────────────────────────
   const handleClickOfflineItem = (item) => {
     dispatch(setOfflineMethod(item));
     dispatch(setOfflineInfoStep(1));
@@ -99,341 +158,364 @@ const ParcelPaymentMethod = (props) => {
     setPaymentMethod(`offline_payment`);
   };
 
+  const handleClickOffline = () => {
+    const next = !openOfflineOptions;
+    setOpenOfflineOptions(next);
+    if (next) {
+      const firstOption = Array.isArray(offlinePaymentOptions)
+        ? offlinePaymentOptions?.[0]
+        : Object.values(offlinePaymentOptions || {})?.[0];
+      if (firstOption && (!offlineMethod || !offlineMethod?.id)) {
+        handleClickOfflineItem(firstOption);
+      } else if (firstOption) {
+        setIsCheckedOffline(true);
+        setPaymentMethod("offline_payment");
+      }
+    }
+    divRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  };
+
   const handleOffline = (e) => {
-    // dispatch(setOfflineInfoStep(2));
-    //  router.push("/checkout?page=offline", undefined, { shallow: true });
     router.push(
-      {
-        pathname: "/checkout",
-        query: { page: "parcel", method: "offline" },
-      },
+      { pathname: "/checkout", query: { page: "parcel", method: "offline" } },
       undefined,
-      { shallow: true }
+      { shallow: true },
     );
   };
 
   return (
-    <CustomStackFullWidth justifyContent="space-between" spacing={1}>
-      <Stack pb={2}>
-        <DeliveryCaption>{t("Payment Method")}</DeliveryCaption>
-        <Typography color={theme.palette.neutral[400]}>
-          {t("Select a Payment Method to Proceed")}
-        </Typography>
+    <Stack spacing={0} ref={divRef}>
+      {/* ── Header ─────────────────────────────────────────────────────── */}
+      <Stack
+        direction="row"
+        alignItems="flex-start"
+        justifyContent="space-between"
+        gap={1}
+        pb={2.5}
+      >
+        <Stack spacing={0.4} sx={{ minWidth: 0, flex: 1 }}>
+          <Typography
+            fontSize={{ xs: "17px", md: "19px" }}
+            fontWeight={700}
+            color="text.primary"
+            lineHeight={1.2}
+          >
+            {t("Payment Method")}
+          </Typography>
+          <Typography fontSize="13px" color="text.secondary">
+            {t("Select a payment method to proceed.")}
+          </Typography>
+        </Stack>
+
+        {payableAmount != null && (
+          <Stack alignItems="flex-end" sx={{ flexShrink: 0 }}>
+            <Typography
+              fontSize="11px"
+              fontWeight={600}
+              color="text.secondary"
+              sx={{ textTransform: "uppercase", letterSpacing: "0.6px" }}
+            >
+              {t("Total")}
+            </Typography>
+            <Typography
+              fontSize={{ xs: "17px", md: "19px" }}
+              fontWeight={700}
+              color="primary.main"
+            >
+              {getAmountWithSign(payableAmount)}
+            </Typography>
+          </Stack>
+        )}
       </Stack>
-      <Box>
-        <CustomStackFullWidth
-          ref={divRef}
-          direction={parcel === "true" ? "column" : "row"}
-          sx={{
-            flexWrap: "wrap",
-            paddingBottom: "10px",
-            gap: {
-              xs: parcel === "true" ? "16px" : "0px",
-              sm: parcel === "true" ? "16px" : "0px",
-              md: "16px",
-            },
-          }}
-        >
-          <>
-            <Grid container spacing={2}>
-              {configData?.customer_wallet_status === 1 &&
-                token &&
-                paidBy !== "receiver" &&
-                forprescription !== "true" && (
-                  <Grid item spacing={3} xs={12} sm={getParcelPayment()[0]?.cash_on_delivery ? 6 : 12}>
-                    <CustomStackFullWidth
-                      flexDirection="row"
-                      alignItems="center"
-                      justifyContent="space-between"
-                      padding="10px 9px"
-                      gap="10px"
-                      sx={{
-                        backgroundColor:
-                          paymentMethod === "wallet" &&
-                          alpha(theme.palette.primary.main, 0.1),
-                        border:
-                          paymentMethod === "wallet"
-                            ? `1px solid ${alpha(
-                              theme.palette.secondary.light,
-                              0.3
-                            )}`
-                            : `1px solid ${alpha(
-                              theme.palette.neutral[400],
-                              0.3
-                            )}`,
-                        borderRadius: "10px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => setPaymentMethod("wallet")}
+
+      {/* ── Wallet + COD ───────────────────────────────────────────────── */}
+      {(showWallet || showCOD) && (
+        <Grid container spacing={1.5} sx={{ mb: 2 }}>
+          {/* Wallet */}
+          {showWallet && (
+            <Grid item xs={12} sm={walletGridSm}>
+              <PaymentCard
+                selected={paymentMethod === "wallet" ? 1 : 0}
+                onClick={() => setPaymentMethod("wallet")}
+              >
+                <Stack direction="row" alignItems="center" gap={1.25}>
+                  <IconCircle
+                    bgcolor={
+                      theme.palette.customColor?.parcelWallet ||
+                      theme.palette.primary.light
+                    }
+                  >
+                    <CustomImageContainer
+                      width="20px"
+                      height="20px"
+                      objectfit="contain"
+                      src={wallet.src}
+                    />
+                  </IconCircle>
+                  <Stack spacing={0.25}>
+                    <Typography
+                      fontSize="14px"
+                      fontWeight={600}
+                      color="text.primary"
                     >
-                      <Stack flexDirection="row" alignItems="center" gap="10px">
-                        <Stack
-                          width="32px"
-                          height="32px"
-                          justifyContent="center"
-                          alignItems="center"
-                          backgroundColor={
-                            theme.palette.customColor.parcelWallet
-                          }
-                          borderRadius="50%"
-                        >
-                          <CustomImageContainer
-                            width="20px"
-                            height="20px"
-                            objectfit="contain"
-                            src={wallet.src}
-                          />
-                        </Stack>
-                        <Typography color="neutral[400]">
-                          {t("Pay via Wallet")}
-                        </Typography>
-                      </Stack>
-                      {paymentMethod === "wallet" ? (
-                        <Button variant="outlined" size="small">
-                          {t("Applied")}
-                        </Button>
-                      ) : (
-                        <Button variant="outlined" size="small">
-                          {t("Apply")}
-                        </Button>
-                      )}
-                    </CustomStackFullWidth>
-                  </Grid>
-                )}
-              {configData?.cash_on_delivery &&
-                getParcelPayment()[0]?.cash_on_delivery && (
-                  <Grid item spacing={3} xs={12} sm={6}>
-                    <CustomStackFullWidth
-                      flexDirection="row"
-                      alignItems="center"
-                      padding="14px 9px"
-                      justifyContent="space-between"
-                      gap="10px"
-                      sx={{
-                        backgroundColor:
-                          paymentMethod === "cash_on_delivery" &&
-                          alpha(theme.palette.primary.main, 0.1),
-                        border:
-                          paymentMethod === "cash_on_delivery"
-                            ? `1px solid ${alpha(
-                              theme.palette.secondary.light,
-                              0.3
-                            )}`
-                            : `1px solid ${alpha(
-                              theme.palette.neutral[400],
-                              0.3
-                            )}`,
-                        borderRadius: "10px",
-                        cursor: "pointer",
-                      }}
-                      onClick={() => setPaymentMethod("cash_on_delivery")}
-                    >
-                      <Stack flexDirection="row" alignItems="center" gap="10px">
-                        <Stack
-                          width="32px"
-                          height="32px"
-                          justifyContent="center"
-                          alignItems="center"
-                          backgroundColor={theme.palette.primary.main}
-                          borderRadius="50%"
-                        >
-                          <CustomImageContainer
-                            width="22px"
-                            height="22px"
-                            objectfit="contain"
-                            src={cashOnDelivery.src}
-                          />
-                        </Stack>
-                        <Typography color="neutral[400]">
-                          {t("Cash on delivery")}
-                        </Typography>
-                      </Stack>
-                      <Radio
-                        sx={{ color: theme.palette.neutral[400], padding: "0px" }}
-                        checked={paymentMethod === "cash_on_delivery"}
-                        onChange={() => setPaymentMethod("cash_on_delivery")}
-                      />
-                    </CustomStackFullWidth>
-                  </Grid>
-                )}
+                      {t("Pay via Wallet")}
+                    </Typography>
+                    {walletBalance != null && (
+                      <Typography
+                        fontSize="12px"
+                        fontWeight={600}
+                        color="primary.main"
+                      >
+                        {t("Balance")}: {getAmountWithSign(walletBalance)}
+                      </Typography>
+                    )}
+                  </Stack>
+                </Stack>
+                <Radio
+                  sx={{ color: "neutral.400", p: 0 }}
+                  checked={paymentMethod === "wallet"}
+                  onChange={() => setPaymentMethod("wallet")}
+                />
+              </PaymentCard>
             </Grid>
-            <Stack>
-              {paidBy !== "receiver" && (
-                <Stack p="10px 0" flexDirection="row" alignItems="baseline" gap=".25rem">
-                  <Typography fontSize="16px" fontWeight={500}>
-                    {t("Pay Via Online")}
-                  </Typography>
-                  <Typography color={theme.palette.neutral[400]} fontSize="12px">
-                    ({t("Faster & secure way to pay bill")})
+          )}
+
+          {/* Cash on delivery */}
+          {showCOD && (
+            <Grid item xs={12} sm={codGridSm}>
+              <PaymentCard
+                selected={paymentMethod === "cash_on_delivery" ? 1 : 0}
+                onClick={() => setPaymentMethod("cash_on_delivery")}
+              >
+                <Stack direction="row" alignItems="center" gap={1.25}>
+                  <IconCircle bgcolor={theme.palette.primary.main}>
+                    <CustomImageContainer
+                      width="22px"
+                      height="22px"
+                      objectfit="contain"
+                      src={cashOnDelivery.src}
+                    />
+                  </IconCircle>
+                  <Typography
+                    fontSize="14px"
+                    fontWeight={600}
+                    color="text.primary"
+                  >
+                    {t("Cash on delivery")}
                   </Typography>
                 </Stack>
-              )}
+                <Radio
+                  sx={{ color: "neutral.400", p: 0 }}
+                  checked={paymentMethod === "cash_on_delivery"}
+                  onChange={() => setPaymentMethod("cash_on_delivery")}
+                />
+              </PaymentCard>
+            </Grid>
+          )}
+        </Grid>
+      )}
 
-              <Stack direction="row" flexWrap="wrap" columnGap={2} rowGap={1} flexGrow={1}>
-                {paidBy !== "receiver" &&
-                  forprescription !== "true" &&
-                  configData?.digital_payment_info?.digital_payment &&
-                  getParcelPayment()[0]?.digital_payment && (
-                    <>
-                      {configData?.active_payment_method_list?.map(
-                        (item, index) => {
-                          return (
-                            <Stack flexGrow={1} flexBasis={"48%"}>
-                              <PaymentMethodCard
-                                key={index}
-                                parcel={parcel}
-                                paymentType={item?.gateway_title}
-                                image={item?.gateway_image_full_url}
-                                paymentMethod={paymentMethod}
-                                setPaymentMethod={setPaymentMethod}
-                                setIsCheckedOffline={setIsCheckedOffline}
-                                paidBy={paidBy}
-                                type={item?.gateway}
-                                digitalPaymentMethodActive={
-                                  configData?.digital_payment_info
-                                    ?.digital_payment
-                                }
-                                imageUrl={
-                                  configData?.base_urls?.gateway_image_url
-                                }
-                              />
-                            </Stack>
-                          );
-                        }
-                      )}
-                    </>
-                  )}
-              </Stack>
-            </Stack>
-          </>
-          <Stack pb="20px">
-            {getParcelPayment()[0]?.offline_payment &&
-              typeof offlinePaymentOptions !== "undefined" &&
-              Object?.keys(offlinePaymentOptions)?.length !== 0 &&
-              configData?.offline_payment_status === 1 &&
-              paidBy !== "receiver" ? (
-              <CustomStackFullWidth
-                padding="10px"
-                borderRadius="10px"
-                backgroundColor={theme.palette.neutral[300]}
-                border={`1px solid ${alpha(theme.palette.primary.main, 0.2)}`}
-                onClick={handleClickOffline}
-                sx={{ cursor: "pointer" }}
+      {/* ── Pay Via Online ─────────────────────────────────────────────── */}
+      {paidBy !== "receiver" &&
+        forprescription !== "true" &&
+        configData?.digital_payment_info?.digital_payment &&
+        getParcelPayment()[0]?.digital_payment && (
+          <Stack spacing={1.25} mb={2}>
+            <Stack direction="row" alignItems="baseline" gap={0.75}>
+              <Typography
+                fontSize={{ xs: "13px", md: "14px" }}
+                fontWeight={700}
+                color="text.primary"
               >
-                <CustomStackFullWidth gap="10px">
-                  <CustomStackFullWidth
-                    flexDirection="row"
-                    justifyContent="space-between"
-                  >
-                    <FormControl
-                      sx={{
-                        marginRight: { xs: "0px" },
-                        // marginLeft: { xs: "5px" },
+                {t("Pay Via Online")}
+              </Typography>
+              <Typography fontSize="12px" color="text.secondary">
+                ({t("Faster & secure way to pay bill")})
+              </Typography>
+            </Stack>
+
+            <Stack direction="row" flexWrap="wrap" gap={1.5}>
+              {configData?.active_payment_method_list?.map((item, index) => (
+                <Stack
+                  key={index}
+                  sx={{
+                    flex: "1 1 calc(50% - 6px)",
+                    minWidth: "140px",
+                    borderRadius: "10px",
+                    border: `1px solid ${
+                      paymentMethod === item?.gateway
+                        ? alpha(theme.palette.primary.main, 0.4)
+                        : alpha(theme.palette.neutral[400], 0.25)
+                    }`,
+                    backgroundColor:
+                      paymentMethod === item?.gateway
+                        ? alpha(theme.palette.primary.main, 0.06)
+                        : theme.palette.background.paper,
+                    transition: "border-color 0.15s, background-color 0.15s",
+                    px: 1,
+                    // neutralise the negative margin inside PaymentMethodCard
+                    "& .MuiFormControlLabel-root": {
+                      marginInlineStart: 0,
+                    },
+                  }}
+                >
+                  <PaymentMethodCard
+                    parcel={parcel}
+                    paymentType={item?.gateway_title}
+                    image={item?.gateway_image_full_url}
+                    paymentMethod={paymentMethod}
+                    setPaymentMethod={setPaymentMethod}
+                    setIsCheckedOffline={setIsCheckedOffline}
+                    paidBy={paidBy}
+                    type={item?.gateway}
+                    digitalPaymentMethodActive={
+                      configData?.digital_payment_info?.digital_payment
+                    }
+                    imageUrl={configData?.base_urls?.gateway_image_url}
+                  />
+                </Stack>
+              ))}
+            </Stack>
+          </Stack>
+        )}
+
+      {/* ── Pay Offline ────────────────────────────────────────────────── */}
+      {getParcelPayment()[0]?.offline_payment &&
+        typeof offlinePaymentOptions !== "undefined" &&
+        Object?.keys(offlinePaymentOptions)?.length !== 0 &&
+        configData?.offline_payment_status === 1 &&
+        paidBy !== "receiver" && (
+          <Stack mb={2.5}>
+            <Stack
+              sx={{
+                padding: "12px 14px",
+                borderRadius: "12px",
+                cursor: "pointer",
+                gap: "12px",
+                border: `1px solid ${
+                  paymentMethod === "offline_payment"
+                    ? alpha(theme.palette.primary.main, 0.4)
+                    : alpha(theme.palette.neutral[400], 0.25)
+                }`,
+                backgroundColor:
+                  paymentMethod === "offline_payment"
+                    ? alpha(theme.palette.primary.main, 0.06)
+                    : theme.palette.background.paper,
+                transition: "border-color 0.15s, background-color 0.15s",
+              }}
+              onClick={handleClickOffline}
+            >
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="space-between"
+                gap={1}
+              >
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  gap={1.25}
+                  sx={{ minWidth: 0, flex: 1 }}
+                >
+                  <Radio
+                    sx={{ p: 0, color: "neutral.400" }}
+                    checked={isCheckedOffline}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleClickOffline();
+                    }}
+                  />
+                  <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+                    <Typography
+                      fontSize="14px"
+                      fontWeight={600}
+                      color="text.primary"
+                    >
+                      {t("Pay Offline")}
+                    </Typography>
+                    <Typography fontSize="12px" color="text.secondary">
+                      {t("Select an option from below.")}
+                    </Typography>
+                  </Stack>
+                </Stack>
+                <Tooltip
+                  placement="left"
+                  title="Offline Payment! Now, with just a click of a button, you can make secure transactions. It's simple, convenient, and reliable."
+                >
+                  <InfoIcon
+                    sx={{
+                      fontSize: 18,
+                      color: "primary.main",
+                      flexShrink: 0,
+                    }}
+                  />
+                </Tooltip>
+              </Stack>
+
+              {openOfflineOptions && (
+                <Stack direction="row" flexWrap="wrap" gap={1}>
+                  {offlinePaymentOptions?.map((item, index) => (
+                    <OfflineButton
+                      key={index}
+                      value={item}
+                      paymentMethod={offlineMethod}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleClickOfflineItem(item);
                       }}
                     >
-                      <RadioGroup
-                        aria-labelledby="demo-radio-buttons-group-label"
-                        name="radio-buttons-group"
-                        fontWeight="600"
-                      >
-                        <CustomFormControlLabel
-                          value="Pay Offline"
-                          control={
-                            <Radio
-                              sx={{
-                                padding: {
-                                  xs: "2px",
-                                  md: "10px",
-                                },
-                              }}
-                              checked={isCheckedOffline}
-                              onClick={handleClickOffline}
-                            />
-                          }
-                          label={
-                            <Stack
-                              flexDirection="row"
-                              gap=".5rem"
-                            >
-                              {/* <OfflinePaymentIcon /> */}
-                              <Typography fontSize="14px" fontWeight="500">
-                                {t("Pay Offline")}
-                                <Typography
-                                  component="span"
-                                  fontSize="10px"
-                                >
-                                  ( {t("Select option from below")} )
-                                </Typography>
-                              </Typography>
-                            </Stack>
-                          }
-                        />
-                      </RadioGroup>
-                    </FormControl>
-                    <Tooltip
-                      placement="left"
-                      title="Offline Payment! Now, with just a click of a button, you can make secure transactions. It's simple, convenient, and reliable."
-                    >
-                      <InfoIcon
-                        fontSize="16px"
-                        sx={{
-                          color: theme.palette.primary.main,
-                        }}
-                      />
-                    </Tooltip>
-                  </CustomStackFullWidth>
-                  {openOfflineOptions && (
-                    <CustomStackFullWidth>
-                      <CustomStackFullWidth flexDirection="row" gap="20px">
-                        {offlinePaymentOptions?.map((item, index) => {
-                          return (
-                            <OfflineButton
-                              key={index}
-                              value={item}
-                              paymentMethod={offlineMethod}
-                              onClick={() => handleClickOfflineItem(item)}
-                            >
-                              <Typography
-                                fontSize="12px"
-                                textTransform="capitalize"
-                              >
-                                {item.method_name}
-                              </Typography>
-                            </OfflineButton>
-                          );
-                        })}
-                      </CustomStackFullWidth>
-                    </CustomStackFullWidth>
-                  )}
-                </CustomStackFullWidth>
-              </CustomStackFullWidth>
-            ) : null}
+                      <Typography fontSize="12px" textTransform="capitalize">
+                        {item.method_name}
+                      </Typography>
+                    </OfflineButton>
+                  ))}
+                </Stack>
+              )}
+            </Stack>
           </Stack>
-        </CustomStackFullWidth>
-      </Box>
-      <Stack direction="row" gap="1rem" justifyContent="flex-end">
-        <CustomButtonPrimary
-          sx={{ width: "100px", bgcolor: theme.palette.neutral[300], color: theme.palette.text.primary, "&:hover": { bgcolor: theme.palette.neutral[400] } }}
+        )}
+
+      {/* ── Footer buttons ─────────────────────────────────────────────── */}
+      <Divider sx={{ mb: 2 }} />
+      <Stack direction="row" gap={1.5} justifyContent="flex-end">
+        <Button
+          variant="outlined"
           onClick={() => setOpen(false)}
+          sx={{
+            minWidth: 90,
+            borderRadius: "8px",
+            textTransform: "none",
+            fontWeight: 600,
+            borderColor: theme.palette.divider,
+            color: "text.secondary",
+            "&:hover": { borderColor: "text.secondary" },
+          }}
         >
           {t("Cancel")}
-        </CustomButtonPrimary>
+        </Button>
 
         {paidBy && (
           <LoadingButton
-            type="submit"
             variant="contained"
+            disableElevation
             onClick={() => {
-              setSelectedPaymentMethod(paymentMethod)
-              setOpen(false)
+              setSelectedPaymentMethod(paymentMethod);
+              setOpen(false);
             }}
             loading={isLoading}
+            sx={{
+              minWidth: 90,
+              borderRadius: "8px",
+              textTransform: "none",
+              fontWeight: 600,
+            }}
           >
             {t("Update")}
           </LoadingButton>
         )}
       </Stack>
-    </CustomStackFullWidth>
+    </Stack>
   );
 };
+
 export default ParcelPaymentMethod;

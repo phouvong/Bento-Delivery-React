@@ -86,6 +86,7 @@ const LoyaltyPoints = (props) => {
 						xs: "none",
 						md: `2px solid ${alpha(theme.palette.neutral[400], 0.3)}`,
 					}}
+					paddingRight={{ xs: "0px", md: "40px" }}
 				>
 					<Stack spacing={{ xs: 2, md: 5 }}>
 						{isSmall && (

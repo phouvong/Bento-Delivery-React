@@ -5,16 +5,25 @@ import {
 	CustomStackFullWidth,
 } from "../../../styled-components/CustomStyles.style";
 import ListItemText from "@mui/material/ListItemText";
-import { Typography } from "@mui/material";
+import { Skeleton, Typography } from "@mui/material";
 import Radio from "@mui/material/Radio";
-
-import CustomAlert from "../../alert/CustomAlert";
 
 import { useTheme } from "@mui/material/styles";
 
 import { Stack } from "@mui/system";
 
 import { CustomTypographyEllipsis } from "../../../styled-components/CustomTypographies.style";
+
+// Placeholder rows shown while address list is loading
+const AddressSkeletonItem = () => (
+	<Stack direction="row" alignItems="center" gap={1} px={0.5}>
+		<Skeleton variant="circular" width={20} height={20} sx={{ flexShrink: 0 }} />
+		<Stack flex={1} spacing={0.5}>
+			<Skeleton variant="text" width="40%" height={18} />
+			<Skeleton variant="text" width="80%" height={14} />
+		</Stack>
+	</Stack>
+);
 
 const AddressSelectionList = (props) => {
 	const theme = useTheme();
@@ -29,7 +38,19 @@ const AddressSelectionList = (props) => {
 		configData,
 		setSelectedAddress,
 		renderOnNavbar,
+		isLoading,
 	} = props;
+
+	if (isLoading) {
+		return (
+			<Stack gap="15px" py={1}>
+				{[1, 2, 3].map((i) => (
+					<AddressSkeletonItem key={i} />
+				))}
+			</Stack>
+		);
+	}
+
 	return (
 		<>
 			<Stack gap="15px">
@@ -100,11 +121,48 @@ const AddressSelectionList = (props) => {
 							</CustomListItem>
 						</Stack>
 					))}
-				{!isRefetching && allAddress?.length === 0 && (
-					<CustomAlert
-						type="info"
-						text={t("No saved addresses found to select.")}
-					/>
+
+				{/* Empty state */}
+				{!isLoading && data && data?.addresses?.length === 0 && (
+					<Stack alignItems="center" spacing={1.5} py={1.5}>
+						<Stack
+							alignItems="center"
+							justifyContent="center"
+							sx={{
+								width: 52,
+								height: 52,
+								borderRadius: "50%",
+								bgcolor: theme.palette.primary.main + "14",
+							}}
+						>
+							<i
+								className="fi fi-rr-map-marker"
+								style={{
+									fontSize: "22px",
+									display: "flex",
+									lineHeight: 1,
+									color: theme.palette.primary.main,
+								}}
+							/>
+						</Stack>
+						<Stack alignItems="center" spacing={0.5}>
+							<Typography
+								fontSize="14px"
+								fontWeight={600}
+								color="text.primary"
+							>
+								{t("No saved addresses yet")}
+							</Typography>
+							<Typography
+								fontSize="12px"
+								color="text.secondary"
+								textAlign="center"
+								sx={{ maxWidth: "200px", lineHeight: 1.5 }}
+							>
+								{t("Add a new address to get started")}
+							</Typography>
+						</Stack>
+					</Stack>
 				)}
 				{/*{!data && <CustomCheckOutShimmer />}*/}
 			</Stack>

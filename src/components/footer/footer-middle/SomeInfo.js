@@ -1,110 +1,67 @@
-import { useTheme } from "@emotion/react";
-import { Typography } from "@mui/material";
-import React from "react";
-import {
-  CustomStackFullWidth,
-  CustomTypographyBold,
-} from "styled-components/CustomStyles.style";
+import { Typography, useTheme } from "@mui/material";
+import { Stack } from "@mui/system";
 import CustomImageContainer from "../../CustomImageContainer";
 import Link from "next/link";
 
-const SomeInfo = (props) => {
-  const { image, alt, title, info, t, href } = props;
-  const theme = useTheme();
-  return (
-    <>{href ? (
-      <Link href={href}>
-        <CustomStackFullWidth
-          alignItems="center"
-          justifyContent="center"
-          spacing={3}
-          sx={{
-            cursor: "pointer",
-            img: {
-              transition: "all ease 0.5s",
-            },
-            "&:hover": {
-              ".MuiTypography-body1": {
-                color: theme.palette.primary.main,
-              },
-              ".MuiTypography-body2": {
-                color: theme.palette.primary.main,
-              },
-            },
-          }}
-        >
-          <CustomImageContainer src={image.src} alt={alt} height={50} width={50} />
-          <CustomStackFullWidth
-            alignItems="center"
-            justifyContent="center"
-            spacing={1}
-          >
-            <CustomTypographyBold
-              sx={{
-                textTransform: "capitalize",
-              }}
-            >
-              {t(title)}
-            </CustomTypographyBold>
-            <Typography
-              variant="body2"
-              sx={{
-                textAlign: "center",
-              }}
-            >
-              {info}
-            </Typography>
-          </CustomStackFullWidth>
-        </CustomStackFullWidth>
-      </Link>
-    ) : (
-      <CustomStackFullWidth
-        alignItems="center"
-        justifyContent="center"
-        spacing={3}
+const Inner = ({ image, alt, title, info, t, theme }) => (
+  <Stack
+    alignItems="center"
+    gap="24px"
+    sx={{
+      flex: 1,
+      px: "8px",
+      cursor: "pointer",
+      img: { transition: "all ease 0.5s" },
+      "&:hover .info-label": { color: theme.palette.primary.main },
+      "&:hover .info-value": { color: theme.palette.primary.main },
+    }}
+  >
+    <CustomImageContainer src={image.src} alt={alt} height={50} width={50} />
+    <Stack gap="4px" alignItems="center" sx={{ width: "100%" }}>
+      <Typography
+        className="info-label"
         sx={{
-          cursor: "pointer",
-          img: {
-            transition: "all ease 0.5s",
-          },
-          "&:hover": {
-            ".MuiTypography-body1": {
-              color: theme.palette.primary.main,
-            },
-            ".MuiTypography-body2": {
-              color: theme.palette.primary.main,
-            },
-          },
+          fontSize: "14px",
+          fontWeight: 600,
+          color: "neutral.1050",
+          letterSpacing: "-0.42px",
+          lineHeight: 1.2,
+          textAlign: "center",
+          transition: "color 0.2s ease",
         }}
       >
-        <CustomImageContainer src={image.src} alt={alt} height={50} width={50} />
-        <CustomStackFullWidth
-          alignItems="center"
-          justifyContent="center"
-          spacing={1}
-        >
-          <CustomTypographyBold
-            sx={{
-              textTransform: "capitalize",
-            }}
-          >
-            {t(title)}
-          </CustomTypographyBold>
-          <Typography
-            variant="body2"
-            sx={{
-              textAlign: "center",
-            }}
-          >
-            {info}
-          </Typography>
-        </CustomStackFullWidth>
-      </CustomStackFullWidth>
-    )
+        {t(title)}
+      </Typography>
+      <Typography
+        className="info-value"
+        sx={{
+          fontSize: "14px",
+          fontWeight: 400,
+          color: "neutral.500",
+          letterSpacing: "-0.42px",
+          lineHeight: 1.2,
+          textAlign: "center",
+          transition: "color 0.2s ease",
+        }}
+      >
+        {info}
+      </Typography>
+    </Stack>
+  </Stack>
+);
 
-    }
-    </>
-  );
+const SomeInfo = ({ image, alt, title, info, t, href }) => {
+  const theme = useTheme();
+
+  if (href) {
+    return (
+      <Link href={href} style={{ flex: 1, textDecoration: "none" }}>
+        <Inner image={image} alt={alt} title={title} info={info} t={t} theme={theme} />
+      </Link>
+    );
+  }
+
+  return <Inner image={image} alt={alt} title={title} info={info} t={t} theme={theme} />;
 };
 
 SomeInfo.propTypes = {};

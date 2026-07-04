@@ -124,7 +124,12 @@ const OrderDetailsBottom = ({
                   fullWidth
                   onClick={() => setOpenModal(true)}
                 >
-                  <Typography variant="h6">{t("Cancel Order")}</Typography>
+                  <Typography variant="h6">
+                    {trackData?.module_type === "parcel" ||
+                    trackData?.module?.module_type === "parcel"
+                      ? t("Cancel Parcel")
+                      : t("Cancel Order")}
+                  </Typography>
                 </Button>
               </Grid>
             )
@@ -157,6 +162,7 @@ const OrderDetailsBottom = ({
           refetchOrderDetails={refetchOrderDetails}
           refetchTrackData={refetchTrackData}
           id={trackData?.id}
+          moduleType={trackData?.module_type || trackData?.module?.module_type}
         />
       </CustomModal>
     </>

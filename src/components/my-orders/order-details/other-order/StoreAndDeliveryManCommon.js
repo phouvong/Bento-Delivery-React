@@ -6,7 +6,6 @@ import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge";
 import CustomRatings from "../../../search/CustomRatings";
 import { t } from "i18next";
 import { getImageUrl } from "utils/CustomFunctions";
-
 const StoreAndDeliveryManCommon = ({
   data,
   imageUrl,
@@ -15,13 +14,15 @@ const StoreAndDeliveryManCommon = ({
   configData,
 }) => {
   const theme = useTheme();
+
   const totalOrderText = t("Delivery Completed");
   const avgRating = Number(data?.avg_rating || 0);
   const ratingCount = Number(data?.rating_count || 0);
   const shouldShowRatings = avgRating > 0 && ratingCount > 0;
   return (
     <>
-      <Grid item md={1.2} sm={4} xs={3}>
+      <Stack direction="row" alignItems="flex-start" spacing={2} sx={{ width: "100%" }}>
+      <Stack sx={{ flexShrink: 0 }}>
         {data && (
           <CustomImageContainer
             src={image}
@@ -33,10 +34,13 @@ const StoreAndDeliveryManCommon = ({
             objectfit="cover"
           />
         )}
-      </Grid>
-      <Grid item md={8} sm={8} xs={10.8} alignSelf="center">
+      </Stack>
+      <Stack alignSelf="center" sx={{ flex: 1, minWidth: 0 }}>
         <Stack direction="row" alignItems="center" spacing={0.6}>
-          <Typography fontWeight="600" fontSize={{ xs: "14px", md: "20px" }}>
+          <Typography
+            fontWeight="600"
+            fontSize={{ xs: "14px", md: "20px" }}
+          >
             {data && data?.name ? data?.name : data?.f_name}
           </Typography>
           {data?.name && (
@@ -82,7 +86,8 @@ const StoreAndDeliveryManCommon = ({
             {`${data?.order_count} ${totalOrderText}`}{" "}
           </Typography>
         )}
-      </Grid>
+      </Stack>
+      </Stack>
     </>
   );
 };

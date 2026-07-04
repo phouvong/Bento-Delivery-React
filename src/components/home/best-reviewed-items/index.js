@@ -1,5 +1,12 @@
-import { Grid, Skeleton, useMediaQuery, useTheme } from "@mui/material";
-import { Stack } from "@mui/system";
+import {
+  Grid,
+  Skeleton,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { Box, Stack } from "@mui/system";
+import NewProductCard from "components/cards/newCard/NewProductCard";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Slider from "react-slick";
@@ -24,7 +31,7 @@ import Menus from "./Menus";
 import { createEnhancedArrows } from "../../common/EnhancedSliderArrows";
 
 const BestReviewedItems = (props) => {
-  const { title, info, bannerIsLoading } = props;
+  const { title, info, bannerIsLoading, isPharmacy } = props;
   const url = info?.best_reviewed_section_banner_full_url;
   const [menu, setMenu] = useState([]);
   const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
@@ -75,13 +82,11 @@ const BestReviewedItems = (props) => {
     if (data) {
       if (uniqueCategories?.length > 0) {
         setMenu(["All", ...uniqueCategories?.map((item) => item.name)]);
-        
       }
       setFilteredData(bestReviewedItems.products);
-
     }
   }, [bestReviewedItems.products]);
-console.log({uniqueCategories});
+  console.log({ uniqueCategories });
 
   useEffect(() => {
     if (selectedMenuIndex === 0) {
@@ -99,20 +104,29 @@ console.log({uniqueCategories});
     }
   }, [selectedMenuIndex]);
 
-  console.log("vvvv",getCategoryIds());
+  console.log("vvvv", getCategoryIds());
 
-  
   const slides = () =>
-    filteredData?.map((product) => (
-      <ProductCard
-        key={product?.id}
-        item={product}
-        cardheight="340px"
-        cardFor="vertical"
-        cardType="vertical-type"
-      // cardFor="popular items"
-      />
-    ));
+    filteredData?.map((product) =>
+      isPharmacy ? (
+        <div key={product?.id}>
+          <NewProductCard
+            variant="vertical"
+            item={product}
+            isPharmacy
+            cardWidth={{ xs: "150px", md: "170px" }}
+          />
+        </div>
+      ) : (
+        <ProductCard
+          key={product?.id}
+          item={product}
+          cardheight="340px"
+          cardFor="vertical"
+          cardType="vertical-type"
+        />
+      ),
+    );
 
   const bestReviewedSliderSettings = {
     //centerMode: true,
@@ -126,7 +140,7 @@ console.log({uniqueCategories});
     ...createEnhancedArrows(isSliderHovered, {
       displayNoneOnMobile: true,
       variant: "primary",
-      noBackground: true
+      noBackground: true,
     }),
     responsive: [
       {
@@ -135,6 +149,7 @@ console.log({uniqueCategories});
           slidesToShow: 1.2,
           slidesToScroll: 1,
           infinite: false,
+          swipeToSlide: true,
         },
       },
       {
@@ -142,6 +157,7 @@ console.log({uniqueCategories});
         settings: {
           slidesToShow: 1.5,
           slidesToScroll: 1,
+          swipeToSlide: true,
           infinite: false,
         },
       },
@@ -150,6 +166,7 @@ console.log({uniqueCategories});
         settings: {
           slidesToShow: 1.7,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
       {
@@ -157,6 +174,7 @@ console.log({uniqueCategories});
         settings: {
           slidesToShow: 2,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
       {
@@ -164,6 +182,7 @@ console.log({uniqueCategories});
         settings: {
           slidesToShow: info?.best_reviewed_section_banner ? 2.6 : 2.1,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
       {
@@ -171,6 +190,7 @@ console.log({uniqueCategories});
         settings: {
           slidesToShow: 3.5,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
     ],
@@ -184,11 +204,12 @@ console.log({uniqueCategories});
     rows: 2,
     slidesToShow: info?.best_reviewed_section_banner ? 2.1 : 2.7,
     slidesToScroll: 1,
+    swipeToSlide: true,
     cssEase: "linear",
     ...createEnhancedArrows(isSliderHovered, {
       displayNoneOnMobile: true,
       variant: "primary",
-      noBackground: true
+      noBackground: true,
     }),
     responsive: [
       {
@@ -198,6 +219,7 @@ console.log({uniqueCategories});
           slidesPerRow: 1,
           rows: 2,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
       {
@@ -207,6 +229,7 @@ console.log({uniqueCategories});
           slidesPerRow: 1,
           rows: 2,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
       {
@@ -216,6 +239,7 @@ console.log({uniqueCategories});
           slidesPerRow: 1,
           rows: 2,
           slidesToScroll: 2,
+          swipeToSlide: true,
         },
       },
       {
@@ -225,6 +249,7 @@ console.log({uniqueCategories});
           slidesPerRow: 1,
           rows: 2,
           slidesToScroll: 2,
+          swipeToSlide: true,
         },
       },
       {
@@ -234,6 +259,7 @@ console.log({uniqueCategories});
           slidesPerRow: 1,
           rows: 2,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
       {
@@ -243,6 +269,7 @@ console.log({uniqueCategories});
           slidesPerRow: 1,
           rows: 2,
           slidesToScroll: 3,
+          swipeToSlide: true,
         },
       },
       {
@@ -252,6 +279,7 @@ console.log({uniqueCategories});
           slidesPerRow: 1,
           rows: 2,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
     ],
@@ -272,28 +300,32 @@ console.log({uniqueCategories});
                 <CustomBoxFullWidth>
                   <Grid
                     container
-                    alignItems="center"
-                    spacing={{ xs: 1.3, md: 1.2, lg: 1.5 }}
+                    spacing={2}
+                    alignItems="stretch"
+                    sx={{
+                      "& .MuiGrid-item": {
+                        display: "flex",
+                        flexDirection: "column",
+                      },
+                    }}
                   >
-                    {info?.best_reviewed_section_banner && !isSmall && (
-                      <Grid item xs={0} sm={0} lg={2.5}>
-                        <CustomBoxFullWidth
+                    {/* Banner — 4 col desktop only */}
+                    {url && (
+                      <Grid
+                        item
+                        xs={0}
+                        md={4}
+                        sx={{ display: { xs: "none", md: "block" } }}
+                      >
+                        <Box
                           sx={{
+                            flex: 1,
+                            borderRadius: "12px",
+                            overflow: "hidden",
                             position: "relative",
-                            height: {
-                              xs: "200px",
-                              sm: "300px",
-                              md: "352px",
-                            },
-                            margin: "10px",
-                            display: {
-                              xs: "none",
-                              md: "inherit",
-                            },
-                            "&:hover": {
-                              img: {
-                                transform: "scale(1.05)",
-                              },
+                            "&:hover img": {
+                              transform: "scale(1.05)",
+                              transition: "transform 0.3s ease",
                             },
                           }}
                         >
@@ -304,46 +336,79 @@ console.log({uniqueCategories});
                               width="100%"
                             />
                           ) : (
-                            <CustomImageContainer
-                              src={url}
-                              height="100%"
-                              width="100%"
-                              borderRadius=".7rem"
-                              objectfit="cover"
-                            />
+                            <Box sx={{ position: "absolute", inset: 0 }}>
+                              <CustomImageContainer
+                                src={url}
+                                height="100%"
+                                width="100%"
+                                borderRadius="12px"
+                                objectfit="cover"
+                              />
+                            </Box>
                           )}
-                        </CustomBoxFullWidth>
+                        </Box>
                       </Grid>
                     )}
-                    <Grid
-                      item
-                      xs={12}
-                      sm={12}
-                      lg={info?.best_reviewed_section_banner ? 9.5 : 12}
-                    >
-                      <SliderCustom
-                        nopadding="false"
-                        paddingBottom="1rem"
+
+                    {/* Slider — 8 col desktop, 12 col mobile */}
+                    <Grid item xs={12} md={url ? 8 : 12}>
+                      <Box
                         onMouseEnter={() => setIsSliderHovered(true)}
                         onMouseLeave={() => setIsSliderHovered(false)}
+                        sx={{
+                          "& .slick-track": { marginLeft: 0 },
+                          "& .slick-slide": {
+                            paddingRight: "12px",
+                            paddingLeft: "12px",
+                          },
+                          "& .slick-list": { margin: "0 -12px" },
+                        }}
                       >
-                        <Stack>
-                          <Slider {...foodBestReviewedSliderSettings}>
-                            {bestReviewedItems?.products?.map((item, index) => {
-                              return (
-                                <ProductCard
-                                  key={index}
-                                  item={item}
-                                  cardheight="150px"
-                                  cardWidth="95%"
-                                  horizontalcard="true"
-                                  cardFor="food horizontal card"
-                                />
-                              );
-                            })}
-                          </Slider>
-                        </Stack>
-                      </SliderCustom>
+                        <Slider
+                          dots={false}
+                          infinite={false}
+                          speed={500}
+                          slidesToShow={2}
+                          slidesToScroll={1}
+                          {...createEnhancedArrows(isSliderHovered, {
+                            displayNoneOnMobile: true,
+                            variant: "primary",
+                            noBackground: true,
+                          })}
+                          responsive={[
+                            {
+                              breakpoint: 900,
+                              settings: { slidesToShow: 1.5 },
+                            },
+                            {
+                              breakpoint: 600,
+                              settings: { slidesToShow: 1.1 },
+                            },
+                          ]}
+                        >
+                          {/* Group items into pairs — each slide = col of 2 */}
+                          {(() => {
+                            const items = bestReviewedItems?.products ?? [];
+                            const pairs = [];
+                            for (let i = 0; i < items.length; i += 2) {
+                              pairs.push(items.slice(i, i + 2));
+                            }
+                            return pairs.map((pair, pi) => (
+                              <Box key={pi}>
+                                <Stack spacing="20px">
+                                  {pair.map((item, ii) => (
+                                    <NewProductCard
+                                      key={ii}
+                                      item={item}
+                                      variant="horizontal"
+                                    />
+                                  ))}
+                                </Stack>
+                              </Box>
+                            ));
+                          })()}
+                        </Slider>
+                      </Box>
                     </Grid>
                   </Grid>
                 </CustomBoxFullWidth>
@@ -360,7 +425,9 @@ console.log({uniqueCategories});
               <SliderCustom nopadding="true">
                 <Slider {...loveItemSettings}>
                   {[...Array(5)].map((_, index) => {
-                    return <ProductCardSimmer key={index} />;
+                    return (
+                      <ProductCardSimmer key={index} variant="horizontal" />
+                    );
                   })}
                 </Slider>
               </SliderCustom>
@@ -369,92 +436,110 @@ console.log({uniqueCategories});
             <>
               {bestReviewedItems && filteredData.length > 0 && (
                 <HomeComponentsWrapper>
-                  <CustomStackFullWidth
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                  >
-                    <H2 text={title} component="h2" />
-                    <Stack
-                      maxWidth="960px"
-                      width={isSmall ? "initial" : "100%"}
+                  <Stack gap="16px">
+                    <CustomStackFullWidth
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
                     >
-                      {menu?.length > 0 && (
-                        <Menus
-                          selectedMenuIndex={selectedMenuIndex}
-                          setSelectedMenuIndex={setSelectedMenuIndex}
-                          menus={menu}
-                        />
-                      )}
-                    </Stack>
-                  </CustomStackFullWidth>
-                  <Grid container spacing={{ xs: 1, md: 1, lg: 1 }}>
-                    {info?.best_reviewed_section_banner && !isSmall && (
-                      <Grid item xs={0} sm={0} lg={2.5}>
-                        <CustomBoxFullWidth
+                      {isPharmacy ? (
+                        <Typography
                           sx={{
-                            position: "relative",
-                            height: {
-                              xs: "200px",
-                              sm: "300px",
-                              md: "352px",
-                            },
-                            paddingTop: "8px",
-                            display: {
-                              xs: "none",
-                              sm: "inherit",
-                            },
-                            "&:hover": {
-                              img: {
-                                transform: "scale(1.03)",
-                              },
-                            },
+                            fontSize: { xs: "18px", md: "24px" },
+                            fontWeight: 700,
+                            color: "neutral.1050",
+                            lineHeight: 1.1,
+                            letterSpacing: "-1.2px",
+                            whiteSpace: "nowrap",
+                            flexShrink: 0,
                           }}
                         >
-                          {bannerIsLoading ? (
-                            <Skeleton
-                              variant="rectangular"
-                              height="100%"
-                              width="100%"
-                            />
-                          ) : (
-                            <CustomImageContainer
-                              src={url}
-                              height="100%"
-                              width="100%"
-                              borderRadius=".7rem"
-                              objectfit="cover"
-                            />
-                          )}
-                        </CustomBoxFullWidth>
-                      </Grid>
-                    )}
-                    <Grid
-                      item
-                      xs={12}
-                      sm={12}
-                      lg={info?.best_reviewed_section_banner ? 9.5 : 12}
-                    >
-                      <Grid item md={12} container position="relative">
-                        <CustomStackFullWidth
-                          justifyContent="right"
-                          key={reRender}
-                        >
-                          <SliderCustom
-                            onMouseEnter={() => setIsSliderHovered(true)}
-                            onMouseLeave={() => setIsSliderHovered(false)}
+                          {title}
+                        </Typography>
+                      ) : (
+                        <H2 text={title} component="h2" />
+                      )}
+                      <Stack
+                        maxWidth="960px"
+                        width={isSmall ? "initial" : "100%"}
+                      >
+                        {menu?.length > 0 && (
+                          <Menus
+                            selectedMenuIndex={selectedMenuIndex}
+                            setSelectedMenuIndex={setSelectedMenuIndex}
+                            menus={menu}
+                          />
+                        )}
+                      </Stack>
+                    </CustomStackFullWidth>
+                    <Grid container spacing={{ xs: 1, md: 1, lg: 1 }}>
+                      {info?.best_reviewed_section_banner && !isSmall && (
+                        <Grid item xs={0} sm={0} lg={2.5}>
+                          <CustomBoxFullWidth
+                            sx={{
+                              position: "relative",
+                              height: {
+                                xs: "200px",
+                                sm: "300px",
+                                md: "352px",
+                              },
+                              paddingTop: "8px",
+                              display: {
+                                xs: "none",
+                                sm: "inherit",
+                              },
+                              "&:hover": {
+                                img: {
+                                  transform: "scale(1.03)",
+                                },
+                              },
+                            }}
                           >
-                            <Slider
-                              ref={SliderRef}
-                              {...bestReviewedSliderSettings}
+                            {bannerIsLoading ? (
+                              <Skeleton
+                                variant="rectangular"
+                                height="100%"
+                                width="100%"
+                              />
+                            ) : (
+                              <CustomImageContainer
+                                src={url}
+                                height="100%"
+                                width="100%"
+                                borderRadius=".7rem"
+                                objectfit="cover"
+                              />
+                            )}
+                          </CustomBoxFullWidth>
+                        </Grid>
+                      )}
+                      <Grid
+                        item
+                        xs={12}
+                        sm={12}
+                        lg={info?.best_reviewed_section_banner ? 9.5 : 12}
+                      >
+                        <Grid item md={12} container position="relative">
+                          <CustomStackFullWidth
+                            justifyContent="right"
+                            key={reRender}
+                          >
+                            <SliderCustom
+                              onMouseEnter={() => setIsSliderHovered(true)}
+                              onMouseLeave={() => setIsSliderHovered(false)}
                             >
-                              {slides()}
-                            </Slider>
-                          </SliderCustom>
-                        </CustomStackFullWidth>
+                              <Slider
+                                ref={SliderRef}
+                                {...bestReviewedSliderSettings}
+                              >
+                                {slides()}
+                              </Slider>
+                            </SliderCustom>
+                          </CustomStackFullWidth>
+                        </Grid>
                       </Grid>
                     </Grid>
-                  </Grid>
+                  </Stack>
                 </HomeComponentsWrapper>
               )}
             </>

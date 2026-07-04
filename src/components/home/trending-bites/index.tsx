@@ -1,9 +1,15 @@
-import VisibilityOutlinedIcon from "@mui/icons-material/VisibilityOutlined";
 import TrendingIcon from "./TrendingIcon";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import { alpha, Avatar, Box, IconButton, Stack, Typography } from "@mui/material";
+import {
+  alpha,
+  Avatar,
+  Box,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
@@ -20,7 +26,10 @@ import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge";
 import { theme } from "theme/base-theme-options";
 
-const GAP = 12; // px gap between cards
+const GAP_MOBILE = 12; // px gap on mobile
+const GAP_DESKTOP = 20; // px gap on desktop (lg+)
+const CARD_WIDTH_MOBILE = 160; // px
+const CARD_WIDTH_DESKTOP = 215; // px
 const PAGE_LIMIT = 10;
 
 const MODULE_TITLES: Record<string, string> = {
@@ -71,17 +80,21 @@ const TrendingBiteCard = ({ item, onClick }: TrendingBiteCardProps) => {
         overflow: "hidden",
         // Responsive card width: show N.x cards so the next card peeks
         flex: {
-          xs: "0 0 calc(78% - 6px)",        // ~1.3 cards — big on mobile
-          sm: "0 0 calc(45% - 6px)",         // ~2.2 cards
-          md: "0 0 calc(28.57% - 9px)",      // 3.5 cards
-          lg: "0 0 calc(22.22% - 10px)",     // 4.5 cards
+          xs: "0 0 calc(78% - 6px)", // ~1.3 cards — big on mobile
+          sm: "0 0 calc(45% - 6px)", // ~2.2 cards
+          md: "0 0 calc(28.57% - 9px)", // 3.5 cards
+          lg: "0 0 calc(18.18% - 10px)", // 4.5 cards
         },
         minWidth: 0,
-        height: { xs: "300px", sm: "320px", md: "400px" },
+        height: { xs: "300px", sm: "320px", md: "382px" },
         cursor: "pointer",
         backgroundColor: "#000",
         flexShrink: 0,
-
+        "& .card-hover-overlay": {
+          opacity: 0,
+          transition: "opacity 0.25s ease",
+        },
+        "&:hover .card-hover-overlay": { opacity: 1 },
       }}
     >
       {item.videoUrl ? (
@@ -93,7 +106,12 @@ const TrendingBiteCard = ({ item, onClick }: TrendingBiteCardProps) => {
           loop
           playsInline
           preload="metadata"
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",
+          }}
         />
       ) : (
         <Box
@@ -108,11 +126,47 @@ const TrendingBiteCard = ({ item, onClick }: TrendingBiteCardProps) => {
             height: "100%",
             objectFit: "cover",
             display: "block",
-            transition: "transform 0.3s ease",
-            "&:hover": { transform: "scale(1.04)" },
           }}
         />
       )}
+
+      {/* Hover overlay + play button */}
+      <Box
+        className="card-hover-overlay"
+        sx={{
+          position: "absolute",
+          inset: 0,
+          backgroundColor: alpha("#000000", 0.18),
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 3,
+          pointerEvents: "none",
+        }}
+      >
+        <Box
+          sx={{
+            width: 52,
+            height: 52,
+            borderRadius: "50%",
+            backgroundColor: alpha("#ffffff", 0.2),
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <i
+            className="fi fi-sr-play"
+            style={{
+              fontSize: "22px",
+              lineHeight: 1,
+              display: "flex",
+              color: "white",
+            }}
+          />
+        </Box>
+      </Box>
 
       {/* View count badge */}
       <Box
@@ -120,17 +174,35 @@ const TrendingBiteCard = ({ item, onClick }: TrendingBiteCardProps) => {
           position: "absolute",
           top: "10px",
           right: "10px",
-          backgroundColor: alpha("#000000", 0.5),
-          borderRadius: "20px",
-          px: 1,
-          py: 0.3,
+          backgroundColor: alpha("#000000", 0.4),
+          border: `1px solid ${alpha("#000000", 0.15)}`,
+          borderRadius: "9999px",
+          px: "6px",
+          py: "2px",
           display: "flex",
           alignItems: "center",
-          gap: 0.5,
+          gap: "2px",
         }}
       >
-        <VisibilityOutlinedIcon sx={{ fontSize: "13px", color: "white" }} />
-        <Typography sx={{ color: "white", fontSize: "11px", fontWeight: 500, lineHeight: 1 }}>
+        <i
+          className="fi fi-rr-eye"
+          style={{
+            fontSize: "14px",
+            lineHeight: 1,
+            display: "flex",
+            color: "white",
+          }}
+        />
+        <Typography
+          sx={{
+            color: "white",
+            fontSize: "14px",
+            fontWeight: 400,
+            lineHeight: 1.3,
+            whiteSpace: "nowrap",
+            paddingInlineStart: "2px",
+          }}
+        >
           {item.viewCount}
         </Typography>
       </Box>
@@ -155,17 +227,26 @@ const TrendingBiteCard = ({ item, onClick }: TrendingBiteCardProps) => {
             alt={item.storeName}
             sx={{ width: 22, height: 22, border: "1.5px solid white" }}
           />
-          <Typography sx={{ color: "white", fontWeight: 700, fontSize: "13px", lineHeight: 1.2 }}>
-            {item.storeName}
-          </Typography>
-          <VerifiedStoreBadge
-            verified={item.storeVerified}
-            fontSize="14px"
+          <Typography
             sx={{
-              marginInlineStart: "0px",
+              color: "white",
+              fontWeight: 700,
+              fontSize: "13px",
+              lineHeight: 1.2,
             }}
-            color="#1c6641"
-          />
+          >
+            {item.storeName}
+            <VerifiedStoreBadge
+              verified={item.storeVerified}
+              fontSize="14px"
+              sx={{
+                paddingInlineStart: "3px",
+                verticalAlign: "middle",
+                marginInlineStart: 0,
+              }}
+              containerSx={{ display: "inline" }}
+            />
+          </Typography>
         </Stack>
         <Typography
           sx={{
@@ -186,9 +267,10 @@ const TrendingBiteCard = ({ item, onClick }: TrendingBiteCardProps) => {
 
 interface TrendingBitesProps {
   title?: string;
+  subtitle?: string;
 }
 
-const TrendingBites = ({ title }: TrendingBitesProps) => {
+const TrendingBites = ({ title, subtitle }: TrendingBitesProps) => {
   const { t } = useTranslation();
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(false);
@@ -200,8 +282,10 @@ const TrendingBites = ({ title }: TrendingBitesProps) => {
   const [nextOffset, setNextOffset] = useState(2);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
+  const isRentalModule = getCurrentModuleType() === "rental";
 
   const mapReel = (reel: any): TrendingBiteItem => ({
+    ...reel,
     id: reel.reel_id,
     foodImage: reel.thumbnail_full_url || "/static/no-image-found.png",
     storeLogo: reel.store_logo_full_url || "/static/no-image-found.png",
@@ -225,7 +309,11 @@ const TrendingBites = ({ title }: TrendingBitesProps) => {
     }
   };
 
-  const { refetch } = useGetReelsList(handleSuccess, { limit: PAGE_LIMIT, offset: 1, guest_id: getGuestId() });
+  const { refetch } = useGetReelsList(handleSuccess, {
+    limit: PAGE_LIMIT,
+    offset: 1,
+    guest_id: getGuestId(),
+  });
 
   const showViewAll = totalSize > PAGE_LIMIT;
   const hasMoreReels = items.length < totalSize;
@@ -243,7 +331,9 @@ const TrendingBites = ({ title }: TrendingBitesProps) => {
       if (newReels.length) {
         setItems((prev) => {
           const existingIds = new Set(prev.map((p) => p.id));
-          const fresh = newReels.map(mapReel).filter((r) => !existingIds.has(r.id));
+          const fresh = newReels
+            .map(mapReel)
+            .filter((r) => !existingIds.has(r.id));
           return [...prev, ...fresh];
         });
         setNextOffset((prev) => prev + 1);
@@ -284,7 +374,8 @@ const TrendingBites = ({ title }: TrendingBitesProps) => {
     const el = trackRef.current;
     if (!el) return;
     const card = el.querySelector<HTMLElement>("[data-card]");
-    const step = (card ? card.offsetWidth + GAP : 220) * 2;
+    const gap = window.innerWidth >= 1200 ? GAP_DESKTOP : GAP_MOBILE;
+    const step = (card ? card.offsetWidth + gap : 220) * 2;
     el.scrollBy({ left: dir === "right" ? step : -step, behavior: "smooth" });
   };
 
@@ -316,7 +407,7 @@ const TrendingBites = ({ title }: TrendingBitesProps) => {
   };
 
   if (items.length === 0) return null;
-console.log({showViewAll,totalSize});
+  console.log({ showViewAll, totalSize });
 
   return (
     <>
@@ -325,12 +416,47 @@ console.log({showViewAll,totalSize});
         onMouseLeave={() => setIsHover(false)}
         sx={{ px: { xs: 0 } }}
       >
-        <CustomStackFullWidth alignItems="center" mb="10px" spacing={1}>
+        <CustomStackFullWidth alignItems="center" spacing={1}>
           {/* Header */}
-          <CustomStackFullWidth alignItems="center" justifyContent="space-between" direction="row">
-            <Stack direction="row" alignItems="center" gap={0.8}>
-              <TrendingIcon size={24} />
-              <H2 text={t(getModuleWiseTitle())} textAlign="start" component="h2" />
+          <CustomStackFullWidth
+            alignItems="center"
+            justifyContent="space-between"
+            direction="row"
+          >
+            <Stack direction="row" alignItems="center" gap={1.5}>
+              <Box sx={{ display: { xs: "none", md: "block" } }}>
+                <TrendingIcon size={42} />
+              </Box>
+              <Box sx={{ display: { xs: "block", md: "none" } }}>
+                <TrendingIcon size={32} />
+              </Box>
+              <Stack gap="4px">
+                <Typography
+                  sx={{
+                    fontSize: { xs: "18px", md: "24px" },
+                    fontWeight: 700,
+                    color: "neutral.1050",
+                    lineHeight: 1.1,
+                    letterSpacing: "-1.2px",
+                    whiteSpace: "nowrap",
+                  }}
+                  component="h2"
+                >
+                  {t(title ?? getModuleWiseTitle())}
+                </Typography>
+                {subtitle && (
+                  <Typography
+                    sx={{
+                      fontSize: "14px",
+                      fontWeight: 400,
+                      color: "neutral.500",
+                      lineHeight: 1.3,
+                    }}
+                  >
+                    {t(subtitle)}
+                  </Typography>
+                )}
+              </Stack>
             </Stack>
           </CustomStackFullWidth>
 
@@ -339,7 +465,6 @@ console.log({showViewAll,totalSize});
             sx={{
               position: "relative",
               width: "100%",
-             
             }}
           >
             {/* Left arrow */}
@@ -368,31 +493,35 @@ console.log({showViewAll,totalSize});
               ref={trackRef}
               sx={{
                 display: "flex",
-                gap: `${GAP}px`,
+                gap: { xs: `${GAP_MOBILE}px`, lg: `${GAP_DESKTOP}px` },
                 overflowX: "auto",
                 scrollSnapType: "x mandatory",
                 WebkitOverflowScrolling: "touch",
                 // Hide scrollbar cross-browser
                 scrollbarWidth: "none",
                 "&::-webkit-scrollbar": { display: "none" },
-                py: "10px",
+                pt: "4px",
+                pb: 0,
               }}
             >
               {items.map((item, index) => (
                 <Box
                   key={item.id}
                   data-card
-                  sx={{ scrollSnapAlign: "start", flexShrink: 0,
+                  sx={{
+                    scrollSnapAlign: "start",
+                    flexShrink: 0,
                     flex: {
-                      xs: "0 0 calc(50% - 6px)",
-                      sm: "0 0 calc(33.33% - 8px)",
-                      md: "0 0 calc(28.57% - 9px)",
-                      lg: "0 0 calc(22.22% - 10px)",
+                      xs: `0 0 ${CARD_WIDTH_MOBILE}px`,
+                      lg: `0 0 ${CARD_WIDTH_DESKTOP}px`,
                     },
                     minWidth: 0,
                   }}
                 >
-                  <TrendingBiteCard item={item} onClick={() => openReel(index)} />
+                  <TrendingBiteCard
+                    item={item}
+                    onClick={() => openReel(index)}
+                  />
                 </Box>
               ))}
 
@@ -404,13 +533,11 @@ console.log({showViewAll,totalSize});
                     scrollSnapAlign: "start",
                     flexShrink: 0,
                     flex: {
-                      xs: "0 0 calc(50% - 6px)",
-                      sm: "0 0 calc(33.33% - 8px)",
-                      md: "0 0 calc(28.57% - 9px)",
-                      lg: "0 0 calc(22.22% - 10px)",
+                      xs: `0 0 ${CARD_WIDTH_MOBILE}px`,
+                      lg: `0 0 ${CARD_WIDTH_DESKTOP}px`,
                     },
                     minWidth: 0,
-                    height: { xs: "300px", sm: "320px", md: "400px" },
+                    height: { xs: "300px", sm: "320px", md: "382px" },
                     borderRadius: "8px",
                     cursor: "pointer",
                     display: "flex",
@@ -418,11 +545,14 @@ console.log({showViewAll,totalSize});
                     alignItems: "center",
                     justifyContent: "center",
                     gap: 1.5,
-                    backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.08),
-                    border: (theme) => `1px dashed ${alpha(theme.palette.primary.main, 0.4)}`,
+                    backgroundColor: (theme) =>
+                      alpha(theme.palette.primary.main, 0.08),
+                    border: (theme) =>
+                      `1px dashed ${alpha(theme.palette.primary.main, 0.4)}`,
                     transition: "background-color 0.2s",
                     "&:hover": {
-                      backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.16),
+                      backgroundColor: (theme) =>
+                        alpha(theme.palette.primary.main, 0.16),
                     },
                   }}
                 >
@@ -441,7 +571,11 @@ console.log({showViewAll,totalSize});
                   >
                     <ArrowForwardIcon />
                   </Box>
-                  <Typography fontWeight={600} fontSize="14px" color="primary.main">
+                  <Typography
+                    fontWeight={600}
+                    fontSize="14px"
+                    color="primary.main"
+                  >
                     {t("View All")}
                   </Typography>
                   <Typography fontSize="12px" color="text.secondary">
@@ -487,8 +621,8 @@ console.log({showViewAll,totalSize});
             prev.map((item) =>
               item.id === reelId
                 ? { ...item, viewCount: formatViewCount(count) }
-                : item
-            )
+                : item,
+            ),
           );
         }}
       />

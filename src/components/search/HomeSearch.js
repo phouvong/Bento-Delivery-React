@@ -4,6 +4,7 @@ import CustomSearch from "../custom-search/CustomSearch";
 
 import Router, { useRouter } from "next/router";
 import SearchSuggestionsBottom from "../search/SearchSuggestionsBottom";
+import { saveRecentSearch } from "utils/recentSearchStorage";
 
 const HomeSearch = () => {
   const [openSearchSuggestions, setOpenSearchSuggestions] = useState(false);
@@ -62,18 +63,8 @@ const HomeSearch = () => {
   const handleKeyPress = (value) => {
     // if (e.key === 'Enter') {
     setOpenSearchSuggestions(false);
-    let getItem = JSON.parse(localStorage.getItem("searchedValues"));
-    if (getItem && getItem.length > 0) {
-      if (value !== "") {
-        getItem.push(value);
-      }
-      localStorage.setItem("searchedValues", JSON.stringify(getItem));
-    } else {
-      if (value !== "") {
-        let newData = [];
-        newData.push(value);
-        localStorage.setItem("searchedValues", JSON.stringify(newData));
-      }
+    if (value !== "") {
+      saveRecentSearch(value);
     }
     if (value !== "") {
       router.push(

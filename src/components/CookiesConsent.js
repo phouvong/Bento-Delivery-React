@@ -1,26 +1,6 @@
 import React, { useState } from "react";
-import { Button, Typography } from "@mui/material";
-import { Stack, styled } from "@mui/system";
-import CustomContainer from "./container";
-import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
+import { Box, Stack, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
-
-const Wrapper = styled("div")(({ theme }) => ({
-  position: "fixed",
-  bottom: 0,
-  left: 0,
-  width: "100%",
-  padding: theme.spacing(2),
-  backgroundColor: theme.palette.background.default,
-  boxShadow:
-    theme.palette.mode === "dark"
-      ? "0px -2px 4px rgb(223 223 223 / 10%)"
-      : "0px -2px 4px rgba(0, 0, 0, 0.1)",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  zIndex: 9999,
-}));
 
 const CookiesConsent = ({ text }) => {
   const [showConsent, setShowConsent] = useState(true);
@@ -34,6 +14,7 @@ const CookiesConsent = ({ text }) => {
     localStorage.setItem("cookiesConsent", "false");
     setShowConsent(false);
   };
+
   let cookiesConsent;
   if (typeof window !== "undefined") {
     cookiesConsent = window.localStorage.getItem("cookiesConsent");
@@ -44,32 +25,108 @@ const CookiesConsent = ({ text }) => {
   }
 
   return (
-    <Wrapper>
-      <CustomContainer>
-        <CustomStackFullWidth
-          direction={{ xs: "column", sm: "row" }}
-          alignItems="center"
-          justifyContent="space-between"
-          spacing={2}
-        >
-          <Typography>{text}</Typography>
-          <Stack direction="row" alignItems="center" spacing={2}>
-            <Button id="cookies-deny-btn" variant="outline" color="primary" onClick={handleDeny}>
+    <Box
+      sx={{
+        position: "fixed",
+        bottom: { xs: 0, md: "24px" },
+        right: { xs: 0, md: "24px" },
+        left: { xs: 0, md: "auto" },
+        zIndex: 9999,
+        width: { xs: "100%", md: "360px" },
+        borderRadius: { xs: "20px 20px 0 0", md: "20px" },
+        backgroundColor: "background.paper",
+        boxShadow: "0px 0px 16px -1px rgba(0,0,0,0.10)",
+        overflow: "hidden",
+      }}
+    >
+      <Stack spacing="20px" sx={{ p: "24px" }}>
+        {/* Title + description */}
+        <Stack spacing="4px">
+          <Typography
+            sx={{
+              fontSize: "24px",
+              fontWeight: 700,
+              letterSpacing: "-1.2px",
+              lineHeight: 1.1,
+              color: "neutral.1050",
+            }}
+          >
+            {t("Accept Cookies.")}
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: "14px",
+              fontWeight: 400,
+              lineHeight: 1.3,
+              color: "neutral.500",
+            }}
+          >
+            {text}
+          </Typography>
+        </Stack>
+
+        {/* Buttons */}
+        <Stack direction="row" spacing="20px">
+          <Box
+            id="cookies-deny-btn"
+            onClick={handleDeny}
+            sx={{
+              flex: 1,
+              height: "44px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "12px",
+              backgroundColor: "background.secondary",
+              cursor: "pointer",
+              "&:hover": { opacity: 0.85 },
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: "16px",
+                fontWeight: 700,
+                letterSpacing: "-0.48px",
+                lineHeight: 1.1,
+                color: "neutral.1050",
+                textTransform: "capitalize",
+              }}
+            >
               {t("Deny")}
-            </Button>
-            <Button
-              id="cookies-accept-btn"
-              variant="contained"
-              color="primary"
-              onClick={handleAccept}
-              sx={{ color: "#fff" }} // force white text
+            </Typography>
+          </Box>
+
+          <Box
+            id="cookies-accept-btn"
+            onClick={handleAccept}
+            sx={{
+              flex: 1,
+              height: "44px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: "12px",
+              backgroundColor: "primary.main",
+              cursor: "pointer",
+              "&:hover": { opacity: 0.9 },
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: "16px",
+                fontWeight: 700,
+                letterSpacing: "-0.48px",
+                lineHeight: 1.1,
+                color: "primary.contrastText",
+                textTransform: "capitalize",
+              }}
             >
               {t("Accept")}
-            </Button>
-          </Stack>
-        </CustomStackFullWidth>
-      </CustomContainer>
-    </Wrapper>
+            </Typography>
+          </Box>
+        </Stack>
+      </Stack>
+    </Box>
   );
 };
 

@@ -122,6 +122,7 @@ export const settings = {
   slidesToShow: 4,
 
   slidesToScroll: 1,
+  swipeToSlide: true,
   nextArrow: <Next />,
   prevArrow: <Prev />,
   responsive: [
@@ -130,6 +131,7 @@ export const settings = {
       settings: {
         slidesToShow: 4,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -138,6 +140,7 @@ export const settings = {
       settings: {
         slidesToShow: 4,
         slidesToScroll: 1,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -146,6 +149,7 @@ export const settings = {
       settings: {
         slidesToShow: 3,
         slidesToScroll: 2,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -154,6 +158,7 @@ export const settings = {
       settings: {
         slidesToShow: 2,
         slidesToScroll: 2,
+        swipeToSlide: true,
         initialSlide: 2,
         infinite: false,
       },
@@ -163,6 +168,7 @@ export const settings = {
       settings: {
         slidesToShow: 2,
         slidesToScroll: 2,
+        swipeToSlide: true,
         initialSlide: 2,
         infinite: false,
       },
@@ -172,6 +178,7 @@ export const settings = {
       settings: {
         slidesToShow: 1.4,
         slidesToScroll: 1,
+        swipeToSlide: true,
         initialSlide: 1,
         infinite: true,
       },
@@ -181,6 +188,7 @@ export const settings = {
       settings: {
         slidesToShow: 1.2,
         slidesToScroll: 1,
+        swipeToSlide: true,
         initialSlide: 1,
         infinite: true,
       },
@@ -190,73 +198,45 @@ export const settings = {
 
 export const foodNewArrivalsettings = {
   dots: false,
-  infinite: false,
-  speed: 500,
-  slidesToShow: 8,
+  infinite: true,
+  autoplay: true,
+  autoplaySpeed: 2500,
+  speed: 600,
+  slidesToShow: 8.2,
   slidesToScroll: 1,
+  swipeToSlide: true,
   responsive: [
     {
       breakpoint: 1450,
-      settings: {
-        slidesToShow: 7,
-        slidesToScroll: 3,
-        infinite: false,
-      },
+      settings: { slidesToShow: 7.2, slidesToScroll: 1, swipeToSlide: true, infinite: true, autoplay: true },
     },
     {
       breakpoint: 1024,
-      settings: {
-        slidesToShow: 7,
-        slidesToScroll: 3,
-        infinite: false,
-      },
+      settings: { slidesToShow: 6.2, slidesToScroll: 1, swipeToSlide: true, infinite: true, autoplay: true },
     },
     {
       breakpoint: 840,
-      settings: {
-        slidesToShow: 6.5,
-        slidesToScroll: 2,
-        infinite: false,
-      },
+      settings: { slidesToShow: 5.2, slidesToScroll: 1, swipeToSlide: true, infinite: true, autoplay: true },
     },
     {
       breakpoint: 760,
-      settings: {
-        slidesToShow: 8,
-        slidesToScroll: 3,
-        infinite: false,
-      },
+      settings: { slidesToShow: 5.2, slidesToScroll: 1, swipeToSlide: true, infinite: true, autoplay: true },
     },
     {
       breakpoint: 695,
-      settings: {
-        slidesToShow: 6,
-        slidesToScroll: 2,
-        initialSlide: 2,
-      },
+      settings: { slidesToShow: 4.2, slidesToScroll: 1, swipeToSlide: true, infinite: true, autoplay: true },
     },
     {
       breakpoint: 600,
-      settings: {
-        slidesToShow: 5.2,
-        slidesToScroll: 2,
-        initialSlide: 2,
-      },
+      settings: { slidesToShow: 3.5, slidesToScroll: 1, swipeToSlide: true, infinite: true, autoplay: true },
     },
     {
       breakpoint: 480,
-      settings: {
-        slidesToShow: 4.2,
-        slidesToScroll: 1,
-        autoplay: true,
-      },
+      settings: { slidesToShow: 3.2, slidesToScroll: 1, swipeToSlide: true, infinite: true, autoplay: true },
     },
     {
       breakpoint: 340,
-      settings: {
-        slidesToShow: 2.5,
-        slidesToScroll: 1,
-      },
+      settings: { slidesToShow: 2.5, slidesToScroll: 1, swipeToSlide: true, infinite: true, autoplay: true },
     },
   ],
 };

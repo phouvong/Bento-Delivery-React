@@ -1,329 +1,347 @@
 import {
-	alpha,
-	Grid,
-	Skeleton,
-	styled,
-	Tab,
-	Tabs,
-	useMediaQuery,
-	useTheme,
+  Box,
+  Skeleton,
+  Stack,
+  styled,
+  Typography,
+  useTheme,
 } from "@mui/material";
 import { useGetCommonConditions } from "api-manage/hooks/react-query/common-conditions/useGetCommonConditions";
-import { useCallback, useEffect, useState } from "react";
-import Slider from "react-slick";
-import SimpleBar from "simplebar-react";
-import "simplebar-react/dist/simplebar.min.css";
-import {
-	CustomBoxFullWidth,
-	CustomFullDivider,
-	CustomStackFullWidth,
-	SliderCustom,
-} from "styled-components/CustomStyles.style";
-import useGetCommonConditionProducts from "../../../../../api-manage/hooks/react-query/common-conditions/useGetCommonConditionProducts";
-import ProductCard from "../../../../cards/ProductCard";
-import DotSpin from "../../../../DotSpin";
-import EmptySearchResults from "../../../../EmptySearchResults";
-import H2 from "../../../../typographies/H2";
-import { HomeComponentsWrapper } from "../../../HomePageComponents";
-import { Next, Prev } from "../../../popular-items-nearby/SliderSettings";
+import useGetCommonConditionProducts from "api-manage/hooks/react-query/common-conditions/useGetCommonConditionProducts";
+import NewProductCard from "components/cards/newCard/NewProductCard";
+import ProductCardSimmer from "components/Shimmer/ProductCardSimmer";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQueryClient } from "react-query";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import { CustomBoxFullWidth } from "styled-components/CustomStyles.style";
 
-const StyledCustomSlider = styled(SliderCustom)(({ theme, active }) => ({
-	color: active === "true" ? theme.palette.primary.main : "inherit",
-	cursor: "pointer",
-	"& .slick-slide": {
-		marginY: "-25px",
-		paddingY: "20px",
-	},
-	"& .slick-dots": {
-		// marginTop: "100px",
-		marginBottom: "-40px",
-		"& li": {
-			backgroundColor: alpha(theme.palette.primary.main, 0.2),
-			width: "6px",
-			height: "6px",
-			borderRadius: "50%",
-			"& button::before": {
-				color: "transparent",
-			},
-		},
-		"& li.slick-active button::before": {
-			top: "-2px",
-			backgroundColor: theme.palette.primary.main,
-			width: "10px",
-			height: "10px",
-			borderRadius: "50%",
-		},
-	},
+const ItemSliderWrapper = styled(CustomBoxFullWidth)(() => ({
+  "& .slick-track": { marginLeft: 0 },
+  "& .slick-slide": { paddingRight: "20px" },
 }));
 
-const CommonConditions = (props) => {
-	const { title } = props;
-	const theme = useTheme();
-	const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-	const [selected, setSelected] = useState(0);
-	const [conditionId, setConditionId] = useState(null);
-	const [commonConditionData,setCommonConditionData] = useState([])
-	const page_limit = "20";
-	const offset = 1;
+const CommonConditions = ({ title }) => {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const slider = useRef(null);
+  // Separate refs for mobile and desktop tab strips
+  const mobileTabsRef = useRef(null);
+  const desktopTabsRef = useRef(null);
+  const queryClient = useQueryClient();
 
-   const queryClient = useQueryClient()
-  const handleSuccess = (res) => {
-    setCommonConditionData(res)
-  }
+  const [tabAtStart, setTabAtStart] = useState(true);
+  const [tabAtEnd, setTabAtEnd] = useState(true);
+  const [selected, setSelected] = useState(0);
+  const [conditionId, setConditionId] = useState(null);
+  const [conditionData, setConditionData] = useState([]);
 
-	const {
-		data: conditions,
-		refetch: conditionRefetch,
-		isLoading: conditionsIsLoading,
-		isRefetching: conditionsIsrefetching,
-	} = useGetCommonConditions();
+  const page_limit = "20";
+  const offset = 1;
 
-	const { data, refetch, isLoading, isRefetching } =
-		useGetCommonConditionProducts({
-			conditionId,
-			page_limit,
-			offset,
-		},handleSuccess);
+  const {
+    data: conditions,
+    refetch: conditionRefetch,
+    isLoading: conditionsLoading,
+  } = useGetCommonConditions();
 
-	useEffect(() => {
-		setConditionId(conditions?.data[0]?.id);
-	}, [conditions]);
+  const { refetch, isLoading } = useGetCommonConditionProducts(
+    { conditionId, page_limit, offset },
+    (res) => setConditionData(res),
+  );
 
-	useEffect(() => {
-		conditionRefetch();
-	}, []);
+  useEffect(() => {
+    conditionRefetch();
+  }, []);
 
-	// useEffect(() => {
-	// 	if (conditionId) {
-	// 		refetch();
-	// 	}
-	// }, [conditionId]);
+  useEffect(() => {
+    if (conditions?.data?.[0]?.id) {
+      setConditionId(conditions.data[0].id);
+    }
+  }, [conditions]);
 
-	const handleClick = (id, index) => {
-		setSelected(index);
-		setConditionId(id);
-	};
+  const handleCheckData = useCallback(() => {
+    const queryState = queryClient.getQueryState(
+      `[common-condition-products-${conditionId}]`,
+    );
+    if (!queryState || queryState.isStale) {
+      refetch();
+    } else {
+      setConditionData(queryState?.data);
+    }
+  }, [conditionId]);
 
-	const handleCheckData = useCallback(() => {
-		const queryState=queryClient.getQueryState(`[common-condition-products-${conditionId}]`)
-		
-		if(!queryState || queryState.isStale){
-			 refetch()
-		}else{
-			setCommonConditionData(queryState?.data)
-		}
-	 },[commonConditionData])
-   
-	useEffect(() => {
-	 handleCheckData()
-   }, [conditionId]);
+  useEffect(() => {
+    if (conditionId) handleCheckData();
+  }, [conditionId]);
 
-	const settings = {
-		dots: true,
-		infinite: false,
-		speed: 500,
-		slidesToShow: 4,
-		slidesToScroll: 4,
-		slidesPerRow: 1,
-		rows: data?.total_size > 7 ? 2 : 1,
-		autoplay: true,
-		responsive: [
-			{
-				breakpoint: 1450,
-				settings: {
-					slidesToShow: 4,
-					slidesToScroll: 3,
-					rows: data?.total_size > 7 ? 2 : 1,
-				},
-			},
-			{
-				breakpoint: 1250,
-				settings: {
-					slidesToShow: 3,
-					slidesToScroll: 2,
-					rows: data?.total_size > 3 ? 2 : 1,
-				},
-			},
-			{
-				breakpoint: 1024,
-				settings: {
-					slidesToShow: 4,
-					slidesToScroll: 1,
-					rows: data?.total_size > 4 ? 2 : 1,
-				},
-			},
-			{
-				breakpoint: 590,
-				settings: {
-					slidesToShow: 2,
-					slidesToScroll: 1,
-					rows: data?.total_size > 2 ? 2 : 1,
-					dots: false,
-				},
-			},
-			{
-				breakpoint: 700,
-				settings: {
-					slidesToShow: 3,
-					slidesToScroll: 1,
-					rows: data?.total_size > 3 ? 2 : 1,
-					dots: false,
-				},
-			},
-			{
-				breakpoint: 360,
-				settings: {
-					slidesToShow: 1,
-					slidesToScroll: 1,
-					rows: 4,
-					dots: false,
-				},
-			},
-			{
-				breakpoint: 320,
-				settings: {
-					slidesToShow: 1,
-					slidesToScroll: 1,
-					rows: 5,
-					dots: false,
-				},
-			},
-		],
-		prevArrow: <Prev />,
-		nextArrow: <Next />,
-	};
+  const handleTabClick = (id, index) => {
+    setSelected(index);
+    setConditionId(id);
+  };
 
-	return (
-		<HomeComponentsWrapper sx={{ marginBottom: "20px" }}>
-			<H2 text={title} textAlign="flex-start" component="h2" />
-			<CustomFullDivider sx={{ marginY: "5px" }} />
-			<Grid container spacing={{ xs: 1, sm: 1, md: 3 }}>
-				<Grid item xs={12} sm={0} md={3}>
-					<CustomStackFullWidth spacing={1}>
-						{conditionsIsLoading && conditionsIsrefetching ? (
-							<>
-								{[...Array(8)].map((item, index) => {
-									return (
-										<Skeleton
-											key={index}
-											variant="text"
-											width={`${Math.floor(Math.random() * 300)}px`}
-										/>
-									);
-								})}
-							</>
-						) : (
-							<SimpleBar style={{ maxHeight: "50vh" }}>
-								<Tabs
-									orientation={isSmall ? "horizontal" : "vertical"}
-									variant={isSmall && "scrollable"}
-									scrollButtons
-									sx={{
-										[theme.breakpoints.down("md")]: {
-											"& .MuiTabs-root": {
-												minHeight: "0px !important",
-											},
-										},
-									}}
-								>
-									{conditions?.data?.map((item, index) => {
-										return (
-											<Tab
-												key={index}
-												textAlign="flex-start"
-												onClick={() => handleClick(item.id, index)}
-												label={item?.name}
-												sx={{
-													alignItems: "flex-start",
-													marginLeft: isSmall
-														? "24px !important"
-														: "0px !important",
-													fontSize:
-														selected === index ? "700" : "400",
-													color:
-														selected === index
-															? "primary.main"
-															: "text.secondary",
-													cursor: "pointer",
-													[theme.breakpoints.down("md")]: {
-														padding: "0px 16px !important",
-														minHeight: "0px !important",
-													},
-												}}
-											/>
-										);
-									})}
-								</Tabs>
-							</SimpleBar>
-						)}
-					</CustomStackFullWidth>
-				</Grid>
-				<Grid item xs={12} sm={12} md={9}
-				 sx={{
-					//margin: { xs: "-4px", md: "-7.5px" },
-					opacity: isLoading ? ".5" : "",
-					transition: "all ease .3s",
-					position: "relative",
-					"&::before": {
-					  position: "absolute",
-					  inset: "0",
-					  content: '""',
-					  zIndex: "999",
-					  display: isLoading ? "block" : "none",
-					},
-				  }}
-				>
-					{isLoading ? (
-						<CustomStackFullWidth
-						sx={{ height: "100%" ,position:"absolute",
-							inset: "0",
-							zIndex: "9999",
-						   
-							}}
-							alignItems="center"
-							justifyContent="center"
-						>
-							<DotSpin />
-						</CustomStackFullWidth>
-					) : null}
-					<>
-							{commonConditionData?.products?.length === 0 ? (
-								<CustomStackFullWidth
-									sx={{ height: "100%", padding: "2rem" }}
-									alignItems="center"
-									justifyContent="center"
-								>
-									<EmptySearchResults
-										text="Items Not Found!"
-										isItems
-									/>
-								</CustomStackFullWidth>
-							) : (
-								<CustomBoxFullWidth>
-									<StyledCustomSlider>
-										<Slider {...settings}>
-											{commonConditionData?.products?.length > 0 &&
-												commonConditionData?.products?.map((item) => (
-													<ProductCard
-														key={item?.id}
-														item={item}
-														cardheight="340px"
-														cardFor="vertical"
-														cardType="vertical-type"
-														noMargin="true"
-														pharmaCommon={true}
-													/>
-												))}
-										</Slider>
-									</StyledCustomSlider>
-								</CustomBoxFullWidth>
-							)}
-						</>
-				</Grid>
-			</Grid>
-		</HomeComponentsWrapper>
-	);
+  // Pick the active tab container depending on viewport width
+  const getActiveTabsEl = () => {
+    if (typeof window !== "undefined" && window.innerWidth < 900) {
+      return mobileTabsRef.current;
+    }
+    return desktopTabsRef.current;
+  };
+
+  const updateTabBoundary = () => {
+    const el = getActiveTabsEl();
+    if (!el) return;
+    setTabAtStart(el.scrollLeft <= 0);
+    setTabAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 1);
+  };
+
+  useEffect(() => {
+    if (!conditions?.data?.length) return;
+    const timer = setTimeout(updateTabBoundary, 100);
+    return () => clearTimeout(timer);
+  }, [conditions]);
+
+  const scrollTabs = (dir) => {
+    const el = getActiveTabsEl();
+    if (!el) return;
+    el.scrollBy({ left: dir * 200, behavior: "smooth" });
+    setTimeout(updateTabBoundary, 350);
+  };
+
+  // Item slider settings
+  const itemSliderSettings = {
+    dots: false,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 5.1,
+    slidesToScroll: 1,
+    swipeToSlide: true,
+    arrows: false,
+    responsive: [
+      { breakpoint: 1024, settings: { slidesToShow: 4, slidesToScroll: 1 , swipeToSlide: true} },
+      { breakpoint: 760, settings: { slidesToShow: 3, slidesToScroll: 2 , swipeToSlide: true} },
+      { breakpoint: 480, settings: { slidesToShow: 2.4, slidesToScroll: 1 , swipeToSlide: true} },
+      { breakpoint: 400, settings: { slidesToShow: 2.1, slidesToScroll: 1 , swipeToSlide: true} },
+      {
+        breakpoint: 360,
+        settings: { slidesToShow: 1.8, slidesToScroll: 1, infinite: false , swipeToSlide: true},
+      },
+      { breakpoint: 340, settings: { slidesToShow: 1.8, slidesToScroll: 1 , swipeToSlide: true} },
+    ],
+  };
+
+  const products = conditionData?.products ?? [];
+
+  const arrowSx = (visible) => ({
+    width: 28,
+    height: 28,
+    borderRadius: "50%",
+    backgroundColor: "background.paper",
+    display: "flex",
+    visibility: visible ? "visible" : "hidden",
+    pointerEvents: visible ? "auto" : "none",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    flexShrink: 0,
+    boxShadow: "0px 1px 4px rgba(0,0,0,0.15)",
+  });
+
+  // Tab items JSX — shared between mobile and desktop renders
+  const tabItemsJsx = conditions?.data?.map((item, index) => {
+    const isActive = selected === index;
+    return (
+      <Box
+        key={item.id}
+        onClick={() => handleTabClick(item.id, index)}
+        sx={{
+          height: "40px",
+          px: "4px",
+          display: "flex",
+          alignItems: "center",
+          cursor: "pointer",
+          flexShrink: 0,
+          borderBottom: isActive
+            ? `3px solid ${theme.palette.primary.main}`
+            : "3px solid transparent",
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: { xs: "13px", md: "18px" },
+            fontWeight: isActive ? 700 : 400,
+            color: isActive ? "primary.main" : "neutral.1050",
+            lineHeight: 1.1,
+            letterSpacing: { xs: "-0.3px", md: "-0.54px" },
+            whiteSpace: "nowrap",
+            transition: "color 0.2s ease",
+          }}
+        >
+          {item.name}
+        </Typography>
+      </Box>
+    );
+  });
+
+  const loadingSkeletonJsx = (
+    <Stack
+      direction="row"
+      gap="20px"
+      sx={{ overflow: "hidden", height: "40px", alignItems: "center", flex: 1 }}
+    >
+      {[...Array(5)].map((_, i) => (
+        <Skeleton key={i} width={60} height={24} />
+      ))}
+    </Stack>
+  );
+
+  return (
+    <Stack gap="16px">
+
+      {/* ══ MOBILE layout (xs only) ══════════════════════════════════════════ */}
+
+      {/* Row 1: title + both arrows (right-aligned) */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        sx={{ display: { xs: "flex", md: "none" }, width: "100%" }}
+      >
+        <Typography
+          sx={{
+            fontSize: "18px",
+            fontWeight: 700,
+            color: "neutral.1050",
+            lineHeight: 1.1,
+            letterSpacing: "-1.2px",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+          }}
+        >
+          {t(title)}
+        </Typography>
+
+        {/* Arrows sit in the title row — no space wasted in the tab strip */}
+        <Stack direction="row" gap="8px" sx={{ ml: "auto", flexShrink: 0 }}>
+          <Box onClick={() => scrollTabs(-1)} sx={arrowSx(!tabAtStart)}>
+            <i
+              className="fi fi-rs-angle-small-left"
+              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050] }}
+            />
+          </Box>
+          <Box onClick={() => scrollTabs(1)} sx={arrowSx(!tabAtEnd)}>
+            <i
+              className="fi fi-rs-angle-small-right"
+              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050] }}
+            />
+          </Box>
+        </Stack>
+      </Stack>
+
+      {/* Row 2: full-width scrollable tabs (no arrows) */}
+      {conditionsLoading ? (
+        <Box sx={{ display: { xs: "block", md: "none" } }}>{loadingSkeletonJsx}</Box>
+      ) : (
+        <Box
+          ref={mobileTabsRef}
+          onScroll={updateTabBoundary}
+          sx={{
+            display: { xs: "block", md: "none" },
+            overflowX: "scroll",
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+        >
+          <Stack direction="row" alignItems="center" gap="20px" sx={{ width: "max-content" }}>
+            {tabItemsJsx}
+          </Stack>
+        </Box>
+      )}
+
+      {/* ══ DESKTOP layout (md+) ═════════════════════════════════════════════ */}
+
+      {/* Single row: title + prev + tabs + next */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        gap="24px"
+        sx={{ display: { xs: "none", md: "flex" }, width: "100%", minWidth: 0 }}
+      >
+        <Typography
+          sx={{
+            fontSize: "24px",
+            fontWeight: 700,
+            color: "neutral.1050",
+            lineHeight: 1.1,
+            letterSpacing: "-1.2px",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+          }}
+        >
+          {t(title)}
+        </Typography>
+
+        <Stack
+          direction="row"
+          alignItems="center"
+          gap="8px"
+          sx={{ ml: "auto", minWidth: 0, maxWidth: "65%" }}
+        >
+          <Box onClick={() => scrollTabs(-1)} sx={{ ...arrowSx(!tabAtStart), mt: "-4px" }}>
+            <i
+              className="fi fi-rs-angle-small-left"
+              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050] }}
+            />
+          </Box>
+
+          {conditionsLoading ? loadingSkeletonJsx : (
+            <Box
+              ref={desktopTabsRef}
+              onScroll={updateTabBoundary}
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                overflowX: "scroll",
+                scrollbarWidth: "none",
+                "&::-webkit-scrollbar": { display: "none" },
+              }}
+            >
+              <Stack direction="row" alignItems="center" gap="20px" sx={{ width: "max-content" }}>
+                {tabItemsJsx}
+              </Stack>
+            </Box>
+          )}
+
+          <Box onClick={() => scrollTabs(1)} sx={{ ...arrowSx(!tabAtEnd), mt: "-4px" }}>
+            <i
+              className="fi fi-rs-angle-small-right"
+              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050] }}
+            />
+          </Box>
+        </Stack>
+      </Stack>
+
+      {/* ── Item slider ── */}
+      <ItemSliderWrapper
+        sx={{ opacity: isLoading ? 0.5 : 1, transition: "opacity 0.3s ease" }}
+      >
+        <Slider key={conditionId} {...itemSliderSettings} ref={slider}>
+          {isLoading
+            ? [...Array(5)].map((_, i) => <ProductCardSimmer key={i} />)
+            : products.map((item) => (
+                <div key={item?.id}>
+                  <NewProductCard
+                    variant="vertical"
+                    item={item}
+                    isPharmacy
+                    cardWidth={{ xs: "150px", md: "180px" }}
+                  />
+                </div>
+              ))}
+        </Slider>
+      </ItemSliderWrapper>
+    </Stack>
+  );
 };
 
 CommonConditions.propTypes = {};

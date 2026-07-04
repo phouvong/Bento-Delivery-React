@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from "react";
 import useGetCoupons from "../../api-manage/hooks/react-query/useGetCoupons";
-import { Box, Stack } from "@mui/system";
-import { Grid, Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box } from "@mui/system";
+import { Grid } from "@mui/material";
 import CustomEmptyResult from "../custom-empty-result";
 import nodataimage from "../../../public/static/nodata.png";
 import Coupon from "./Coupon";
 import CustomShimmerCard from "./Shimmer";
-import { t } from "i18next";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { useGetCouponLists } from "api-manage/hooks/react-query/useCouponsLists";
+import NewCouponCard from "./NewCouponCard";
 
-const Coupons = () => {
-  const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down("md"));
+const Coupons = ({ moduleId, moduleType }) => {
   const [copy, setCopy] = useState(null);
 
   const {
@@ -20,10 +18,14 @@ const Coupons = () => {
     refetch: rentalCouponRefetch,
     isLoading: isRentalCouponLoading,
     isFetching: isRentalCouponFetching,
-  } = useGetCouponLists();
-  const { data, refetch, isLoading, isFetching } = useGetCoupons();
+  } = useGetCouponLists(moduleId);
+  const { data, refetch, isLoading, isFetching } = useGetCoupons(moduleId);
 
-  const isRentalModule = getCurrentModuleType() === "rental";
+  // When a module is explicitly selected (Coupons tab), trust its type;
+  // otherwise fall back to the globally selected module in localStorage.
+  const isRentalModule = moduleType
+    ? moduleType === "rental"
+    : getCurrentModuleType() === "rental";
 
   useEffect(() => {
     if (isRentalModule) {
@@ -31,7 +33,7 @@ const Coupons = () => {
     } else {
       refetch();
     }
-  }, []);
+  }, [moduleId, isRentalModule]);
 
   const couponData = isRentalModule ? rentalCouponData ?? [] : data ?? [];
   const isCouponLoading = isRentalModule ? isRentalCouponLoading : isLoading;
@@ -39,29 +41,23 @@ const Coupons = () => {
 
   return (
     <Box
-      mt={{ xs: "1rem", md: "2rem" }}
+      mt={{ xs: "12px", md: "2rem" }}
       minHeight="60vh"
       paddingLeft={{ xs: "10px", sm: "20px", md: "25px" }}
       paddingRight={{ xs: "10px", sm: "20px", md: "40px" }}
+      paddingBottom={{ xs: "24px", md: "32px" }}
     >
       <Grid container spacing={2}>
-        {isSmall && (
-          <Grid item xs={12}>
-            {isSmall && (
-              <Stack direction="row" justifyContent="space-between">
-                <Typography
-                  textTransform="capitalize"
-                  fontWeight="700"
-                  fontSize="16px"
-                >
-                  {t("Coupons")}
-                </Typography>
-                {/*<InfoOutlinedIcon />*/}
-              </Stack>
-            )}
-          </Grid>
-        )}
         {couponData &&
+          couponData?.length > 0 &&
+          couponData?.map((coupon, index) => {
+            return (
+              <Grid item sm={6} xs={12} md={4} key={index}>
+                <NewCouponCard coupon={coupon} setCopy={setCopy} copy={copy} />
+              </Grid>
+            );
+          })}
+        {/* {couponData &&
           couponData?.length > 0 &&
           couponData?.map((coupon, index) => {
             return (
@@ -74,7 +70,7 @@ const Coupons = () => {
                 />
               </Grid>
             );
-          })}
+          })} */}
         {couponData && !isCouponFetching && couponData.length === 0 && (
           <CustomEmptyResult label="No Coupon Found" image={nodataimage} />
         )}

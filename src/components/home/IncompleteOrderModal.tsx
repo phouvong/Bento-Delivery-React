@@ -23,6 +23,8 @@ interface FailPaymentOrderData {
   cash_on_delivery?: boolean;
   partially_paid_amount?: number;
   maximum_cod_order_amount?: number;
+  module_type?: string;
+  module?: { module_type?: string };
 }
 
 interface IncompleteOrderModalProps {
@@ -84,7 +86,10 @@ const IncompleteOrderModal: React.FC<IncompleteOrderModalProps> = ({
       toast.error(t("Order ID is missing"));
       return;
     }
-    if (failPaymentOrderData?.maximum_cod_order_amount > failPaymentOrderData?.order_amount) {
+    if (
+      failPaymentOrderData?.maximum_cod_order_amount >
+      failPaymentOrderData?.order_amount
+    ) {
       paymentMethodUpdateMutation(formData, {
         onSuccess: handleSuccess,
         onError: onErrorResponse,
@@ -123,7 +128,13 @@ const IncompleteOrderModal: React.FC<IncompleteOrderModalProps> = ({
     >
       <Typography component="span" fontSize="18px" fontWeight="500">
         {t("Your Payment was")}
-        <Typography component="span" ml={1} fontSize="18px" fontWeight="500" color="error">
+        <Typography
+          component="span"
+          ml={1}
+          fontSize="18px"
+          fontWeight="500"
+          color="error"
+        >
           {t("Incomplete")}
         </Typography>
       </Typography>
@@ -162,9 +173,13 @@ const IncompleteOrderModal: React.FC<IncompleteOrderModalProps> = ({
           </Typography>
           <Typography fontWeight="500">
             {failPaymentOrderData.order_amount
-              ? getAmountWithSign(failPaymentOrderData?.partially_paid_amount > 0 ? failPaymentOrderData.order_amount - failPaymentOrderData?.partially_paid_amount : failPaymentOrderData.order_amount)
-              : t("N/A")
-            }
+              ? getAmountWithSign(
+                  failPaymentOrderData?.partially_paid_amount > 0
+                    ? failPaymentOrderData.order_amount -
+                        failPaymentOrderData?.partially_paid_amount
+                    : failPaymentOrderData.order_amount
+                )
+              : t("N/A")}
           </Typography>
         </Stack>
       </Stack>
@@ -172,13 +187,15 @@ const IncompleteOrderModal: React.FC<IncompleteOrderModalProps> = ({
         textAlign="center"
         sx={{
           color: (theme) => theme.palette.neutral[500],
-          maxWidth: "350px"
+          maxWidth: "350px",
         }}
       >
-        {t("Your payment was incomplete. Please choose an option below to complete your transaction.")}
+        {t(
+          "Your payment was incomplete. Please choose an option below to complete your transaction."
+        )}
       </Typography>
       <FormControlLabel
-        sx={{ alignSelf: "flex-start", }}
+        sx={{ alignSelf: "flex-start" }}
         control={
           <Checkbox
             checked={dontShowAgain}
@@ -198,7 +215,10 @@ const IncompleteOrderModal: React.FC<IncompleteOrderModalProps> = ({
           />
         }
         label={
-          <Typography fontSize="14px" sx={{ color: theme => theme.palette.neutral[500] }}>
+          <Typography
+            fontSize="14px"
+            sx={{ color: (theme) => theme.palette.neutral[500] }}
+          >
             {t("Don't show this again")}
           </Typography>
         }
@@ -222,13 +242,14 @@ const IncompleteOrderModal: React.FC<IncompleteOrderModalProps> = ({
           onClick={handleSwitchToCOD}
           disabled={!failPaymentOrderData.order_id || orderLoading}
           sx={{
-            bgcolor: (theme) => alpha(theme.palette.neutral[200], 0.4),
-            color: (theme) => theme.palette.neutral[800],
+            backgroundColor: (theme) => alpha(theme.palette.neutral[600], 0.4),
+            color: (theme) => theme.palette.neutral[1000],
             borderColor: "transparent",
             // px: "30px",
             // borderRadius: "5px",
             "&:hover": {
-              bgcolor: (theme) => alpha(theme.palette.neutral[200], 1),
+              backgroundColor: (theme) =>
+                alpha(theme.palette.neutral[200], 0.8),
               color: (theme) => theme.palette.neutral[900],
               borderColor: "transparent",
             },
@@ -253,9 +274,11 @@ const IncompleteOrderModal: React.FC<IncompleteOrderModalProps> = ({
         loading={cancelLoading}
         disabled={!failPaymentOrderData.order_id || cancelLoading}
       >
-        {t("Cancel Order")}
+        {failPaymentOrderData?.module_type === "parcel" ||
+        failPaymentOrderData?.module?.module_type === "parcel"
+          ? t("Cancel Parcel")
+          : t("Cancel Order")}
       </LoadingButton>
-
     </Stack>
   );
 };

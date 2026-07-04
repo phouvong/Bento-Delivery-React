@@ -20,12 +20,16 @@ const ParcelCategory = () => {
     <CustomStackFullWidth
       spacing={2.5}
       sx={{
-        paddingBottom: { xs: "20px", sm: "30px", md: "50px" },
-        marginTop: "80px",
+        paddingBottom: { xs: "20px", sm: "30px", md: "30px" },
+        marginTop: "40px",
       }}
     >
       <Stack justifyContent="center" spacing={{ xs: 1, md: 0 }}>
-        <H1 text="We Deliver Everything" component="h2" />
+        <H1
+          text="We Deliver Everything"
+          component="h2"
+          sx={{ fontSize: { xs: "15px", md: "32px" }, color: "neutral.1050" }}
+        />
         <Typography
           textAlign="center"
           color={theme.palette.neutral[400]}
@@ -35,16 +39,17 @@ const ParcelCategory = () => {
         </Typography>
       </Stack>
       <CustomStackFullWidth>
-        <Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
+        <Grid container spacing={{ xs: 1.5, sm: 3, md: 3 }}>
           {!isLoading ? (
             <>
-              {data && data?.map((item) => {
-                return (
-                  <Grid item xs={12} sm={6} md={4} key={item.id}>
-                    <ParcelCategoryCard data={item} />
-                  </Grid>
-                );
-              })}
+              {data &&
+                data?.map((item) => {
+                  return (
+                    <Grid item xs={6} sm={6} md={4} key={item.id}>
+                      <ParcelCategoryCard data={item} />
+                    </Grid>
+                  );
+                })}
             </>
           ) : (
             <CustomStackFullWidth sx={{ marginTop: "24px" }}>

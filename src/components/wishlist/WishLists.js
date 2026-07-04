@@ -167,7 +167,7 @@ const WishLists = (props) => {
             )}
           </Stack>
         ) : (
-          <Typography>nai</Typography>
+          <Typography>{t("No data found")}</Typography>
         )}
         {/*{currentTab === getItemsOrFoods() && wishLists?.item?.length > 0 && (*/}
         {/*  <WishListSideBarAction />*/}

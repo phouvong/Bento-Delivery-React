@@ -1,30 +1,37 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
-import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import { Card, Typography, useTheme } from "@mui/material";
-import { Stack } from "@mui/system";
-import { t } from "i18next";
-import CustomImageContainer from "../../CustomImageContainer";
-import { CustomButtonPrimary } from "styled-components/CustomButtons.style";
-import { CustomButtonStack } from "components/checkout/CheckOut.style";
-import { useState, useEffect } from "react";
-import { Modal, Box, Grid, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import {
+  Box,
+  Card,
+  Divider,
+  Drawer,
+  Grid,
+  IconButton,
+  Modal,
+  Stack,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import { t } from "i18next";
+import { useDispatch } from "react-redux";
+import { setParcelCategories } from "redux/slices/parcelCategoryData";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
+import { CustomButtonPrimary } from "styled-components/CustomButtons.style";
+import CustomImageContainer from "../../CustomImageContainer";
 import useGetParcelCategory from "../../../api-manage/hooks/react-query/percel/usePercelCategory";
 import ParcelCategoryCard from "../parcel-category/ParcelCategoryCard";
 import ParcelCategoryShimmer from "../parcel-category/ParcelCategoryShimmer";
-import { useDispatch, useSelector } from "react-redux";
-import { setParcelCategories } from "redux/slices/parcelCategoryData";
 
-const ParcelInfo = ({ parcelCategories, setReceiverLocation }) => {
+const ParcelInfo = ({ parcelCategories }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [open, setOpen] = useState(false);
-   
   const [tempSelected, setTempSelected] = useState(parcelCategories);
-  const { parcelInfo } = useSelector((state) => state.parcelInfoData);
-  const { data, refetch, isFetched, isLoading } = useGetParcelCategory();
-  console.log("parcelCategories", parcelInfo);
+  const { data, refetch, isLoading } = useGetParcelCategory();
+
   useEffect(() => {
     if (open) {
       refetch();
@@ -32,157 +39,268 @@ const ParcelInfo = ({ parcelCategories, setReceiverLocation }) => {
     }
   }, [open]);
 
+  const handleClose = () => setOpen(false);
+
   const handleUpdate = () => {
     if (tempSelected) {
       dispatch(setParcelCategories(tempSelected));
-      //setReceiverLocation(parcelInfo?.receiverLocations);
       setOpen(false);
     }
-  }
-
-  const modalStyle = {
-    position: 'absolute',
-    top: { xs: "20px", md: "50%" },
-    left: '50%',
-    transform: { xs: "translateX(-50%) translateY(0)", md: "translateX(-50%) translateY(-50%)" },
-    width: { xs: "95%", md: "70%" },
-    bgcolor: 'background.paper',
-    border: '1px solid #fff',
-    boxShadow: 24,
-    p: 4,
-    borderRadius: "10px",
-    maxHeight: { xs: "80vh", md: "90vh" },
-    overflowY: "auto",
-    outline: "none"
   };
 
-  return (
-    <CustomStackFullWidth height="100%">
-      <Card sx={{ padding: "1.2rem", backgroundColor: theme.palette.background.custom, border: `1px solid rgba(0, 0, 0, 0.05)`, height: "100%" }}>
-        <CustomStackFullWidth gap={2} height="100%">
-          <Stack align="center">
-            <Typography fontWeight={500} fontSize="16px">
-              {t("Parcel Info")}
-            </Typography>
-          </Stack>
+  const modalStyle = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: { md: "70%", lg: "60%" },
+    maxWidth: "880px",
+    bgcolor: "background.paper",
+    boxShadow: 24,
+    borderRadius: "16px",
+    maxHeight: "90vh",
+    display: "flex",
+    flexDirection: "column",
+    outline: "none",
+    overflow: "hidden",
+  };
 
-          <Stack
-            width="100%"
-            // justifyContent="center"
-            alignItems="center"
-            gap={2}
-            paddingBlock={{ xs: "20px", sm: "40px", md: "50px" }}
-            flexGrow={1}
-            sx={{
-              backgroundColor: theme.palette.background.paper,
-              borderRadius: "8px",
-              position: "relative",
-            }}
-          >
-            <Stack
-              direction="row"
-              alignItems="center"
-              gap={.5}
-              position="absolute"
-              right="10px"
-              top="10px"
-              onClick={() => setOpen(true)}
-              sx={{
-                cursor: "pointer",
-                color: theme.palette.info.main,
-                fontWeight: "500",
-              }}>
-              <EditIcon fontSize="12px" />
-              {t("Edit")}
-            </Stack>
-            <CustomImageContainer
-              src={parcelCategories?.image_full_url}
-              height="100px"
-              width="100px"
-              objectfit="contain"
-            />
-
-            <Stack width="100%" justifyContent="center" alignItems="center">
-              <Typography fontSize="16px" fontWeight="700">
-                {parcelCategories?.name}
-              </Typography>
-              <Typography>{parcelCategories?.description}</Typography>
-            </Stack>
-          </Stack>
-
-          <CustomButtonStack width="100%">
-            <CustomButtonPrimary fullwidth="true" type="submit">
-              {t("Proceed to Checkout")}
-            </CustomButtonPrimary>
-          </CustomButtonStack>
-        </CustomStackFullWidth>
-      </Card>
-      <Modal
-        open={open}
-        onClose={() => setOpen(false)}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
+  const renderContent = () => (
+    <>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{
+          px: { xs: 2, md: 3 },
+          py: { xs: 1.5, md: 2 },
+          borderBottom: `1px solid ${
+            theme.palette.neutral?.[200] || "rgba(0,0,0,0.06)"
+          }`,
+        }}
       >
-        <Box sx={modalStyle}>
-          <IconButton onClick={() => setOpen(false)}
-            sx={{
-              backgroundColor: theme.palette.neutral[300],
-              borderRadius: "50%",
-              padding: ".315rem",
-              position: "absolute",
-              top: "10px",
-              right: "10px",
-              svg: {
-                fontSize: "1.2rem !important",
-              }
-            }}
+        <Stack>
+          <Typography
+            fontWeight={700}
+            fontSize={{ xs: "16px", md: "18px" }}
+            color="text.primary"
           >
-            <CloseIcon />
-          </IconButton>
-
-          <Typography id="modal-modal-title" variant="h6" component="h2" fontWeight="bold" mb={3}>
             {t("Select what you wish to send")}
           </Typography>
+          <Typography
+            fontSize={{ xs: "12px", md: "13px" }}
+            color={theme.palette.neutral?.[500] || "text.secondary"}
+          >
+            {t("Pick the parcel type that best fits your item")}
+          </Typography>
+        </Stack>
+        <IconButton
+          onClick={handleClose}
+          sx={{
+            backgroundColor: theme.palette.neutral?.[200] || "rgba(0,0,0,0.06)",
+            borderRadius: "50%",
+            padding: "6px",
+            "&:hover": {
+              backgroundColor:
+                theme.palette.neutral?.[300] || "rgba(0,0,0,0.12)",
+            },
+          }}
+        >
+          <CloseIcon sx={{ fontSize: "18px" }} />
+        </IconButton>
+      </Stack>
 
-          <Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
-            {!isLoading ? (
-              <>
-                {data && data?.map((item) => {
-                  return (
-                    <Grid item xs={12} sm={6} md={4} key={item.id}>
-                      <ParcelCategoryCard
-                        data={item}
-                        selected={tempSelected?.id === item.id}
-                        onClick={(data) => setTempSelected(data)}
-                      />
-                    </Grid>
-                  );
-                })}
-              </>
-            ) : (
-              <CustomStackFullWidth sx={{ marginTop: "24px" }}>
-                <ParcelCategoryShimmer />
-              </CustomStackFullWidth>
-            )}
-          </Grid>
-          <Stack direction="row" justifyContent="end" gap={2} mt={4}>
-            <CustomButtonPrimary
-              sx={{ width: "100px", bgcolor: theme.palette.neutral[300], color: theme.palette.text.primary, "&:hover": { bgcolor: theme.palette.neutral[400] } }}
-              onClick={() => setOpen(false)}
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: "auto",
+          px: { xs: 2, md: 3 },
+          py: { xs: 2, md: 3 },
+        }}
+      >
+        <Grid container spacing={{ xs: 1.5, sm: 2, md: 2.5 }}>
+          {!isLoading ? (
+            data?.map((item) => (
+              <Grid item xs={6} sm={6} md={4} key={item.id}>
+                <ParcelCategoryCard
+                  data={item}
+                  selected={tempSelected?.id === item.id}
+                  onClick={(d) => setTempSelected(d)}
+                />
+              </Grid>
+            ))
+          ) : (
+            <CustomStackFullWidth sx={{ marginTop: "24px" }}>
+              <ParcelCategoryShimmer />
+            </CustomStackFullWidth>
+          )}
+        </Grid>
+      </Box>
+
+      <Divider />
+      <Stack
+        direction="row"
+        justifyContent={{ xs: "stretch", md: "flex-end" }}
+        gap={1.5}
+        sx={{
+          px: { xs: 2, md: 3 },
+          py: { xs: 1.5, md: 2 },
+          backgroundColor: theme.palette.background.paper,
+        }}
+      >
+        <CustomButtonPrimary
+          sx={{
+            flex: { xs: 1, md: "0 0 auto" },
+            maxWidth: { xs: "100%", md: "140px" },
+            minWidth: { md: "120px" },
+            height: "44px",
+            borderRadius: "10px",
+            bgcolor: theme.palette.neutral?.[200] || "rgba(0,0,0,0.06)",
+            color: theme.palette.text.primary,
+            boxShadow: "none",
+            "&:hover": {
+              bgcolor: theme.palette.neutral?.[300] || "rgba(0,0,0,0.12)",
+              boxShadow: "none",
+            },
+          }}
+          onClick={handleClose}
+        >
+          {t("Cancel")}
+        </CustomButtonPrimary>
+        <CustomButtonPrimary
+          sx={{
+            flex: { xs: 1, md: "0 0 auto" },
+            maxWidth: { xs: "100%", md: "140px" },
+            minWidth: { md: "120px" },
+            height: "44px",
+            borderRadius: "10px",
+            boxShadow: "none",
+            "&:hover": { boxShadow: "none" },
+          }}
+          onClick={handleUpdate}
+        >
+          {t("Update")}
+        </CustomButtonPrimary>
+      </Stack>
+    </>
+  );
+
+  return (
+    <>
+      <Card
+        sx={{
+          padding: { xs: "12px 14px", md: "14px 20px" },
+          backgroundColor: theme.palette.background.paper,
+          border: `1px solid ${
+            theme.palette.neutral?.[200] || "rgba(0,0,0,0.06)"
+          }`,
+          borderRadius: "12px",
+          boxShadow: "none",
+        }}
+      >
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          gap={2}
+        >
+          <Stack direction="row" alignItems="center" gap={1.5} minWidth={0}>
+            <Box
+              sx={{
+                width: { xs: 36, md: 44 },
+                height: { xs: 36, md: 44 },
+                flexShrink: 0,
+              }}
             >
-              {t("Cancel")}
-            </CustomButtonPrimary>
-            <CustomButtonPrimary
-              sx={{ width: "100px" }}
-              onClick={handleUpdate}
-            >
-              {t("Update")}
-            </CustomButtonPrimary>
+              <CustomImageContainer
+                src={parcelCategories?.image_full_url}
+                height="100%"
+                width="100%"
+                objectfit="contain"
+              />
+            </Box>
+            <Stack minWidth={0}>
+              <Typography
+                fontWeight={700}
+                fontSize={{ xs: "15px", md: "16px" }}
+                sx={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {t("Parcel Type")}
+                {parcelCategories?.name ? ` - ${parcelCategories.name}` : ""}
+              </Typography>
+              <Typography
+                fontSize={{ xs: "11px", md: "13px" }}
+                color={theme.palette.neutral?.[400] || "text.secondary"}
+                sx={{
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {t("Choose which type of item you want to send")}
+              </Typography>
+            </Stack>
           </Stack>
-        </Box>
-      </Modal>
-    
-    </CustomStackFullWidth>
+
+          <IconButton
+            onClick={() => setOpen(true)}
+            sx={{
+              color: theme.palette.info?.main || theme.palette.primary.main,
+              border: `1px solid ${
+                theme.palette.neutral?.[200] || "rgba(0,0,0,0.1)"
+              }`,
+              borderRadius: "10px",
+              width: 36,
+              height: 36,
+              flexShrink: 0,
+            }}
+          >
+            <EditIcon sx={{ fontSize: "16px" }} />
+          </IconButton>
+        </Stack>
+      </Card>
+
+      {isMobile ? (
+        <Drawer
+          anchor="bottom"
+          open={open}
+          onClose={handleClose}
+          PaperProps={{
+            sx: {
+              borderTopLeftRadius: "20px",
+              borderTopRightRadius: "20px",
+              maxHeight: "92vh",
+              display: "flex",
+              flexDirection: "column",
+              overflow: "hidden",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              width: 40,
+              height: 4,
+              borderRadius: "999px",
+              backgroundColor:
+                theme.palette.neutral?.[300] || "rgba(0,0,0,0.12)",
+              mx: "auto",
+              mt: 1,
+              mb: 0.5,
+              flexShrink: 0,
+            }}
+          />
+          {renderContent()}
+        </Drawer>
+      ) : (
+        <Modal open={open} onClose={handleClose}>
+          <Box sx={modalStyle}>{renderContent()}</Box>
+        </Modal>
+      )}
+    </>
   );
 };
 

@@ -42,9 +42,7 @@ const CustomDialogConfirmStyle = (props) => {
             width="100%"
             spacing={{ xs: 1, sm: 2, md: 3 }}
           >
-            <CustomButtonCancel variant="contained" onClick={onClose}>
-              {t("Cancel")}
-            </CustomButtonCancel>
+            
             <CustomButtonSuccess
               loading={isLoading}
               variant="contained"
@@ -52,6 +50,9 @@ const CustomDialogConfirmStyle = (props) => {
             >
               {t("Yes")}
             </CustomButtonSuccess>
+            <CustomButtonCancel variant="contained" onClick={onClose}>
+              {t("Cancel")}
+            </CustomButtonCancel>
           </Stack>
         </DialogActions>
       </WrapperForCustomDialogConfirm>

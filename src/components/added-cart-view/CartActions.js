@@ -21,10 +21,22 @@ const CartActions = (props) => {
   const router = useRouter();
   const dispatch = useDispatch();
 
+  const checkoutStoreId = cartList?.[0]?.store_id;
+  const moduleParam = router.query?.module;
+  const checkoutQuery = {
+    page: "cart",
+    ...(moduleParam && { module: moduleParam }),
+    ...(checkoutStoreId != null && { store_id: checkoutStoreId }),
+  };
+
   const handleRoute = () => {
-    router.push("/checkout?page=cart", undefined, { shallow: true }).then(() => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
+    router
+      .push({ pathname: "/checkout", query: checkoutQuery }, undefined, {
+        shallow: true,
+      })
+      .then(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
   };
   const handleCheckout = () => {
     if (
@@ -34,9 +46,13 @@ const CartActions = (props) => {
     ) {
       setOpen(true);
     } else if (cartList?.length > 0 && token) {
-      router.push("/checkout?page=cart", undefined, { shallow: true }).then(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      });
+      router
+        .push({ pathname: "/checkout", query: checkoutQuery }, undefined, {
+          shallow: true,
+        })
+        .then(() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
       setSideDrawerOpen(false);
     } else {
       if (cartList?.length === 0) {
@@ -49,7 +65,6 @@ const CartActions = (props) => {
       }
     }
   };
-
 
   return (
     <Stack

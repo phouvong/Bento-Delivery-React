@@ -24,6 +24,7 @@ const DigitalPaymentManage = ({
   refetchTrackData,
   id,
   setModalOpen,
+  moduleType,
 }) => {
   const { mutate: paymentMethodUpdateMutation, isLoading: orderLoading } =
     useMutation(
@@ -79,7 +80,7 @@ const DigitalPaymentManage = ({
               variant="contained"
               onClick={handleClose}
             >
-              {t("Cancel Order")}
+              {moduleType === "parcel" ? t("Cancel Parcel") : t("Cancel Order")}
             </CustomButtonCancel>
           </Stack>
         </DialogActions>

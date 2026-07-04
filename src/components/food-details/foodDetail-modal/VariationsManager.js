@@ -3,7 +3,8 @@ import VariationButtons from "./VariationButtons";
 import { ChoiceValues } from "./ChoiceValues";
 
 const VariationsManager = (props) => {
-  const { t, modalData, radioCheckHandler, changeChoices } = props;
+  const { t, modalData, radioCheckHandler, changeChoices, selectedOptions } =
+    props;
   return (
     <>
       {modalData.length > 0 && modalData[0].food_variations?.length > 0 ? (
@@ -15,6 +16,7 @@ const VariationsManager = (props) => {
             radioCheckHandler={radioCheckHandler}
             choiceIndex={choiceIndex}
             changeChoices={changeChoices}
+            selectedOptions={selectedOptions}
           />
         ))
       ) : (

@@ -1,6 +1,7 @@
 import React from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import MainLayout from "../../src/components/layout/MainLayout";
+import SimpleMobileHeader from "components/common/SimpleMobileHeader";
 import HelpAndSupport from "../../src/components/help-and-support";
 import { useTranslation } from "react-i18next";
 import SEO from "../../src/components/seo";
@@ -34,6 +35,7 @@ const Index = ({ configData ,metaData}) => {
         configData={configData}
       />
       <MainLayout configData={configData} >
+        <SimpleMobileHeader title="Help & Support" />
         <CustomContainer>
           <HelpAndSupport configData={configData} t={t} />
         </CustomContainer>

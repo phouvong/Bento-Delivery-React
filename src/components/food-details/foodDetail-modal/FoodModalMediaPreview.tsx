@@ -52,6 +52,8 @@ interface FoodModalMediaPreviewProps {
   aspectRatio?: string;
   borderRadius?: string;
   alt?: string;
+  activeIndex?: number;
+  onSlideChange?: (idx: number) => void;
 }
 
 interface ArrowProps {
@@ -92,6 +94,8 @@ const FoodModalMediaPreview = ({
   aspectRatio = "2/1",
   borderRadius = ".3rem",
   alt = "Product",
+  activeIndex,
+  onSlideChange,
 }: FoodModalMediaPreviewProps) => {
   const previewType = product?.video_preview_type;
   const inlineUrl = product?.video_preview_url ?? "";
@@ -111,8 +115,16 @@ const FoodModalMediaPreview = ({
     : [];
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
+  const sliderRef = useRef<Slider | null>(null);
+  const [currentSlide, setCurrentSlide] = useState(activeIndex ?? 0);
   const totalSlides = (hasVideo ? 1 : 0) + images.length;
+
+  useEffect(() => {
+    if (typeof activeIndex !== "number") return;
+    if (activeIndex === currentSlide) return;
+    if (!sliderRef.current) return;
+    sliderRef.current.slickGoTo(activeIndex);
+  }, [activeIndex, currentSlide]);
 
   useEffect(() => {
     if (!hasVideo || !useVideoTag) return;
@@ -218,11 +230,15 @@ const FoodModalMediaPreview = ({
     speed: 400,
     slidesToShow: 1,
     slidesToScroll: 1,
+    swipeToSlide: true,
     swipe: true,
     draggable: true,
-    beforeChange: (_current: number, next: number) => setCurrentSlide(next),
-    prevArrow:
-      currentSlide > 0 ? <SliderArrow direction="prev" /> : <span />,
+    initialSlide: activeIndex ?? 0,
+    beforeChange: (_current: number, next: number) => {
+      setCurrentSlide(next);
+      onSlideChange?.(next);
+    },
+    prevArrow: currentSlide > 0 ? <SliderArrow direction="prev" /> : <span />,
     nextArrow:
       currentSlide < totalSlides - 1 ? (
         <SliderArrow direction="next" />
@@ -253,7 +269,7 @@ const FoodModalMediaPreview = ({
         },
       }}
     >
-      <Slider {...sliderSettings}>
+      <Slider ref={sliderRef} {...sliderSettings}>
         {hasVideo && <Box>{videoSlide}</Box>}
         {imageSlides}
       </Slider>

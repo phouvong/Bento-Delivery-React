@@ -1,26 +1,42 @@
 import React, { useEffect, useState } from "react";
-import { Paper, Stack } from "@mui/material";
+import { Box, Paper, Stack } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "next/router";
 import Skeleton from "@mui/material/Skeleton";
 import useGetSuggestedProducts from "../../api-manage/hooks/react-query/search/useGetSuggestedProducts";
-import RecentSearchWithSuggestions from "./recent-search/RecentSearchWithSuggestions";
 import SuggestedSearches from "./recent-search/SuggestedSearches";
-import { getCurrentModuleType } from "../../helper-functions/getCurrentModuleType";
-import { ModuleTypes } from "../../helper-functions/moduleTypes";
+import SearchDropdownEmpty from "./recent-search/SearchDropdownEmpty";
+import { useDispatch } from "react-redux";
+import {
+  handleSuggestionItemClick,
+  handleSuggestionStoreClick,
+} from "helper-functions/handleSuggestionClick";
+import {
+  getRecentSearches,
+  deleteRecentSearch,
+  clearRecentSearches,
+} from "utils/recentSearchStorage";
 
-const CustomPaper = styled(Paper)(({ theme, display, padding }) => ({
+const DropdownPaper = styled(Paper)(({ theme }) => ({
   position: "absolute",
-  top:  42,
+  top: 48,
+  left: 0,
   width: "100%",
-  padding: "1.5rem 1.5rem 2rem 1.5rem",
   zIndex: 999,
-  display: display ? display : "inherit",
-  borderTopLeftRadius: "5px",
-  borderTopRightRadius: "5px",
+  borderRadius: "16px",
+  boxShadow: "0px 8px 32px 0px rgba(0,0,0,0.12)",
+  overflow: "hidden",
 }));
+
+const ScrollableContent = styled("div")({
+  maxHeight: "400px",
+  overflowY: "auto",
+  "&::-webkit-scrollbar": { width: "4px" },
+  "&::-webkit-scrollbar-track": { background: "transparent" },
+  "&::-webkit-scrollbar-thumb": { background: "neutral.300", borderRadius: "4px" },
+});
+
 const SearchSuggestionsBottom = (props) => {
   const {
     searchValue,
@@ -31,38 +47,44 @@ const SearchSuggestionsBottom = (props) => {
     handleKeyPress,
     itemOrStoreSuggestionData,
     isRefetchingItemOrStoreSuggestion,
+    searchFromNav = false,
   } = props;
-  const [suggestedKeywords, setSuggestedKeywords] = useState([]);
+
   const [list, setList] = useState([]);
   const { t } = useTranslation();
   const router = useRouter();
+  const reduxDispatch = useDispatch();
+
+  const closeSuggestion = () => setOpenSearchSuggestions(false);
+
+  const onSuggestionItemClick = (item) =>
+    handleSuggestionItemClick(item, router, reduxDispatch, closeSuggestion);
+
+  const onSuggestionStoreClick = (store) =>
+    handleSuggestionStoreClick(store, router, closeSuggestion);
+
   let token = undefined;
   if (typeof window !== "undefined") {
     token = localStorage.getItem("token");
   }
 
-  const handleSearchSuccess = (res) => {
-    setSuggestedKeywords(res);
-  };
-
+  const handleSearchSuccess = (res) => {};
   const { refetch, isRefetching } =
     useGetSuggestedProducts(handleSearchSuccess);
 
   useEffect(() => {
-    let getItem = JSON.parse(localStorage.getItem("searchedValues"));
-    if (getItem && getItem.length > 0) {
-      const uniqueItems = Array.from(new Set([...list, ...getItem]));
-      setList(uniqueItems);
-    }
+    setList(getRecentSearches());
     if (token) {
       refetch();
     }
   }, []);
- const queryModule = router?.query?.module || router?.query?.module_id;
-      const moduleValue = Array.isArray(queryModule)
-        ? queryModule[0]
-        : queryModule || getModuleId();
-  const handleSearchHistoryOnClick = (value) => {
+
+  const getModuleValue = () => {
+    const queryModule = router?.query?.module || router?.query?.module_id;
+    return Array.isArray(queryModule) ? queryModule[0] : queryModule;
+  };
+
+  const handleItemClick = (value) => {
     setSelectedValue(value);
     setOpenSearchSuggestions(false);
     router.push(
@@ -71,118 +93,86 @@ const SearchSuggestionsBottom = (props) => {
         query: {
           search: value,
           data_type: "searched",
-          module: moduleValue,
+          module: getModuleValue(),
         },
       },
       undefined,
-      {
-        shallow: true,
-      }
-    );
-  };
-  
-  const handleSearchSuggestionsOnClick = (value) => {
-    setSelectedValue(value);
-    setOpenSearchSuggestions(false);
-    router.push(
-      {
-        pathname: "/search",
-        query: {
-          search: value.substring(0, value.indexOf(" ")),
-          data_type: "searched",
-
-        },
-      },
-      undefined,
-      {
-        shallow: true,
-      }
+      { shallow: true },
     );
   };
 
-  const handleDeleteAble = (value) => {
-    let getItem = JSON.parse(localStorage.getItem("searchedValues"));
-    if (getItem && getItem.length > 0) {
-      let newItems = getItem.filter((item) => item !== value);
-      setList(newItems);
-      localStorage.setItem("searchedValues", JSON.stringify(newItems));
-    }
+  const handleDelete = (value) => {
+    deleteRecentSearch(value);
+    setList((prev) => prev.filter((item) => item !== value));
   };
+
   const clearAll = () => {
+    clearRecentSearches();
     setList([]);
-    localStorage.removeItem("searchedValues");
   };
-  return (
-    <>
-      <CustomPaper
-        elevation={8}
-        onMouseEnter={() => setOnSearchdiv(true)}
-        onMouseLeave={() => setOnSearchdiv(false)}
-        display={
-          token
-            ? list.length > 0 || itemOrStoreSuggestionData
-              ? "inherit"
-              : "none"
-            : list.length > 0 || itemOrStoreSuggestionData
-              ? "inherit"
-              : "none"
-        }
-      >
-        <CustomStackFullWidth spacing={1}>
-          {isEmpty ? (
-            <>
-              {list.length > 0 && (
-                <RecentSearchWithSuggestions
-                  list={list}
-                  handleSearchHistoryOnClick={handleSearchHistoryOnClick}
-                  handleDeleteAble={handleDeleteAble}
-                  t={t}
-                  suggestedKeywords={suggestedKeywords}
-                  clearAll={clearAll}
-                />
-              )}
-              {/*{suggestedKeywords.length > 0 && (*/}
-              {/*  <SuggestionBasedOnInterest*/}
-              {/*    suggestedKeywords={suggestedKeywords}*/}
-              {/*    t={t}*/}
-              {/*  />*/}
-              {/*)}*/}
-            </>
-          ) : (
-            <>
-              {(itemOrStoreSuggestionData?.items?.length > 0 ||
-                itemOrStoreSuggestionData?.stores?.length > 0) && (
-                  <SuggestedSearches
-                    t={t}
-                    data={itemOrStoreSuggestionData}
-                    handleKeyPress={handleKeyPress}
-                    isRefetching={isRefetchingItemOrStoreSuggestion}
-                    searchValue={searchValue}
-                  />
-                )}
-            </>
-          )}
 
-          {isRefetching && (
-            <Stack spacing={1}>
-              <Skeleton variant="text" width="120px" />
-              <Stack
-                direction="row"
-                spacing={1}
-                flexWrap="wrap"
-                flexGrow={1}
-                alignItems="center"
-                justifyContent="flex-start"
-              >
-                <Skeleton variant="text" width="120px" height="40px" />
-                <Skeleton variant="text" width="120px" height="40px" />
-                <Skeleton variant="text" width="120px" height="40px" />
+  // hide dropdown when nothing to show
+  const hasTypingResults =
+    !isEmpty &&
+    (itemOrStoreSuggestionData?.items?.length > 0 ||
+      itemOrStoreSuggestionData?.stores?.length > 0 ||
+      isRefetchingItemOrStoreSuggestion);
+
+  if (!isEmpty && !hasTypingResults && !searchValue) return null;
+
+  return (
+    <DropdownPaper
+      elevation={0}
+      onMouseEnter={() => setOnSearchdiv(true)}
+      onMouseLeave={() => setOnSearchdiv(false)}
+    >
+      <ScrollableContent>
+        {isEmpty ? (
+          // ── Empty state: 4 sections ──────────────────────────────────
+          <SearchDropdownEmpty
+            list={list}
+            onItemClick={handleItemClick}
+            onDelete={handleDelete}
+            onClearAll={clearAll}
+            t={t}
+            searchFromNav={searchFromNav}
+          />
+        ) : (
+          // ── Typing state: items + stores suggestions ─────────────────
+          <Box sx={{ p: "20px" }}>
+            {isRefetchingItemOrStoreSuggestion ? (
+              <Stack spacing={1}>
+                <Skeleton variant="text" width="120px" />
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  flexWrap="wrap"
+                  alignItems="center"
+                >
+                  <Skeleton variant="text" width="120px" height="40px" />
+                  <Skeleton variant="text" width="120px" height="40px" />
+                  <Skeleton variant="text" width="120px" height="40px" />
+                </Stack>
               </Stack>
-            </Stack>
-          )}
-        </CustomStackFullWidth>
-      </CustomPaper>
-    </>
+            ) : (
+              (itemOrStoreSuggestionData?.items?.length > 0 ||
+                itemOrStoreSuggestionData?.stores?.length > 0 ||
+                searchValue) && (
+                <SuggestedSearches
+                  t={t}
+                  data={itemOrStoreSuggestionData}
+                  handleKeyPress={handleKeyPress}
+                  isRefetching={isRefetchingItemOrStoreSuggestion}
+                  searchValue={searchValue}
+                  onItemClick={onSuggestionItemClick}
+                  onStoreClick={onSuggestionStoreClick}
+                />
+              )
+            )}
+          </Box>
+        )}
+      </ScrollableContent>
+    </DropdownPaper>
   );
 };
 

@@ -1,5 +1,5 @@
 import { useTheme } from "@emotion/react";
-import { Typography, useMediaQuery } from "@mui/material";
+import { Box, Skeleton, Stack, Typography, useMediaQuery } from "@mui/material";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
@@ -212,6 +212,120 @@ const OtherOrder = (props) => {
         break;
     }
   };
+
+  if (dataIsLoading) {
+    const skeletonContent = (
+      <Stack spacing={2} sx={{ width: "100%", p: { xs: 2, sm: 3, md: 3 } }}>
+        {/* Header row: Order ID + status chips + Cancel button */}
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+          flexWrap="wrap"
+          gap={1}
+        >
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Skeleton variant="text" width={160} height={28} />
+            <Skeleton variant="rounded" width={70} height={24} sx={{ borderRadius: "6px" }} />
+            <Skeleton variant="rounded" width={100} height={24} sx={{ borderRadius: "6px" }} />
+          </Stack>
+          <Skeleton variant="rounded" width={110} height={36} sx={{ borderRadius: "8px" }} />
+        </Stack>
+
+        {/* Order date */}
+        <Skeleton variant="text" width={160} height={20} />
+
+        {/* Tabs */}
+        <Stack direction="row" spacing={1}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} variant="rounded" width={110} height={36} sx={{ borderRadius: "6px" }} />
+          ))}
+        </Stack>
+
+        {/* Content area: items + summary */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "1fr auto" },
+            gap: 2,
+          }}
+        >
+          {/* Items list */}
+          <Stack spacing={1.5}>
+            {Array.from({ length: 2 }).map((_, i) => (
+              <Stack key={i} direction="row" spacing={1.5} alignItems="center">
+                <Skeleton variant="rounded" width={64} height={64} sx={{ borderRadius: "8px", flexShrink: 0 }} />
+                <Stack spacing={0.5} flex={1}>
+                  <Skeleton variant="text" width="60%" height={20} />
+                  <Skeleton variant="text" width="40%" height={18} />
+                  <Skeleton variant="text" width="30%" height={18} />
+                </Stack>
+                <Skeleton variant="text" width={60} height={22} />
+              </Stack>
+            ))}
+          </Stack>
+
+          {/* Summary card */}
+          <Stack
+            spacing={1}
+            sx={{
+              minWidth: { xs: "100%", md: 200 },
+              border: (t) => `1px solid ${t.palette.divider}`,
+              borderRadius: "10px",
+              p: 2,
+            }}
+          >
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Stack key={i} direction="row" justifyContent="space-between">
+                <Skeleton variant="text" width={90} height={18} />
+                <Skeleton variant="text" width={60} height={18} />
+              </Stack>
+            ))}
+            <Box sx={{ borderBottom: (t) => `2px solid ${t.palette.divider}`, my: 0.5 }} />
+            <Stack direction="row" justifyContent="space-between">
+              <Skeleton variant="text" width={50} height={22} />
+              <Skeleton variant="text" width={70} height={22} />
+            </Stack>
+          </Stack>
+        </Box>
+
+        {/* Address + Payment row */}
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+            gap: 2,
+          }}
+        >
+          {Array.from({ length: 2 }).map((_, i) => (
+            <Stack
+              key={i}
+              spacing={1}
+              sx={{
+                border: (t) => `1px solid ${t.palette.divider}`,
+                borderRadius: "10px",
+                p: 2,
+              }}
+            >
+              <Skeleton variant="text" width={80} height={22} />
+              <Skeleton variant="text" width="80%" height={18} />
+              <Skeleton variant="text" width="60%" height={18} />
+            </Stack>
+          ))}
+        </Box>
+      </Stack>
+    );
+
+    return (
+      <CustomStackFullWidth alignItems="center" justifyContent="center" mb="2rem">
+        {isSmall ? (
+          <CustomPaperBigCard padding="14px">{skeletonContent}</CustomPaperBigCard>
+        ) : (
+          skeletonContent
+        )}
+      </CustomStackFullWidth>
+    );
+  }
 
   const content = (
     <>

@@ -85,6 +85,7 @@ export const shareSettings = {
   infinite: false,
   slidesToShow: 9,
   slidesToScroll: 1,
+  swipeToSlide: true,
   nextArrow: <NextArrow displayNoneOnMobile />,
   prevArrow: <PrevArrow displayNoneOnMobile />,
 
@@ -94,6 +95,7 @@ export const shareSettings = {
       settings: {
         slidesToShow: 8,
         slidesToScroll: 3,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -102,6 +104,7 @@ export const shareSettings = {
       settings: {
         slidesToShow: 7,
         slidesToScroll: 2,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -110,6 +113,7 @@ export const shareSettings = {
       settings: {
         slidesToShow: 7,
         slidesToScroll: 2,
+        swipeToSlide: true,
         initialSlide: 2,
       },
     },
@@ -118,6 +122,7 @@ export const shareSettings = {
       settings: {
         slidesToShow: 6,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -125,6 +130,7 @@ export const shareSettings = {
       settings: {
         slidesToShow: 5,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
   ],

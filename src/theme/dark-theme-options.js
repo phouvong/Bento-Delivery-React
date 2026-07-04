@@ -6,12 +6,14 @@ const neutral = {
   // 300: "#323232",
   300: "#111827",
   400: "#9CA3AF",
+  450: "#6B7280", // Figma: --sds-color-text-default-tertiary (placeholder)
   500: "#c5c5ca",
   600: "#f0f0fa",
   700: "#f0f2f4",
   800: "#1F2937",
   900: "#111827",
   1000: "#FFFFFF",
+  1050: "#e0e0e0", // Figma: --sds-color-text-default-default
   1100: "#D6D6D6",
 };
 const moduleTheme = {
@@ -22,8 +24,9 @@ const moduleTheme = {
 };
 
 const background = {
-  default: "#0B0F19",
-  paper: neutral[900],
+  default: "#2C2C2C",
+  paper: "#1E1E1E",
+  secondary: "#2C2C2C", // "#1e2533", // Figma: --sds-color-background-default-secondary (dark mode)
   custom: "#282829",
   custom2: "#1F2937",
   custom3: neutral[800],
@@ -72,6 +75,7 @@ const info = {
   light: "#64B6F7",
   dark: "#0B79D0",
   lite: "#DBF5FF",
+  tertiary: "#1a2333",
   contrastText: neutral[900],
   contrastText1: "#F5F6F8",
   blue: "#0D6EFD",
@@ -84,6 +88,8 @@ const warning = {
   dark: "#B27B16",
   lite: "#FFBD8B",
   liter: "#FFF8F2",
+  lighter: "#2d2200",
+  secondary: "#e8972a",
   contrastText: neutral[900],
   new: "#FFC817",
 };
@@ -94,6 +100,10 @@ const error = {
   dark: "#922E2E",
   contrastText: neutral[900],
   deepLight: "#FF725E",
+  danger: "#ff4444",
+  dangerLight: "#4a2020",
+  dangerText: "#ff6b6b",
+  red: "#ff5252",
 };
 
 const text = {
@@ -117,6 +127,14 @@ const customColor = {
   textGrayDeep: "#787676",
   buyButton: "#F9E091",
   parcelWallet: "#8B3FFD",
+  starAmber: "#F59E0B",
+  vegGreen: "#4caf50",
+  vegIcon: "#71B63A",
+  textNeutral: "#e0e0e0",
+  newBadge: "#c9a100",
+  ratingCount: "#888888",
+  deliveryText: "#a0a0a0",
+  tagBg: "#3a3a3a",
 };
 const whiteContainer = {
   main: "#ffffff",
@@ -128,7 +146,7 @@ const toolTipColor = "#88908C";
 const paperBoxShadow = "#E5EAF1";
 export const darkThemeOptions = {
   components: {
-     MuiUseMediaQuery: { defaultProps: { noSsr: true } }, // ⚡ Fix hydration
+    MuiUseMediaQuery: { defaultProps: { noSsr: true } }, // ⚡ Fix hydration
     MuiAvatar: {
       styleOverrides: {
         root: {

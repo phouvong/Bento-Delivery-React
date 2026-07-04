@@ -1,43 +1,41 @@
-import { Grid, Skeleton } from "@mui/material";
+import { Stack } from "@mui/material";
 import useGetNewArrivalStores from "api-manage/hooks/react-query/store/useGetNewArrivalStores";
 import { useGetVisitAgain } from "api-manage/hooks/react-query/useGetVisitAgain";
+import MobileAppBanner from "components/home/MobileAppBanner";
 import PaidAds from "components/home/paid-ads";
+import RecommendedStore from "components/home/recommended-store";
+import ModuleHomeSidebarLayout from "components/home/sidebar-layout/ModuleHomeSidebarLayout";
 import { getModuleId } from "helper-functions/getModuleId";
 import { getToken } from "helper-functions/getToken";
-import React, { useEffect, useState } from "react";
+import { t } from "i18next";
+import { useRouter } from "next/router";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useIntersectionObserver } from "api-manage/hooks/custom-hooks/useIntersectionObserver";
 import useGetOtherBanners from "../../../../api-manage/hooks/react-query/useGetOtherBanners";
 import CustomContainer from "../../../container";
 import OrderDetailsModal from "../../../order-details-modal/OrderDetailsModal";
 import Banners from "../../banners";
-import BestReviewedItems from "../../best-reviewed-items";
 import FeaturedCategories from "../../featured-categories";
 import RunningCampaigns from "../../running-campaigns";
 import Stores from "../../stores";
-import VisitAgain from "../../visit-again";
 import TrendingBites from "../../trending-bites";
+import VisitAgain from "../../visit-again";
+import LastOrdersSection from "../food/LastOrdersSection";
+import QuickDeliverySection from "../food/QuickDeliverySection";
 import CommonConditions from "./common-conditions";
-import FeaturedStores from "./featured-stores";
-import PharmacyStaticBanners from "./pharmacy-banners/PharmacyStaticBanners";
-import TopOffersNearMe from "components/home/top-offers-nearme";
-import RecommendedStore from "components/home/recommended-store";
-import MobileAppBanner from "components/home/MobileAppBanner";
+import PharmacySearchBanner from "./PharmacySearchBanner";
+import { getPharmacySections } from "./pharmacySectionsConfig";
+import SelfCareOTCSection from "./SelfCareOTCSection";
+import VerifiedPharmacies from "./VerifiedPharmacies";
 
-const SECTION_GAP = 3;
-const menus = ["All", "New", "Baby Care", "Womans Care", "Mens"];
+const S = ({ children }) => children ?? null;
 
-const Pharmacy = ({ configData }) => {
+const Pharmacy = ({ configData, routeSection }) => {
+  const router = useRouter();
   const token = getToken();
   const [isVisited, setIsVisited] = useState(false);
   const { orderDetailsModalOpen } = useSelector((state) => state.utilsData);
   const [storeData, setStoreData] = React.useState([]);
-  
-  // Use custom intersection observer hook
-  const { ref: triggerRef, hasTriggered: loadMore } = useIntersectionObserver({
-    threshold: 0.2,
-    triggerOnce: true,
-  });
   const { data, refetch, isLoading } = useGetOtherBanners();
   const {
     data: visitedStores,
@@ -51,7 +49,8 @@ const Pharmacy = ({ configData }) => {
   } = useGetNewArrivalStores({
     type: "all",
   });
-  
+  const moduleId = useMemo(() => getModuleId(), []);
+
   useEffect(() => {
     if (visitedStores?.length > 0 || newStore?.stores?.length > 0) {
       if (visitedStores?.length > 0 && visitedStores) {
@@ -63,117 +62,167 @@ const Pharmacy = ({ configData }) => {
         }
       }
     }
-  }, [visitedStores, newStore?.stores, getModuleId()]);
+  }, [visitedStores, newStore?.stores, moduleId]);
 
-  return (
-    <Grid
-      container
-      rowSpacing={SECTION_GAP}
-      sx={{
-        "& > .MuiGrid-item:has(> *:empty)": { display: "none" },
-        "& > .MuiGrid-item:empty": { display: "none" },
-      }}
-    >
-      <Grid item xs={12}>
-        <CustomContainer>
+  const overviewContent = (
+    <Stack gap={{ xs: "16px", lg: "32px" }}>
+      <S>
+        <PharmacySearchBanner
+          zoneid={
+            typeof window !== "undefined"
+              ? localStorage.getItem("zoneid")
+              : undefined
+          }
+        />
+      </S>
+
+      <S>
+        <CustomContainer
+          sx={{
+            paddingLeft: "16px !important",
+            paddingRight: "0 !important",
+          }}
+        >
+          <CommonConditions title={t("Shop By Conditions")} />
+        </CustomContainer>
+      </S>
+
+      <S>
+        <CustomContainer noMobilePadding>
           <FeaturedCategories configData={configData} />
         </CustomContainer>
-      </Grid>
-      <Grid item xs={12}>
-        <CustomContainer>
-          <RecommendedStore/>
-        </CustomContainer>
-      </Grid>
-      <Grid item xs={12}>
-        <CustomContainer>
-          <PharmacyStaticBanners />
-        </CustomContainer>
-      </Grid>
-      <Grid item xs={12}>
-        <CustomContainer>
-          <TrendingBites title="Trending Bites" />
-        </CustomContainer>
-      </Grid>
-      <Grid item xs={12}>
-        <CustomContainer>
-          <VisitAgain
-            configData={configData}
-            visitedStores={storeData}
-            isVisited={isVisited}
-            isFetching={visitIsFetching || isFetching}
-          />
-        </CustomContainer>
-      </Grid>
-      <Grid item xs={12}>
-        <CustomContainer>
-          <PaidAds />
-        </CustomContainer>
-      </Grid>
-    
-      <Grid item xs={12}>
-        <CustomContainer>
-          <BestReviewedItems
-            menus={menus}
-            title="Basic Medicine Nearby"
-            bannerIsLoading={isLoading}
-            url={`${data?.promotional_banner_url}/${data?.basic_section_nearby}`}
-          />
-        </CustomContainer>
-      </Grid>
-      
-      <Grid item xs={12}>
-        <CustomContainer>
-          <TopOffersNearMe title="Top offers near me"  />
-        </CustomContainer>
-      </Grid>
-      
-      <Grid item xs={12}>
+      </S>
+
+      {configData?.repeat_order_option && token ? (
+        <S>
+          {/* 🔥 new feature your last order - user logged in wise */}
+          <CustomContainer noMobilePadding={true}>
+            <LastOrdersSection title={t("Refill Your Medicine")} />
+          </CustomContainer>
+        </S>
+      ) : null}
+      <S>
         <CustomContainer>
           <Banners />
         </CustomContainer>
-      </Grid>
-      
-      <Grid item xs={12}>
-        <CustomContainer>
-          <FeaturedStores title="Featured Store" configData={configData} />
+      </S>
+
+      <S>
+        <CustomContainer
+          sx={{
+            paddingLeft: "16px !important",
+            paddingRight: "0 !important",
+          }}
+        >
+          <QuickDeliverySection
+            title={t("Quick & Emergency Delivery")}
+            subtitle={t("Get fastest order from your nearby pharmacies.")}
+            cardVariant="withItems"
+          />
         </CustomContainer>
-      </Grid>
-      
-      <Grid item xs={12}>
+      </S>
+
+      <S>
         <CustomContainer>
-          <RunningCampaigns />
+          <PaidAds />
         </CustomContainer>
-      </Grid>
-      
-      <Grid item xs={12}>
-        <CustomContainer>
-          <CommonConditions title="Common Conditions" />
+      </S>
+
+      <S>
+        <CustomContainer
+          sx={{
+            paddingLeft: "16px !important",
+            paddingRight: "0 !important",
+          }}
+        >
+          <TrendingBites
+            title={t("Health Highlights")}
+            subtitle={t("Essential medicines & health products")}
+          />
         </CustomContainer>
-      </Grid>
-   
-      <Grid item xs={12}>
+      </S>
+
+      <S>
         <CustomContainer>
+          <RecommendedStore title={t("Recommended Pharmacies")} />
+        </CustomContainer>
+      </S>
+
+      <S>
+        <CustomContainer
+          sx={{
+            paddingLeft: "16px !important",
+            paddingRight: "0 !important",
+          }}
+        >
+          <VisitAgain
+            configData={configData}
+            isVisited={isVisited}
+            visitedStores={storeData}
+            isFetching={visitIsFetching || isFetching}
+          />
+        </CustomContainer>
+      </S>
+
+      <S>
+        {/* new feature */}
+        <CustomContainer
+          sx={{
+            paddingLeft: "16px !important",
+            paddingRight: "0 !important",
+          }}
+        >
+          <VerifiedPharmacies />
+        </CustomContainer>
+      </S>
+
+      <S>
+        <CustomContainer noMobilePadding>
           <MobileAppBanner />
         </CustomContainer>
-      </Grid>
-      <Grid
-        item
-        xs={12}
-        sx={{
-          position: "sticky",
-          top: { xs: "47px", md: "92px" },
-          zIndex: 999,
-        }}
-      >
-        <CustomContainer>
-          <Stores />
+      </S>
+
+      <S>
+        <CustomContainer
+          sx={{
+            paddingLeft: "16px !important",
+            paddingRight: "0 !important",
+          }}
+        >
+          <SelfCareOTCSection />
         </CustomContainer>
-      </Grid>
-       
+      </S>
+
+      <S>
+        <CustomContainer
+          sx={{
+            paddingLeft: "16px !important",
+            paddingRight: "0 !important",
+          }}
+        >
+          <RunningCampaigns />
+        </CustomContainer>
+      </S>
+
+      <S>
+        <CustomContainer>
+          <Stores title={t("Explore Pharmacy")} />
+        </CustomContainer>
+      </S>
+
       {orderDetailsModalOpen && !token && (
         <OrderDetailsModal orderDetailsModalOpen={orderDetailsModalOpen} />
       )}
-    </Grid>
+    </Stack>
+  );
+
+  const pharmacySections = getPharmacySections();
+  return (
+    <ModuleHomeSidebarLayout
+      overviewContent={overviewContent}
+      sections={pharmacySections}
+      routeSection={routeSection}
+    />
   );
 };
 

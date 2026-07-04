@@ -23,7 +23,7 @@ import { onErrorResponse } from "../../../api-manage/api-error-response/ErrorRes
 const CustomStyledBox = styled(Paper)(({ theme }) => ({
   padding: "1.5rem",
   [theme.breakpoints.down("sm")]: {
-    width: 280,
+    width: "100%",
   },
 }));
 

@@ -60,9 +60,12 @@ const Banners = ({ promotionalBanner, isSmall, feature }) => {
                 width: { sm: "100%", md: "590px" },
                 borderRadius: "20px",
                 overflow: "hidden",
+                aspectRatio: "3/1",
                 "img": {
-                  height: "auto",
+                  height: "100%",
                   maxWidth: "100%",
+                  width: "100%",
+
 
                   // border: "1px solid"
                 }
@@ -75,7 +78,7 @@ const Banners = ({ promotionalBanner, isSmall, feature }) => {
                 width={590}
                 objectFit="cover"
                 borderRadius="20px"
-                aspectRatio="2/1"
+                aspectRatio="3/1"
               />
             </Box>
           );
@@ -145,6 +148,7 @@ const Banners = ({ promotionalBanner, isSmall, feature }) => {
     infinite: infiniteManage(),
     slidesToShow: slidesToShowManage(),
     slidesToScroll: 1,
+    swipeToSlide: true,
     autoplay: true,
     speed: 2000,
     autoplaySpeed: 3000,
@@ -155,6 +159,7 @@ const Banners = ({ promotionalBanner, isSmall, feature }) => {
         settings: {
           slidesToShow: 2,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
       {
@@ -162,6 +167,7 @@ const Banners = ({ promotionalBanner, isSmall, feature }) => {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
+          swipeToSlide: true,
           initialSlide: 1,
         },
       },
@@ -170,6 +176,7 @@ const Banners = ({ promotionalBanner, isSmall, feature }) => {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
     ],

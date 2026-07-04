@@ -61,6 +61,7 @@ const ImageViewModal = ({ open, onClose, imageSrc, alt = "Preview" }) => {
       onClose={onClose}
       aria-labelledby="image-preview-modal"
       aria-describedby="large-image-preview"
+      sx={{ zIndex: 1600 }}
     >
       <ModalWrapper>
         <CloseButton onClick={onClose} aria-label="close">

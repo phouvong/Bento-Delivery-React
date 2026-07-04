@@ -1,69 +1,143 @@
 import React, { useEffect } from "react";
-import { CustomStackFullWidth } from "../src/styled-components/CustomStyles.style";
-import { Container, Stack, Typography } from "@mui/material";
-import { useTranslation } from "react-i18next";
-import maintainance from "../public/static/maintenance.png";
-import CustomImageContainer from "../src/components/CustomImageContainer";
-import { useGetConfigData } from "../src/api-manage/hooks/useGetConfigData";
-import { useDispatch, useSelector } from "react-redux";
-import { setConfigData } from "../src/redux/slices/configData";
+import Head from "next/head";
 import { useRouter } from "next/router";
-const Maintainance = (props) => {
+import { useTranslation } from "react-i18next";
+import { Box, Container, Stack, Typography, useTheme } from "@mui/material";
+import { CustomStackFullWidth } from "../src/styled-components/CustomStyles.style";
+import CustomImageContainer from "../src/components/CustomImageContainer";
+import CustomDivider from "../src/components/CustomDivider";
+import MaintenanceImage from "../public/static/maintenance.png";
+import {
+  checkMaintenanceMode,
+  getCommonServerSideProps,
+} from "../src/utils/serverSidePropsHelper";
+
+const Maintainance = ({ configData }) => {
   const router = useRouter();
+  const theme = useTheme();
   const { t } = useTranslation();
-  const dispatch = useDispatch();
-  const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
-  const { configData } = useSelector((state) => state.configData);
-  useEffect(() => {
-    if (!configData) {
-      configRefetch();
-    }
-  }, [configData]);
-  useEffect(() => {
-    if (dataConfig) {
-      dispatch(setConfigData(dataConfig));
-    }
-  }, [dataConfig]);
 
   useEffect(() => {
-    if (dataConfig && !dataConfig?.maintenance_mode) {
+    if (!checkMaintenanceMode(configData)) {
       router.push("/");
     }
-  }, [dataConfig]);
+  }, [configData]);
+
+  const messageSetup =
+    configData?.maintenance_mode_data?.maintenance_message_setup;
+
+  const showBusinessEmail = messageSetup?.business_email === 1;
+  const showBusinessNumber = messageSetup?.business_number === 1;
+
+  const handleEmailClick = () => {
+    if (configData?.email) {
+      window.location.href = `mailto:${configData.email}`;
+    }
+  };
+
   return (
-    <Container
-      maxWidth="lg"
-      sx={{
-        mt: "9rem",
-        mb: { xs: "72px", md: "0" },
-      }}
-    >
-      <CustomStackFullWidth
-        justifyContent="center"
-        alignItems="center"
-        spacing={4}
+    <>
+      <Head>
+        <title>{t("Maintenance mode")}</title>
+      </Head>
+      <Box
+        sx={{
+          minHeight: "100vh",
+          width: "100%",
+          backgroundColor: theme.palette.background.default,
+        }}
       >
-        <Stack maxWidth="600px" width="100%" spacing={2} padding="1rem">
-          <CustomImageContainer
+      <Container
+        maxWidth="lg"
+        sx={{
+          pt: "9rem",
+          pb: { xs: "72px", md: "4rem" },
+          color: theme.palette.text.primary,
+        }}
+      >
+        <CustomStackFullWidth
+          justifyContent="center"
+          alignItems="center"
+          spacing={4}
+        >
+          <Stack
+            maxWidth="600px"
             width="100%"
-            height="100%"
-            objectfit="cover"
-            src={maintainance.src}
-          />
-          <Stack>
-            <Typography align="center" variant="h3" color="primary.main">
-              {t("We are under maintenance.")}
-            </Typography>
-            <Typography align="center" variant="h5">
-              {t("We will be back very soon.")}
-            </Typography>
+            spacing={2}
+            padding="1rem"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <CustomImageContainer
+              width="325px"
+              height="100%"
+              objectfit="cover"
+              src={MaintenanceImage.src}
+              loading="auto"
+            />
+            <Stack spacing={2}>
+              <Typography align="center" variant="h3" color="text.primary">
+                {messageSetup?.maintenance_message ||
+                  t("We are Cooking Up Something Special!")}
+              </Typography>
+              <Typography align="center" color="text.secondary" fontSize="14px">
+                {messageSetup?.message_body ||
+                  t(
+                    "Our system is currently undergoing maintenance to bring you an even tastier experience. Hang tight while we make the dishes."
+                  )}
+              </Typography>
+            </Stack>
+
+            {(showBusinessEmail || showBusinessNumber) && (
+              <>
+                <CustomDivider divider="3px" type="dashed" />
+                <Typography
+                  textAlign="center"
+                  fontSize="14px"
+                  color="text.primary"
+                >
+                  {t("Any query? Feel free to contact us")}
+                </Typography>
+                <Stack justifyContent="center" width="100%" alignItems="center">
+                  {showBusinessNumber && configData?.phone && (
+                    <Typography
+                      component="a"
+                      href={`tel:${configData.phone}`}
+                      fontSize="14px"
+                      sx={{
+                        color: (theme) => theme.palette.primary.main,
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {configData.phone}
+                    </Typography>
+                  )}
+                  {showBusinessEmail && configData?.email && (
+                    <Typography
+                      onClick={handleEmailClick}
+                      fontSize="14px"
+                      sx={{
+                        color: (theme) => theme.palette.primary.main,
+                        textDecoration: "underline",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {configData.email}
+                    </Typography>
+                  )}
+                </Stack>
+              </>
+            )}
           </Stack>
-        </Stack>
-      </CustomStackFullWidth>
-    </Container>
+        </CustomStackFullWidth>
+      </Container>
+      </Box>
+    </>
   );
 };
 
-Maintainance.propTypes = {};
-
 export default Maintainance;
+
+export const getServerSideProps = async (context) =>
+  getCommonServerSideProps(context, "maintenance");

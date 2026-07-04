@@ -13,7 +13,7 @@ const RouteLinks = (props) => {
   const dispatch = useDispatch();
   const { selectedModule } = useSelector((state) => state.utilsData);
 
-  const { token, configData } = props;
+  const { token, configData, centered } = props;
   const { t } = useTranslation();
   const router = useRouter();
   const handleClick = (href, value) => {
@@ -52,8 +52,21 @@ const RouteLinks = (props) => {
   console.log({ configData });
 
 
+  const linkSx = {
+    fontSize: "14px",
+    fontWeight: 400,
+    color: "neutral.1050",
+    letterSpacing: "-0.42px",
+    lineHeight: 1.2,
+    whiteSpace: "nowrap",
+    py: "6px",
+    cursor: "pointer",
+    textAlign: centered ? "center" : "left",
+    "&:hover": { color: theme.palette.primary.main },
+  };
+
   return (
-    <CustomStackFullWidth spacing={2} alignItems={{ xs: "start" }}>
+    <CustomStackFullWidth gap="0px" alignItems={centered ? "center" : "flex-start"}>
       {RouteLinksData.map((item, index) => {
         if (
           (!configData?.toggle_store_registration && item?.value === "restaurant_owner") ||
@@ -62,42 +75,15 @@ const RouteLinks = (props) => {
           return null;
         }
         return (
-          <Typography
-            key={index}
-            onClick={() => handleClick(item.link, item.value)}
-            sx={{
-              textAlign: "left",
-              cursor: "pointer",
-              "&:hover": {
-                color: theme.palette.primary.main,
-              },
-            }}
-          >
+          <Typography key={index} onClick={() => handleClick(item.link, item.value)} sx={linkSx}>
             {t(item.name)}
           </Typography>
         );
       })}
-
-      <Typography
-        onClick={() => handleClickToRoute("/about-us")}
-        sx={{
-          cursor: "pointer",
-          "&:hover": {
-            color: theme.palette.primary.main,
-          },
-        }}
-      >
+      <Typography onClick={() => handleClickToRoute("/about-us")} sx={linkSx}>
         {t("About Us")}
       </Typography>
-      <Typography
-        onClick={() => handleClickToRoute("/track-order")}
-        sx={{
-          cursor: "pointer",
-          "&:hover": {
-            color: theme.palette.primary.main,
-          },
-        }}
-      >
+      <Typography onClick={() => handleClickToRoute("/track-order")} sx={linkSx}>
         {selectedModule?.module_type === "rental" ? t("Track Trip") : t("Track Order")}
       </Typography>
     </CustomStackFullWidth>

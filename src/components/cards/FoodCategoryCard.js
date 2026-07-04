@@ -1,16 +1,9 @@
-import { useTheme } from "@emotion/react";
-import {
-  Grid,
-  Skeleton,
-  Tooltip,
-  Typography, useMediaQuery,
-} from "@mui/material";
+import { Grid, Skeleton, Tooltip, Typography } from "@mui/material";
 import { Box, Stack, styled } from "@mui/system";
-import { useRouter } from "next/router";
-import { getModuleId } from "helper-functions/getModuleId";
-import CustomImageContainer from "../CustomImageContainer";
-import NextImage from "components/NextImage";
 import useTextEllipsis from "api-manage/hooks/custom-hooks/useTextEllipsis";
+import NextImage from "components/NextImage";
+import { getModuleId } from "helper-functions/getModuleId";
+import { useRouter } from "next/router";
 
 const FeatureImageBox = styled(Stack)(({ theme }) => ({
   width: "100%",
@@ -30,22 +23,17 @@ const FoodCategoryCard = (props) => {
     slug,
   } = props;
   const router = useRouter();
-  const theme = useTheme()
-  const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const { ref: textRef, isEllipsed } = useTextEllipsis(name);
   const queryModule = router?.query?.module || router?.query?.module_id;
-    const moduleValue = Array.isArray(queryModule)
-      ? queryModule[0]
-      : queryModule || getModuleId();
+  const moduleValue = Array.isArray(queryModule)
+    ? queryModule[0]
+    : queryModule || getModuleId();
 
   const handleClick = () => {
     router.push({
-      pathname: "/search",
+      pathname: `/home/category/${slug || id}`,
       query: {
-        search: "category",
-        id: id,
-        name: name && (name),
-        data_type: "category",
+        id,
         ...(moduleValue ? { module: String(moduleValue) } : {}),
       },
     });
@@ -53,45 +41,40 @@ const FoodCategoryCard = (props) => {
 
   return (
     <Grid item sx={{ overflow: "hidden" }} onClick={handleClick}>
-      <FeatureImageBox
-        justifyContent="center"
-        alignItems="center"
-        spacing={1}
-      >
+      <FeatureImageBox justifyContent="center" alignItems="center" spacing={1}>
         <Box
           sx={{
-            transition: "all ease 0.5s",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
             borderRadius: "50%",
+            transition: "all ease 0.5s",
             "&:hover": {
               boxShadow: "0px 10px 20px rgba(88, 110, 125, 0.1)",
-              img: {
-                transform: "scale(1.05)",
-              },
+              img: { transform: "scale(1.05)" },
             },
           }}
         >
           <Box
             sx={{
+              width: { xs: 56, md: 88 },
+              height: { xs: 56, md: 88 },
               borderRadius: "50%",
               overflow: "hidden",
-              aspectRatio: "1",
-              img: {
-                aspectRatio: "1",
-              },
+              flexShrink: 0,
+              "& img": { width: "100%", height: "100%", objectFit: "cover" },
             }}
           >
-            {onlyshimmer ? (<Stack sx={{ height: { xs: "56px", sm: "120px" }, width: { xs: "56px", sm: "120px" } }}>
+            {onlyshimmer ? (
               <Skeleton variant="circular" width="100%" height="100%" />
-            </Stack>) : (
+            ) : (
               <NextImage
                 src={categoryImageUrl}
                 alt={name}
-                height={isSmall ? 56 : 120}
-                width={isSmall ? 56 : 120}
+                height={88}
+                width={88}
                 borderRadius="50%"
                 objectFit="cover"
-
-                //loading="loading"
                 bg="#ddd"
               />
             )}
@@ -118,9 +101,9 @@ const FoodCategoryCard = (props) => {
               color: (theme) => theme.palette.neutral[1000],
               overflow: "hidden",
               textOverflow: "ellipsis",
-              display: "-webkit-box",
-              WebkitLineClamp: "1",
-              WebkitBoxOrient: "vertical",
+              whiteSpace: "nowrap",
+              maxWidth: { xs: "56px", md: "88px" },
+              textAlign: "center",
               transition: "all ease 0.3s",
               "&:hover": {
                 color: "primary.main",

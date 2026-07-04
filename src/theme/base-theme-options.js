@@ -265,6 +265,14 @@ export const baseThemeOptions = {
         },
       },
     },
+
+    MuiDialog: {
+      styleOverrides: {
+        paper: {
+          borderRadius: 20,
+        },
+      },
+    },
   },
 
   direction: "ltr",
@@ -274,7 +282,7 @@ export const baseThemeOptions = {
   },
 
   typography: {
-    fontFamily: '"Rubik","sans-serif"',
+    fontFamily: '"DM Sans","Rubik","sans-serif"',
     button: { fontWeight: 600 },
 
     body1: {

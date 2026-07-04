@@ -22,6 +22,12 @@ export const onErrorResponse = (error) => {
   });
 };
 export const onSingleErrorResponse = (error) => {
+  if (
+    error?.response?.data?.errors &&
+    error?.response?.data?.errors?.length > 0
+  ) {
+    return onErrorResponse(error);
+  }
   toast.error(error?.response?.data?.message, {
     id: "error",
   });

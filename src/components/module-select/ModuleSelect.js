@@ -114,7 +114,6 @@ const ModuleSelect = ({
       { shallow: true }
     );
   };
-  console.log({ existingModuleId });
 
   let currentZoneIds = undefined;
   if (typeof window !== "undefined") {

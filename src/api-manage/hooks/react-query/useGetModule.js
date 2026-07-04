@@ -7,11 +7,17 @@ import { filterOutRiderShareModules } from "helper-functions/moduleFilter";
 
 const getModule = async () => {
   const { data } = await MainApi.get(moduleList);
-  return filterOutRiderShareModules(data);
+  // return filterOutRiderShareModules(data);
+  return data;
 };
 
 const normalizeZoneIdForKey = (zoneId) => {
-  if (!zoneId || zoneId === "undefined" || zoneId === "null" || /nan/i.test(zoneId))
+  if (
+    !zoneId ||
+    zoneId === "undefined" ||
+    zoneId === "null" ||
+    /nan/i.test(zoneId)
+  )
     return null;
 
   try {
@@ -43,7 +49,9 @@ const getZoneIdsKeyFromStorage = () => {
 };
 
 export default function useGetModule() {
-  const [zoneIdsKey, setZoneIdsKey] = useState(() => getZoneIdsKeyFromStorage());
+  const [zoneIdsKey, setZoneIdsKey] = useState(() =>
+    getZoneIdsKeyFromStorage(),
+  );
 
   useEffect(() => {
     if (typeof window === "undefined") return;

@@ -23,10 +23,55 @@ const OtpLogin = ({
   configData,
   isRemember,
   getActiveLoginType,
-  onlyOtp
+  onlyOtp,
+  inlineLayout,
 }) => {
   const theme = useTheme();
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
+
+  const phoneInput = (
+    <CustomPhoneInput
+      value={otpLoginFormik.values.phone}
+      onHandleChange={otpHandleChange}
+      initCountry={configData?.country}
+      touched={otpLoginFormik.touched.phone}
+      errors={otpLoginFormik.errors.phone}
+      rtlChange="true"
+      borderRadius="10px"
+      height="45px"
+      lanDirection={lanDirection}
+    />
+  );
+
+  if (inlineLayout) {
+    return (
+      <>
+        {phoneInput}
+        <LoadingButton
+          type="submit"
+          fullWidth
+          variant="contained"
+          loading={isLoading}
+          id={fireBaseId}
+          sx={{
+            color: "#fff",
+            height: "44px",
+            borderRadius: "12px",
+            fontSize: "16px",
+            fontWeight: 700,
+            letterSpacing: "-0.48px",
+            lineHeight: 1.1,
+            textTransform: "capitalize",
+            boxShadow: "none",
+            "&:hover": { boxShadow: "none" },
+          }}
+        >
+          {t("Get OTP")}
+        </LoadingButton>
+      </>
+    );
+  }
+
   return (
     <CustomStackFullWidth>
       <Typography fontSize="18px" fontWeight="600" textAlign="left" mb="1rem">
@@ -34,17 +79,7 @@ const OtpLogin = ({
       </Typography>
       <form onSubmit={otpLoginFormik.handleSubmit} noValidate>
         <CustomStackFullWidth sx={{ gap: "14px" }}>
-          <CustomPhoneInput
-            value={otpLoginFormik.values.phone}
-            onHandleChange={otpHandleChange}
-            initCountry={configData?.country}
-            touched={otpLoginFormik.touched.phone}
-            errors={otpLoginFormik.errors.phone}
-            rtlChange="true"
-            borderRadius="10px"
-            height="45px"
-            lanDirection={lanDirection}
-          />
+          {phoneInput}
           <FormControlLabel
             control={
               <Checkbox
@@ -52,7 +87,6 @@ const OtpLogin = ({
                 color="primary"
                 onChange={rememberMeHandleChange}
                 isRemember={isRemember || false}
-
               />
             }
             label={
@@ -67,7 +101,6 @@ const OtpLogin = ({
               onClick={handleClick}
               sx={{
                 cursor: "pointer",
-                // textDecoration: 'underline',
                 fontWeight: "400",
                 fontSize: "12px",
                 [theme.breakpoints.down("sm")]: {
@@ -94,12 +127,7 @@ const OtpLogin = ({
             type="submit"
             fullWidth
             variant="contained"
-            sx={{
-              fontSize: "14px",
-              fontWeight: "500",
-
-              height: "45px",
-            }}
+            sx={{ fontSize: "14px", fontWeight: "500", height: "45px" }}
             loading={isLoading}
             id={fireBaseId}
           >
@@ -108,9 +136,8 @@ const OtpLogin = ({
         </CustomStackFullWidth>
       </form>
       {!onlyOtp && (
-        <Typography onClick={getActiveLoginType} mt="1rem" sx={{ textDecoration: "underLine", cursor: 'pointer', color: theme => theme => theme.palette.primary.main }} textAlign="center">{("Go Back")}</Typography>
+        <Typography onClick={getActiveLoginType} mt="1rem" sx={{ textDecoration: "underLine", cursor: 'pointer', color: theme => theme => theme.palette.primary.main }} textAlign="center">{t("Go Back")}</Typography>
       )}
-
     </CustomStackFullWidth>
   );
 };

@@ -229,7 +229,7 @@ const TransactionHistory = (props) => {
                                 item?.transaction_type === "point_to_wallet" ||
                                   item?.transaction_type ===
                                     "partial_payment" ||
-                                  item?.transaction_type === "order_place"
+                                  item?.transaction_type === "order_place" || item?.transaction_type === "pro_subscription"
                                   ? item?.debit
                                   : item?.credit + item?.admin_bonus
                               )}

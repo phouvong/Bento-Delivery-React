@@ -1,118 +1,91 @@
-import { Grid, useMediaQuery, useTheme } from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
+import { Box, Grid } from "@mui/material";
+import React, { useEffect, useMemo } from "react";
 import { useInView } from "react-intersection-observer";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
-import { removeDuplicates } from "utils/CustomFunctions";
 import useGetStoresByFiltering from "../../../api-manage/hooks/react-query/store/useGetStoresByFiltering";
-import StoreCard from "../../cards/StoreCard";
+import NewStoreCard from "components/cards/newCard/NewStoreCard";
+import NewStoreCardSkeleton from "components/Shimmer/NewStoreCardSkeleton";
 import DotSpin from "../../DotSpin";
-import CustomEmptyResult from "components/custom-empty-result";
-import noData from "../../../../public/static/newnoitem.png";
 import EmptySearchResults from "components/EmptySearchResults";
 
 const AllStores = (props) => {
-  const theme = useTheme();
   const {
     selectedFilterValue,
     configData,
-    totalDataCount,
     setTotalDataCount,
     filteredData,
   } = props;
-  const [offset, setOffSet] = useState(1);
-  const [page_limit, setPage_Limit] = useState(12);
-  const [storeData, setStoreData] = useState([]);
+
   const { ref, inView } = useInView();
-  const prevSelectedFilter = useRef();
-  const preFilterData = useRef();
-  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+
   const pageParams = {
     type: selectedFilterValue,
-    offset,
-    limit: page_limit,
+    limit: 12,
     filteredData,
+    enabled: true,
   };
+
   const {
     data,
-    refetch,
-    fetchNextPage,
     isFetchingNextPage,
     isLoading,
     hasNextPage,
+    fetchNextPage,
   } = useGetStoresByFiltering(pageParams);
-  // useEffect(() => {
-  //   refetch();
-  // }, [convertFilterText]);
+
+  const storeData = useMemo(
+    () => (data?.pages ?? []).flatMap((page) => page?.stores ?? []),
+    [data]
+  );
 
   useEffect(() => {
-    setOffSet(1);
-  }, [selectedFilterValue, filteredData]);
-  const handleAPiCallOnSuccess = (item) => {
-    setTotalDataCount(item.total_size);
-    if (
-      filteredData === preFilterData.current ||
-      selectedFilterValue === prevSelectedFilter?.current
-    ) {
-      setStoreData((prev) =>
-        removeDuplicates([...new Set([...prev, ...item?.stores])], "id")
-      );
-    } else {
-      setStoreData(item?.stores);
+    const lastPage = data?.pages?.[data.pages.length - 1];
+    if (lastPage?.total_size !== undefined) {
+      setTotalDataCount(lastPage.total_size);
     }
-    preFilterData.current = filteredData;
-    prevSelectedFilter.current = selectedFilterValue;
-  };
-
-  const handleStoreData = () => {
-    if (data && data?.pages?.length > 0) {
-      data?.pages?.forEach((item) => {
-        handleAPiCallOnSuccess(item);
-      });
-    }
-  };
-  useEffect(() => {
-    handleStoreData();
   }, [data]);
+
   useEffect(() => {
-    if (inView) {
+    if (inView && hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
-  }, [inView, selectedFilterValue, filteredData]);
+  }, [inView]);
 
-  useEffect(() => {
-    refetch();
-  }, [filteredData]);
   return (
     <CustomBoxFullWidth>
-      <Grid container spacing={2}>
-        {storeData?.length === 0 && !isLoading && (
+      <Grid container spacing={3}>
+        {storeData.length === 0 && !isLoading && (
           <EmptySearchResults text="Stores not found!" />
         )}
-        {storeData?.length > 0 &&
+        {storeData.length > 0 &&
           !isLoading &&
-          storeData?.map((item, index) => {
-            return (
-              <Grid key={index} item xs={12} sm={6} md={3}>
-                <StoreCard item={item} imageUrl={item?.cover_photo_full_url} />
-              </Grid>
-            );
-          })}
-        {(isLoading || isFetchingNextPage) && (
-          <CustomStackFullWidth
-            alignItems="center"
-            justifyContent="center"
-            mt={storeData?.length === 0 ? (isSmall ? "7rem" : "10rem") : "3rem"}
-          >
+          storeData.map((item, index) => (
+            <Grid key={index} item xs={12} sm={6} md={4}>
+              <Box sx={{ "& > *": { width: "100% !important" } }}>
+                <NewStoreCard
+                  variant="normal"
+                  item={item}
+                  imageUrl={item?.cover_photo_full_url}
+                />
+              </Box>
+            </Grid>
+          ))}
+        {isLoading &&
+          [...Array(6)].map((_, i) => (
+            <Grid key={i} item xs={12} sm={6} md={4}>
+              <NewStoreCardSkeleton />
+            </Grid>
+          ))}
+        {!isLoading && isFetchingNextPage && (
+          <CustomStackFullWidth alignItems="center" justifyContent="center" mt="3rem">
             <DotSpin />
           </CustomStackFullWidth>
         )}
       </Grid>
-      {totalDataCount !== storeData.length && (
-        <CustomBoxFullWidth ref={ref}></CustomBoxFullWidth>
-      )}
+      {hasNextPage && <CustomBoxFullWidth ref={ref} />}
     </CustomBoxFullWidth>
   );
 };

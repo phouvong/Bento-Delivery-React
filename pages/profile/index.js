@@ -33,37 +33,40 @@ const Index = () => {
     }
   }, [dataConfig]);
   useEffect(() => {
-    if (token) {
-      try {
-        // Attempt to decode the Base64 token
-        const decodedToken = jwt.decode(token);
+    if (!token) return;
 
-        // Check if decodedToken is a valid string
-        if (typeof decodedToken === "string") {
-          // Assuming decodedToken is in the format: "key1=value1&&key2=value2&&..."
-          const keyValuePairs = decodedToken.split("&&");
+    // Only the order-attribute flow encodes a base64 payload here. Other
+    // gateway callbacks (e.g. Pro plan subscription) drop arbitrary opaque
+    // tokens into the URL, so guard the decode to avoid InvalidCharacterError
+    // from base-64 — the dev overlay surfaces it even when try/catch handles it.
+    const candidate = String(token).trim();
+    const looksLikeBase64 =
+      candidate.length > 0 &&
+      candidate.length % 4 === 0 &&
+      /^[A-Za-z0-9+/]+={0,2}$/.test(candidate);
+    if (!looksLikeBase64) return;
 
-          // Loop through the key-value pairs to find the one with attribute_id
-          for (const pair of keyValuePairs) {
-            const [key, value] = pair.split("=");
-            if (key === "attribute_id") {
-              if (page === "my-orders?flag=success" ||
-                page === "my-orders" ||
-                page === "my-orders?flag=cancel" ||
-                page === "my-orders?flag=fail") {
-                setAttributeId(value);
-              }
-              return; // Exit the loop when attribute_id is found
-            }
+    try {
+      const decodedToken = jwt.decode(candidate);
+      if (typeof decodedToken !== "string") return;
+      // Payload format: "key1=value1&&key2=value2&&..."
+      const keyValuePairs = decodedToken.split("&&");
+      for (const pair of keyValuePairs) {
+        const [key, value] = pair.split("=");
+        if (key === "attribute_id") {
+          if (
+            page === "my-orders?flag=success" ||
+            page === "my-orders" ||
+            page === "my-orders?flag=cancel" ||
+            page === "my-orders?flag=fail"
+          ) {
+            setAttributeId(value);
           }
-        } else {
-          console.error("Decoded token is not a string:", decodedToken);
+          return;
         }
-      } catch (error) {
-        console.error("Error decoding token:", error);
       }
-    } else {
-      console.error("Token is missing.");
+    } catch (error) {
+      console.error("Error decoding token:", error);
     }
   }, [token]);
   return (
@@ -77,7 +80,7 @@ const Index = () => {
       />
       <MainLayout configData={configData} landingPageData={landingPageData}>
         <NoSsr>
-          <AuthGuard from={router.pathname.replace("/", "")}>
+          <AuthGuard from={router.pathname.replace("/", "")} requireToken>
             <UserInformation
               page={page}
               configData={configData}

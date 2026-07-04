@@ -11,7 +11,7 @@ import { setLogoutUser } from "redux/slices/profileInfo";
 import toast from "react-hot-toast";
 import { logoutSuccessFull } from "utils/toasterMessages";
 import { clearWishList } from "redux/slices/wishList";
-import { setClearCart } from "redux/slices/cart";
+import { setClearCart, clearAllCartData } from "redux/slices/cart";
 
 const DrawerMenu = ({ setToggled, openDrawer, setOpenDrawer }) => {
   const { t } = useTranslation();
@@ -33,12 +33,18 @@ const DrawerMenu = ({ setToggled, openDrawer, setOpenDrawer }) => {
       setTimeout(() => {
         dispatch(setLogoutUser(null));
         localStorage.removeItem("token");
+        // Clear any "don't show this incomplete order again" flags so the
+        // next user sees a fresh state.
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith("incomplete_order_hidden_"))
+          .forEach((k) => localStorage.removeItem(k));
         setOpenDrawer(false);
         toast.success(t(logoutSuccessFull));
         setOpenModal(false);
         let a = [];
         dispatch(clearWishList(a));
         dispatch(setClearCart());
+        dispatch(clearAllCartData());
         if (router.pathname === "/") {
           router.push("/", undefined, { shallow: true });
         } else {

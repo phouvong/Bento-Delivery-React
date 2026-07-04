@@ -4,12 +4,28 @@ import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 const initialState = {
   cartItem: null,
   cartList: [],
+  // Store-scoped cart list — only populated on the store-details page from
+  // cart/list?store_id=X. Kept separate from the global cartList so it
+  // doesn't clobber items belonging to other stores in a multi-store cart.
+  storeCartList: [],
+  // Server-grouped cart payload from api/v1/customer/cart/get-all.
+  // Shape: [{ store: { id, name, logo_full_url, ... }, carts: [...] }]
+  cartGroups: [],
   campaignItemList: [],
   buyNowItemList: [],
   campaignItem: null,
   type: "regular",
   totalAmount: null,
   walletAmount: null,
+  // Per-store cart preferences set in StoreCartSidebar — read by
+  // ItemCheckout to seed the order payload so the user's choices in the
+  // sidebar actually reach order-place.
+  cartPrefs: {
+    extraPackaging: true,
+    addCutlery: true,
+    unavailableChoice: "remove",
+    monthlySubscribe: false,
+  },
 };
 const isEqual = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 export const cartSlice = createSlice({
@@ -18,6 +34,9 @@ export const cartSlice = createSlice({
   reducers: {
     setCartList: (state = initialState, action) => {
       state.cartList = action.payload;
+    },
+    setStoreCartList: (state = initialState, action) => {
+      state.storeCartList = Array.isArray(action.payload) ? action.payload : [];
     },
     setCart: (state = initialState, action) => {
       if (action.payload.module_type !== "food") {
@@ -249,11 +268,33 @@ export const cartSlice = createSlice({
     setWalletAmount: (state, action) => {
       state.walletAmount = action.payload;
     },
+    setCartGroups: (state, action) => {
+      state.cartGroups = Array.isArray(action.payload) ? action.payload : [];
+    },
+    removeCartGroupByStoreId: (state, action) => {
+      const targetId = String(action.payload);
+      state.cartGroups = state.cartGroups.filter(
+        (g) => String(g?.store?.id ?? g?.restaurant?.id) !== targetId
+      );
+    },
+    setCartPrefs: (state, action) => {
+      state.cartPrefs = { ...state.cartPrefs, ...(action.payload || {}) };
+    },
+    clearCartGroups: (state) => {
+      state.cartGroups = [];
+      state.cartList = [];
+    },
+    clearAllCartData: (state) => {
+      state.cartGroups = [];
+      state.cartList = [];
+      state.storeCartList = [];
+    },
   },
 });
 export const {
   cart,
   setCartList,
+  setStoreCartList,
   setCart,
   setUpdateItemToCart,
   setVariationToCart,
@@ -267,5 +308,10 @@ export const {
   setUpdateVariationToCart,
   setTotalAmount,
   setWalletAmount,
+  setCartGroups,
+  removeCartGroupByStoreId,
+  setCartPrefs,
+  clearCartGroups,
+  clearAllCartData,
 } = cartSlice.actions;
 export default cartSlice.reducer;

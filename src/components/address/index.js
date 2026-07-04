@@ -21,10 +21,10 @@ import { useTheme } from "@emotion/react";
 import { setAllSaveAddress } from "redux/slices/storedData";
 
 export const GrayButton = styled(Button)(({ theme }) => ({
-  color: theme.palette.neutral[400],
+  color: theme.palette.primary.main,
   fontSize: "12px",
   border: "1px solid",
-  borderColor: theme.palette.neutral[400],
+  borderColor: theme.palette.primary.main,
   borderRadius: "5px",
 }));
 const Address = (props) => {
@@ -80,72 +80,81 @@ const Address = (props) => {
         <Stack>
           {isSmall ? (
             <SmallDeviceIconButton onClick={handleClick}>
-              <LocationOnIcon style={{ fontSize: "16px" }} />
+              <i
+                className="fi fi-rs-map-marker-plus"
+                style={{ fontSize: "16px", lineHeight: 1, display: "flex" }}
+              />
             </SmallDeviceIconButton>
           ) : (
             <GrayButton
               onClick={handleClick}
               variant="outlined"
-              startIcon={<LocationOnIcon style={{ fontSize: "16px" }} />}
+              startIcon={
+                <i
+                  className="fi fi-rs-map-marker-plus"
+                  style={{ fontSize: "16px", lineHeight: 1, display: "flex" }}
+                />
+              }
             >
               {t("Add Address")}
             </GrayButton>
           )}
         </Stack>
       </CustomStackFullWidth>
-      <Grid container spacing={{ xs: 1, sm: 1.5, md: 2.5 }}>
-        <Grid item xs={12} md={12}>
-          <NoSsr>
-            {isLoading ? (
-              <Shimmer />
-            ) : AllSaveAddress && AllSaveAddress?.length > 0 ? (
-              <Box>
-                <Grid container>
-                  {AllSaveAddress?.map((item, index) => {
-                    return (
-                      <Grid
-                        item
-                        key={item.id}
-                        xs={12}
-                        sm={6}
-                        md={6}
-                        lg={6}
-                        paddingRight={{ xs: "10px", sm: "15px", md: "25px" }}
-                        paddingBottom={{ xs: "10px", sm: "15px", md: "25px" }}
-                      >
-                        <AddressCard
-                          item={item}
-                          refetch={refetch}
-                          configData={configData}
-                          dispatch={dispatch}
-                          openAddressModal={openAddressModal}
-                          setEditAddress={setEditAddress}
-                          edit={edit}
-                          setAddAddress={setAddAddress}
-                        />
-                      </Grid>
-                    );
-                  })}
+      <Box>
+        {AllSaveAddress?.length === 0 ? (
+          <Stack
+            alignItems="center"
+            justifyContent="center"
+            sx={{ minHeight: "300px" }}
+            spacing={1.5}
+          >
+            <i
+              className="fi fi-rr-marker"
+              style={{
+                fontSize: "48px",
+                lineHeight: 1,
+                display: "flex",
+                color: theme.palette.neutral[300],
+              }}
+            />
+            <Typography
+              fontSize="16px"
+              fontWeight="600"
+              color={theme.palette.neutral[500]}
+            >
+              {t("No Address Found")}
+            </Typography>
+            <Typography
+              fontSize="13px"
+              color={theme.palette.neutral[400]}
+              textAlign="center"
+            >
+              {t("You have not added any address yet.")}
+            </Typography>
+          </Stack>
+        ) : (
+          <Grid container spacing={{ xs: 2, sm: 3, md: 3 }}>
+            {AllSaveAddress?.map((item, index) => {
+              return (
+                <Grid key={item?.id} item xs={12} sm={6}>
+                  <AddressCard
+                    key={item?.id}
+                    item={item}
+                    refetch={refetch}
+                    configData={configData}
+                    dispatch={dispatch}
+                    openAddressModal={openAddressModal}
+                    setEditAddress={setEditAddress}
+                    edit={edit}
+                    setAddAddress={setAddAddress}
+                  />
                 </Grid>
-              </Box>
-            ) : (
-              <Stack
-                alignItems="center"
-                justifyContent="center"
-                width="100%"
-                height="100%"
-              >
-                <CustomEmptyResult
-                  label="No address found"
-                  image={nodata}
-                  width="128px"
-                  height="80"
-                />
-              </Stack>
-            )}
-          </NoSsr>
-        </Grid>
-      </Grid>
+              );
+            })}
+          </Grid>
+        )}
+      </Box>
     </CustomStackFullWidth>
   );
 };

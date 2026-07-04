@@ -42,7 +42,7 @@ const OfflineForm = ({
   offlinePaymentLoading,
   usePartialPayment,
   handleOffineOrder,
-  setOfflineCheck
+  setOfflineCheck,
 }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -52,45 +52,67 @@ const OfflineForm = ({
   const router = useRouter();
   const { orderInformation } = useSelector((state) => state.utilsData);
 
-  // Create a validation schema using Yup.
+  // Use a per-index suffixed key for each customer input so two
+  // `method_informations` rows with the same `customer_input` don't share
+  // formik state (the original code keyed by `customer_input` alone, which
+  // caused typing in one to fill the other).
+  const fieldKeyFor = (item, index) => `${item.customer_input}__${index}`;
+
+  const selectedMethodInfos =
+    offlinePaymentOptions?.filter(
+      (item) => item.method_name === offlineMethod?.method_name
+    )[0]?.method_informations || [];
+
   const validationSchema = Yup.object().shape({
-    // Define validation rules for each field dynamically.
-    ...offlinePaymentOptions
-      ?.filter((item) => item.method_name === offlineMethod?.method_name)[0]
-      ?.method_informations?.reduce((acc, item) => {
-        if (item?.is_required === 1) {
-          acc[item.customer_input] = Yup.string().required(
-            "This field is required"
-          );
-        }
-        return acc;
-      }, {}),
+    ...selectedMethodInfos.reduce((acc, item, index) => {
+      if (item?.is_required === 1) {
+        acc[fieldKeyFor(item, index)] = Yup.string().required(
+          "This field is required"
+        );
+      }
+      return acc;
+    }, {}),
   });
 
   const initialValues = {
     customer_note: "",
     payment_method: offlineMethod ? offlineMethod.method_name : "",
   };
-  offlinePaymentOptions
-    ?.filter((item) => item.method_name === offlineMethod?.method_name)[0]
-    ?.method_informations?.forEach((item) => {
-      initialValues[item.customer_input] = "";
-    });
+  selectedMethodInfos.forEach((item, index) => {
+    initialValues[fieldKeyFor(item, index)] = "";
+  });
+
   const formik = useFormik({
     initialValues,
     validationSchema,
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-        let newData = {
-          ...values,
+        // Fold the suffixed form keys back to `customer_input` names so the
+        // backend payload shape stays the same. When duplicate keys exist,
+        // collect them into an array on that key.
+        const { customer_note, payment_method, ...rest } = values;
+        const folded = { customer_note, payment_method };
+        selectedMethodInfos.forEach((item, index) => {
+          const key = fieldKeyFor(item, index);
+          const value = rest[key];
+          const target = item.customer_input;
+          if (folded[target] === undefined) {
+            folded[target] = value;
+          } else if (Array.isArray(folded[target])) {
+            folded[target].push(value);
+          } else {
+            folded[target] = [folded[target], value];
+          }
+        });
+
+        const newData = {
+          ...folded,
           method_id: offlineMethod.id,
         };
-        if (values) {
-          dispatch(setOfflinePaymentInfo(newData));
-          dispatch(setOrderInformation({ ...orderInformation, ...newData }));
-          handleOffineOrder(newData);
-        }
+        dispatch(setOfflinePaymentInfo(newData));
+        dispatch(setOrderInformation({ ...orderInformation, ...newData }));
+        handleOffineOrder(newData);
       } catch (err) {
         // console.log(error);
       }
@@ -113,19 +135,31 @@ const OfflineForm = ({
     <CustomStackFullWidth
       justifyContent="center"
       alignItems="center"
-    // padding={{ xs: ".75rem", sm: "1.25rem" }}
-    // gap={1}
+      // padding={{ xs: ".75rem", sm: "1.25rem" }}
+      // gap={1}
     >
       <CustomImageContainer width="120px" src={OfflinePaymentImage.src} />
-      <Typography variant="body1" color={theme.palette.neutral[600]} mb={1}>{t("Pay your bill using any of the payment method below and input the required information in the form")}</Typography>
+      <Typography variant="body1" color={theme.palette.neutral[600]} mb={1}>
+        {t(
+          "Pay your bill using any of the payment method below and input the required information in the form"
+        )}
+      </Typography>
       <Stack direction="row" alignItems="center" gap="10px">
         <Typography variant="subtitle1">Total order price: </Typography>
-        <Typography variant="subtitle1" color={theme.palette.primary.main}>{getAmountWithSign(total_order_amount)}</Typography>
+        <Typography variant="subtitle1" color={theme.palette.primary.main}>
+          {getAmountWithSign(total_order_amount)}
+        </Typography>
       </Stack>
       <CustomStackFullWidth mt={4}>
         <form onSubmit={formik.handleSubmit}>
           <Stack spacing={2}>
-            <Stack direction={{ xs: "column", sm: "row" }} justifyContent="center" flexWrap="wrap" gap={2} sx={{ marginBottom: "20px" }}>
+            <Stack
+              direction={{ xs: "column", sm: "row" }}
+              justifyContent="center"
+              flexWrap="wrap"
+              gap={2}
+              sx={{ marginBottom: "20px" }}
+            >
               {offlinePaymentOptions?.length > 0 &&
                 offlinePaymentOptions?.map((item, index) => {
                   const isSelected =
@@ -158,7 +192,9 @@ const OfflineForm = ({
                           //   : theme.palette.neutral[100],
                           transition: "all 0.3s ease-in-out",
                           backgroundColor: theme.palette.neutral[100],
-                          boxShadow: isSelected ? "0px 10px 20px rgba(0, 0, 0, 0.10)" : "0px 10px 20px rgba(0, 0, 0, 0.0)",
+                          boxShadow: isSelected
+                            ? "0px 10px 20px rgba(0, 0, 0, 0.10)"
+                            : "0px 10px 20px rgba(0, 0, 0, 0.0)",
                           "&:hover": {
                             boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.10)",
                             // borderColor: theme.palette.primary.main,
@@ -205,8 +241,7 @@ const OfflineForm = ({
                           color={theme.palette.neutral[1000]}
                           mb={2}
                         >
-                          {item.method_name}{" "}
-                          {t("Info")}
+                          {item.method_name} {t("Info")}
                         </Typography>
 
                         <Stack gap="5px">
@@ -264,13 +299,18 @@ const OfflineForm = ({
             >
               {t("Payment Info")}
             </Typography>
-            <Grid container spacing={3} sx={{ marginTop: "-24px !important", marginLeft: "-24px !important" }}>
-              {offlinePaymentOptions
-                ?.filter(
-                  (item) => item.method_name === offlineMethod?.method_name
-                )[0]
-                ?.method_informations?.map((item, index) => (
-                  <Grid item xs={12} md={6} key={index}>
+            <Grid
+              container
+              spacing={3}
+              sx={{
+                marginTop: "-24px !important",
+                marginLeft: "-24px !important",
+              }}
+            >
+              {selectedMethodInfos.map((item, index) => {
+                const fieldKey = fieldKeyFor(item, index);
+                return (
+                  <Grid item xs={12} md={6} key={fieldKey}>
                     <TextField
                       required
                       fullWidth
@@ -282,8 +322,8 @@ const OfflineForm = ({
                           (word) => word.charAt(0).toUpperCase() + word.slice(1)
                         )
                         .join(" ")}
-                      id={item.customer_input}
-                      name={item.customer_input}
+                      id={fieldKey}
+                      name={fieldKey}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
                       placeholder={item.customer_placeholder
@@ -294,18 +334,18 @@ const OfflineForm = ({
                           (word) => word.charAt(0).toUpperCase() + word.slice(1)
                         )
                         .join(" ")}
-                      value={formik.values[item.customer_input]}
+                      value={formik.values[fieldKey] ?? ""}
                       error={
-                        formik.touched[item.customer_input] &&
-                        Boolean(formik.errors[item.customer_input])
+                        formik.touched[fieldKey] &&
+                        Boolean(formik.errors[fieldKey])
                       }
                       helperText={
-                        formik.touched[item.customer_input] &&
-                        formik.errors[item.customer_input]
+                        formik.touched[fieldKey] && formik.errors[fieldKey]
                       }
                     />
                   </Grid>
-                ))}
+                );
+              })}
               <Grid item xs={12} md={12}>
                 <TextField
                   rows={4}
@@ -317,7 +357,7 @@ const OfflineForm = ({
                   value={formik.values["customer_note"]}
                   onChange={formik.handleChange}
                   onBlur={formik.handleBlur}
-                // defaultValue="Default Value"
+                  // defaultValue="Default Value"
                 />
               </Grid>
             </Grid>

@@ -38,7 +38,8 @@ const GoogleMapComponent = ({
   bottom,
   polygonPaths,
   fromVendor,
-  mapmodal
+  mapmodal,
+  zoomToLocationToken,
 }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
@@ -46,17 +47,13 @@ const GoogleMapComponent = ({
   const expanded =
     typeof isModalExpand === "boolean" ? isModalExpand : localExpanded;
   const setExpanded =
-    typeof setIsModalExpand === "function" ? setIsModalExpand : setLocalExpanded;
+    typeof setIsModalExpand === "function"
+      ? setIsModalExpand
+      : setLocalExpanded;
   const containerStyle = {
     width: expanded ? "100vw" : "100%",
     maxHeight: expanded ? "100dvh" : "50dvh",
-    height: expanded
-      ? "100dvh"
-      : height
-        ? height
-        : isSmall
-          ? "350px"
-          : "350px",
+    height: expanded ? "100dvh" : height ? height : isSmall ? "350px" : "350px",
     paddingBottom: "0px",
   };
   const mapRef = useRef(GoogleMap);
@@ -74,7 +71,7 @@ const GoogleMapComponent = ({
       streetViewControl: false,
       mapTypeControl: false,
       fullscreenControl: false,
-        disableDefaultUI: true,
+      disableDefaultUI: true,
       styles: theme.palette.mode === "dark" ? darkStyles : grayMapStyle,
     }),
     [theme.palette.mode]
@@ -180,10 +177,35 @@ const GoogleMapComponent = ({
       const lat = parseFloat(location.lat);
       const lng = parseFloat(location.lng);
       if (!isNaN(lat) && !isNaN(lng)) {
+        const mapCenter = map.getCenter?.();
+        const isDragSync =
+          mapCenter &&
+          Math.abs(mapCenter.lat() - lat) < 0.0001 &&
+          Math.abs(mapCenter.lng() - lng) < 0.0001;
         map.panTo({ lat, lng });
+        const targetZoom = polygonPaths ? 9 : 17;
+        const currentZoom = map.getZoom?.() ?? zoom;
+        if (!isDragSync && currentZoom < targetZoom) {
+          map.setZoom(targetZoom);
+          setZoom(targetZoom);
+        }
       }
     }
   }, [map, location]);
+
+  useEffect(() => {
+    if (!map || !zoomToLocationToken) return;
+    const targetZoom = polygonPaths ? 9 : 17;
+    if (location?.lat && location?.lng) {
+      const lat = parseFloat(location.lat);
+      const lng = parseFloat(location.lng);
+      if (!isNaN(lat) && !isNaN(lng)) {
+        map.panTo({ lat, lng });
+      }
+    }
+    map.setZoom(targetZoom);
+    setZoom(targetZoom);
+  }, [zoomToLocationToken]);
 
   const MapContent = (
     <Stack
@@ -252,7 +274,7 @@ const GoogleMapComponent = ({
       )}
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={map ? undefined : (center ?? centerPosition)}
+        center={map ? undefined : center ?? centerPosition}
         onLoad={onLoad}
         zoom={zoom}
         onUnmount={onUnmount}

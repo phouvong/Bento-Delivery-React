@@ -116,12 +116,14 @@ const CampaignBanners = () => {
     }
   };
 
+  const hasMultiple = bannersData.length > 1;
   const settings = {
     dots: false,
-    infinite: true,
-    slidesToShow: 2,
+    infinite: hasMultiple,
+    slidesToShow: hasMultiple ? 2 : 1,
     slidesToScroll: 1,
-    autoplay: true,
+    swipeToSlide: true,
+    autoplay: hasMultiple,
     speed: 800,
     autoplaySpeed: 4000,
     cssEase: "linear",
@@ -131,6 +133,7 @@ const CampaignBanners = () => {
         settings: {
           slidesToShow: 1,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
     ],
@@ -153,11 +156,7 @@ const CampaignBanners = () => {
           <Slider {...settings}>
             {[...Array(2)].map((_, index) => (
               <BannersWrapper key={index}>
-                <Skeleton
-                  variant="rectangular"
-                  height="100%"
-                  width="100%"
-                />
+                <Skeleton variant="rectangular" height="100%" width="100%" />
               </BannersWrapper>
             ))}
           </Slider>
@@ -202,7 +201,7 @@ const CampaignBanners = () => {
           image={`${getImageUrl(
             foodBanner?.storage,
             "item_image_url",
-            configData
+            configData,
           )}/${foodBanner?.image}`}
           open={openModal}
           handleModalClose={handleModalClose}

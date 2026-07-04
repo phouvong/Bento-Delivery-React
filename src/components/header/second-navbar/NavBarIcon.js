@@ -18,6 +18,7 @@ const NavBarIcon = ({ icon, label, user, handleClick, badgeCount }) => {
         <IconButton
           sx={{
             gap: "15px",
+            color: (theme) => theme.palette.neutral[1050],
           }}
           onClick={() => handleClick()}
         >

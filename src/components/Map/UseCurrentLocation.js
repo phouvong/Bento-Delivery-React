@@ -14,7 +14,8 @@ const UseCurrentLocation = ({
   setRerenderMap,
   isGeolocationEnabled,
   coords,
-  fromMapModal
+  fromMapModal,
+  onZoomRequest,
 }) => {
   const [openLocation, setOpenLocation] = useState(false);
   const handleCloseLocation = () => {
@@ -43,8 +44,9 @@ const UseCurrentLocation = ({
               lat: coords?.latitude,
               lng: coords?.longitude,
             });
+            onZoomRequest?.();
             setLoadingCurrentLocation(false);
-            if(!fromMapModal){
+            if (!fromMapModal) {
               if (zoneId) {
                 localStorage.setItem("zoneid", zoneId);
                 // router.push('/home')

@@ -17,6 +17,7 @@ import React from "react";
 export const AppBarStyle = styled(AppBar)(({ theme, scrolling, isSmall }) => ({
   top: !scrolling ? "0" : isSmall ? "0px" : "-30px",
   background: `${theme.palette.mode === "light" && "#fff !important"}`,
+  boxShadow: "none",
   transition: "all 0.4s ease",
   // WebkitAnimation: !isSmall && scrolling ? "fadeInUp 0.4s" : "fadeInDown 0.4s",
   // animation: !isSmall && scrolling ? "fadeInUp 0.4s" : "fadeInDown 0.4s",

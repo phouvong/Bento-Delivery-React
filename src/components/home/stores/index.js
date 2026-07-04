@@ -1,190 +1,159 @@
+import { Typography, useMediaQuery } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { Box, Stack } from "@mui/system";
-import React, { useState } from "react";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { ModuleTypes } from "helper-functions/moduleTypes";
+import { t } from "i18next";
+import { useState } from "react";
+import { useSelector } from "react-redux";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
-import H2 from "../../typographies/H2";
 import { HomeComponentsWrapper } from "../HomePageComponents";
-import Menus from "../best-reviewed-items/Menus";
-
-import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import {
-  Button,
-  List,
-  Skeleton,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
-import ListItemButton from "@mui/material/ListItemButton";
-import ListItemText from "@mui/material/ListItemText";
-import { useTheme } from "@mui/material/styles";
-import { t } from "i18next";
-import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
-import CustomPopover from "../../CustomPopover";
 import AllStores from "./AllStores";
-import MobileMenus from "./MobileMenus";
 
 const menus = [
   { label: t("All"), value: "all" },
   { label: t("Newly Joined"), value: "newly_joined" },
-  { label: t("Popular"), value: "popular" },
+  { label: t("Nearby"), value: "nearby" },
   { label: t("Top Rated"), value: "top_rated" },
+  { label: t("Popular"), value: "popular" },
 ];
-const filterLabels = [
-  { label: t("All"), value: "all" },
-  { label: t("Delivery"), value: "delivery" },
-  { label: t("Take Away"), value: "take_away" },
-];
-const Filter = (props) => {
-  const { selectedFilterValue, setSelectedFilterValue } = props;
-  const [anchorEl, setAnchorEl] = React.useState(null);
-  const open = Boolean(anchorEl);
-  const { t } = useTranslation();
+
+const ModuleWiseMenu = {
+  [ModuleTypes.FOOD]: menus,
+  [ModuleTypes.GROCERY]: menus,
+  [ModuleTypes.PHARMACY]: [
+    { label: t("All"), value: "all" },
+    { label: t("Open Now"), value: "currently_open" },
+    { label: t("Free Delivery"), value: "free_delivery" },
+    { label: t("Rx Accepted"), value: "rx_accepted" },
+    { label: t("Nearby"), value: "nearby" },
+  ],
+  [ModuleTypes.ECOMMERCE]: menus,
+};
+
+// ─── Pill Tab ──────────────────────────────────────────────────────────────
+
+const PillTabs = ({
+  selectedMenuIndex,
+  setSelectedMenuIndex,
+  setFilteredData,
+}) => {
   const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-  const mobileLayout = () => {};
-  const desktopLayout = () => {
-    return (
-      <Box sx={{ width: 120, bgcolor: "background.paper" }}>
-        <List component="nav" aria-label="main mailbox folders">
-          {filterLabels?.map((item, index) => {
-            return (
-              <ListItemButton
-                key={index}
-                selected={selectedFilterValue === item?.value}
-                onClick={() => setSelectedFilterValue(item?.value)}
-              >
-                <ListItemText primary={t(item?.label)} />
-              </ListItemButton>
-            );
-          })}
-        </List>
-      </Box>
-    );
-  };
+  const currentModule = getCurrentModuleType();
+  const activeMenus = ModuleWiseMenu[currentModule] ?? menus;
   return (
-    <>
-      <Button onClick={handleClick} variant="text">
-        <FilterAltOutlinedIcon fontSize="small" />
-        {isSmall ? null : (
-          <>
-            <Typography color="customColor.textGray">{t("Filter")}</Typography>
-            {open ? (
-              <KeyboardArrowUpIcon
-                sx={{
-                  color: (theme) => theme.palette.customColor.textGray,
-                }}
-              />
-            ) : (
-              <KeyboardArrowDownIcon
-                color="customColor.textGray"
-                sx={{
-                  color: (theme) => theme.palette.customColor.textGray,
-                }}
-              />
-            )}
-          </>
-        )}
-      </Button>
-      {open && (
-        <CustomPopover
-          openPopover={open}
-          anchorEl={anchorEl}
-          placement="bottom"
-          handleClose={() => setAnchorEl(null)}
-          top="10px"
-          // left="-230px"
-        >
-          {isSmall ? mobileLayout() : desktopLayout()}
-        </CustomPopover>
-      )}
-    </>
+    <Stack
+      direction="row"
+      alignItems="center"
+      gap="8px"
+      sx={{
+        overflowX: "auto",
+        scrollbarWidth: "none",
+        "&::-webkit-scrollbar": { display: "none" },
+        flexWrap: { xs: "nowrap", md: "wrap" },
+        width: { xs: "100%", md: "auto" },
+        ml: { xs: 0, md: "auto" },
+      }}
+    >
+      {activeMenus.map((item, index) => {
+        const isActive = selectedMenuIndex === index;
+        return (
+          <Box
+            key={index}
+            onClick={() => {
+              setSelectedMenuIndex(index);
+              setFilteredData(item.value);
+            }}
+            sx={{
+              height: 32,
+              px: "12px",
+              borderRadius: "6px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+              flexShrink: 0,
+              backgroundColor: isActive
+                ? theme.palette.primary.main
+                : "transparent",
+              transition: "background-color 0.2s ease",
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize: "14px",
+                fontWeight: isActive ? 600 : 400,
+                color: isActive ? "#ffffff" : "neutral.500",
+                lineHeight: 1.3,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {t(item.label)}
+            </Typography>
+          </Box>
+        );
+      })}
+    </Stack>
   );
 };
-const Stores = (props) => {
+
+// ─── Main ──────────────────────────────────────────────────────────────────
+
+const Stores = ({ title }) => {
   const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
-  const [selectedFilterValue, setSelectedFilterValue] = useState("all");
   const [filteredData, setFilteredData] = useState("all");
   const [totalDataCount, setTotalDataCount] = useState(null);
   const { configData } = useSelector((state) => state.configData);
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-  const stores = t("Stores");
-  const handleSelectedMenuIndex = (value) => {
-    setSelectedMenuIndex(value);
-  };
-  const desktopScreenHandler = () => {
-    return (
-      <Stack
-        direction="row"
-        alignItems="center"
-        justifyContent="center"
-        spacing={1}
-      >
-        <Menus
-          selectedMenuIndex={selectedMenuIndex}
-          setSelectedMenuIndex={handleSelectedMenuIndex}
-          menus={menus}
-          setFilteredData={setFilteredData}
-        />
-        <Filter
-          selectedFilterValue={selectedFilterValue}
-          setSelectedFilterValue={setSelectedFilterValue}
-        />
-      </Stack>
-    );
-  };
-  const mobileScreenHandler = () => {
-    return (
-      <MobileMenus
-        selectedMenuIndex={selectedMenuIndex}
-        setSelectedMenuIndex={setSelectedMenuIndex}
-        selectedFilterValue={selectedFilterValue}
-        setSelectedFilterValue={setSelectedFilterValue}
-        menus={menus}
-      />
-    );
-  };
 
   return (
     <HomeComponentsWrapper>
+      {/* Header */}
       <CustomStackFullWidth
-        direction="row"
-        alignItems="center"
-        justifyContent="space-between"
         py="10px"
-        pl="20px"
         sx={{
           position: "sticky",
-          top: { xs: "55px", md: "63px" },
+          top: { xs: "75px", md: "63px" },
           zIndex: 100,
-          background: (theme) => theme.palette.neutral[300],
+          background: (theme) => theme.palette.background.default,
+          width: "100%",
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          alignItems: { xs: "flex-start", md: "center" },
+          justifyContent: { xs: "flex-start", md: "space-between" },
+          gap: { xs: "10px", md: "12px" },
         }}
       >
-        {totalDataCount ? (
-          <H2 text={`${totalDataCount} ${stores}`} component="h2" />
-        ) : (
-          <Skeleton variant="text" width="80px" />
-        )}
-
-        {isSmall ? mobileScreenHandler() : desktopScreenHandler()}
+        <Typography
+          sx={{
+            fontSize: { xs: "18px", md: "24px" },
+            fontWeight: 700,
+            color: "neutral.1050",
+            lineHeight: 1.1,
+            letterSpacing: "-1.2px",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+          }}
+        >
+          {t(title ?? "Explore Restaurants")}
+        </Typography>
+        <PillTabs
+          selectedMenuIndex={selectedMenuIndex}
+          setSelectedMenuIndex={setSelectedMenuIndex}
+          setFilteredData={setFilteredData}
+        />
       </CustomStackFullWidth>
+
+      {/* Cards */}
       <CustomBoxFullWidth
-        key={`${filteredData}${selectedFilterValue}`}
-        sx={{
-          minHeight: "20vh",
-          marginTop: "1rem",
-        }}
+        sx={{ minHeight: "20vh", marginTop: "1rem" }}
       >
         <AllStores
-          selectedFilterValue={selectedFilterValue}
+          selectedFilterValue="all"
           configData={configData}
           totalDataCount={totalDataCount}
           setTotalDataCount={setTotalDataCount}

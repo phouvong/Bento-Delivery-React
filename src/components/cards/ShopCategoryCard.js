@@ -55,13 +55,9 @@ const ShopCategoryCard = (props) => {
     <Wrapper>
       <Link
         href={{
-          pathname: "/search",
+          pathname: `/home/category/${item?.slug || item?.id}`,
           query: {
-            search: "category",
-            id: `${item?.id}`,
-           
-            name: item?.name && item?.name,
-            data_type: "category",
+            id: item?.id,
             ...(moduleValue ? { module: String(moduleValue) } : {}),
           },
         }}

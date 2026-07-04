@@ -118,14 +118,27 @@ const CustomPhoneInputManual = ({
   lanDirection,
   height,
   borderRadius,
-                                  id
+  id,
 }) => {
   const theme = useTheme();
   const { configData } = useSelector((state) => state.configData);
   const { t } = useTranslation();
   const defaultCountry = initCountry?.toLowerCase();
-  const changeHandler = (phone) => {
-    onHandleChange(phone);
+  // The library calls onChange as (value, country, event, formattedValue).
+  // When the typed digits match a known dial code, `country.dialCode` is the
+  // detected ISD prefix — make sure that prefix is always at the front of
+  // the value we hand up so the consumer never sees a bare local number.
+  const changeHandler = (phone, country) => {
+    let next = phone || "";
+    const dialCode = country?.dialCode;
+    if (dialCode && next && !next.startsWith(dialCode)) {
+      // Strip any leading zeros from the local part (BD/UK style
+      // "01712..." would become "88001712..." without this), then
+      // prepend the detected ISD prefix.
+      const local = next.replace(/^0+/, "");
+      next = `${dialCode}${local}`;
+    }
+    onHandleChange(next, country);
   };
   return (
     <NoSsr>
@@ -159,7 +172,7 @@ const CustomPhoneInputManual = ({
               })}
             />
             <input
-              id={id||""}
+              id={id || ""}
               style={{
                 backgroundColor: "transparent",
                 position: "absolute",

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import AppleLogin from "react-apple-login";
-import { Typography, useMediaQuery, useTheme } from "@mui/material";
+import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { appleLoginCredential } from "utils/staticCredential";
 import { CustomGoogleButton } from "components/auth/sign-in/social-login/GoogleLoginComp";
@@ -24,6 +24,7 @@ const AppleLoginComp = (props) => {
     setModalFor,
     setJwtToken,
     setUserInfo,
+    isLandingVariant,
   } = props;
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
@@ -194,7 +195,11 @@ const AppleLoginComp = (props) => {
     <div
       style={{
         width:
-          socialLength === 3 && state?.status !== "social" ? "45px" : "100%",
+          isLandingVariant
+            ? "100%"
+            : socialLength === 3 && state?.status !== "social"
+            ? "45px"
+            : "100%",
       }}
     >
       {appleSdkLoaded ? (
@@ -206,9 +211,33 @@ const AppleLoginComp = (props) => {
           usePopup={true}
           callback={handleAppleResponse}
           scope="email name"
-          render={(
-            renderProps // Custom Apple Sign-in Button
-          ) => <>{handleView(renderProps.onClick)}</>}
+          render={(renderProps) =>
+            isLandingVariant ? (
+              <Box
+                onClick={renderProps.onClick}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  py: "13px",
+                  borderRadius: "12px",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  backgroundColor: "background.paper",
+                  cursor: "pointer",
+                }}
+              >
+                <Box
+                  component="img"
+                  src={appleLogo.src}
+                  alt="apple"
+                  sx={{ width: 20, height: 20, objectFit: "contain" }}
+                />
+              </Box>
+            ) : (
+              <>{handleView(renderProps.onClick)}</>
+            )
+          }
         />
       ) : (
         <Typography>{t("Loading Apple Login...")}</Typography>

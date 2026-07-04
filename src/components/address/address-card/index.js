@@ -22,7 +22,7 @@ export const AddressTypography = styled(Typography)(
   ({ theme, fontWeight }) => ({
     fontWeight: fontWeight ? fontWeight : "500",
     fontSize: "12px",
-  })
+  }),
 );
 
 const AddressCard = (props) => {
@@ -62,7 +62,7 @@ const AddressCard = (props) => {
     <CustomPaperBigCard
       padding="0px"
       sx={{
-        borderRadius: "5px",
+        borderRadius: "8px",
         boxShadow:
           "0px 9.075414657592773px 18.150829315185547px -2.7226247787475586px rgba(145, 158, 171, 0.05), 0px 0px 1.8150832653045654px 0px rgba(145, 158, 171, 0.20)",
       }}
@@ -72,7 +72,7 @@ const AddressCard = (props) => {
           direction="row"
           alignItems="center"
           justifyContent="space-between"
-          padding={{ xs: " 4px 20px", md: " 13px 20px" }}
+          padding={{ xs: "4px 20px", md: "8px 20px" }}
           sx={{
             background: (theme) => alpha(theme.palette.info.contrastText1, 0.3),
             borderRadius: "5px 5px 0px 0px",
@@ -83,10 +83,21 @@ const AddressCard = (props) => {
           </Typography>
           <Stack direction="row" alignItems="center">
             <IconButton onClick={handleClick}>
-              <AddressEditSvg />
+              <i
+                className="fi fi-rr-map-marker-edit"
+                style={{ fontSize: "18px", lineHeight: 1, display: "flex" }}
+              />
             </IconButton>
             <IconButton onClick={() => setOpenDelete(true)}>
-              <img src={deleteIcon.src} alt="delete" />
+              <i
+                className="fi fi-rr-trash"
+                style={{
+                  fontSize: "18px",
+                  lineHeight: 1,
+                  display: "flex",
+                  color: "#f44336",
+                }}
+              />
             </IconButton>
           </Stack>
         </CustomStackFullWidth>

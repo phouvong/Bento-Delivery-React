@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import MainLayout from "../../src/components/layout/MainLayout";
+import SimpleMobileHeader from "components/common/SimpleMobileHeader";
 import SEO from "../../src/components/seo"
 import StoreRegistration from "../../src/components/store-resgistration";
 import { NoSsr } from "@mui/material";
@@ -44,6 +45,7 @@ const Index = ({metaData}) => {
         configData={configData}
       />
       <MainLayout configData={configData} landingPageData={landingPageData}>
+        <SimpleMobileHeader title="Vendor Application" />
         <NoSsr>
           <StoreRegistration />
         </NoSsr>

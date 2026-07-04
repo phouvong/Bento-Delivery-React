@@ -1,38 +1,57 @@
 import React from "react";
-import { Box, FormGroup } from "@mui/material";
-
+import { Box, Stack, Typography, alpha, useTheme } from "@mui/material";
 import IncDecAddOn from "./IncDecAddOn";
-import { FoodTitleTypography } from "../food-card/FoodCard.style";
 
 const AddOnsManager = (props) => {
   const { t, modalData, changeAddOns, selectedAddons } = props;
+  const theme = useTheme();
+  const addOns = modalData?.[0]?.add_ons ?? [];
+  if (addOns.length === 0) return null;
   return (
     <Box
-      paddingLeft={{ xs: "10px", md: "0px" }}
-      paddingRight={{
-        xs: "5px",
-        md: "10px",
+      sx={{
+        borderRadius: "12px",
+        border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+        backgroundColor: theme.palette.background.paper,
+        overflow: "hidden",
       }}
     >
-      <FoodTitleTypography
-        textAlign="left"
-        gutterBottom
-        component="h6"
-        sx={{ margin: "10px 0", fontWeight: "500", fontSize: "14px" }}
+      <Stack
+        spacing={0.25}
+        sx={{
+          px: { xs: 1.5, md: 2 },
+          py: { xs: 1.25, md: 1.5 },
+          borderBottom: `1px solid ${alpha(theme.palette.text.primary, 0.06)}`,
+        }}
       >
-        {t("Add Ons (Optional)")}
-      </FoodTitleTypography>
-      <FormGroup sx={{ marginLeft: "20px" }}>
-        {modalData.length > 0 &&
-          modalData[0].add_ons?.map((item) => (
-            <IncDecAddOn
-              key={item?.id}
-              changeAddOns={changeAddOns}
-              add_on={item}
-              selectedAddons={selectedAddons}
-            />
-          ))}
-      </FormGroup>
+        <Typography
+          sx={{
+            fontSize: { xs: "14px", md: "15px" },
+            fontWeight: 700,
+            color: theme.palette.text.primary,
+          }}
+        >
+          {t("Add Ons")}
+        </Typography>
+        <Typography
+          sx={{
+            fontSize: { xs: "11px", md: "12px" },
+            color: theme.palette.text.secondary,
+          }}
+        >
+          {t("Optional extras you can add to your order")}
+        </Typography>
+      </Stack>
+      <Stack>
+        {addOns.map((item) => (
+          <IncDecAddOn
+            key={item?.id}
+            changeAddOns={changeAddOns}
+            add_on={item}
+            selectedAddons={selectedAddons}
+          />
+        ))}
+      </Stack>
     </Box>
   );
 };

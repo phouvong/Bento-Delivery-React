@@ -29,85 +29,153 @@ export const ImageContainer = styled(Box)(({ theme }) => ({
   },
 }));
 
-
 const Registration = ({ seller_app_download_section }) => {
   const theme = useTheme();
+  console.log({ seller_app_download_section });
   return (
-    <Box sx={{
-      p: { xs: "16px", md: "30px" },
-      boxShadow: "0px 8px 15px 0px #1C1E2008, 0px 0px 2px 0px #1C1E2014",
-      borderRadius: "10px",
-      background: theme => theme.palette.neutral[100],
-      width: "100%",
-      my:{xs:".5rem",md:"1rem"}
-
-    }}>
+    <Box
+      sx={{
+        p: { xs: "16px", md: "30px" },
+        boxShadow: "0px 8px 15px 0px #1C1E2008, 0px 0px 2px 0px #1C1E2014",
+        borderRadius: "10px",
+        background: (theme) => theme.palette.neutral[100],
+        width: "100%",
+        my: { xs: ".5rem", md: "1rem" },
+      }}
+    >
       <Grid container justifyContent="space-between" alignItems="center">
-        <Grid container item xs={12} md={7} alignItems="center" spacing={2.5} justifyContent={{ xs: "center", md: "flex-start" }}>
-          <Grid item xs={12} md={3.4} sx={{ display: "flex", justifyContent: { xs: "center", md: "flex-start" } }}>
+        <Grid
+          container
+          item
+          xs={12}
+          md={7}
+          alignItems="center"
+          spacing={2.5}
+          justifyContent={{ xs: "center", md: "flex-start" }}
+        >
+          <Grid
+            item
+            xs={12}
+            md={3.4}
+            sx={{
+              display: "flex",
+              justifyContent: { xs: "center", md: "flex-start" },
+            }}
+          >
             <ImageContainer>
               <CustomImageContainer
-                src={seller_app_download_section?.download_seller_app_image_full_url}
+                src={
+                  seller_app_download_section?.download_seller_app_image_full_url
+                }
                 alt="delivery man"
                 width="100%"
                 height="100%"
               />
             </ImageContainer>
           </Grid>
-          <Grid item xs={12} md={8.6} sx={{ textAlign: { xs: "center", md: "left" } }}>
-            <Typography variant="h4" fontSize={{ xs: "18px", md: "30px" }} sx={{ fontWeight: "600" }}>
+          <Grid
+            item
+            xs={12}
+            md={8.6}
+            sx={{ textAlign: { xs: "center", md: "left" } }}
+          >
+            <Typography
+              variant="h4"
+              fontSize={{ xs: "18px", md: "30px" }}
+              sx={{ fontWeight: "600" }}
+            >
               <DollarSignHighlighter
                 text={seller_app_download_section?.download_seller_app_title}
                 theme={theme}
               />
             </Typography>
-            <Typography my=".7rem" sx={{ maxWidth: "400px" }} >
+            <Typography my=".7rem" sx={{ maxWidth: "400px" }}>
               {seller_app_download_section?.download_seller_app_sub_title}
             </Typography>
-            <Link href={{ pathname: "/store-registration", query: { active: "active" } }} prefetch={false}>
-              <Button variant="contained" sx={{ borderRadius: "10px", padding: "7px 16px",marginBottom:{xs:"1rem",sm:"0px"} }}>
-                {seller_app_download_section?.download_seller_app_content_button_title || "Start Selling"}
+            <Link
+              href={{
+                pathname: "/store-registration",
+                query: { active: "active" },
+              }}
+              prefetch={false}
+            >
+              <Button
+                variant="contained"
+                sx={{
+                  borderRadius: "10px",
+                  padding: "7px 16px",
+                  marginBottom: { xs: "1rem", sm: "0px" },
+                }}
+              >
+                {seller_app_download_section?.download_seller_app_content_button_title ||
+                  "Start Selling"}
                 <ArrowForwardIcon sx={{ ml: 1, fontSize: "20px" }} />
               </Button>
             </Link>
           </Grid>
-
         </Grid>
         <Grid item xs={12} md={5} alignItems="center" spacing={2} sx={{}}>
-          <Stack alignItems="center" >
+          <Stack alignItems="center">
             <Box>
-              <Typography fontSize={{ xs: "20px", md: "30px" }} fontWeight="600" lineHeight="1.4" textAlign={{ xs: "center", md: "left" }}>
-                {seller_app_download_section?.download_seller_app_links?.download_user_app_title}
+              <Typography
+                fontSize={{ xs: "20px", md: "30px" }}
+                fontWeight="600"
+                lineHeight="1.4"
+                textAlign={{ xs: "center", md: "left" }}
+              >
+                {
+                  seller_app_download_section?.download_seller_app_links
+                    ?.download_user_app_title
+                }
               </Typography>
-              <Typography color={theme.palette.neutral[500]} fontSize="16px" textAlign={{ xs: "center", md: "left" }}>
-                {seller_app_download_section?.download_seller_app_links?.download_user_app_sub_title}
+              <Typography
+                color={theme.palette.neutral[500]}
+                fontSize="16px"
+                textAlign={{ xs: "center", md: "left" }}
+              >
+                {
+                  seller_app_download_section?.download_seller_app_links
+                    ?.download_user_app_sub_title
+                }
               </Typography>
             </Box>
-            <Stack width="100%" alignItems="center" direction={{ xs: "column", md: "row" }} gap="1rem" p={{ xs: "1rem", md: "1.3rem" }}
-              backgroundColor={alpha(theme.palette.neutral[200], .5)} border="1px solid"
+            <Stack
+              width="100%"
+              alignItems="center"
+              direction={{ xs: "column", md: "row" }}
+              gap="1rem"
+              p={{ xs: "1rem", md: "1.3rem" }}
+              backgroundColor={alpha(theme.palette.neutral[200], 0.5)}
+              border="1px solid"
               borderRadius="1rem"
               borderColor={theme.palette.neutral[300]}
             >
-              <Box sx={{
-                padding: "10px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                background: theme.palette.neutral[100],
-                borderRadius: "10px",
-                gap: "8px"
-              }}>
+              <Box
+                sx={{
+                  padding: "10px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background: theme.palette.neutral[100],
+                  borderRadius: "10px",
+                  gap: "8px",
+                }}
+              >
                 <QRCodeClient
                   size={70}
                   playStoreLink={
-                    seller_app_download_section?.download_seller_app_links?.playstore_url_status === 1
-                      ? seller_app_download_section?.download_seller_app_links?.playstore_url
+                    seller_app_download_section?.download_seller_app_links
+                      ?.playstore_url_status === 1
+                      ? seller_app_download_section?.download_seller_app_links
+                          ?.playstore_url
                       : null
                   }
                   appStoreLink={
-                    seller_app_download_section?.download_seller_app_links?.apple_store_url_status === 1
-                      ? seller_app_download_section?.download_seller_app_links?.apple_store_url
+                    seller_app_download_section?.download_seller_app_links
+                      ?.apple_store_url_status === 1
+                      ? seller_app_download_section?.download_seller_app_links
+                          ?.apple_store_url
                       : null
                   }
                 />
@@ -119,25 +187,49 @@ const Registration = ({ seller_app_download_section }) => {
                   {t("Scan to Download")}
                 </Typography>
               </Box>
-              <Box >
-                <Typography color={theme.palette.neutral[1000]} textAlign="center" fontSize="18px" fontWeight="500" >
-                  {t("Download the Customer App")}
+              <Box>
+                <Typography
+                  color={theme.palette.neutral[1000]}
+                  textAlign="center"
+                  fontSize="18px"
+                  fontWeight="500"
+                >
+                  {seller_app_download_section?.download_seller_app_button_title ||
+                    t("Download the Seller App")}
                 </Typography>
-                <Typography marginBottom={{ xs: ".6rem", md: "1rem" }} textAlign="center" color={theme.palette.neutral[500]} fontSize="14px" >
-                  {t("Smart shopping starts here.")}
+                <Typography
+                  marginBottom={{ xs: ".6rem", md: "1rem" }}
+                  textAlign="center"
+                  color={theme.palette.neutral[500]}
+                  fontSize="14px"
+                >
+                  {seller_app_download_section?.download_seller_app_button_sub_title ||
+                    t("Smart shopping starts here.")}
                 </Typography>
-                <AppLinks landingPageData={{
-                  app_store_link: seller_app_download_section?.download_seller_app_links?.apple_store_url,
-                  play_store_link: seller_app_download_section?.download_seller_app_links?.playstore_url,
-                  app_status: seller_app_download_section?.download_seller_app_links?.apple_store_url_status,
-                  play_status: seller_app_download_section?.download_seller_app_links?.playstore_url_status
-                }} />
+                <AppLinks
+                  landingPageData={{
+                    app_store_link:
+                      seller_app_download_section?.download_business_app_links
+                        ?.seller_appstore_url,
+                    play_store_link:
+                      seller_app_download_section?.download_business_app_links
+                        ?.seller_playstore_url,
+                    app_status: Number(
+                      seller_app_download_section?.download_business_app_links
+                        ?.seller_appstore_url_status
+                    ),
+                    play_status: Number(
+                      seller_app_download_section?.download_business_app_links
+                        ?.seller_playstore_url_status
+                    ),
+                  }}
+                />
               </Box>
             </Stack>
           </Stack>
         </Grid>
       </Grid>
-    </Box >
-  )
-}
+    </Box>
+  );
+};
 export default Registration;

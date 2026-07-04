@@ -6,6 +6,7 @@ export const settings = {
   speed: 500,
   slidesToShow: 4,
   slidesToScroll: 1,
+  swipeToSlide: true,
   nextArrow: <WhiteNext />,
   prevArrow: <WhitePrev />,
   responsive: [
@@ -14,6 +15,7 @@ export const settings = {
       settings: {
         slidesToShow: 4,
         slidesToScroll: 3,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -22,6 +24,7 @@ export const settings = {
       settings: {
         slidesToShow: 3.5,
         slidesToScroll: 2,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -30,6 +33,7 @@ export const settings = {
       settings: {
         slidesToShow: 3,
         slidesToScroll: 2,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -38,6 +42,7 @@ export const settings = {
       settings: {
         slidesToShow: 2.5,
         slidesToScroll: 2,
+        swipeToSlide: true,
         initialSlide: 2,
       },
     },
@@ -47,6 +52,7 @@ export const settings = {
         className: 'center',
         slidesToShow: 1,
         slidesToScroll: 1,
+        swipeToSlide: true,
         centerMode: true,
         centerPadding: '40px',
         initialSlide: 0,
@@ -59,6 +65,7 @@ export const settings = {
         className: 'center',
         slidesToShow: 1,
         slidesToScroll: 1,
+        swipeToSlide: true,
         centerMode: true,
         centerPadding: '20px',
         initialSlide: 0,

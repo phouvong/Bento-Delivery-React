@@ -29,69 +29,128 @@ export const ComponentTwoContainer = styled(Box)(
 );
 
 const ComponentTwo = ({ user_app_download_section }) => {
+  console.log({ user_app_download_section });
+
   const theme = useTheme();
   return (
     <>
       <CustomContainer>
-        <Grid container py={{ xs: "1rem", md: "3.2rem" }} spacing={{ xs: "1rem", sm: "0px" }}>
-          <Grid item xs={12} md={6} >
-            <Stack gap={{ xs: ".5rem", md: '1.3rem' }} alignItems="center" >
+        <Grid
+          container
+          py={{ xs: "1rem", md: "3.2rem" }}
+          spacing={{ xs: "1rem", sm: "0px" }}
+        >
+          <Grid item xs={12} md={6}>
+            <Stack gap={{ xs: ".5rem", md: "1.3rem" }} alignItems="center">
               <Box>
-                <Typography fontSize={{ xs: "18px", md: "30px" }} marginBottom="10px" fontWeight="600" lineHeight="1.4" textAlign={{ xs: "center", md: "left" }}>
+                <Typography
+                  fontSize={{ xs: "18px", md: "30px" }}
+                  marginBottom="10px"
+                  fontWeight="600"
+                  lineHeight="1.4"
+                  textAlign={{ xs: "center", md: "left" }}
+                >
                   {user_app_download_section?.download_user_app_title}
                 </Typography>
-                <Typography color={theme.palette.neutral[500]} fontSize={{ xs: "13px", md: "16px" }} textAlign={{ xs: "center", md: "left" }}>
+                <Typography
+                  color={theme.palette.neutral[500]}
+                  fontSize={{ xs: "13px", md: "16px" }}
+                  textAlign={{ xs: "center", md: "left" }}
+                >
                   {user_app_download_section?.download_user_app_sub_title}
                 </Typography>
               </Box>
-              <Stack width="100%" alignItems="center" direction={{ xs: "column", md: "row" }} gap="1rem" p="1.3rem"
-                backgroundColor={theme.palette.background.custom7} border="1px solid"
+              <Stack
+                width="100%"
+                alignItems="center"
+                direction={{ xs: "column", md: "row" }}
+                gap="1rem"
+                p="1.3rem"
+                backgroundColor={theme.palette.background.custom7}
+                border="1px solid"
                 borderRadius="1rem"
                 borderColor={theme.palette.neutral[300]}
               >
-                <Box sx={{
-                  padding: { xs: "10px", md: "16px" },
-                  background: theme.palette.neutral[100],
-                  borderRadius: "10px",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}>
+                <Box
+                  sx={{
+                    padding: { xs: "10px", md: "16px" },
+                    background: theme.palette.neutral[100],
+                    borderRadius: "10px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
                   <QRCodeClient
                     size={70}
                     playStoreLink={
-                      user_app_download_section?.download_user_app_links?.playstore_url_status ===
-                      "1" &&
-                      user_app_download_section?.download_user_app_links?.playstore_url
+                      Number(
+                        user_app_download_section?.download_user_app_links
+                          ?.playstore_url_status
+                      ) === 1
+                        ? user_app_download_section?.download_user_app_links
+                            ?.playstore_url
+                        : null
                     }
                     appStoreLink={
-                      user_app_download_section?.download_user_app_links?.apple_store_url_status ===
-                      "1" &&
-                      user_app_download_section?.download_user_app_links?.apple_store_url
+                      Number(
+                        user_app_download_section?.download_user_app_links
+                          ?.apple_store_url_status
+                      ) === 1
+                        ? user_app_download_section?.download_user_app_links
+                            ?.apple_store_url
+                        : null
                     }
                   />
-                  <Typography color={theme.palette.neutral[500]} pt="5px" textAlign="center">
+                  <Typography
+                    color={theme.palette.neutral[500]}
+                    pt="5px"
+                    textAlign="center"
+                  >
                     {t("Scan to Download")}
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography color={theme.palette.neutral[1000]} textAlign="center" fontSize="18px" fontWeight="500" >
-                    {t("Download the Customer App")}
+                  <Typography
+                    color={theme.palette.neutral[1000]}
+                    textAlign="center"
+                    fontSize="18px"
+                    fontWeight="500"
+                  >
+                    {user_app_download_section?.download_user_app_button_title ||
+                      t("Download the Customer App")}
                   </Typography>
-                  <Typography marginBottom="1rem" textAlign="center" color={theme.palette.neutral[500]} fontSize="14px" >
-                    {t("Smart shopping starts here.")}
+                  <Typography
+                    marginBottom="1rem"
+                    textAlign="center"
+                    color={theme.palette.neutral[500]}
+                    fontSize="14px"
+                  >
+                    {user_app_download_section?.download_user_app_button_sub_title ||
+                      t("Smart shopping starts here.")}
                   </Typography>
-                  <AppLinks landingPageData={{
-                    app_store_link: user_app_download_section?.download_user_app_links?.apple_store_url,
-                    play_store_link: user_app_download_section?.download_user_app_links?.playstore_url,
-                    app_status: user_app_download_section?.download_user_app_links?.apple_store_url_status,
-                    play_status: user_app_download_section?.download_user_app_links?.playstore_url_status
-                  }} />
+                  <AppLinks
+                    landingPageData={{
+                      app_store_link:
+                        user_app_download_section?.download_user_app_links
+                          ?.apple_store_url,
+                      play_store_link:
+                        user_app_download_section?.download_user_app_links
+                          ?.playstore_url,
+                      app_status: Number(
+                        user_app_download_section?.download_user_app_links
+                          ?.apple_store_url_status
+                      ),
+                      play_status: Number(
+                        user_app_download_section?.download_user_app_links
+                          ?.playstore_url_status
+                      ),
+                    }}
+                  />
                 </Box>
               </Stack>
             </Stack>
-
           </Grid>
           <Grid
             item
@@ -105,7 +164,7 @@ const ComponentTwo = ({ user_app_download_section }) => {
                 maxWidth: "450px",
                 height: "100%",
                 width: "100%",
-              }
+              },
             }}
           >
             <NextImage
@@ -118,8 +177,7 @@ const ComponentTwo = ({ user_app_download_section }) => {
             />
           </Grid>
         </Grid>
-      </CustomContainer >
-
+      </CustomContainer>
     </>
   );
 };

@@ -165,7 +165,7 @@ const ForgotPassword = ({ configData }) => {
     }
   };
   return (
-    <Box minHeight="50vh" sx={{display:"flex"}}>
+    <Box minHeight="50vh" sx={{ display: "flex", minWidth: { xs: "300px", sm: "450px" } }}>
       <FlexContainerCenter >
         <CustomStackFullWidth sx={{paddingX:"2rem",paddingY:"2rem", alignItems:"center",justifyContent:"center"}}>
           <Stack justifyContent="center" alignItems="center">

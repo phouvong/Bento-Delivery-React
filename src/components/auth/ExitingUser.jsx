@@ -31,7 +31,7 @@ const ExitingUser = ({
   return (
     <CustomStackFullWidth
       spacing={3}
-      sx={{ maxWidth: "400px", padding: "2rem" }}
+      sx={{ maxWidth: "100%", padding: "2rem" }}
     >
       <CustomStackFullWidth alignItems="center">
         <Avatar

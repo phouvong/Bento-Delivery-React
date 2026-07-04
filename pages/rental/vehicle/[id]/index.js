@@ -9,6 +9,7 @@ import { useGetConfigData } from "../../../../src/api-manage/hooks/useGetConfigD
 import { setConfigData } from "../../../../src/redux/slices/configData";
 import { useEffect } from "react";
 import VehicleDetailsPage from "../../../../src/components/home/module-wise-components/rental/components/vehicle-details/VehicleDetailsPage";
+import SimpleMobileHeader from "components/common/SimpleMobileHeader";
 import { NoSsr } from "@mui/material";
 
 const index = ({ vehicleDetailsData, configData }) => {
@@ -29,17 +30,26 @@ const index = ({ vehicleDetailsData, configData }) => {
     <>
       <CssBaseline />
       <SEO
-        title={vehicleDetailsData?.meta_title || effectiveConfigData?.business_name}
-        image={vehicleDetailsData?.meta_image || effectiveConfigData?.fav_icon_full_url}
+        title={
+          vehicleDetailsData?.meta_title || effectiveConfigData?.business_name
+        }
+        image={
+          vehicleDetailsData?.meta_image ||
+          effectiveConfigData?.fav_icon_full_url
+        }
         businessName={effectiveConfigData?.business_name}
         configData={effectiveConfigData}
-        description={vehicleDetailsData?.meta_description || ''}
+        description={vehicleDetailsData?.meta_description || ""}
         robotsMeta={vehicleDetailsData?.meta_data}
       />
-      <MainLayout configData={effectiveConfigData} landingPageData={landingPageData}>
-       <NoSsr>
-        <VehicleDetailsPage vehicleDetailsData={vehicleDetailsData} />
-       </NoSsr>
+      <MainLayout
+        configData={effectiveConfigData}
+        landingPageData={landingPageData}
+      >
+        <SimpleMobileHeader title="Vehicle Details" />
+        <NoSsr>
+          <VehicleDetailsPage vehicleDetailsData={vehicleDetailsData} />
+        </NoSsr>
       </MainLayout>
     </>
   );

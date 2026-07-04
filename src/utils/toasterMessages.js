@@ -14,7 +14,7 @@ export const message_sending_image_limit =
 export const loginSuccessFull = "Logged in successfully";
 export const signup_successfull = "Signup successfully.";
 export const cod_exceeds_message =
-  "The total amount of the order, exceeds maximum amount of the cash on delivery method";
+  "Order total exceeds the cash on delivery limit of";
 //module select popover
 export const module_header = "Select a type of module for your orders";
 export const module_bottom = "A module must be selected to continue.";
@@ -25,7 +25,7 @@ export const out_of_stock = "Out of Stock";
 export const coupon_minimum =
   "To apply this coupon,the minimum purchase amount is";
 export const wallet_transfer_message = "Point to wallet transfer successfully.";
-export const out_of_limits = "Out of Limits";
+export const out_of_limits = "You can't add more than the allowed quantity of this item";
 export const cart_item_remove = "Cart item remove successfully";
 export const edit_offline_payment_info = "Payment info updated.";
 export const no_chatting_plan = "this store is not having any chatting plan";

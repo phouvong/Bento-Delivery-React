@@ -82,7 +82,7 @@ const InfoCard = ({
 			direction="row"
 			spacing={2}
 			alignItems="center"
-			padding="10px 15px 10px 10px"
+			padding={{ xs: "10px 0px", md: "10px 15px 10px 10px" }}
 			sx={{
 				background:
 					selectedId === currentId &&

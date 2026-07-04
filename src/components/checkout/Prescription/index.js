@@ -34,9 +34,9 @@ import useGetMostTrips from "../../../api-manage/hooks/react-query/useGetMostTri
 import { useTheme } from "@emotion/react";
 import { getGuestId, getToken } from "helper-functions/getToken";
 import { setOrderDetailsModal } from "redux/slices/offlinePaymentData";
-import {useGetTax} from "api-manage/hooks/react-query/order-place/useGetTax";
+import { useGetTax } from "api-manage/hooks/react-query/order-place/useGetTax";
 
-const PrescriptionCheckout = ({ storeId ,page}) => {
+const PrescriptionCheckout = ({ storeId, page }) => {
   const router = useRouter();
   const theme = useTheme();
   const dispatch = useDispatch();
@@ -51,12 +51,14 @@ const PrescriptionCheckout = ({ storeId ,page}) => {
   const [deliveryTip, setDeliveryTip] = useState(0);
   const [note, setNote] = useState("");
   const [paymentMethodImage, setPaymentMethodImage] = useState("");
+  const [selectedDeliveryOption, setSelectedDeliveryOption] = useState(null);
+  const [deliveryFee, setDeliveryFee] = useState(0);
   const { configData } = useSelector((state) => state.configData);
   const { data: storeData, refetch } = useGetStoreDetails(storeId);
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
   const guestId = getGuestId();
-  const [payableAmount,setPayableAmount] = useState(0);
-  const {mutate:taxMutate,data}=useGetTax()
+  const [payableAmount, setPayableAmount] = useState(0);
+  const { mutate: taxMutate, data } = useGetTax();
 
   useEffect(() => {
     refetch();
@@ -121,6 +123,10 @@ const PrescriptionCheckout = ({ storeId ,page}) => {
       delivery_instruction,
       guest_id: guestId,
       is_prescription: true,
+      ...(selectedDeliveryOption?.id != null && {
+        delivery_id: selectedDeliveryOption.id,
+        delivery_type: selectedDeliveryOption.deliveryType,
+      }),
       ...(!getToken() && {
         contact_person_name: guestUserInfo?.contact_person_name,
         contact_person_number: guestUserInfo?.contact_person_number,
@@ -186,7 +192,6 @@ const PrescriptionCheckout = ({ storeId ,page}) => {
     });
   };
   const placeOrder = () => {
-
     if (paymentMethod && paymentMethod === "cash_on_delivery") {
       if (prescriptionImages.length > 0) {
         handlePlaceOrder();
@@ -226,7 +231,7 @@ const PrescriptionCheckout = ({ storeId ,page}) => {
     >
       <Grid item xs={12} md={matches ? 12 : 7}>
         <Stack spacing={3}>
-          <CheckoutStepper />
+          <CheckoutStepper storeData={storeData} />
           {zoneData && (
             <AddPaymentMethod
               setPaymentMethod={setPaymentMethod}
@@ -256,6 +261,11 @@ const PrescriptionCheckout = ({ storeId ,page}) => {
             setDeliveryTip={setDeliveryTip}
             isHomeDelivery={configData?.home_delivery_status}
             page={page}
+            zoneData={zoneData?.data}
+            deliveryFee={deliveryFee}
+            couponDiscount={null}
+            selectedDeliveryOption={selectedDeliveryOption}
+            setSelectedDeliveryOption={setSelectedDeliveryOption}
           />
           {orderType !== "take_away" && (
             <DeliveryManTip
@@ -268,7 +278,20 @@ const PrescriptionCheckout = ({ storeId ,page}) => {
         </Stack>
       </Grid>
 
-      <Grid item xs={12} md={matches ? 12 : 5} height="auto">
+      <Grid
+        item
+        xs={12}
+        md={matches ? 12 : 5}
+        height="auto"
+        sx={{
+          ...(!matches && {
+            position: "sticky",
+            top: "50px",
+            alignSelf: "flex-start",
+            maxHeight: "calc(100vh - 32px)",
+          }),
+        }}
+      >
         <CustomPaperBigCard height="auto" padding="20px">
           <Stack spacing={1} justifyContent="space-between">
             <CouponTitle textAlign="left">{t("Order Summary")}</CouponTitle>
@@ -306,6 +329,8 @@ const PrescriptionCheckout = ({ storeId ,page}) => {
                 totalOrderAmount={0}
                 deliveryTip={deliveryTip}
                 setPayableAmount={setPayableAmount}
+                selectedDeliveryOption={selectedDeliveryOption}
+                setDeliveryFee={setDeliveryFee}
               />
             ) : (
               <OrderCalculationShimmer />

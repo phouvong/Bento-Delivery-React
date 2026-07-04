@@ -1,271 +1,341 @@
 import { useTheme } from "@emotion/react";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import {
-	alpha,
-	Grid,
-	Paper,
-	Tooltip,
-	Typography,
-	useMediaQuery,
+  alpha,
+  Grid,
+  IconButton,
+  Paper,
+  Stack,
+  Tooltip,
+  Typography,
+  useMediaQuery,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import { useAddStoreToWishlist } from "api-manage/hooks/react-query/wish-list/useAddStoreToWishLists";
 import { useWishListStoreDelete } from "api-manage/hooks/react-query/wish-list/useWishListStoreDelete";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
-import { getModuleId } from "helper-functions/getModuleId";
-import Link from "next/link";
+import { getStoreRedirectURL } from "helper-functions/handleStoreRedirect";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useRef } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { addWishListStore, removeWishListStore } from "redux/slices/wishList";
-import { CustomButtonPrimary } from "styled-components/CustomButtons.style";
-import {
-	CustomBoxFullWidth,
-	CustomStackFullWidth,
-} from "styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { not_logged_in_message } from "utils/toasterMessages";
 import CustomImageContainer from "../CustomImageContainer";
-import CustomRatings from "../search/CustomRatings";
-import { RoundedIconButton } from "./product-details-section/ProductsThumbnailsSettings";
+import VerifiedStoreBadge from "../cards/VerifiedStoreBadge";
 
 const CustomWrapper = styled(Paper)(({ theme }) => ({
-	padding: "20px",
-	borderRadius: "5px",
-	background: theme.palette.background.paper,
-	boxShadow:
-		"0px 10px 20px -3px rgba(145, 158, 171, 0.05), 0px 0px 2px 0px rgba(145, 158, 171, 0.20)",
+  padding: "12px",
+  borderRadius: "12px",
+  background: theme.palette.background.paper,
+  //border: `1px solid ${theme.palette.divider}`,
+  boxShadow: "none",
 }));
 
-const StoreDetails = ({ storeDetails, storeImageBaseUrl }) => {
-	const { t } = useTranslation();
-	const theme = useTheme();
-	const router = useRouter();
-	const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
-	const { configData } = useSelector((state) => state.configData);
-	const dispatchRedux = useDispatch();
-	const { wishLists } = useSelector((state) => state.wishList);
-	const { mutate } = useWishListStoreDelete();
-	const { mutate: addFavoriteMutation } = useAddStoreToWishlist();
+const StatCard = styled("div")(({ theme, highlighted }) => ({
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  textAlign: "center",
+  padding: "8px 8px",
+  borderRadius: "10px",
+  border: highlighted ? `1px solid ${theme.palette.primary.main}` : "none",
+  backgroundColor: alpha(
+    theme.palette.neutral?.[400] || theme.palette.text.secondary,
+    0.08
+  ),
+  minHeight: "56px",
+  width: "100%",
+}));
 
-	let token = undefined;
-	if (typeof window !== "undefined") {
-		token = localStorage.getItem("token");
-	}
-	const onSuccessHandlerForDelete = (res) => {
-		dispatchRedux(removeWishListStore(storeDetails?.id));
-		toast.success(res.message, {
-			id: "wishlist",
-		});
-	};
+const StoreDetails = ({ storeDetails }) => {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const router = useRouter();
+  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+  const dispatchRedux = useDispatch();
+  const { wishLists } = useSelector((state) => state.wishList);
+  const { mutate } = useWishListStoreDelete();
+  const { mutate: addFavoriteMutation } = useAddStoreToWishlist();
+  const wishlistPending = useRef(false);
 
-	const addToFavorite = () => {
-		if (token) {
-			addFavoriteMutation(storeDetails?.id, {
-				onSuccess: (response) => {
-					if (response) {
-						dispatchRedux(addWishListStore(storeDetails));
-						toast.success(response?.message);
-					}
-				},
-				onError: (error) => {
-					toast.error(error.response.data.message);
-				},
-			});
-		} else toast.error(t(not_logged_in_message));
-	};
-	const isInWishList = (id) => {
-		return !!wishLists?.store?.find(
-			(wishStore) => wishStore.id === storeDetails?.id
-		);
-	};
-	const deleteWishlistStore = (id) => {
-		mutate(id, {
-			onSuccess: onSuccessHandlerForDelete,
-			onError: (error) => {
-				toast.error(error.response.data.message);
-			},
-		});
-	};
-	const delievryTime = storeDetails?.delivery_time?.split(" ");
-	const handleClick = () => {
-		router.push({
-			pathname: "/profile",
-			query: {
-				page: "inbox",
-				type: "vendor",
-				id: storeDetails?.vendor_id,
-				routeName: "vendor_id",
-				chatFrom: "true",
-			},
-		});
-	};
-	return (
-		<CustomWrapper>
-			<Grid container spacing={2.5}>
-				<Grid item xs={12} container>
-					<Grid item xs={10} alignSelf="center">
-						<CustomStackFullWidth
-							direction="raw"
-							alignItems="center"
-							sx={{
-								flex: "0 0 60px",
-								gap: "10px",
-							}}
-						>
-							<CustomBoxFullWidth
-								sx={{
-									position: "relative",
-									height: "60px",
-									width: "80px",
-									borderRadius: "50%",
-									border: (theme) =>
-										`1px solid ${alpha(
-											theme.palette.neutral[300],
-											0.3
-										)}`,
-								}}
-							>
-								<CustomImageContainer
-									src={storeDetails?.logo_full_url}
-									// alt={item?.name}
-									height="100%"
-									width="100%"
-									obejctfit="contain"
-									borderRadius="50%"
-								/>
-							</CustomBoxFullWidth>
-							<CustomStackFullWidth spacing={0.5}>
-								<Typography variant="h7" component="h2">
-									{storeDetails?.name}
-								</Typography>
-								<CustomStackFullWidth
-									direction="row"
-									alignItems="center"
-								>
-									<CustomRatings
-										ratingValue={storeDetails?.avg_rating}
-										color={theme.palette.warning.main}
-										readOnly
-									/>
-									<Typography
-										fontSize="12px"
-										color="customColor.textGray"
-									>
-										({storeDetails?.rating_count})
-									</Typography>
-								</CustomStackFullWidth>
-								<Typography fontSize="14px" component="h3">
-									{storeDetails?.total_items - 1}+ {t("Products")}
-								</Typography>
-							</CustomStackFullWidth>
-						</CustomStackFullWidth>
-					</Grid>
-					<Grid item xs={2}>
-						{!isInWishList(storeDetails?.id) && (
-							<Tooltip text="Add to cart">
-								<RoundedIconButton
-									sx={{
-										filter:
-											"drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.05))",
-									}}
-									onClick={addToFavorite}
-								>
-									<FavoriteBorderIcon color="primary" size="small" />
-								</RoundedIconButton>
-							</Tooltip>
-						)}
-						{isInWishList(storeDetails?.id) && (
-							<Tooltip text="Add to cart">
-								<RoundedIconButton
-									onClick={() => deleteWishlistStore(storeDetails?.id)}
-									sx={{
-										filter:
-											"drop-shadow(0px 4px 8px rgba(0, 0, 0, 0.05))",
-									}}
-								>
-									<FavoriteIcon color="primary" size="small" />
-								</RoundedIconButton>
-							</Tooltip>
-						)}
-					</Grid>
-				</Grid>
-				<Grid item xs={12} container>
-					<Grid item xs={4}>
-						<CustomStackFullWidth alignItems="flex-start">
-							<Typography sx={{ fontSize: "18px", fontWeight: "bold" }}>
-								{storeDetails?.positive_rating.toFixed(1)}%
-							</Typography>
-							<Typography
-								sx={{
-									color: (theme) => theme.palette.customColor.textGray,
-									fontSize: isSmall ? "12px" : "inherit",
-								}}
-							>
-								{t("Positive Review")}
-							</Typography>
-						</CustomStackFullWidth>
-					</Grid>
-					<Grid item xs={4}>
-						<CustomStackFullWidth alignItems="flex-start">
-							<Typography sx={{ fontSize: "18px", fontWeight: "bold" }}>
-								{getAmountWithSign(storeDetails?.minimum_order)}
-							</Typography>
-							<Typography
-								sx={{
-									color: (theme) => theme.palette.customColor.textGray,
-									fontSize: isSmall ? "12px" : "inherit",
-								}}
-							>
-								{t("Minimum Order")}
-							</Typography>
-						</CustomStackFullWidth>
-					</Grid>
-					<Grid item xs={4}>
-						<CustomStackFullWidth alignItems="flex-start">
-							<CustomStackFullWidth direction="raw" alignItems="center">
-								<Typography
-									sx={{ fontSize: "18px", fontWeight: "bold" }}
-								>
-									{delievryTime?.[0]}
-								</Typography>
-								<Typography sx={{ fontSize: "18px" }}>
-									{delievryTime?.[1]}
-								</Typography>
-							</CustomStackFullWidth>
-							<Typography
-								sx={{
-									color: (theme) => theme.palette.customColor.textGray,
-									fontSize: isSmall ? "12px" : "inherit",
-								}}
-							>
-								{t("Delivery Time")}
-							</Typography>
-						</CustomStackFullWidth>
-					</Grid>
-				</Grid>
-				<Grid item xs={12} container spacing={2}>
-					<Grid item xs={12}>
-						<Link
-							href={{
-								pathname: "/store/[id]",
-								query: {
-									id: `${storeDetails?.id}`,
-									module_id: `${getModuleId()}`,
-								},
-							}}
-						>
-							<CustomButtonPrimary fullwidth="true">
-								<Typography>{t("Visit Store")}</Typography>
-							</CustomButtonPrimary>
-						</Link>
-					</Grid>
-				</Grid>
-			</Grid>
-		</CustomWrapper>
-	);
+  let token = undefined;
+  if (typeof window !== "undefined") {
+    token = localStorage.getItem("token");
+  }
+  const onSuccessHandlerForDelete = (res) => {
+    dispatchRedux(removeWishListStore(storeDetails?.id));
+    toast.success(res.message, { id: "wishlist" });
+  };
+
+  const addToFavorite = () => {
+    if (wishlistPending.current) return;
+    if (token) {
+      wishlistPending.current = true;
+      addFavoriteMutation(storeDetails?.id, {
+        onSuccess: (response) => {
+          if (response) {
+            dispatchRedux(addWishListStore(storeDetails));
+            toast.success(response?.message);
+          }
+        },
+        onError: (error) => {
+          toast.error(error.response.data.message);
+        },
+        onSettled: () => {
+          wishlistPending.current = false;
+        },
+      });
+    } else toast.error(t(not_logged_in_message));
+  };
+
+  const isInWishList = () => {
+    return !!wishLists?.store?.find(
+      (wishStore) => wishStore.id === storeDetails?.id
+    );
+  };
+
+  const deleteWishlistStore = (id) => {
+    if (wishlistPending.current) return;
+    wishlistPending.current = true;
+    mutate(id, {
+      onSuccess: onSuccessHandlerForDelete,
+      onError: (error) => {
+        toast.error(error.response.data.message);
+      },
+      onSettled: () => {
+        wishlistPending.current = false;
+      },
+    });
+  };
+
+  const handleVisitStore = () => {
+    router.push(getStoreRedirectURL(storeDetails));
+  };
+
+  const deliveryTime = storeDetails?.delivery_time?.split(" ");
+  const itemsCount =
+    storeDetails?.total_items > 0 ? storeDetails?.total_items - 1 : 0;
+  const liked = isInWishList();
+
+  const headerIconSx = {
+    width: 32,
+    height: 32,
+    borderRadius: "8px",
+    border: `1px solid ${alpha(theme.palette.text.primary, 0.12)}`,
+    color: theme.palette.text.primary,
+    backgroundColor: theme.palette.background.paper,
+    "&:hover": {
+      backgroundColor: alpha(theme.palette.text.primary, 0.04),
+    },
+  };
+
+  return (
+    <CustomWrapper>
+      <Stack spacing={0.75}>
+        <Stack
+          direction="row"
+          alignItems="center"
+          justifyContent="space-between"
+        >
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: { xs: "16px", md: "18px" },
+              color: theme.palette.text.primary,
+            }}
+          >
+            {t("Store")}
+          </Typography>
+          <Stack direction="row" spacing={1}>
+            <Tooltip
+              title={liked ? t("Remove from wishlist") : t("Add to wishlist")}
+            >
+              <IconButton
+                onClick={() =>
+                  liked
+                    ? deleteWishlistStore(storeDetails?.id)
+                    : addToFavorite()
+                }
+                sx={headerIconSx}
+              >
+                <i
+                  className={liked ? "fi fi-sr-heart" : "fi fi-rr-heart"}
+                  style={{
+                    fontSize: "14px",
+                    display: "flex",
+                    lineHeight: 1,
+                    color: liked
+                      ? theme.palette.primary.main
+                      : theme.palette.text.secondary,
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title={t("Visit store")}>
+              <IconButton onClick={handleVisitStore} sx={headerIconSx}>
+                <i
+                  className="fi fi-rr-arrow-up-right-from-square"
+                  style={{
+                    fontSize: "13px",
+                    display: "flex",
+                    lineHeight: 1,
+                    color: theme.palette.text.secondary,
+                  }}
+                />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+        </Stack>
+
+        <Stack direction="row" alignItems="center" spacing={1}>
+          <CustomStackFullWidth
+            sx={{
+              position: "relative",
+              height: 56,
+              width: 56,
+              flexShrink: 0,
+              borderRadius: "50%",
+              border: `1px solid ${alpha(theme.palette.text.primary, 0.08)}`,
+              overflow: "hidden",
+            }}
+          >
+            <CustomImageContainer
+              src={storeDetails?.logo_full_url}
+              height="100%"
+              width="100%"
+              obejctfit="cover"
+              borderRadius="50%"
+            />
+          </CustomStackFullWidth>
+          <Stack spacing={0.25} minWidth={0} flex={1}>
+            <Stack direction="row" spacing={0.5} alignItems="center">
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "14px", md: "15px" },
+                  color: theme.palette.text.primary,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {storeDetails?.name}
+              </Typography>
+              <VerifiedStoreBadge
+                verified={storeDetails?.verified_seller}
+                fontSize="14px"
+              />
+            </Stack>
+            <Stack direction="row" spacing={0.75} alignItems="center">
+              <i
+                className="fi fi-sr-star"
+                style={{
+                  color: theme.palette.warning.main,
+                  fontSize: "12px",
+                  display: "flex",
+                  lineHeight: 1,
+                }}
+              />
+              <Typography
+                sx={{
+                  fontWeight: 600,
+                  fontSize: { xs: "12px", md: "13px" },
+                  color: theme.palette.text.primary,
+                }}
+              >
+                {storeDetails?.avg_rating?.toFixed?.(1) ??
+                  storeDetails?.avg_rating}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: { xs: "12px", md: "13px" },
+                  color: theme.palette.text.secondary,
+                }}
+              >
+                {itemsCount} {t("Items")}
+              </Typography>
+            </Stack>
+          </Stack>
+        </Stack>
+
+        <Grid container spacing={0.75}>
+          <Grid item xs={4}>
+            <StatCard>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "14px", md: "15px" },
+                  color: theme.palette.primary.main,
+                  lineHeight: 1.15,
+                }}
+              >
+                {storeDetails?.positive_rating?.toFixed(0) ?? 0}%
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: isSmall ? "10px" : "11px",
+                  color: theme.palette.text.secondary,
+                  mt: 0.5,
+                }}
+              >
+                {t("Positive Reviews")}
+              </Typography>
+            </StatCard>
+          </Grid>
+          <Grid item xs={4}>
+            <StatCard>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "13px", md: "14px" },
+                  color: theme.palette.text.primary,
+                  lineHeight: 1.15,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {deliveryTime?.[0]} {deliveryTime?.[1]}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: isSmall ? "10px" : "11px",
+                  color: theme.palette.text.secondary,
+                  mt: 0.5,
+                }}
+              >
+                {t("Delivery Time")}
+              </Typography>
+            </StatCard>
+          </Grid>
+          <Grid item xs={4}>
+            <StatCard>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "14px", md: "15px" },
+                  color: theme.palette.primary.main,
+                  lineHeight: 1.15,
+                }}
+              >
+                {getAmountWithSign(storeDetails?.minimum_order)}
+              </Typography>
+              <Typography
+                sx={{
+                  fontSize: isSmall ? "10px" : "11px",
+                  color: theme.palette.text.secondary,
+                  mt: 0.5,
+                }}
+              >
+                {t("Min Order")}
+              </Typography>
+            </StatCard>
+          </Grid>
+        </Grid>
+      </Stack>
+    </CustomWrapper>
+  );
 };
 
 StoreDetails.propTypes = {};

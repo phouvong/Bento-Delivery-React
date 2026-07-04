@@ -6,20 +6,20 @@ import { useRouter } from "next/router";
 import SEO from "../../../../src/components/seo";
 import MainLayout from "../../../../src/components/layout/MainLayout";
 import CustomContainer from "../../../../src/components/container";
-import {CustomStackFullWidth} from "../../../../src/styled-components/CustomStyles.style";
+import { CustomStackFullWidth } from "../../../../src/styled-components/CustomStyles.style";
 import TypeWiseStore from "../../../../src/components/Store/TypeWiseStore";
-import {getImageUrl} from "../../../../src/utils/CustomFunctions";
+import SimpleMobileHeader from "components/common/SimpleMobileHeader";
+import { getImageUrl } from "../../../../src/utils/CustomFunctions";
 import { getCommonServerSideProps } from "utils/serverSidePropsHelper";
 import { processMetadata } from "utils/fetchPageMetaData";
-
 
 const Index = ({ configData, metaData }) => {
   const metadata = processMetadata(metaData, {
     title: `Latest Stores - ${configData?.business_name}`,
-    description: metaData?.description || '',
+    description: metaData?.description || "",
     image: `${metaData?.image || configData?.logo_full_url}`,
-    robotsMeta: metaData?.robotsMeta || ''
-  })
+    robotsMeta: metaData?.robotsMeta || "",
+  });
   const { t } = useTranslation();
   const router = useRouter();
   const newText = t("New On");
@@ -34,6 +34,7 @@ const Index = ({ configData, metaData }) => {
         robotsMeta={metadata.robotsMeta}
       />
       <MainLayout configData={configData}>
+        <SimpleMobileHeader title="Latest Providers" />
         <CustomContainer>
           <CustomStackFullWidth mt="1rem">
             <TypeWiseStore
@@ -51,5 +52,5 @@ const Index = ({ configData, metaData }) => {
 
 export default Index;
 export const getServerSideProps = async (context) => {
-    return await getCommonServerSideProps(context, 'latest_store_page')
-}
+  return await getCommonServerSideProps(context, "latest_store_page");
+};

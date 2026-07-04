@@ -16,7 +16,7 @@ import { settings } from "./settings";
 import ProductCard from "../../cards/ProductCard";
 import useGetCommonConditionStore from "../../../api-manage/hooks/react-query/common-conditions/useGetCommonConditionStore";
 
-const PopularInTheStore = ({ id, storeShare }) => {
+const PopularInTheStore = ({ id, storeShare, sortBy, type }) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const offset = 1;
@@ -73,6 +73,8 @@ const PopularInTheStore = ({ id, storeShare }) => {
 
   const { data, refetch, isLoading } = usePopularProductsInStore({
     id,
+    sortBy,
+    type,
     ...storeShare,
   });
   const {
@@ -90,6 +92,13 @@ const PopularInTheStore = ({ id, storeShare }) => {
     refetchCommonCondition();
     refetch();
   }, []);
+
+  // Refetch popular items whenever the active sort/type filter changes
+  // so the section reflects the current selection.
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortBy, type]);
 
   return (
     <CustomBoxFullWidth>

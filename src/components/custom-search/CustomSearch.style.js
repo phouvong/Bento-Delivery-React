@@ -4,39 +4,38 @@ import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 
 export const Search = styled(CustomStackFullWidth)(({ theme, type2 }) => ({
-  backgroundColor: theme.palette.neutral[100],
+  backgroundColor: theme.palette.mode === "dark" ? theme.palette.neutral[200] : "#f2f2f2",
   color: theme.palette.neutral[600],
   height: "40px",
-  border:
-    type2
-      ? `1px solid ${alpha(
+  border: type2
+    ? `1px solid ${alpha(
         getCurrentModuleType() === ModuleTypes.FOOD
           ? theme.palette.moduleTheme.food
           : theme.palette.primary.main,
-        0.4
+        0.4,
       )}`
-      : `1px solid ${alpha(theme.palette.neutral[500], .4)}`,
-  borderRadius: "5px",
-  transition: theme.transitions.create(['box-shadow', 'border-color'], {
+    : "1px solid #e0e0e0",
+  borderRadius: "9999px",
+  transition: theme.transitions.create(["box-shadow", "border-color"], {
     duration: theme.transitions.duration.short,
   }),
-  "&:focus-within": {
-    border: `1px solid ${getCurrentModuleType() === ModuleTypes.FOOD
-      ? theme.palette.moduleTheme.food
-      : theme.palette.primary.main
-      }`,
-    boxShadow: `0 4px 12px ${alpha(
-      getCurrentModuleType() === ModuleTypes.FOOD
-        ? theme.palette.moduleTheme.food
-        : theme.palette.primary.main,
-      0.25
-    )}, 0 0 0 1px ${alpha(
-      getCurrentModuleType() === ModuleTypes.FOOD
-        ? theme.palette.moduleTheme.food
-        : theme.palette.primary.main,
-      0.1
-    )}`,
-  },
+  // "&:focus-within": {
+  //   border: `1px solid ${getCurrentModuleType() === ModuleTypes.FOOD
+  //     ? theme.palette.moduleTheme.food
+  //     : theme.palette.primary.main
+  //     }`,
+  //   boxShadow: `0 4px 12px ${alpha(
+  //     getCurrentModuleType() === ModuleTypes.FOOD
+  //       ? theme.palette.moduleTheme.food
+  //       : theme.palette.primary.main,
+  //     0.25
+  //   )}, 0 0 0 1px ${alpha(
+  //     getCurrentModuleType() === ModuleTypes.FOOD
+  //       ? theme.palette.moduleTheme.food
+  //       : theme.palette.primary.main,
+  //     0.1
+  //   )}`,
+  // },
 }));
 
 export const StyledInputBase = styled(InputBase)(
@@ -52,5 +51,5 @@ export const StyledInputBase = styled(InputBase)(
       transition: theme.transitions.create("width"),
       width: "100%",
     },
-  })
+  }),
 );

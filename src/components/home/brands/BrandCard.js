@@ -35,7 +35,7 @@ const BrandCard = (props) => {
 					},
 				}}
 			>
-				<Link href={`/home?brand_id=${id}&data_type=brand`} />
+				<Link href={`/search?brand_id=${id}&data_type=brand`} />
 				<Stack
 					sx={{
 						maxWidth: horizontal

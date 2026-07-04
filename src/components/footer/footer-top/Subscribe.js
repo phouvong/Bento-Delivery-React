@@ -1,37 +1,28 @@
-import { useTheme } from "@emotion/react";
-import { LoadingButton } from "@mui/lab";
-import { InputBase, Paper } from "@mui/material";
-import React, { useState } from "react";
+import { Button, CircularProgress, InputBase } from "@mui/material";
+import { Box } from "@mui/system";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import { onErrorResponse } from "../../../api-manage/api-error-response/ErrorResponses";
 import { usePostNewsletterEmail } from "../../../api-manage/hooks/react-query/newsletter/usePostNewsletterEmail";
-import { getCurrentModuleType } from "../../../helper-functions/getCurrentModuleType";
-import { ModuleTypes } from "../../../helper-functions/moduleTypes";
 
 const Subscribe = () => {
-  const [emailAddress, setEmailAddress] = useState(null);
+  const [emailAddress, setEmailAddress] = useState("");
   const { t } = useTranslation();
   const { mutate, isLoading } = usePostNewsletterEmail();
-  const theme = useTheme();
 
   const handleSuccess = () => {
-    toast.success(t("Subscribed Successfully"), {
-      id: "subscribed-toaster",
-    });
+    toast.success(t("Subscribed Successfully"), { id: "subscribed-toaster" });
     setEmailAddress("");
   };
 
   const handleSubmit = () => {
     const regex =
       /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
-    if (regex.test(emailAddress) === true) {
+    if (regex.test(emailAddress)) {
       mutate(
         { email: emailAddress },
-        {
-          onSuccess: handleSuccess,
-          onError: onErrorResponse,
-        }
+        { onSuccess: handleSuccess, onError: onErrorResponse }
       );
     } else {
       toast.error(t("Please insert a valid email."), {
@@ -39,56 +30,60 @@ const Subscribe = () => {
       });
     }
   };
+
   return (
-    <Paper
-      elevation={0}
+    <Box
       sx={{
-        mt: 1,
-        p: getCurrentModuleType() === ModuleTypes.FOOD ? "0px" : "5px",
         display: "flex",
         alignItems: "center",
-        backgroundColor: "white",
-        width: { xs: "100%" },
-        mr: "auto",
-        borderRadius: "10px",
+        gap: "24px",
+        backgroundColor: "background.paper",
+        borderRadius: "12px",
+        pl: "24px",
+        pr: "8px",
+        py: "8px",
+        width: "100%",
       }}
     >
       <InputBase
         sx={{
-          ml: 1.5,
-          mr: 1.5,
           flex: 1,
-          color: "black",
-          align: "center",
-          height: "48px",
+          minWidth: 0,
+          fontSize: "14px",
+          fontWeight: 400,
+          lineHeight: 1.3,
+          "& input::placeholder": { color: "#757575", opacity: 1 },
         }}
         value={emailAddress}
         type="email"
         name="email"
-        placeholder={t("Your Email")}
+        placeholder={t("Enter your email address")}
         onChange={(e) => setEmailAddress(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
       />
-      <LoadingButton
-        loading={isLoading}
-        sx={{
-          width: "100px",
-          borderRadius: "5px",
-          background: theme.palette.primary.main,
-          // backgroundColor: (theme) =>
-          // 	getCurrentModuleType() === ModuleTypes.FOOD
-          // 		? theme.palette.moduleTheme.food
-          // 		: "primary.main",
-          color: "#ffffff",
-          marginRight: "3px",
-        }}
+      <Button
         variant="contained"
-        type="submit"
-        aria-label="search"
-        onClick={() => handleSubmit()}
+        onClick={handleSubmit}
+        disabled={isLoading}
+        startIcon={isLoading ? <CircularProgress size={14} color="inherit" /> : undefined}
+        sx={{
+          height: "36px",
+          px: "16px",
+          borderRadius: "8px",
+          fontSize: "14px",
+          fontWeight: 600,
+          letterSpacing: "-0.42px",
+          lineHeight: 1.2,
+          textTransform: "none",
+          whiteSpace: "nowrap",
+          flexShrink: 0,
+          boxShadow: "none",
+          "&:hover": { boxShadow: "none" },
+        }}
       >
-        {t("Subscribe")}
-      </LoadingButton>
-    </Paper>
+        {t("Subscribe Now")}
+      </Button>
+    </Box>
   );
 };
 

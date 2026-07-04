@@ -84,14 +84,10 @@ const CategoryPopover = ({ handlePopoverCloseSub, categories }) => {
           query: { categoryId: item?.id },
         }
         : {
-          pathname: "/search",
+          pathname: `/home/category/${item?.slug || item?.id}`,
           query: {
-            search: "category",
             id: item?.id,
             module: moduleValue,
-            name: (item?.name),
-            data_type: "category",
-            from: "nav",
           },
         };
 
@@ -101,13 +97,10 @@ const CategoryPopover = ({ handlePopoverCloseSub, categories }) => {
 
   const handleClickToSubCategory = (item) => {
     router.push({
-      pathname: "/search",
+      pathname: `/home/category/${item?.slug || item?.id}`,
       query: {
-        search: "category",
         id: item?.id,
-        module: `${moduleValue}`,
-        name: (item?.name),
-        data_type: "category",
+        module: moduleValue,
       },
     });
     handlePopoverCloseSub?.();

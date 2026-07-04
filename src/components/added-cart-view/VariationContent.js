@@ -3,51 +3,66 @@ import { Typography } from "@mui/material";
 import { Stack } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import { getSelectedAddOn } from "../../helper-functions/CardHelpers";
-import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import VisibleVariations from "./FoodVariations";
-import { OrderFoodSubtitle } from "../checkout/CheckOut.style";
 
 const VariationContent = ({ cartItem }) => {
   const { t } = useTranslation();
   const handleProduct = () => {
     if (cartItem?.selectedOption?.length > 0) {
       return (
-        <Stack>
+        <>
           {cartItem?.choice_options?.map((item, index) => {
             return (
-              <Stack key={index}>
+              <React.Fragment key={index}>
                 <Typography color="customColor.textGray" fontSize="12px">
-                  {item?.title} :{" "}
+                  {item?.title}:
+                </Typography>
+                <Typography color="text.primary" fontSize="12px">
                   {cartItem?.selectedOption?.[0]?.type.split("-")?.[index]}
                 </Typography>
-              </Stack>
+                {index < cartItem?.choice_options?.length - 1 && (
+                  <Typography color="text.secondary" fontSize="12px">
+                    ,
+                  </Typography>
+                )}
+              </React.Fragment>
             );
           })}
-        </Stack>
+        </>
       );
     }
   };
   const handleFood = () => {
     return (
-      <CustomStackFullWidth>
+      <>
         <VisibleVariations variations={cartItem?.food_variations} t={t} />
-        {cartItem?.selectedAddons?.length > 0 && (
-          <Stack direction="row" alignItems="center" flexWrap="wrap" gap="5px">
-            <OrderFoodSubtitle>{t("Addon")}</OrderFoodSubtitle>
-            <OrderFoodSubtitle>:</OrderFoodSubtitle>
-            <OrderFoodSubtitle>
-              {getSelectedAddOn(cartItem?.selectedAddons)}
-            </OrderFoodSubtitle>
-          </Stack>
-        )}
-      </CustomStackFullWidth>
+        {(() => {
+          const addonText = getSelectedAddOn(cartItem?.selectedAddons);
+          return addonText ? (
+            <>
+              <Typography fontSize="12px" color="text.primary">
+                {t("Addon")}:
+              </Typography>
+              <Typography fontSize="12px" color="text.secondary">
+                {addonText}
+              </Typography>
+            </>
+          ) : null;
+        })()}
+      </>
     );
   };
 
   return (
-    <div>
+    <Stack
+      direction="row"
+      alignItems="center"
+      flexWrap="wrap"
+      gap="4px"
+      sx={{ fontSize: "12px" }}
+    >
       {cartItem?.module_type === "food" ? handleFood() : handleProduct()}
-    </div>
+    </Stack>
   );
 };
 

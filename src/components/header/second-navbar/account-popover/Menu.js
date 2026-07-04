@@ -14,6 +14,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import CustomDialogConfirm from "../../../custom-dialog/confirm/CustomDialogConfirm";
 import { useDispatch, useSelector } from "react-redux";
 import { setLogoutUser } from "redux/slices/profileInfo";
+import { clearAllCartData } from "redux/slices/cart";
 import toast from "react-hot-toast";
 import { logoutSuccessFull } from "utils/toasterMessages";
 import { menuData } from "./menuData";
@@ -35,7 +36,13 @@ const Menu = ({ onClose, cartListRefetch }) => {
       setTimeout(() => {
         cartListRefetch();
         dispatch(setLogoutUser(null));
+        dispatch(clearAllCartData());
         localStorage.removeItem("token");
+        // Clear any "don't show this incomplete order again" flags so the
+        // next user sees a fresh state.
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith("incomplete_order_hidden_"))
+          .forEach((k) => localStorage.removeItem(k));
         onClose?.();
         toast.success(t(logoutSuccessFull));
 
@@ -43,14 +50,11 @@ const Menu = ({ onClose, cartListRefetch }) => {
           router.push("/home");
         }
         setOpenModal(false);
-
-
       }, 500);
     } catch (err) {
       //   toast.error('Unable to logout.');
     }
   };
-
 
   const handleClick = (item) => {
     if (item?.id === 10) {
@@ -73,9 +77,12 @@ const Menu = ({ onClose, cartListRefetch }) => {
           if (
             (configData?.customer_wallet_status === 0 && item.id === 4) ||
             (configData?.loyalty_point_status === 0 && item.id === 5) ||
-            (configData?.ref_earning_status === 0 && item.id === 6) || (
-              (!modules?.find((item) => item?.module_type === 'rental') && item.id === 3) || (modules?.find((item) => item?.module_type === 'rental')?.status === 0 && item.id === 3)
-            )
+            (configData?.ref_earning_status === 0 && item.id === 6) ||
+            (!modules?.find((item) => item?.module_type === "rental") &&
+              item.id === 3) ||
+            (modules?.find((item) => item?.module_type === "rental")?.status ===
+              0 &&
+              item.id === 3)
           ) {
             return null;
           } else {
@@ -101,7 +108,7 @@ const Menu = ({ onClose, cartListRefetch }) => {
                       textTransform: "capitalize",
                     }}
                   >
-                    {t(item?.name?.replace("-", " "))}
+                    {t(item?.label ?? item?.name?.replaceAll("-", " "))}
                   </ListItemText>
                 </MenuItem>
               );

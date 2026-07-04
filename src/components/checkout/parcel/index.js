@@ -7,7 +7,14 @@ import {
 } from "styled-components/CustomStyles.style";
 import H1 from "../../typographies/H1";
 import { Stack } from "@mui/system";
-import { Grid, Tooltip, Typography, IconButton, Card, alpha } from "@mui/material";
+import {
+  Grid,
+  Tooltip,
+  Typography,
+  IconButton,
+  Card,
+  alpha,
+} from "@mui/material";
 import DeliveryInfo from "../DeliveryInfo";
 import PaymentMethod from "../PaymentMethod";
 import useGetDistance from "../../../api-manage/hooks/react-query/google-api/useGetDistance";
@@ -43,6 +50,7 @@ import {
   getReferDiscount,
 } from "helper-functions/CardHelpers";
 import CustomDivider from "../../CustomDivider";
+import CustomPageBreadCrumb from "components/common/CustomPageBreadCrumb";
 import useGetDeliveryInstruction from "../../../api-manage/hooks/react-query/order-place/useGetDeliveryInstruction";
 import {
   setOrderDetailsModalOpen,
@@ -55,6 +63,8 @@ import { useGetTax } from "api-manage/hooks/react-query/order-place/useGetTax";
 import deliveryFree from "components/checkout/DeliveryFree";
 import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { useGetSurgePrice } from "api-manage/hooks/react-query/order-place/useGetSurgePrice";
+import useGetProActiveOffer from "api-manage/hooks/react-query/pro-plans/useGetProActiveOffer";
+import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
 import InfoIcon from "@mui/icons-material/Info";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
@@ -62,8 +72,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeliveryInstruction from "../DeliveryInstruction";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import LoadingButton from "@mui/lab/LoadingButton";
-
-
 
 const ParcelCheckout = () => {
   const theme = useTheme();
@@ -76,11 +84,14 @@ const ParcelCheckout = () => {
   const { offlineInfoStep, offlinePaymentInfo } = useSelector(
     (state) => state.offlinePayment
   );
+  console.log({ profileInfo });
+
   const { parcelCategories } = useSelector((state) => state.parcelCategories);
   const [address, setAddress] = useState(undefined);
   const [deliveryTip, setDeliveryTip] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("cash_on_delivery");
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(paymentMethod);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] =
+    useState(paymentMethod);
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
   const [paidBy, setPaidBy] = useState("sender");
   const [orderId, setOrderId] = useState("");
@@ -89,7 +100,8 @@ const ParcelCheckout = () => {
   const [zoneIdEnabled, setZoneIdEnabled] = useState(true);
   const [currentZoneId, setCurrentZoneId] = useState(null);
   const [openModal, setOpenModal] = useState(false);
-  const [openEditInstructionModal, setOpenEditInstructionModal] = useState(false);
+  const [openEditInstructionModal, setOpenEditInstructionModal] =
+    useState(false);
   const [customerInstruction, setCustomerInstruction] = useState(null);
   const [check, setCheck] = React.useState(null);
   const [customNote, setCustomNote] = useState("");
@@ -102,6 +114,8 @@ const ParcelCheckout = () => {
     parcelInfo?.senderLocations,
     parcelInfo?.receiverLocations
   );
+  console.log({ parcelInfo });
+
   const { data: surgePrice, mutate: surgeMutate } = useGetSurgePrice();
   const token = getToken();
   const guest_id = getGuestId();
@@ -280,6 +294,83 @@ const ParcelCheckout = () => {
       }
     }
   };
+  const proFeatureEnabled = configData?.pro_member_status === 1;
+  const hasToken = !!token;
+  const { data: activeOfferRaw } = useGetProActiveOffer({
+    enabled: proFeatureEnabled && hasToken,
+  });
+  const activeOffer = activeOfferRaw?.data ?? activeOfferRaw ?? null;
+  const isProActive = activeOffer?.status === true;
+  const proBenefit = activeOffer?.benefit ?? null;
+  const proMinOrderAmount = Number(proBenefit?.min_order_amount) || 0;
+  const proMinSatisfied =
+    proBenefit?.min_order_status !== 1 ||
+    Number(parcelDeliveryFree() || 0) >= proMinOrderAmount;
+  const proDeliveryBenefitActive =
+    isProActive &&
+    proBenefit?.type === "delivery_fee" &&
+    proMinSatisfied &&
+    Number(parcelDeliveryFree() || 0) > 0;
+  const proDeliveryOfferType = proBenefit?.offer_type;
+  const proDeliveryDiscountPct =
+    Number(proBenefit?.charge_discount_percentage) || 0;
+  const computeProDeliveryDiscount = (rawFee) => {
+    if (!proDeliveryBenefitActive) return 0;
+    const fee = Number(rawFee) || 0;
+    if (
+      proDeliveryOfferType === "free" ||
+      proDeliveryOfferType === "full_free"
+    ) {
+      return fee;
+    }
+    if (proDeliveryOfferType === "partial_free" && proDeliveryDiscountPct > 0) {
+      return (fee * proDeliveryDiscountPct) / 100;
+    }
+    return 0;
+  };
+  const rawParcelDeliveryFee = Number(parcelDeliveryFree() || 0);
+  const proDeliveryDiscount = computeProDeliveryDiscount(rawParcelDeliveryFee);
+  const effectiveParcelDeliveryFee = Math.max(
+    0,
+    rawParcelDeliveryFee - proDeliveryDiscount
+  );
+  const proCoversDelivery =
+    proDeliveryBenefitActive &&
+    (proDeliveryOfferType === "free" || proDeliveryOfferType === "full_free") &&
+    proDeliveryDiscount > 0;
+  const proSavingsMessage = (() => {
+    if (!proDeliveryBenefitActive) return undefined;
+    // Parcel is delivery-only — keep the qualifier in delivery terms.
+    const hasMin = proBenefit?.min_order_status === 1 && proMinOrderAmount > 0;
+    const minAmount = hasMin ? getAmountWithSign(proMinOrderAmount) : "";
+    if (proCoversDelivery) {
+      return hasMin
+        ? t("Free delivery as a Pro member on deliveries above {{amount}}", {
+            amount: minAmount,
+          })
+        : t("Free delivery as a Pro member");
+    }
+    if (proDeliveryDiscountPct > 0) {
+      return hasMin
+        ? t(
+            "{{percent}}% off on delivery fee as a Pro member on deliveries above {{amount}}",
+            { percent: proDeliveryDiscountPct, amount: minAmount }
+          )
+        : t("{{percent}}% off on delivery fee as a Pro member", {
+            percent: proDeliveryDiscountPct,
+          });
+    }
+    return hasMin
+      ? t(
+          "Delivery fee benefit as a Pro member on deliveries above {{amount}}",
+          {
+            amount: minAmount,
+          }
+        )
+      : t("Delivery fee benefit as a Pro member");
+  })();
+  console.log({ parcelInfo });
+
   const receiverDetails = JSON.stringify({
     id: null,
     address_type: "others",
@@ -289,7 +380,27 @@ const ParcelCheckout = () => {
     additional_address: null,
     latitude: parcelInfo?.receiverLocations?.lat,
     longitude: parcelInfo?.receiverLocations?.lng,
-    zone_id: zoneData?.zone_data[0]?.id,
+    zone_id: (() => {
+      const raw = parcelInfo?.receiverZoneId;
+      if (raw == null) return null;
+      // The value may arrive as an array ([6]), a JSON-stringified
+      // array ("[6]"), or a scalar (6 / "6"). Normalize to a plain
+      // string of the first id so the API receives `"6"`, not `"[6]"`.
+      let scalar = raw;
+      if (Array.isArray(scalar)) scalar = scalar[0];
+      else if (typeof scalar === "string") {
+        const trimmed = scalar.trim();
+        if (trimmed.startsWith("[")) {
+          try {
+            const parsed = JSON.parse(trimmed);
+            scalar = Array.isArray(parsed) ? parsed[0] : parsed;
+          } catch {
+            scalar = trimmed.replace(/^\[|\]$/g, "");
+          }
+        }
+      }
+      return scalar != null ? String(scalar) : null;
+    })(),
     zone_ids: null,
     _method: null,
     contact_person_name: parcelInfo?.receiverName,
@@ -299,15 +410,15 @@ const ParcelCheckout = () => {
   });
   const isDigital =
     paymentMethod !== "cash_on_delivery" &&
-      paymentMethod !== "wallet" &&
-      paymentMethod !== "offline_payment" &&
-      paymentMethod !== null
+    paymentMethod !== "wallet" &&
+    paymentMethod !== "offline_payment" &&
+    paymentMethod !== null
       ? "digital_payment"
       : paymentMethod;
   const orderMutationObject = {
     ...address,
     cart: [],
-    order_amount: parcelDeliveryFree() + Number(deliveryTip),
+    order_amount: effectiveParcelDeliveryFee + Number(deliveryTip),
     order_type: "parcel",
     payment_method: isDigital,
     distance: tempDistance,
@@ -351,7 +462,7 @@ const ParcelCheckout = () => {
     if (parcelDeliveryFree()) {
       const newOrderObject = {
         ...orderMutationObject,
-        order_amount: parcelDeliveryFree(),
+        order_amount: effectiveParcelDeliveryFee,
       };
       mutate(newOrderObject, {
         onError: onErrorResponse,
@@ -367,7 +478,12 @@ const ParcelCheckout = () => {
             dispatch(setOrderDetailsModal(true));
           } else {
             dispatch(setGuestUserOrderId(res?.order_id));
-            dispatch(setOrderInformation({ ...res, phone: formatPhoneNumber(parcelInfo?.senderPhone) }));
+            dispatch(
+              setOrderInformation({
+                ...res,
+                phone: formatPhoneNumber(parcelInfo?.senderPhone),
+              })
+            );
             dispatch(setOrderDetailsModalOpen(true));
           }
           if (
@@ -382,13 +498,16 @@ const ParcelCheckout = () => {
             const callBackUrl = token
               ? `${window.location.origin}/profile?page=${page}`
               : `${window.location.origin}/home`;
-            const url = `${baseUrl}/payment-mobile?order_id=${res?.order_id
-              }&customer_id=${profileInfo?.id ?? res?.user_id ? res?.user_id : guest_id
-              }&payment_platform=${payment_platform}&callback=${callBackUrl}&payment_method=${paymentMethod}`;
+            const url = `${baseUrl}/payment-mobile?order_id=${
+              res?.order_id
+            }&customer_id=${
+              profileInfo?.id ?? res?.user_id ? res?.user_id : guest_id
+            }&payment_platform=${payment_platform}&callback=${callBackUrl}&payment_method=${paymentMethod}`;
             router.push(url, undefined, { shallow: true });
           } else if (paymentMethod === "wallet") {
             if (
-              Number(profileInfo?.wallet_balance) < Number(parcelDeliveryFree())
+              Number(profileInfo?.wallet_balance) <
+              Number(effectiveParcelDeliveryFee)
             ) {
               toast.error(t("Wallet balance is below total amount."), {
                 id: "wallet",
@@ -412,7 +531,12 @@ const ParcelCheckout = () => {
             }
           } else if (paymentMethod === "offline_payment") {
             setOrderId(res?.order_id);
-            dispatch(setOrderInformation({ ...res, phone: formatPhoneNumber(parcelInfo?.senderPhone) }));
+            dispatch(
+              setOrderInformation({
+                ...res,
+                phone: formatPhoneNumber(parcelInfo?.senderPhone),
+              })
+            );
             // setOfflineCheck(true);
             toast.success(res?.message);
             console.log("offline");
@@ -467,17 +591,20 @@ const ParcelCheckout = () => {
         },
       });
     } else {
-
       dispatch(setOrderDetailsModalOpen(true));
       if (paymentMethod === "cash_on_delivery") {
         const handleSuccess = (res) => {
           if (res) {
-
             toast.success(res?.message);
             const token = getToken();
             if (!token) {
               setOrderId(res?.order_id);
-              dispatch(setOrderInformation({ ...res, phone: formatPhoneNumber(parcelInfo?.senderPhone) }));
+              dispatch(
+                setOrderInformation({
+                  ...res,
+                  phone: formatPhoneNumber(parcelInfo?.senderPhone),
+                })
+              );
               Router.push(
                 {
                   pathname: "/home",
@@ -525,17 +652,17 @@ const ParcelCheckout = () => {
     setSideDrawerOpen(true);
   };
   const finalTotal = profileInfo?.is_valid_for_discount
-    ? parcelDeliveryFree() +
-    Number(deliveryTip) +
-    (configData?.additional_charge ? configData?.additional_charge : 0) -
-    getReferDiscount(
-      parcelDeliveryFree(),
-      profileInfo?.discount_amount,
-      profileInfo?.discount_amount_type
-    )
-    : parcelDeliveryFree() +
-    Number(deliveryTip) +
-    (configData?.additional_charge ? configData?.additional_charge : 0);
+    ? effectiveParcelDeliveryFee +
+      Number(deliveryTip) +
+      (configData?.additional_charge ? configData?.additional_charge : 0) -
+      getReferDiscount(
+        effectiveParcelDeliveryFee,
+        profileInfo?.discount_amount,
+        profileInfo?.discount_amount_type
+      )
+    : effectiveParcelDeliveryFee +
+      Number(deliveryTip) +
+      (configData?.additional_charge ? configData?.additional_charge : 0);
 
   const getParcelPayment = () => {
     // Check if zoneData and zone_data are available
@@ -546,21 +673,49 @@ const ParcelCheckout = () => {
       item?.modules?.find((module) => module?.module_type === "parcel")
     );
   };
+  const breadcrumbItems = [
+    {
+      key: "parcel",
+      label: t("Parcel"),
+      icon: (
+        <i
+          className="fi fi-rr-home"
+          style={{ fontSize: 12, display: "flex", lineHeight: 1 }}
+        />
+      ),
+      onRedirect: "/parcel-delivery-info",
+    },
+    {
+      key: "checkout",
+      label: t("Checkout"),
+    },
+  ];
+
   const extraText = t("This charge includes extra vehicle charge");
-  const deliveryToolTipsText = `${extraText} ${getAmountWithSign(extraCharge)}${surgePrice?.customer_note_status !== 0
-    ? ` ${surgePrice?.customer_note} ${surgePrice?.type === "amount"
-      ? getAmountWithSign(surgePrice?.price)
-      : `${surgePrice?.price}%`
-    }`
-    : ""
-    }`;
+  const proTooltipText =
+    proDeliveryBenefitActive && proDeliveryDiscount > 0
+      ? ` ${t("Pro discount applied")}: -${getAmountWithSign(
+          proDeliveryDiscount
+        )}`
+      : "";
+  const deliveryToolTipsText = `${
+    extraCharge > 0 ? `${extraText} ${getAmountWithSign(extraCharge)}` : ""
+  }${
+    surgePrice?.price > 0 && surgePrice?.customer_note_status !== 0
+      ? ` ${surgePrice?.customer_note} ${
+          surgePrice?.type === "amount"
+            ? getAmountWithSign(surgePrice?.price)
+            : `${surgePrice?.price}%`
+        }`
+      : ""
+  }${proTooltipText}`.trim();
 
   return (
     <>
       {method === "offline" ? (
         <CustomStackFullWidth
           paddingBottom={{ sm: "20px", md: "80px" }}
-          pt="1.5rem"
+          pt={{ xs: 0, sm: "1.5rem" }}
           alignItems="center"
         >
           <CustomPaperBigCard
@@ -569,7 +724,7 @@ const ParcelCheckout = () => {
             <OfflineForm
               offlinePaymentOptions={offlinePaymentOptions}
               total_order_amount={
-                parcelDeliveryFree() +
+                effectiveParcelDeliveryFee +
                 parseFloat(deliveryTip) +
                 configData?.additional_charge
               }
@@ -582,10 +737,13 @@ const ParcelCheckout = () => {
       ) : (
         <CustomStackFullWidth
           paddingBottom={{ sm: "20px", md: "80px" }}
-          pt="1.5rem"
+          pt={{ xs: "1.5rem", sm: "1.5rem" }}
         >
-          <Stack paddingBottom="20px">
+          <Stack paddingBottom={{ xs: "16px", sm: "8px" }}>
             <H1 text="Checkout" textAlign="left" />
+          </Stack>
+          <Stack paddingBottom={{ xs: "16px", sm: "20px" }}>
+            <CustomPageBreadCrumb items={breadcrumbItems} />
           </Stack>
           <CustomStackFullWidth>
             <Grid container spacing={3}>
@@ -624,302 +782,320 @@ const ParcelCheckout = () => {
                   parcel="true"
                   offlinePaymentOptions={offlinePaymentOptions}
                   getParcelPayment={getParcelPayment}
+                  walletBalance={profileInfo?.wallet_balance}
+                  payableAmount={
+                    effectiveParcelDeliveryFee +
+                    parseFloat(deliveryTip || 0) +
+                    (configData?.additional_charge || 0)
+                  }
                 />
               </Grid>
               <Grid item xs={12} sm={12} md={4}>
-
                 {currentZoneId && zoneData && (
-                  <Card sx={{ padding: "1.2rem", backgroundColor: theme.palette.background.custom, border: `1px solid rgba(0, 0, 0, 0.05)`, }}>
-                    <Stack gap="1rem">
-                      <DeliveryCaption>
-                        {t("Order Summary")}
-                      </DeliveryCaption>
+                  <Card
+                    sx={{
+                      padding: 0,
+                      backgroundColor: theme.palette.background.paper,
+                      border: "none",
+                      borderRadius: "16px",
+                      boxShadow:
+                        "0px 4px 16px 0px rgba(17, 24, 39, 0.06), 0px 1px 2px 0px rgba(17, 24, 39, 0.04)",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <Stack
+                      sx={{ padding: { xs: "16px", md: "20px" } }}
+                      gap={1.5}
+                    >
+                      <Typography
+                        fontWeight={700}
+                        fontSize={{ xs: "16px", md: "18px" }}
+                        color="text.primary"
+                      >
+                        {t("Billing")}
+                      </Typography>
 
-                      <Stack sx={{
-                        backgroundColor: theme.palette.background.paper,
-                        padding: "1rem",
-                        borderRadius: ".5rem",
-                      }}>
-                        <Stack
-                          flexDirection="row"
-                          alignItems="center"
-                          justifyContent="space-between"
-                        >
-                          <Typography fontSize="16px" fontWeight="500">
-                            {t("Add More Delivery Instruction")}
-                          </Typography>
-                          {selectedInstruction ? (
-                            //   <IconButton>
-                            //     <BorderColorIcon sx={{color:theme=>theme.palette.primary.main}} fontSize="medium" onClick={handleClick} />
-                            // </IconButton>
-                            <Stack
-                              direction="row"
-                              alignItems="center"
-                              gap={.5}
-                              onClick={handleClick}
-                              sx={{
-                                cursor: "pointer",
-                                color: theme.palette.info.main,
-                                fontWeight: "500",
-                              }}>
-                              <EditIcon fontSize="12px" />
-                              {t("Edit")}
-                            </Stack>
-                          ) : (
-                            <Stack onClick={handleEditInstructionClick}>
-                              <AddIcon width="16px" height="16px" />
-                            </Stack>
+                      {parcelInfo?.name && (
+                        <Stack direction="row" alignItems="center" gap={1.5}>
+                          {parcelInfo?.image && (
+                            <CustomImageContainer
+                              src={parcelInfo?.image}
+                              height="44px"
+                              width="44px"
+                              objectfit="contain"
+                              borderRadius="8px"
+                            />
                           )}
-                        </Stack>
-                        <Stack>
-                          {customerInstruction && (
-                            <Stack
-                              direction="row"
-                              gap="10px"
-                              justifyContent="flex-start"
-                              mt="1rem"
-                              sx={{
-                                backgroundColor: theme => theme.palette.neutral[300],
-                                padding: "8px 10px",
-                                borderRadius: "8px"
-                              }}
-                            >
-                              <Stack
-                                gap="10px"
-                                direction="row"
-                                alignItems="center"
-                                justifyContent="space-between"
-                                width="100%"
-
-                              >
-                                <Typography
-                                  fontSize="12px"
-                                  fontWeight={400}
-                                //color={theme.palette.primary.main}
-                                >
-                                  {selectedInstruction}
-                                </Typography>
-                                <Stack
-                                  justifyContent="flex-end"
-                                  alignItems='end'
-                                  sx={{ cursor: "pointer" }}
-
-                                >
-                                  <CloseIcon
-                                    sx={{
-                                      width: "20px",
-                                      height: "20px",
-                                      fontWeight: "700"
-                                    }}
-                                    onClick={handleRemoveInstruction}
-                                  />
-                                </Stack>
-                              </Stack>
-                            </Stack>
-                          )}
-                          {customNote && (
-                            <Stack
-                              gap="10px"
-                              direction="row"
-                              alignItems="center"
-                              justifyContent="space-between"
-                              width="100%"
-                              sx={{
-                                backgroundColor: theme => theme.palette.neutral[300],
-                                padding: "8px 10px",
-                                borderRadius: "8px"
-                              }}
-                              marginTop="10px"
-                            >
-                              <Stack>
-                                <Typography
-                                  fontSize="12px"
-                                  fontWeight={600}
-
-                                >Note:</Typography>
-                                <Typography
-                                  fontSize="12px"
-                                  fontWeight={400}
-                                  color={alpha(
-                                    theme.palette.neutral[600],
-                                    0.7
-                                  )}
-                                >
-                                  {customNote}
-                                </Typography>
-                              </Stack>
-                              <Stack
-                                justifyContent="flex-end"
-                                alignItems='end'
-                                sx={{ cursor: "pointer" }}
-                              >
-                                <CloseIcon
-                                  sx={{
-                                    width: "20px",
-                                    height: "20px",
-                                    fontWeight: "700"
-                                  }}
-                                  onClick={handleRemoveInstructionDes}
-                                />
-                              </Stack>
-                            </Stack>
-                          )}
-                        </Stack>
-                        <CustomModal
-                          openModal={openEditInstructionModal}
-                          handleClose={() => setOpenEditInstructionModal(false)}
-                        >
-                          <CustomStackFullWidth
-                            direction="row"
-                            alignItems="center"
-                            justifyContent="flex-end"
-                            sx={{ position: "relative" }}
+                          <Typography
+                            fontWeight={700}
+                            fontSize="15px"
+                            color="text.primary"
                           >
-                            <IconButton
-                              onClick={() => setOpenModal(false)}
-                              sx={{
-                                zIndex: "99",
-                                position: "absolute",
-                                top: 0,
-                                right: 0,
-                                backgroundColor: (theme) =>
-                                  theme.palette.neutral[100],
-                                borderRadius: "50%",
-                                [theme.breakpoints.down("md")]: {
-                                  top: 10,
-                                  right: 5,
-                                },
-                              }}
-                            >
-                              <CloseIcon
-                                sx={{ fontSize: "20px", fontWeight: "700" }}
-                              />
-                            </IconButton>
-                          </CustomStackFullWidth>
-                          <DeliveryInstruction
-                            setOpenModal={setOpenEditInstructionModal}
-                            deliveryInstruction={deliveryInstruction}
-                            setCustomerInstruction={setCustomerInstruction}
-                            selectedInstruction={selectedInstruction}
-                            setSelectedInstruction={setSelectedInstruction}
-                            customNote={customNote}
-                            setCustomNote={setCustomNote}
+                            {parcelInfo?.name}
+                          </Typography>
+                        </Stack>
+                      )}
+                    </Stack>
 
-                          />
-                        </CustomModal>
-                      </Stack>
-
+                    <Stack
+                      sx={{
+                        padding: { xs: "0 16px 16px", md: "0 20px 20px" },
+                      }}
+                      gap={1.5}
+                    >
+                      {/* {proFeatureEnabled &&
+                      hasToken &&
+                      isProActive &&
+                      proSavingsMessage ? (
+                        <ProSavingsBanner message={proSavingsMessage} />
+                      ) : null} */}
                       <Stack
-                        spacing={1}
-                        paddingY="10px"
+                        spacing={1.25}
                         sx={{
                           backgroundColor: theme.palette.background.paper,
-                          borderRadius: ".5rem",
-                          padding: "1rem",
+                          borderRadius: 0,
+                          padding: 0,
                         }}
                       >
-                        <Stack direction="row" justifyContent="space-between">
-                          <Typography fontWeight="500">
-                            {t("Delivery Fee")}
-                            {extraCharge > 0 || surgePrice?.price > 0 ? (
-                              <Tooltip
-                                title={deliveryToolTipsText}
-                                placement="top"
-                                arrow={true}
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                          <Stack
+                            direction="row"
+                            alignItems="center"
+                            spacing={0.75}
+                          >
+                            <Typography
+                              fontSize="14px"
+                              color={
+                                theme.palette.neutral?.[500] ||
+                                theme.palette.text.secondary
+                              }
+                            >
+                              {t("Delivery Fee")}
+                              {extraCharge > 0 ||
+                              surgePrice?.price > 0 ||
+                              (proDeliveryBenefitActive &&
+                                proDeliveryDiscount > 0) ? (
+                                <Tooltip
+                                  title={deliveryToolTipsText}
+                                  placement="top"
+                                  arrow={true}
+                                >
+                                  <InfoIcon
+                                    sx={{ fontSize: "11px", ml: 0.5 }}
+                                  />
+                                </Tooltip>
+                              ) : null}
+                            </Typography>
+                            {/* {proCoversDelivery ? (
+                              <Typography
+                                component="span"
+                                sx={{
+                                  fontSize: "11px",
+                                  px: 0.75,
+                                  py: 0.1,
+                                  borderRadius: "999px",
+                                  backgroundColor: alpha(
+                                    theme.palette.primary.main,
+                                    0.12
+                                  ),
+                                  color: theme.palette.primary.main,
+                                  fontWeight: 600,
+                                }}
                               >
-                                <InfoIcon sx={{ fontSize: "11px" }} />
-                              </Tooltip>
-                            ) : null}
-                          </Typography>
-                          <Typography fontWeight="500">
-                            {getAmountWithSign(parcelDeliveryFree())}
-                          </Typography>
+                                {t("Pro")}
+                              </Typography>
+                            ) : null} */}
+                          </Stack>
+                          {proDeliveryBenefitActive &&
+                          proDeliveryDiscount > 0 &&
+                          rawParcelDeliveryFee > 0 ? (
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              justifyContent="flex-end"
+                              spacing={0.5}
+                            >
+                              <Typography
+                                sx={{
+                                  textDecoration: "line-through",
+                                  opacity: 0.6,
+                                }}
+                              >
+                                {getAmountWithSign(rawParcelDeliveryFee)}
+                              </Typography>
+                              <Typography color="primary" fontWeight={600}>
+                                {effectiveParcelDeliveryFee === 0
+                                  ? t("Free")
+                                  : getAmountWithSign(
+                                      effectiveParcelDeliveryFee
+                                    )}
+                              </Typography>
+                            </Stack>
+                          ) : (
+                            <Typography
+                              fontSize="14px"
+                              fontWeight={500}
+                              color="text.primary"
+                            >
+                              {getAmountWithSign(rawParcelDeliveryFee)}
+                            </Typography>
+                          )}
                         </Stack>
-                        <Stack direction="row" justifyContent="space-between">
-                          <Typography fontWeight="500">
+
+                        <Stack
+                          direction="row"
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                          <Typography
+                            fontSize="14px"
+                            color={
+                              theme.palette.neutral?.[500] ||
+                              theme.palette.text.secondary
+                            }
+                          >
                             {t("Delivery Man Tips")}
                           </Typography>
-                          <Typography fontWeight="500">
+                          <Typography
+                            fontSize="14px"
+                            fontWeight={500}
+                            color="text.primary"
+                          >
                             {getAmountWithSign(deliveryTip)}
                           </Typography>
                         </Stack>
                         {taxData?.tax_included !== null &&
-                          taxData?.tax_included === 0 ? (
-                          <>
-                            <Stack direction="row" justifyContent="space-between">
-                              <Typography fontWeight="500">
-                                {t("VAT/TAX")}
-                              </Typography>
-                              <Typography fontWeight="500">
-                                {taxData?.tax_included === 0 && <>{"(+)"}</>}
-                                {getAmountWithSign(taxData?.tax_amount)}
-                              </Typography>
-                            </Stack>
-                          </>
+                        taxData?.tax_included === 0 ? (
+                          <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Typography
+                              fontSize="14px"
+                              color={
+                                theme.palette.neutral?.[500] ||
+                                theme.palette.text.secondary
+                              }
+                            >
+                              {t("VAT/TAX")}
+                            </Typography>
+                            <Typography
+                              fontSize="14px"
+                              fontWeight={500}
+                              color="text.primary"
+                            >
+                              {taxData?.tax_included === 0 && <>{"(+)"}</>}
+                              {getAmountWithSign(taxData?.tax_amount)}
+                            </Typography>
+                          </Stack>
                         ) : null}
                         {configData?.additional_charge_status === 1 && (
-                          <Stack direction="row" justifyContent="space-between">
+                          <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
                             <Typography
-                              fontWeight="500"
+                              fontSize="14px"
+                              color={
+                                theme.palette.neutral?.[500] ||
+                                theme.palette.text.secondary
+                              }
                               sx={{
                                 textTransform: "capitalize",
                                 overflow: "hidden",
                                 textOverflow: "ellipsis",
-                                whiteSpace: "nowrap", // ensures single line
+                                whiteSpace: "nowrap",
                               }}
                             >
                               {configData?.additional_charge_name}
                             </Typography>
-                            <Typography fontWeight="500">
+                            <Typography
+                              fontSize="14px"
+                              fontWeight={500}
+                              color="text.primary"
+                            >
                               {getAmountWithSign(configData?.additional_charge)}
                             </Typography>
                           </Stack>
                         )}
+                      </Stack>
+                    </Stack>
 
-                        <CustomDivider border="1px" />
-                        <Stack direction="row" justifyContent="space-between">
-                          <Typography
-                            fontWeight="500"
-                            color="primary"
-                            component="span"
-                          >
-                            {t("Total")}
-                            {taxData?.tax_included === 1 &&
-                              taxData?.tax_included !== null && (
-                                <Typography
-                                  fontSize="12px"
-                                  sx={{ marginInlineStart: "5px" }}
-                                  color="primary"
-                                  component="span"
-                                >
-                                  {"(Vat/Tax incl.)"}
-                                </Typography>
-                              )}
-                          </Typography>
-                          <Typography fontWeight="500" color="primary">
-                            {getAmountWithSign(
-                              parcelDeliveryFree() +
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      justifyContent="space-between"
+                      gap={2}
+                      sx={{
+                        padding: { xs: "16px", md: "20px" },
+                        borderTop: `1px solid ${
+                          theme.palette.neutral?.[200] || "rgba(0,0,0,0.06)"
+                        }`,
+                      }}
+                    >
+                      <Stack>
+                        <Typography
+                          fontSize="13px"
+                          color={
+                            theme.palette.neutral?.[500] ||
+                            theme.palette.text.secondary
+                          }
+                        >
+                          {t("Subtotal")}
+                          {taxData?.tax_included === 1 &&
+                            taxData?.tax_included !== null && (
+                              <Typography
+                                fontSize="11px"
+                                component="span"
+                                sx={{ marginInlineStart: "5px" }}
+                                color={
+                                  theme.palette.neutral?.[500] ||
+                                  theme.palette.text.secondary
+                                }
+                              >
+                                {"(Vat/Tax incl.)"}
+                              </Typography>
+                            )}
+                        </Typography>
+                        <Typography
+                          fontSize="18px"
+                          fontWeight={700}
+                          color="text.primary"
+                        >
+                          {getAmountWithSign(
+                            effectiveParcelDeliveryFee +
                               Number(deliveryTip) +
                               taxData?.tax_amount +
                               (configData?.additional_charge
                                 ? configData?.additional_charge
                                 : 0)
-                            )}
-                          </Typography>
-                        </Stack>
+                          )}
+                        </Typography>
                       </Stack>
-
-                      <Stack>
-                        <LoadingButton
-                          type="submit"
-                          fullWidth
-                          variant="contained"
-                          onClick={orderPlace}
-                          loading={isLoading}
-                        >
-                          {t("Confirm Parcel Request")}
-                        </LoadingButton>
-                      </Stack>
+                      <LoadingButton
+                        type="submit"
+                        variant="contained"
+                        onClick={orderPlace}
+                        loading={isLoading}
+                        sx={{
+                          borderRadius: "10px",
+                          height: "44px",
+                          px: 3,
+                          fontWeight: 700,
+                          fontSize: "14px",
+                          textTransform: "capitalize",
+                          boxShadow: "none",
+                          "&:hover": { boxShadow: "none" },
+                        }}
+                      >
+                        {t("Confirm Order")}
+                      </LoadingButton>
                     </Stack>
                   </Card>
                 )}

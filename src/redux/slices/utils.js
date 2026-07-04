@@ -8,6 +8,8 @@ const initialState = {
   orderInformation: {},
   welcomeModal: false,
   openForgotPasswordModal: false,
+  openSignInModal: false,
+  searchBannerInView: true,
 };
 export const utilsSlice = createSlice({
   name: "utils-data",
@@ -34,6 +36,12 @@ export const utilsSlice = createSlice({
     setOpenForgotPasswordModal: (state, action) => {
       state.openForgotPasswordModal = action.payload;
     },
+    setOpenSignInModal: (state, action) => {
+      state.openSignInModal = action.payload;
+    },
+    setSearchBannerInView: (state, action) => {
+      state.searchBannerInView = action.payload;
+    },
   },
 });
 
@@ -45,6 +53,8 @@ export const {
   setOrderInformation,
   setWelcomeModal,
   setOpenForgotPasswordModal,
+  setOpenSignInModal,
+  setSearchBannerInView,
 } = utilsSlice.actions;
 
 export default utilsSlice.reducer;

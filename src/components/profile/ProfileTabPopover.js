@@ -24,22 +24,32 @@ const StyledMenuItem = styled(MenuItem)(({ theme, page, menu }) => ({
   },
 }));
 const ProfileTabPopover = (props) => {
-  const { deleteUserHandler,isLoadingDelete,accountDeleteStatus,setAccountDeleteStatus, anchorEl, onClose, open, page, ...other } = props;
+  const {
+    deleteUserHandler,
+    isLoadingDelete,
+    accountDeleteStatus,
+    setAccountDeleteStatus,
+    anchorEl,
+    onClose,
+    open,
+    page,
+    ...other
+  } = props;
   const { configData } = useSelector((state) => state.configData);
-  const [openModal, setOpenModal] = useState(false)
-  const [deleteModal, setDeleteModal] = useState(false)
+  const [openModal, setOpenModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
   const router = useRouter();
 
   const handleClose = () => {
-    setDeleteModal(false)
-    setAccountDeleteStatus(true)
+    setDeleteModal(false);
+    setAccountDeleteStatus(true);
   };
 
-  const handleOpenDeleteModal= ()=>{
+  const handleOpenDeleteModal = () => {
     onClose();
-    setOpenModal(false)
-    setDeleteModal(true)
-  }
+    setOpenModal(false);
+    setDeleteModal(true);
+  };
 
   const handleClick = (item) => {
     router.push({
@@ -100,7 +110,7 @@ const ProfileTabPopover = (props) => {
                 menu={menu}
                 onClick={() => handleClick(menu)}
               >
-                {t(menu?.name?.replace("-", " "))}
+                {t(menu?.label ?? menu?.name?.replaceAll("-", " "))}
               </StyledMenuItem>
             );
           }
@@ -113,10 +123,7 @@ const ProfileTabPopover = (props) => {
           {t("Delete Your Account")}
         </StyledMenuItem>
       </MenuList>
-      <CustomModal
-        openModal={deleteModal}
-        handleClose={handleClose}
-      >
+      <CustomModal openModal={deleteModal} handleClose={handleClose}>
         <DeleteAccount
           isLoading={isLoadingDelete}
           handleClose={handleClose}

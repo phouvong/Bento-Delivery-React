@@ -117,6 +117,7 @@ export const settings = {
   speed: 500,
   slidesToShow: 4.8,
   slidesToScroll: 1,
+  swipeToSlide: true,
   nextArrow: <Next />,
   prevArrow: <Prev />,
 
@@ -126,6 +127,7 @@ export const settings = {
       settings: {
         slidesToShow: 4.9,
         slidesToScroll: 3,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -134,6 +136,7 @@ export const settings = {
       settings: {
         slidesToShow: 4.6,
         slidesToScroll: 3,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -142,6 +145,7 @@ export const settings = {
       settings: {
         slidesToShow: 3.5,
         slidesToScroll: 2,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -150,6 +154,7 @@ export const settings = {
       settings: {
         slidesToShow: 3.3,
         slidesToScroll: 2,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -158,6 +163,7 @@ export const settings = {
       settings: {
         slidesToShow: 3,
         slidesToScroll: 2,
+        swipeToSlide: true,
         infinite: false,
       },
     },
@@ -167,6 +173,7 @@ export const settings = {
       settings: {
         slidesToShow: 2.8,
         slidesToScroll: 2,
+        swipeToSlide: true,
         initialSlide: 2,
       },
     },
@@ -175,6 +182,7 @@ export const settings = {
       settings: {
         slidesToShow: 2.5,
         slidesToScroll: 2,
+        swipeToSlide: true,
         initialSlide: 2,
       },
     },
@@ -183,6 +191,7 @@ export const settings = {
       settings: {
         slidesToShow: 2,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -190,6 +199,7 @@ export const settings = {
       settings: {
         slidesToShow: 1.9,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -197,6 +207,7 @@ export const settings = {
       settings: {
         slidesToShow: 1.8,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -204,6 +215,7 @@ export const settings = {
       settings: {
         slidesToShow: 1.6,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -211,6 +223,7 @@ export const settings = {
       settings: {
         slidesToShow: 1.2,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
     {
@@ -218,6 +231,7 @@ export const settings = {
       settings: {
         slidesToShow: 1,
         slidesToScroll: 1,
+        swipeToSlide: true,
       },
     },
   ],

@@ -194,9 +194,13 @@ const main = () => {
 
   const enPath = path.join(ROOT_DIR, "src", "language", "en.js");
   const arPath = path.join(ROOT_DIR, "src", "language", "ar.js");
+  const bnPath = path.join(ROOT_DIR, "src", "language", "bn.js");
+  const esPath = path.join(ROOT_DIR, "src", "language", "es.js");
 
   const english = readExportedObject(enPath, "english");
   const arabic = readExportedObject(arPath, "arabic");
+  const bengali = readExportedObject(bnPath, "bengali");
+  const spanish = readExportedObject(esPath, "spain");
 
   let addedToEnglish = 0;
   for (const key of scannedKeys) {
@@ -209,17 +213,28 @@ const main = () => {
   writeEnglishFile(enPath, english);
 
   const englishKeys = Object.keys(english);
+
   const missingInArabic = englishKeys.filter(
     (key) => !Object.prototype.hasOwnProperty.call(arabic, key)
   );
+  const missingInBengali = englishKeys.filter(
+    (key) => !Object.prototype.hasOwnProperty.call(bengali, key)
+  );
+  const missingInSpanish = englishKeys.filter(
+    (key) => !Object.prototype.hasOwnProperty.call(spanish, key)
+  );
 
   const addedToArabic = appendMissingKeysToArabicFile(arPath, missingInArabic);
+  const addedToBengali = appendMissingKeysToArabicFile(bnPath, missingInBengali);
+  const addedToSpanish = appendMissingKeysToArabicFile(esPath, missingInSpanish);
 
   console.log("✅ i18n scan complete");
   console.log(`- Files scanned: ${files.length}`);
   console.log(`- Keys found: ${scannedKeys.size}`);
   console.log(`- Added to en: ${addedToEnglish}`);
   console.log(`- Added to ar: ${addedToArabic}`);
+  console.log(`- Added to bn: ${addedToBengali}`);
+  console.log(`- Added to es: ${addedToSpanish}`);
 };
 
 main();

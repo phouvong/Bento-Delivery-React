@@ -1,17 +1,11 @@
-import { Grid, Stack, Typography } from "@mui/material";
+import { Box, Divider, Stack, Typography, alpha } from "@mui/material";
 import Skeleton from "@mui/material/Skeleton";
 import { useTheme } from "@mui/material/styles";
-import { Box } from "@mui/system";
 import { getAmountWithSign } from "../../../helper-functions/CardHelpers";
 import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
 import { handleProductValueWithOutDiscount } from "../../../utils/CustomFunctions";
 import CustomImageContainer from "../../CustomImageContainer";
 import VariationContent from "../../added-cart-view/VariationContent";
-import {
-	OrderFoodAmount,
-	OrderFoodName,
-	OrderFoodSubtitle,
-} from "../CheckOut.style";
 
 export const VegNonveg = ({ theme, item, t }) => {
 	return (
@@ -21,10 +15,8 @@ export const VegNonveg = ({ theme, item, t }) => {
 				bottom: 0,
 				left: 0,
 				width: "100%",
-
 				background: (theme) => theme.palette.primary.overLay,
 				opacity: "0.6",
-				// color: (theme)=>theme.palette.neutral[100],
 				padding: "10px",
 				height: "30%",
 				alignItems: "center",
@@ -39,104 +31,121 @@ export const VegNonveg = ({ theme, item, t }) => {
 		</Stack>
 	);
 };
+
 const RegularOrders = (props) => {
 	const { configData, cartList, t, isSmall } = props;
 	const theme = useTheme();
-	const productBaseUrl = configData?.base_urls?.item_image_url;
-	return (
-		<>
-			{cartList.length > 0 ? (
-				cartList.map((item, index) => (
-					<CustomStackFullWidth
-						key={index}
-						direction="row"
-						alignItems="flex-start"
-						spacing={{ xs: 1, sm: 1, md: 2 }}
-						mt={index !== 0 && "1rem"}
-					>
-						<Stack position="relative">
-							<CustomImageContainer
-								height="30px"
-								width="30px"
-								src={item?.image_full_url}
-								loading="lazy"
-							/>
-						</Stack>
-						<Stack
-							direction="row"
-							justifyContent="space-between"
-							alignItems="flex-start"
-							width="100%"
-						>
-							<Stack direction="row" spacing={1.3}>
-								<OrderFoodSubtitle>
-									{item.quantity}
-									<Typography
-										component="span"
-										fontSize="12px"
-										pl="5px"
-									>
-										x
-									</Typography>
-								</OrderFoodSubtitle>
+	const neutralBase =
+		theme.palette.neutral?.[400] || theme.palette.text.secondary;
 
-								<Stack>
-									<Box>
-										<OrderFoodName>
-											{item.name}
-										</OrderFoodName>
-										{item.is_prescription_required !==
-											0 && (
-											<Box
-												fontSize={"10px"}
-												sx={{
-													color: theme.palette.error
-														.main,
-												}}
-											>
-												{t("Prescription Required")}
-											</Box>
-										)}
-									</Box>
-									<VariationContent cartItem={item} />
-								</Stack>
-							</Stack>
-							<OrderFoodAmount>
-								{getAmountWithSign(
-									handleProductValueWithOutDiscount(item)
-								)}
-							</OrderFoodAmount>
-						</Stack>
-					</CustomStackFullWidth>
-				))
-			) : (
-				<CustomStackFullWidth
+	if (!cartList || cartList.length === 0) {
+		return (
+			<CustomStackFullWidth
+				direction="row"
+				alignItems="flex-start"
+				spacing={2}
+			>
+				<Skeleton variant="rectangular" height="90px" width="95px" />
+				<Stack>
+					<Skeleton variant="text" width="50px" />
+					<Skeleton variant="text" width="50px" />
+					<Skeleton variant="text" width="50px" />
+				</Stack>
+			</CustomStackFullWidth>
+		);
+	}
+
+	return (
+		<Stack width="100%" divider={<Divider flexItem />}>
+			{cartList.map((item, index) => (
+				<Stack
+					key={index}
 					direction="row"
 					alignItems="flex-start"
-					spacing={2}
+					spacing={1.5}
+					py={{ xs: 1, md: 1.25 }}
 				>
-					<Skeleton
-						variant="rectangular"
-						height="90px"
-						width="95px"
-					/>
-					<Stack>
-						<Skeleton variant="text" width="50px" />
-						<Skeleton variant="text" width="50px" />
-						<Skeleton variant="text" width="50px" />
+					<Box
+						sx={{
+							width: { xs: 48, md: 56 },
+							height: { xs: 48, md: 56 },
+							borderRadius: "8px",
+							overflow: "hidden",
+							flexShrink: 0,
+							backgroundColor: alpha(neutralBase, 0.08),
+						}}
+					>
+						<CustomImageContainer
+							height="100%"
+							width="100%"
+							src={item?.image_full_url}
+							objectFit="cover"
+							borderRadius="8px"
+							loading="lazy"
+						/>
+					</Box>
+
+					<Stack flex={1} minWidth={0} spacing={0.25}>
+						<Typography
+							sx={{
+								fontWeight: 600,
+								fontSize: { xs: "13px", md: "14px" },
+								color: theme.palette.text.primary,
+								lineHeight: 1.25,
+							}}
+						>
+							{item.name}
+						</Typography>
+						<Typography
+							sx={{
+								fontWeight: 700,
+								fontSize: { xs: "13px", md: "14px" },
+								color: theme.palette.text.primary,
+							}}
+						>
+							{getAmountWithSign(
+								handleProductValueWithOutDiscount(item),
+							)}
+						</Typography>
+						{item.is_prescription_required !== 0 && (
+							<Typography
+								sx={{
+									fontSize: "10px",
+									color: theme.palette.error.main,
+								}}
+							>
+								{t("Prescription Required")}
+							</Typography>
+						)}
+						<VariationContent cartItem={item} />
 					</Stack>
-				</CustomStackFullWidth>
-			)}
-			<Grid item md={12} xs={12}>
-				<Stack
-					width="100%"
-					sx={{
-						mt: "20px",
-						borderBottom: `2px solid ${theme.palette.neutral[300]}`,
-					}}
-				></Stack>
-			</Grid>
-		</>
+
+					<Box
+						sx={{
+							minWidth: 32,
+							height: 32,
+							px: 1,
+							borderRadius: "8px",
+							backgroundColor: alpha(neutralBase, 0.12),
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							flexShrink: 0,
+						}}
+					>
+						<Typography
+							sx={{
+								fontWeight: 700,
+								fontSize: { xs: "13px", md: "14px" },
+								color: theme.palette.text.primary,
+							}}
+						>
+							{item.quantity}
+						</Typography>
+					</Box>
+				</Stack>
+			))}
+		</Stack>
 	);
 };
 

@@ -89,7 +89,11 @@ const TrackOrderDetails = ({
 						{trackOrderData?.delivery_address?.address}
 					</Typography>
 				</Stack>
-				<Button onClick={handleClick} variant="outlined">
+				<Button
+					onClick={handleClick}
+					variant="outlined"
+					sx={{ whiteSpace: "nowrap", flexShrink: 0 }}
+				>
 					{t("View Order Details")}
 				</Button>
 			</CustomStackFullWidth>

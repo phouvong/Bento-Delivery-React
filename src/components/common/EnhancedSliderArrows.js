@@ -63,7 +63,10 @@ const EnhancedButtonContainer = styled(Box)(({ theme, right, isdisabled, ishover
 }));
 
 // Enhanced Arrow Wrappers
-const EnhancedPrevWrapper = styled(Box)(({ theme, isdisabled, isarrowhovered, width, height, variant }) => ({
+const getDefaultBg = (theme, variant) =>
+  variant === "primary" ? theme.palette.primary.main : theme.palette.neutral[100];
+
+const EnhancedPrevWrapper = styled(Box)(({ theme, isdisabled, isarrowhovered, width, height, variant, noanimation, nohovercolor }) => ({
   zIndex: 1,
   top: "50%",
   left: variant === "primary" ? 0 : "0px",
@@ -73,22 +76,20 @@ const EnhancedPrevWrapper = styled(Box)(({ theme, isdisabled, isarrowhovered, wi
   width: width || "38px",
   height: height || "38px",
   borderRadius: "50%",
-  backgroundColor: isarrowhovered 
-    ? theme.palette.primary.main 
-    : variant === "primary" 
-      ? theme.palette.primary.main 
-      : theme.palette.neutral[100],
+  backgroundColor: isarrowhovered
+    ? theme.palette.primary.main
+    : getDefaultBg(theme, variant),
   cursor: "pointer",
   transition: "all 0.3s ease",
-  animation: isarrowhovered ? "none" : `${slideLeft} 0.8s ease-in-out infinite alternate`,
+  animation: (noanimation || isarrowhovered) ? "none" : `${slideLeft} 0.8s ease-in-out infinite alternate`,
   boxShadow: variant === "primary" ? "rgba(149, 157, 165, 0.2) 0px 8px 24px" : "none",
   "&:hover": {
-    backgroundColor: theme.palette.primary.main,
-    transform: "scale(1.05)",
+    backgroundColor: nohovercolor ? getDefaultBg(theme, variant) : theme.palette.primary.main,
+    ...(nohovercolor ? {} : { transform: "scale(1.05)" }),
   },
 }));
 
-const EnhancedNextWrapper = styled(Box)(({ theme, isdisabled, isarrowhovered, width, height, variant }) => ({
+const EnhancedNextWrapper = styled(Box)(({ theme, isdisabled, isarrowhovered, width, height, variant, noanimation, nohovercolor }) => ({
   zIndex: 1,
   top: "50%",
   right: variant === "primary" ? 8 : 0,
@@ -98,34 +99,35 @@ const EnhancedNextWrapper = styled(Box)(({ theme, isdisabled, isarrowhovered, wi
   width: width || "38px",
   height: height || "38px",
   borderRadius: "50%",
-  backgroundColor: isarrowhovered 
-    ? theme.palette.primary.main 
-    : variant === "primary" 
-      ? theme.palette.primary.main 
-      : theme.palette.neutral[100],
+  backgroundColor: isarrowhovered
+    ? theme.palette.primary.main
+    : getDefaultBg(theme, variant),
   cursor: "pointer",
   transition: "all 0.3s ease",
-  animation: isarrowhovered ? "none" : `${slideRight} 0.8s ease-in-out infinite alternate`,
+  animation: (noanimation || isarrowhovered) ? "none" : `${slideRight} 0.8s ease-in-out infinite alternate`,
   boxShadow: variant === "primary" ? "rgba(149, 157, 165, 0.2) 0px 8px 24px" : "none",
   border: variant === "white" ? "1px solid" : "none",
   "&:hover": {
-    backgroundColor: theme.palette.primary.main,
-    transform: "scale(1.05)",
+    backgroundColor: nohovercolor ? getDefaultBg(theme, variant) : theme.palette.primary.main,
+    ...(nohovercolor ? {} : { transform: "scale(1.05)" }),
   },
 }));
 
 // Enhanced Next Arrow Component
-export const EnhancedNext = ({ 
-  onClick, 
-  className, 
-  displayNoneOnMobile, 
-  width, 
-  height, 
-  isHovered, 
+export const EnhancedNext = ({
+  onClick,
+  className,
+  displayNoneOnMobile,
+  width,
+  height,
+  iconSize,
+  isHovered,
   variant = "white", // "white", "primary", "neutral"
   noboxshadow,
   noBackground,
-  rightSpace 
+  rightSpace,
+  noAnimation,
+  noHoverColor,
 }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
@@ -149,15 +151,17 @@ export const EnhancedNext = ({
         onClick={onClick}
         isdisabled={className?.includes("slick-disabled")}
         isarrowhovered={isArrowHovered}
+        noanimation={noAnimation ? "true" : undefined}
+        nohovercolor={noHoverColor ? "true" : undefined}
         onMouseEnter={() => setIsArrowHovered(true)}
         onMouseLeave={() => setIsArrowHovered(false)}
       >
         {getLanguage() === "rtl" ? (
           <ChevronLeftIcon
             sx={{
-              fontSize: "30px",
-              color: isArrowHovered || variant === "primary" 
-                ? "white" 
+              fontSize: iconSize || "30px",
+              color: (!noHoverColor && isArrowHovered) || variant === "primary"
+                ? "white"
                 : theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
@@ -165,9 +169,9 @@ export const EnhancedNext = ({
         ) : (
           <ChevronRightIcon
             sx={{
-              fontSize: "30px",
-              color: isArrowHovered || variant === "primary" 
-                ? "white" 
+              fontSize: iconSize || "30px",
+              color: (!noHoverColor && isArrowHovered) || variant === "primary"
+                ? "white"
                 : theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
@@ -179,17 +183,20 @@ export const EnhancedNext = ({
 };
 
 // Enhanced Prev Arrow Component
-export const EnhancedPrev = ({ 
-  onClick, 
-  className, 
-  displayNoneOnMobile, 
-  width, 
-  height, 
-  left, 
-  isHovered, 
+export const EnhancedPrev = ({
+  onClick,
+  className,
+  displayNoneOnMobile,
+  width,
+  height,
+  iconSize,
+  left,
+  isHovered,
   variant = "white", // "white", "primary", "neutral"
   noboxshadow,
-  noBackground 
+  noBackground,
+  noAnimation,
+  noHoverColor,
 }) => {
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
@@ -213,6 +220,8 @@ export const EnhancedPrev = ({
         onClick={onClick}
         isdisabled={className?.includes("slick-disabled")}
         isarrowhovered={isArrowHovered}
+        noanimation={noAnimation ? "true" : undefined}
+        nohovercolor={noHoverColor ? "true" : undefined}
         onMouseEnter={() => setIsArrowHovered(true)}
         onMouseLeave={() => setIsArrowHovered(false)}
       >
@@ -220,8 +229,8 @@ export const EnhancedPrev = ({
           <ChevronRightIcon
             sx={{
               fontSize: "30px",
-              color: isArrowHovered || variant === "primary" 
-                ? "white" 
+              color: (!noHoverColor && isArrowHovered) || variant === "primary"
+                ? "white"
                 : theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
@@ -230,8 +239,8 @@ export const EnhancedPrev = ({
           <ChevronLeftIcon
             sx={{
               fontSize: "30px",
-              color: isArrowHovered || variant === "primary" 
-                ? "white" 
+              color: (!noHoverColor && isArrowHovered) || variant === "primary"
+                ? "white"
                 : theme.palette.neutral[600],
               transition: "color 0.3s ease",
             }}
@@ -249,10 +258,13 @@ export const createEnhancedArrows = (isHovered, options = {}) => {
     displayNoneOnMobile = false,
     width,
     height,
+    iconSize,
     left,
     noboxshadow = false,
     noBackground = false,
-    rightSpace
+    rightSpace,
+    noAnimation = false,
+    noHoverColor = false,
   } = options;
 
   return {
@@ -261,11 +273,14 @@ export const createEnhancedArrows = (isHovered, options = {}) => {
         displayNoneOnMobile={displayNoneOnMobile}
         width={width}
         height={height}
+        iconSize={iconSize}
         isHovered={isHovered}
         variant={variant}
         noboxshadow={noboxshadow}
         noBackground={noBackground}
         rightSpace={rightSpace}
+        noAnimation={noAnimation}
+        noHoverColor={noHoverColor}
       />
     ),
     prevArrow: (
@@ -273,11 +288,14 @@ export const createEnhancedArrows = (isHovered, options = {}) => {
         displayNoneOnMobile={displayNoneOnMobile}
         width={width}
         height={height}
+        iconSize={iconSize}
         left={left}
         isHovered={isHovered}
         variant={variant}
         noboxshadow={noboxshadow}
         noBackground={noBackground}
+        noAnimation={noAnimation}
+        noHoverColor={noHoverColor}
       />
     ),
   };

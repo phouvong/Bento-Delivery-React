@@ -22,7 +22,6 @@ import {
 import { setUser } from "redux/slices/profileInfo";
 import { useDispatch } from "react-redux";
 import ImageAddIcon from "../../single-file-uploader-with-preview/ImageAddIcon";
-import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import InputAdornment from "@mui/material/InputAdornment";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
@@ -283,32 +282,30 @@ const BasicInformationForm = ({
           direction="row"
           justifyContent="space-between"
           alignItems="center"
+          sx={{
+            px: { xs: "16px", md: "24px" },
+            pt: { xs: "16px", md: "24px" },
+            pb: "8px",
+          }}
         >
-          <Typography variant="subtitle2" fontWeight="700">
+          <Typography
+            sx={{ fontSize: "18px", fontWeight: 700, color: "neutral.1050" }}
+          >
             {t("Edit Personal Details")}
           </Typography>
           <BackIconButton onClick={() => setEditProfile(false)}>
-            <ArrowBackIosNewIcon
-              sx={{
-                fontSize: "10px",
-                color: (theme) => theme.palette.primary.main,
-                fontWeight: "700",
-                marginRight: "3px",
-              }}
-            />
-            {t("Go Back")}
+            {t("Close")}
           </BackIconButton>
         </Stack>
       </Grid>
-      <form noValidate onSubmit={profileFormik.handleSubmit}>
+      <form noValidate onSubmit={profileFormik.handleSubmit} style={{ width: "100%" }}>
         <Grid
           container
           md={12}
           xs={12}
-          spacing={{ xs: 2, sm: 2, md: 3 }}
-          paddingRight={{ xs: "0px", md: "60px" }}
-          paddingLeft={{ xs: "0px", md: "60px" }}
-          marginLeft="0px"
+          rowSpacing={{ xs: 2, sm: 2, md: 3 }}
+          paddingX={{ xs: "16px", md: "24px" }}
+          paddingBottom={{ xs: "24px", md: "40px" }}
         >
           <Grid item md={12} xs={12} textAlign="-webkit-center">
             <Stack
@@ -321,7 +318,7 @@ const BasicInformationForm = ({
               <ImageUploaderWithPreview
                 type="file"
                 labelText={t("Upload your photo")}
-                hintText="Image format - jpg, png, jpeg, gif Image Size - maximum size 2 MB Image Ratio - 1:1"
+                hintText={t("Image format - jpg, png, jpeg, gif Image Size - maximum size 2 MB Image Ratio - 1:1")}
                 file={profileFormik.values.image}
                 onChange={singleFileUploadHandlerForImage}
                 imageOnChange={imageOnchangeHandlerForImage}
@@ -362,7 +359,7 @@ const BasicInformationForm = ({
               touched={profileFormik.touched.name && "true"}
             />
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={12} xs={12}>
             <Stack position="relative">
               <TextField
                 sx={{ width: "100%" }}
@@ -399,7 +396,7 @@ const BasicInformationForm = ({
                   {" "}
                   {email && (
                     <>
-                      {data?.is_email_verified === "1" &&
+                      {data?.is_email_verified === 1 &&
                         email === profileFormik?.values.email ? (
                         <VerifiedIcon />
                       ) : (
@@ -423,7 +420,7 @@ const BasicInformationForm = ({
               </Stack>
             </Stack>
           </Grid>
-          <Grid item md={6} xs={12}>
+          <Grid item md={12} xs={12}>
             <Stack position="relative">
               <TextField
                 name="phone"
@@ -492,7 +489,7 @@ const BasicInformationForm = ({
           </Grid>
           {configData?.centralize_login?.manual_login_status === 1 ? (
             <>
-              <Grid item md={6} xs={12}>
+              <Grid item md={12} xs={12}>
                 <TextField
                   required
                   InputLabelProps={{ shrink: true }}
@@ -511,7 +508,7 @@ const BasicInformationForm = ({
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          aria-label="toggle password visibility"
+                          aria-label={t("toggle password visibility")}
                           onClick={() =>
                             setShowPassword((prevState) => !prevState)
                           }
@@ -527,7 +524,7 @@ const BasicInformationForm = ({
                   }}
                 />
               </Grid>
-              <Grid item md={6} xs={12}>
+              <Grid item md={12} xs={12}>
                 <TextField
                   InputLabelProps={{ shrink: true }}
                   required
@@ -547,7 +544,7 @@ const BasicInformationForm = ({
                     endAdornment: (
                       <InputAdornment position="end">
                         <IconButton
-                          aria-label="toggle password visibility"
+                          aria-label={t("toggle password visibility")}
                           onClick={() =>
                             setConfirmShowPassword((prevState) => !prevState)
                           }

@@ -1,140 +1,155 @@
-import React, { useEffect, useState } from "react";
-import { CustomStackFullWidth } from "../../../styled-components/CustomStyles.style";
-
-import {
-	Step,
-	StepConnector,
-	stepConnectorClasses,
-	StepLabel,
-	Stepper,
-	styled,
-} from "@mui/material";
-
-import { t } from "i18next";
-import { Check } from "@mui/icons-material";
-
-import { StepperCustomBorder } from "../CheckOut.style";
-import { useTheme } from "@emotion/react";
+import React from "react";
+import { Breadcrumbs, Link as MuiLink, Stack, Typography } from "@mui/material";
+import HomeOutlinedIcon from "@mui/icons-material/HomeOutlined";
+import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import { useTheme } from "@mui/material/styles";
 import { useRouter } from "next/router";
+import Link from "next/link";
+import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
+import { getStoresOrRestaurants } from "../../../helper-functions/getStoresOrRestaurants";
 
-const CustomStepperLabels = styled(Stepper)(({ theme }) => ({
-	"& .MuiStepLabel-label.Mui-completed": {
-		color: theme.palette.primary.main,
-	},
-}));
+const getCurrentLabel = (pathname, t) => {
+  if (pathname?.includes("/cart")) return t("Cart");
+  if (pathname?.includes("/checkout")) return t("Checkout");
+  return t("Checkout");
+};
 
-const QontoConnector = styled(StepConnector)(({ theme }) => ({
-	[`&.${stepConnectorClasses.alternativeLabel}`]: {
-		top: 10,
-		left: "calc(-50% + 16px)",
-		right: "calc(50% + 16px)",
-		[theme.breakpoints.down("md")]: {
-			left: "calc(-50% + 10px)",
-			right: "calc(50% + 10px)",
-		},
-	},
-	[`&.${stepConnectorClasses.active}`]: {
-		[`& .${stepConnectorClasses.line}`]: {
-			borderColor:theme.palette.primary.main,
-		},
-	},
-	[`&.${stepConnectorClasses.completed}`]: {
-		[`& .${stepConnectorClasses.line}`]: {
-			borderColor: theme.palette.primary.main,
-		},
-	},
-	[`& .${stepConnectorClasses.line}`]: {
-		borderColor: theme.palette.neutral[400],
-		borderTopWidth: 3,
-		borderRadius: 1,
-		[theme.breakpoints.down("md")]: {
-			borderTopWidth: 2,
-		},
-	},
-}));
+const CheckoutStepper = ({
+  text,
+  text1,
+  text2,
+  storeData,
+  homeHref,
+  storeHref: storeHrefOverride,
+}) => {
+  const { t } = useTranslation();
+  const theme = useTheme();
+  const router = useRouter();
 
-const QontoStepIconRoot = styled("div")(({ theme, ownerState }) => ({
-	color: theme.palette.primary.main,
-	display: "flex",
-	height: 22,
-	alignItems: "center",
-	...(ownerState.active && {
-		color: theme.palette.primary.main,
-	}),
-	"& .QontoStepIcon-completedIcon": {
-		color: theme.palette.neutral[100],
-		zIndex: 1,
-		fontSize: 18,
-		[theme.breakpoints.down("md")]: {
-			fontSize: 10,
-		},
-	},
-	"& .QontoStepIcon-circle": {
-		width: 8,
-		height: 8,
-		borderRadius: "50%",
-		backgroundColor: theme.palette.neutral[400],
-	},
-}));
-function QontoStepIcon(props) {
-	const { active, completed, className } = props;
-	const theme = useTheme();
-	return (
-		<QontoStepIconRoot ownerState={{ active }} className={className}>
-			{completed ? (
-				<StepperCustomBorder
-					background={theme.palette.primary.main}
-					padding={{ xs: "3px", md: "5px" }}
-				>
-					<Check className="QontoStepIcon-completedIcon" />
-				</StepperCustomBorder>
-			) : (
-				<StepperCustomBorder
-					background={theme.palette.neutral[100]}
-					padding={{ xs: "4px", md: "10px" }}
-				>
-					<div className="QontoStepIcon-circle" />
-				</StepperCustomBorder>
-			)}
-		</QontoStepIconRoot>
-	);
-}
-const CheckoutStepper = ({text,text1,text2}) => {
-	const [actStep, setActStep] = useState(1);
-	const steps = [
-		{
-			label: text2|| t("Add To cart"),
-		},
-		{
-			label:text || "Fill details",
-		},
-		{
-			label: text1 || "Confirmation",
-		},
-	];
-	const router = useRouter()
-	useEffect(() => {
-		if (router.pathname === "/rental/checkout") {
-			setActStep(2)
-		}
-	}, [router.pathname])	
-	return (
-		<CustomStackFullWidth>
-			<CustomStepperLabels
-				activeStep={actStep}
-				alternativeLabel
-				connector={<QontoConnector />}
-			>
-				{steps.map((labels, index) => (
-					<Step key={index}>
-						<StepLabel StepIconComponent={QontoStepIcon}>
-							{t(labels.label)}
-						</StepLabel>
-					</Step>
-				))}
-			</CustomStepperLabels>
-		</CustomStackFullWidth>
-	);
+  const { cartList, campaignItemList, buyNowItemList } = useSelector(
+    (state) => state.cart
+  );
+
+  // The checkout store comes from the URL (store_id). Only trust a cart item as
+  // a name/id fallback when it actually belongs to that store — otherwise a
+  // stale item from another store/module would mislabel the breadcrumb.
+  const queryStoreId =
+    router?.query?.store_id != null ? String(router.query.store_id) : null;
+  const sourceItem =
+    campaignItemList?.[0] || buyNowItemList?.[0] || cartList?.[0];
+  const sourceMatchesStore =
+    !queryStoreId || String(sourceItem?.store_id) === queryStoreId;
+
+  const storeName =
+    storeData?.name ||
+    (sourceMatchesStore
+      ? sourceItem?.store_name || sourceItem?.store?.name
+      : null);
+  const storeId =
+    storeData?.id ||
+    queryStoreId ||
+    (sourceMatchesStore ? sourceItem?.store_id : null);
+
+  const currentLabel = text || text1 || getCurrentLabel(router?.pathname, t);
+  const listLabel = t(getStoresOrRestaurants());
+
+  const queryModule =
+    typeof router?.query?.module === "string" ? router.query.module : null;
+  const resolvedHomeHref =
+    homeHref ?? (queryModule ? `/home?module=${queryModule}` : "/home");
+
+  // Link back to the store using its slug + module so the store-details page
+  // resolves the correct store under the right module (not a numeric-id lookup
+  // that can collide across modules).
+  const storeSlug =
+    storeData?.slug ||
+    (typeof router?.query?.store_slug === "string"
+      ? router.query.store_slug
+      : null);
+  const storeLinkId = storeSlug || storeId;
+  const computedStoreHref = storeLinkId
+    ? queryModule
+      ? `/store/${storeLinkId}?module=${queryModule}`
+      : `/store/${storeLinkId}`
+    : null;
+  const storeHref = storeHrefOverride ?? computedStoreHref;
+
+  return (
+    <Stack spacing={{ xs: 0.5, md: 0.5 }} sx={{ width: "100%" }}>
+      <Typography
+        variant="h4"
+        sx={{
+          display: { xs: "none", md: "block" },
+          fontWeight: 700,
+          fontSize: { xs: "1.5rem", md: "2rem" },
+          color: theme.palette.text.primary,
+        }}
+      >
+        {currentLabel}
+      </Typography>
+      <Breadcrumbs
+        separator={
+          <NavigateNextIcon
+            fontSize="small"
+            sx={{ color: theme.palette.text.secondary }}
+          />
+        }
+        aria-label="breadcrumb"
+      >
+        <Link href={resolvedHomeHref} passHref legacyBehavior>
+          <MuiLink
+            underline="hover"
+            color="inherit"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              fontSize: { xs: "0.8rem", md: "0.875rem" },
+              color: theme.palette.text.secondary,
+            }}
+          >
+            <HomeOutlinedIcon sx={{ fontSize: 18 }} />
+            {t("Home")}
+          </MuiLink>
+        </Link>
+
+        {storeName &&
+          (storeHref ? (
+            <Link href={storeHref} passHref legacyBehavior>
+              <MuiLink
+                underline="hover"
+                color="inherit"
+                sx={{
+                  fontSize: { xs: "0.8rem", md: "0.875rem" },
+                  color: theme.palette.text.secondary,
+                }}
+              >
+                {storeName}
+              </MuiLink>
+            </Link>
+          ) : (
+            <Typography
+              sx={{
+                fontSize: { xs: "0.8rem", md: "0.875rem" },
+                color: theme.palette.text.secondary,
+              }}
+            >
+              {storeName}
+            </Typography>
+          ))}
+        <Typography
+          sx={{
+            fontSize: { xs: "0.8rem", md: "0.875rem" },
+            color: theme.palette.text.primary,
+            fontWeight: 500,
+          }}
+        >
+          {currentLabel}
+        </Typography>
+      </Breadcrumbs>
+    </Stack>
+  );
 };
 
 export default CheckoutStepper;

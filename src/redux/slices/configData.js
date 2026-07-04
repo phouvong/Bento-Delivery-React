@@ -24,9 +24,7 @@ export const configDataSlice = createSlice({
       state.countryCode = action.payload;
     },
     setModules: (state, action) => {
-      state.modules = filterOutRiderShareModules(action.payload).map(
-        (item) => item
-      );
+      state.modules = action.payload; // filterOutRiderShareModules(action.payload).map((item) => item);
     },
     setLandingPageData: (state, action) => {
       state.landingPageData = action.payload;

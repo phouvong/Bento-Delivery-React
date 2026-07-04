@@ -36,6 +36,7 @@ const PharmacyStaticBanners = () => {
     infinite: data?.length > 2 && true,
     slidesToShow: data?.length == 1 ? 1 : 2,
     slidesToScroll: 1,
+    swipeToSlide: true,
     autoplay: true,
     speed: 800,
     autoplaySpeed: 4000,
@@ -46,6 +47,7 @@ const PharmacyStaticBanners = () => {
         settings: {
           slidesToShow: 1.1,
           slidesToScroll: 1,
+          swipeToSlide: true,
         },
       },
     ],

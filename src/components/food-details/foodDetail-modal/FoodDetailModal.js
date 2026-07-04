@@ -1,22 +1,27 @@
 import CloseIcon from "@mui/icons-material/Close";
-import { Box, Grid, Modal, Skeleton } from "@mui/material";
-import React, { useCallback, useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  Drawer,
+  Grid,
+  Modal,
+  Skeleton,
+  Typography,
+  alpha,
+  useMediaQuery,
+} from "@mui/material";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { useTheme } from "@mui/material/styles";
 import { useRouter } from "next/router";
-import "simplebar-react/dist/simplebar.min.css";
-import SimpleBar from "simplebar-react";
-import StartPriceView from "./StartPriceView";
 import { handleProductVariationRequirementsToaster } from "./SomeHelperFuctions";
 import AddUpdateOrderToCart from "./AddUpdateOrderToCart";
 import AddOrderToCart from "./AddOrderToCart";
-import TotalAmountVisibility from "./TotalAmountVisibility";
 import AddOnsManager from "./AddOnsManager";
 import VariationsManager from "./VariationsManager";
 import FoodDetailsManager from "./FoodDetailsManager";
-import IncrementDecrementManager from "./IncrementDecrementManager";
 import { handleDiscountChip } from "./helper-functions/handleDiscountChip";
 import { handleInitialTotalPriceVarPriceQuantitySet } from "./helper-functions/handleDataOnFirstMount";
 import {
@@ -24,7 +29,10 @@ import {
   getIndexFromArrayByComparision,
   isAvailable,
 } from "utils/CustomFunctions";
-import { getDiscountedAmount } from "helper-functions/CardHelpers";
+import {
+  getAmountWithSign,
+  getDiscountedAmount,
+} from "helper-functions/CardHelpers";
 import {
   setBuyNowItemList,
   setCampaignItemList,
@@ -32,8 +40,6 @@ import {
   setClearCart,
   setUpdateVariationToCart,
 } from "redux/slices/cart";
-import { setCartSidebarOpen } from "redux/slices/utils";
-import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { FoodDetailModalStyle } from "./foodDetailModal.style";
 import IconButton from "@mui/material/IconButton";
 import CartClearModal from "../../product-details/product-details-section/CartClearModal";
@@ -47,12 +53,11 @@ import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { handleValuesFromCartItems } from "../../product-details/product-details-section/helperFunction";
 import useCartItemUpdate from "../../../api-manage/hooks/react-query/add-cart/useCartItemUpdate";
 import { getGuestId } from "helper-functions/getToken";
-import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
-import {useGetItemDetails} from "api-manage/hooks/react-query/product-details/useGetItemDetails";
+import { useGetItemDetails } from "api-manage/hooks/react-query/product-details/useGetItemDetails";
 import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
 
 const FoodDetailModal = ({
-  product:fromCard,
+  product: fromCard,
   handleModalClose,
   imageBaseUrl,
   open,
@@ -61,14 +66,14 @@ const FoodDetailModal = ({
   addToWishlistHandler,
   removeFromWishlistHandler,
   isWishlisted,
-  setOpenLocationAlert
+  setOpenLocationAlert,
 }) => {
-  console.log({fromCard});
+  console.log({ fromCard });
   const router = useRouter();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const theme = useTheme();
-  const [product,setProduct] = useState(fromCard);
+  const [product, setProduct] = useState(fromCard);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [totalPrice, setTotalPrice] = useState(null);
   const [varPrice, setVarPrice] = useState(null);
@@ -94,16 +99,27 @@ const FoodDetailModal = ({
   if (typeof window !== "undefined") {
     location = localStorage.getItem("location");
   }
-  const handleSuccessItem = (resData) => {
-  }
-  console.log({fromCard});
-  const params={
-    id:fromCard?.id
-  }
-  const {data,isLoading:cardDataIsLoading}=useGetItemDetails(params, handleSuccessItem,productUpdate)
+  const handleSuccessItem = (resData) => {};
+  console.log({ fromCard, imageBaseUrl });
+  const params = {
+    id: fromCard?.id,
+  };
+  const {
+    data,
+    isLoading: cardDataIsLoading,
+    error: itemDetailsError,
+    isError: itemDetailsIsError,
+  } = useGetItemDetails(params, handleSuccessItem, productUpdate);
+  // Treat a 404 (or missing/deleted item payload) as "not found" so the
+  // modal can render the empty-state UI instead of the regular shimmer or
+  // a half-broken detail layout.
+  const itemNotFound =
+    itemDetailsIsError &&
+    (itemDetailsError?.response?.status === 404 ||
+      itemDetailsError?.response?.status === 410);
 
   useEffect(() => {
-    if(productUpdate){
+    if (productUpdate) {
       handleInitialTotalPriceVarPriceQuantitySet(
         fromCard,
         setModalData,
@@ -116,8 +132,9 @@ const FoodDetailModal = ({
         setSelectedAddOns,
         setOtherSelectedOption
       );
-    }else{
-      if(data){
+    } else {
+      if (data) {
+        console.log({ data });
         handleInitialTotalPriceVarPriceQuantitySet(
           data,
           setModalData,
@@ -131,12 +148,12 @@ const FoodDetailModal = ({
           setOtherSelectedOption
         );
       }
-      }
-
+    }
 
     //initially setting these states to use further
+  }, [product, data]);
 
-  }, [product,data]);
+  console.log({ totalPrice });
 
   const notify = (i) => toast(i);
   const itemValuesHandler = (itemIndex, variationValues) => {
@@ -181,26 +198,41 @@ const FoodDetailModal = ({
     return newVariations;
   };
 
-  const getNewObj = () => ({
-    ...modalData[0],
-    totalPrice: getDiscountedAmount(
-      totalPrice,
-      product?.discount,
-      product?.discount_type,
-      product?.store_discount,
-      quantity
-    ),
-    quantity: quantity,
-    food_variations: getNewVariationForDispatch(),
-    selectedAddons: selectedAddons,
-    itemBasePrice: getDiscountedAmount(
-      calculateItemBasePrice(modalData[0], selectedOptions),
-      product?.discount,
-      product?.discount_type,
-      product?.store_discount,
-      quantity
-    ),
-  });
+  // Add-ons are billed at their row price and are NOT eligible for the item
+  // discount. Strip them out before applying discount, then add them back.
+  const computeAddOnsTotal = () =>
+    selectedAddons?.reduce((sum, addOn) => {
+      const addOnQty = Number(addOn?.quantity) || 0;
+      if (productUpdate && addOnQty <= 0) return sum;
+      const effectiveQty = addOnQty > 0 ? addOnQty : 1;
+      return sum + (Number(addOn?.price) || 0) * effectiveQty;
+    }, 0) || 0;
+
+  const getNewObj = () => {
+    const addOnsTotal = computeAddOnsTotal();
+    const discountableSubtotal = (Number(totalPrice) || 0) - addOnsTotal;
+    return {
+      ...modalData[0],
+      totalPrice:
+        getDiscountedAmount(
+          discountableSubtotal,
+          product?.discount,
+          product?.discount_type,
+          product?.store_discount,
+          quantity
+        ) + addOnsTotal,
+      quantity: quantity,
+      food_variations: getNewVariationForDispatch(),
+      selectedAddons: selectedAddons,
+      itemBasePrice: getDiscountedAmount(
+        calculateItemBasePrice(modalData[0], selectedOptions),
+        product?.discount,
+        product?.discount_type,
+        product?.store_discount,
+        quantity
+      ),
+    };
+  };
   const handleSuccess = (res) => {
     if (res) {
       let product = {};
@@ -217,14 +249,17 @@ const FoodDetailModal = ({
         };
       });
       dispatch(setCart(product));
-      //dispatch(setCartSidebarOpen(true));
+      toast.success(t("Item added to cart successfully"));
       handleClose();
     }
   };
   const updateCartSuccessHandler = (res) => {
     if (res && res.length > 0) {
       const updatedProducts = res.map((item) => {
-        const indexNumber = getIndexFromArrayByComparision(cartList, item?.item); // use current item
+        const indexNumber = getIndexFromArrayByComparision(
+          cartList,
+          item?.item
+        ); // use current item
         return {
           product: {
             ...item?.item,
@@ -254,15 +289,54 @@ const FoodDetailModal = ({
     }
   };
 
+  const variationSigOf = (opts) =>
+    (opts ?? [])
+      .filter((o) => o?.isSelected)
+      .map((o) => String(o?.label ?? ""))
+      .sort()
+      .join("|");
 
   const addOrUpdateToCartByDispatch = () => {
-    if (productUpdate) {
+    // We should hit the update API whenever the item is already in the
+    // user's cart for this store — not only when the modal was opened from
+    // the cart (productUpdate=true). Without this branch the "Update to
+    // Cart" button silently called the add API when the modal was opened
+    // from a product card.
+    const targetItemId = modalData?.[0]?.id ?? product?.id;
+    const targetStoreId =
+      product?.store_id ??
+      product?.store?.id ??
+      modalData?.[0]?.store_id ??
+      modalData?.[0]?.store?.id;
+
+    const hasVariations = modalData?.[0]?.food_variations?.length > 0;
+    const currentSig = variationSigOf(selectedOptions);
+
+    const existingCartRow = cartList?.find((item) => {
+      if (item?.id !== targetItemId) return false;
+      if (
+        targetStoreId != null &&
+        String(item?.store_id) !== String(targetStoreId)
+      ) {
+        return false;
+      }
+      if (!hasVariations) return true;
+      if (!currentSig) return false;
+      return variationSigOf(item?.selectedOption) === currentSig;
+    });
+    const shouldUpdate = productUpdate || !!existingCartRow;
+
+    if (shouldUpdate) {
       //for updating
 
       let totalQty = 0;
       const itemObject = {
-        cart_id: product?.cart_id,
+        cart_id: product?.cart_id ?? existingCartRow?.cartItemId,
         guest_id: getGuestId(),
+        // /cart/update validator requires store_id; pull it from whichever
+        // shape the source payload exposes so the request never goes out
+        // without it.
+        store_id: targetStoreId,
         model: product?.available_date_starts ? "ItemCampaign" : "Item",
         add_on_ids:
           selectedAddons?.length > 0
@@ -274,7 +348,7 @@ const FoodDetailModal = ({
           selectedAddons?.length > 0
             ? selectedAddons.map((add) => add.quantity)
             : [],
-        item_id: product?.id,
+        item_id: targetItemId,
         price: totalPrice,
         quantity: quantity,
         variation:
@@ -305,9 +379,10 @@ const FoodDetailModal = ({
                 return add.id;
               })
             : [],
-        add_on_qtys:selectedAddons?.length > 0
-          ? selectedAddons.map((add) => add.quantity)
-          : [],
+        add_on_qtys:
+          selectedAddons?.length > 0
+            ? selectedAddons.map((add) => add.quantity)
+            : [],
         item_id: modalData[0]?.id,
         price: totalPrice,
         quantity: quantity,
@@ -323,10 +398,13 @@ const FoodDetailModal = ({
               })
             : [],
       };
-      mutate(itemObject, {
-        onSuccess: handleSuccess,
-        onError: onErrorResponse,
-      });
+      mutate(
+        { postData: itemObject, store_id: modalData[0]?.store_id },
+        {
+          onSuccess: handleSuccess,
+          onError: onErrorResponse,
+        }
+      );
     }
   };
   const handleBuyOrOrderNow = (status) => {
@@ -517,32 +595,30 @@ const FoodDetailModal = ({
     }
   };
   const addToCard = (status) => {
-    if(location){
-let checkingFor = status ? status : "cart";
-    if (cartList?.length > 0) {
-      //checking same restaurant items already exist or not
-      const isRestaurantExist = cartList.find(
-        (item) => item.store_id === product.store_id
-      );
-      if (isRestaurantExist) {
-        if (productUpdate) {
-          handleAddToCartOnDispatch(checkingFor);
+    if (location) {
+      let checkingFor = status ? status : "cart";
+      if (cartList?.length > 0) {
+        //checking same restaurant items already exist or not
+        // Multi-store carts allowed — always proceed with add.
+        const isRestaurantExist = true;
+        if (isRestaurantExist) {
+          if (productUpdate) {
+            handleAddToCartOnDispatch(checkingFor);
+          } else {
+            //add the same product based on variations
+            handleAddToCartOnDispatch(checkingFor);
+          }
         } else {
-          //add the same product based on variations
-          handleAddToCartOnDispatch(checkingFor);
+          if (cartList.length !== 0) {
+            handleClearCartModalOpen();
+          }
         }
       } else {
-        if (cartList.length !== 0) {
-          handleClearCartModalOpen();
-        }
+        handleAddToCartOnDispatch(checkingFor);
       }
     } else {
-      handleAddToCartOnDispatch(checkingFor);
-    }
-    }else{
       setOpenLocationAlert?.(true);
     }
-    
   };
   const clearCartAlert = () => {
     dispatch(setClearCart());
@@ -766,20 +842,31 @@ let checkingFor = status ? status : "cart";
         price = modalData?.[0]?.price;
       }
     } else {
-      price = product?.price;
+      // price = product?.price;
+      price = (data || product)?.price;
     }
     if (selectedOptions?.length > 0) {
       selectedOptions?.forEach(
         (item) => (price += Number.parseInt(item?.optionPrice))
       );
     }
-    setTotalPrice(price * quantity);
+    const addOnsTotal =
+      selectedAddons?.reduce((sum, addOn) => {
+        const addOnQty = Number(addOn?.quantity) || 0;
+        // In edit mode the cart can hand back addons with quantity 0 (the
+        // user has effectively unselected them). Only count addons with a
+        // positive quantity; for fresh selections default to 1.
+        if (productUpdate && addOnQty <= 0) return sum;
+        const effectiveQty = addOnQty > 0 ? addOnQty : 1;
+        return sum + (Number(addOn?.price) || 0) * effectiveQty;
+      }, 0) || 0;
+    setTotalPrice(price * quantity + addOnsTotal);
   };
   useEffect(() => {
     if (product) {
       handleTotalPrice();
     }
-  }, [quantity, modalData]);
+  }, [quantity, modalData, selectedAddons, selectedOptions]);
   const decrementPrice = () => {
     setQuantity((prevQty) => prevQty - 1);
   };
@@ -787,7 +874,7 @@ let checkingFor = status ? status : "cart";
   const incrementPrice = () => {
     if (modalData[0]?.maximum_cart_quantity) {
       if (modalData[0]?.maximum_cart_quantity <= modalData[0]?.quantity) {
-        toast.error(t(out_of_limits));
+        toast.error(t(out_of_limits), { id: "out-of-limits" });
       } else {
         setQuantity((prevQty) => prevQty + 1);
       }
@@ -798,16 +885,24 @@ let checkingFor = status ? status : "cart";
   const { mutate: addFavoriteMutation } = useAddToWishlist();
 
   const isInCart = (id) => {
-    if (productUpdate) {
-      const isInCart = cartList.filter((item) => item.id === id);
-      if (isInCart.length > 0) {
-        return true;
-      } else {
+    if (productUpdate) return true;
+
+    const storeIdToMatch = product?.store_id;
+    const hasVariations = modalData?.[0]?.food_variations?.length > 0;
+    const currentSig = variationSigOf(selectedOptions);
+
+    return !!cartList?.find((item) => {
+      if (item?.id !== id) return false;
+      if (
+        storeIdToMatch != null &&
+        String(item?.store_id) !== String(storeIdToMatch)
+      ) {
         return false;
       }
-    }
-
-    // return !!cartList.find((item) => item.id === id)
+      if (!hasVariations) return true;
+      if (!currentSig) return false;
+      return variationSigOf(item?.selectedOption) === currentSig;
+    });
   };
 
   const isInList = (id) => {
@@ -828,235 +923,737 @@ let checkingFor = status ? status : "cart";
 
   const handleRouteToStore = () => {
     if (router.pathname !== `/store/[id]`) {
-     handleStoreRedirect(modalData[0]?.store_details, router);
+      handleStoreRedirect(modalData[0]?.store_details, router);
     }
   };
-console.log({ modalData });
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"), {
+    noSsr: true,
+  });
+
+  const requiresSelection = useMemo(() => {
+    const item = modalData?.[0];
+    if (!item?.food_variations?.length) return false;
+    return item.food_variations.some((v, idx) => {
+      if (v?.required !== "on") return false;
+      return !selectedOptions?.some((s) => s.choiceIndex === idx);
+    });
+  }, [modalData, selectedOptions]);
+
+  const itemIsAvailable =
+    modalData?.length > 0 &&
+    isAvailable(
+      modalData[0].available_time_starts,
+      modalData[0].available_time_ends
+    );
+  const hasCampaignSchedule = !!modalData?.[0]?.available_date_starts;
+  const showScheduleNotAvailable =
+    modalData?.length > 0 && !itemIsAvailable && !hasCampaignSchedule;
+
+  const hasVariations = modalData?.[0]?.food_variations?.length > 0;
+  const hasAddOns = modalData?.[0]?.add_ons?.length > 0;
+  const hasOptions = hasVariations || hasAddOns;
+
+  const safeTotalPrice = Number(totalPrice) || 0;
+  const safeAddOnsTotal = computeAddOnsTotal();
+  const safeDiscountableSubtotal = safeTotalPrice - safeAddOnsTotal;
+  const discountedTotalPrice =
+    getDiscountedAmount(
+      safeDiscountableSubtotal,
+      product?.discount ?? modalData?.[0]?.discount,
+      product?.discount_type ?? modalData?.[0]?.discount_type,
+      product?.store_discount ?? modalData?.[0]?.store_discount,
+      quantity
+    ) + safeAddOnsTotal;
+  const totalHasDiscount = discountedTotalPrice < safeTotalPrice;
+
+  // Best-effort guess during loading shimmer so the modal width and
+  // shimmer layout already match the eventual content.
+  const guessedHasOptions =
+    modalData?.length > 0
+      ? hasOptions
+      : Boolean(
+          fromCard?.food_variations?.length > 0 ||
+            fromCard?.add_ons?.length > 0 ||
+            data?.food_variations?.length > 0 ||
+            data?.add_ons?.length > 0
+        );
+
+  const closeButton = (
+    <IconButton
+      onClick={handleModalClose}
+      sx={{
+        zIndex: 99,
+        position: "absolute",
+        top: { xs: 8, md: 6 },
+        right: { xs: 8, md: 6 },
+        width: 24,
+        height: 24,
+        padding: 0,
+        display: { xs: "none", md: "flex" },
+        backgroundColor: "transparent",
+        "&:hover": {
+          backgroundColor: "transparent",
+        },
+      }}
+    >
+      <i
+        className="fi fi-rr-cross-circle"
+        style={{
+          fontSize: "16px",
+          display: "flex",
+          color: theme.palette.text.primary,
+        }}
+      />
+    </IconButton>
+  );
+
+  const leftShimmer = (
+    <Stack spacing={1.25}>
+      <Skeleton
+        variant="rectangular"
+        width="100%"
+        sx={{
+          borderRadius: "12px",
+          height: { xs: 282, md: 282 },
+        }}
+      />
+      <Stack direction="row" spacing={0.75}>
+        {Array.from({ length: 5 }).map((_, idx) => (
+          <Skeleton
+            key={idx}
+            variant="rectangular"
+            width={48}
+            height={48}
+            sx={{ borderRadius: "10px", flexShrink: 0 }}
+          />
+        ))}
+      </Stack>
+      <Skeleton variant="text" width="50%" height={22} />
+      <Skeleton variant="text" width="80%" height={28} />
+      <Skeleton variant="text" width="40%" height={20} />
+      <Skeleton variant="text" width={120} height={32} />
+    </Stack>
+  );
+
+  const rightShimmer = (
+    <Stack spacing={2}>
+      {Array.from({ length: 2 }).map((_, idx) => (
+        <Box
+          key={idx}
+          sx={{
+            p: 2,
+            borderRadius: "12px",
+            border: (t) => `1px solid ${t.palette.divider}`,
+          }}
+        >
+          <Stack spacing={1}>
+            <Stack
+              direction="row"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Skeleton variant="text" width="30%" height={22} />
+              <Skeleton variant="text" width={60} height={20} />
+            </Stack>
+            {Array.from({ length: 3 }).map((__, j) => (
+              <Stack
+                key={j}
+                direction="row"
+                justifyContent="space-between"
+                alignItems="center"
+              >
+                <Skeleton variant="text" width="40%" height={20} />
+                <Skeleton variant="text" width={50} height={20} />
+              </Stack>
+            ))}
+          </Stack>
+        </Box>
+      ))}
+    </Stack>
+  );
+
+  const shimmer = guessedHasOptions ? (
+    <Box sx={{ p: { xs: 1.5, md: 2 }, width: "100%" }}>
+      <Grid
+        container
+        spacing={{ xs: 2, md: 3 }}
+        sx={{ flexWrap: { md: "nowrap" } }}
+      >
+        <Grid item xs={12} md={5}>
+          {leftShimmer}
+        </Grid>
+        <Grid item xs={12} md={7}>
+          {rightShimmer}
+        </Grid>
+      </Grid>
+    </Box>
+  ) : (
+    <Box sx={{ p: { xs: 1.5, md: 2 }, width: "100%" }}>{leftShimmer}</Box>
+  );
+
+  const detailsLeft = (
+    <FoodDetailsManager
+      configData={configData}
+      handleDiscountChip={handleDiscountChip}
+      imageBaseUrl={imageBaseUrl}
+      modalData={modalData}
+      product={data || fromCard}
+      t={t}
+      router={router}
+      isInList={isInList}
+      theme={theme}
+      addToWishlistHandler={addToWishlistHandler}
+      removeFromWishlistHandler={removeFromWishlistHandler}
+      isWishlisted={isWishlisted}
+      handleRouteToStore={handleRouteToStore}
+      onClose={handleModalClose}
+    />
+  );
+
+  const bodyContent = hasOptions ? (
+    <Grid
+      container
+      spacing={{ xs: 2, md: 3 }}
+      sx={{
+        p: { xs: 0, md: 2 },
+        flex: { md: 1 },
+        minHeight: 0,
+        overflow: { md: "hidden" },
+        flexWrap: { md: "nowrap" },
+        m: 0,
+        width: "100%",
+      }}
+    >
+      <Grid
+        item
+        xs={12}
+        md={5}
+        sx={{
+          minHeight: 0,
+          maxHeight: { md: "100%" },
+          overflowY: { xs: "visible", md: "auto" },
+          overflowX: "hidden",
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
+        }}
+      >
+        {detailsLeft}
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        md={7}
+        sx={{
+          minHeight: 0,
+          maxHeight: { md: "100%" },
+          overflowY: { xs: "visible", md: "auto" },
+          overflowX: "hidden",
+          scrollbarWidth: "none",
+          "&::-webkit-scrollbar": { display: "none" },
+        }}
+      >
+        <Stack
+          spacing={1.5}
+          sx={{ px: { xs: 1.5, md: 0 }, mb: { xs: 2, md: 0 } }}
+        >
+          {hasVariations && (
+            <VariationsManager
+              t={t}
+              modalData={modalData}
+              radioCheckHandler={radioCheckHandler}
+              changeChoices={changeChoices}
+              selectedOptions={selectedOptions}
+            />
+          )}
+          {hasAddOns && (
+            <AddOnsManager
+              t={t}
+              modalData={modalData}
+              changeAddOns={changeAddOns}
+              selectedAddons={selectedAddons}
+            />
+          )}
+        </Stack>
+      </Grid>
+    </Grid>
+  ) : (
+    <Box
+      sx={{
+        p: { xs: 0, md: 2 },
+        flex: { md: 1 },
+        minHeight: 0,
+        overflowY: { md: "auto" },
+        overflowX: "hidden",
+        scrollbarWidth: "none",
+        "&::-webkit-scrollbar": { display: "none" },
+      }}
+    >
+      {detailsLeft}
+    </Box>
+  );
+
+  const qtyStepper = (
+    <Stack
+      direction="row"
+      alignItems="center"
+      gap="8px"
+      sx={{
+        flexShrink: 0,
+        height: "44px",
+        backgroundColor: theme.palette.background.secondary,
+        borderRadius: "8px",
+        px: "12px",
+      }}
+    >
+      <IconButton
+        onClick={decrementPrice}
+        disabled={quantity <= 1}
+        sx={{
+          width: 36,
+          height: 36,
+          p: "6px",
+          borderRadius: "8px",
+          color: "neutral.1050",
+          flexShrink: 0,
+          "&:hover": { backgroundColor: "action.hover" },
+          "&.Mui-disabled": { opacity: 0.35 },
+        }}
+      >
+        <i
+          className="fi fi-rr-minus-small"
+          style={{ fontSize: 16, display: "flex", lineHeight: 1 }}
+        />
+      </IconButton>
+      <Box
+        sx={{
+          width: 32,
+          textAlign: "center",
+          fontSize: "18px",
+          fontWeight: 700,
+          color: "neutral.1050",
+          letterSpacing: "-0.54px",
+          lineHeight: 1.1,
+          fontVariantNumeric: "tabular-nums",
+          flexShrink: 0,
+        }}
+      >
+        {quantity}
+      </Box>
+      <IconButton
+        onClick={incrementPrice}
+        sx={{
+          width: 36,
+          height: 36,
+          p: "6px",
+          borderRadius: "8px",
+          color: "neutral.1050",
+          flexShrink: 0,
+          "&:hover": { backgroundColor: "action.hover" },
+        }}
+      >
+        <i
+          className="fi fi-rr-plus-small"
+          style={{ fontSize: 16, display: "flex", lineHeight: 1 }}
+        />
+      </IconButton>
+    </Stack>
+  );
+
+  const addToCartButton = (
+    <Button
+      onClick={() => addToCard()}
+      disabled={isLoading || updateIsLoading}
+      sx={{
+        height: 44,
+        minWidth: { xs: 120, md: 160 },
+        px: 3,
+        borderRadius: "10px",
+        textTransform: "none",
+        fontWeight: 700,
+        fontSize: { xs: "13px", md: "14px" },
+        whiteSpace: "nowrap",
+        boxShadow: "none",
+        backgroundColor: theme.palette.primary.main,
+        color: theme.palette.background.paper,
+        "&:hover": {
+          boxShadow: "none",
+          backgroundColor: theme.palette.primary.dark,
+        },
+        "&.Mui-disabled": {
+          color: theme.palette.background.paper,
+          backgroundColor: alpha(theme.palette.primary.main, 0.55),
+        },
+      }}
+    >
+      {isLoading || updateIsLoading
+        ? "..."
+        : isInCart?.(product?.id)
+        ? t("Update to Cart")
+        : t("Add To Cart")}
+    </Button>
+  );
+
+  const renderActionButtons = () => {
+    if (showScheduleNotAvailable) {
+      return (
+        <AddOrderToCart
+          isLoading={isLoading}
+          isInCart={isInCart}
+          product={product}
+          t={t}
+          addToCard={addToCard}
+          orderNow={orderNow}
+          router={router}
+          isScheduled={modalData[0]?.schedule_order ? "true" : "false"}
+          updateIsLoading={updateIsLoading}
+          requiresSelection={requiresSelection}
+        />
+      );
+    }
+    // Campaign items can be ordered directly — checkout goes to
+    // `?page=campaign` (handled by `orderNow`). Detect them by the
+    // presence of `available_date_starts` on the source modal data,
+    // matching the same signal already used by `hasCampaignSchedule`.
+    if (hasCampaignSchedule) {
+      return (
+        <Button
+          onClick={orderNow}
+          disabled={isLoading || updateIsLoading || requiresSelection}
+          sx={{
+            height: 44,
+            minWidth: { xs: 120, md: 160 },
+            px: 3,
+            borderRadius: "10px",
+            textTransform: "none",
+            fontWeight: 700,
+            fontSize: { xs: "13px", md: "14px" },
+            whiteSpace: "nowrap",
+            boxShadow: "none",
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.background.paper,
+            "&:hover": {
+              boxShadow: "none",
+              backgroundColor: theme.palette.primary.dark,
+            },
+            "&.Mui-disabled": {
+              color: theme.palette.background.paper,
+              backgroundColor: alpha(theme.palette.primary.main, 0.55),
+            },
+          }}
+        >
+          {t("Order Now")}
+        </Button>
+      );
+    }
+    return addToCartButton;
+  };
+
+  const focusNextRequiredVariation = () => {
+    const variations = modalData?.[0]?.food_variations ?? [];
+    const firstMissingIdx = variations.findIndex((v, idx) => {
+      if (v?.required !== "on") return false;
+      return !selectedOptions?.some((s) => s.choiceIndex === idx);
+    });
+    if (firstMissingIdx === -1) return;
+    if (typeof document === "undefined") return;
+    const node = document.getElementById(`food-variation-${firstMissingIdx}`);
+    if (!node) return;
+    node.scrollIntoView({ behavior: "smooth", block: "center" });
+    const highlightColor = alpha(theme.palette.error.main, 0.45);
+    node.style.boxShadow = `0 0 0 2px ${highlightColor}`;
+    node.style.borderColor = theme.palette.error.main;
+    window.setTimeout(() => {
+      node.style.boxShadow = "";
+      node.style.borderColor = "";
+    }, 1400);
+  };
+
+  const requiredCta = (
+    <Button
+      fullWidth
+      disableElevation
+      onClick={focusNextRequiredVariation}
+      sx={{
+        height: 48,
+        borderRadius: "10px",
+        textTransform: "none",
+        fontWeight: 700,
+        fontSize: { xs: "14px", md: "15px" },
+        boxShadow: "none",
+        backgroundColor: alpha(theme.palette.text.primary, 0.06),
+        color: theme.palette.text.secondary,
+        "&:hover": {
+          backgroundColor: alpha(theme.palette.text.primary, 0.1),
+          boxShadow: "none",
+        },
+      }}
+    >
+      {t("Choose Required Option")}
+    </Button>
+  );
+
+  const stickyBar = !cardDataIsLoading && modalData.length > 0 && (
+    <Box
+      sx={{
+        flexShrink: 0,
+        px: { xs: 1.5, md: 2 },
+        py: { xs: 1.25, md: 1.5 },
+        borderTop: `1px solid ${theme.palette.divider}`,
+        backgroundColor: theme.palette.background.paper,
+        zIndex: 2,
+      }}
+    >
+      {showScheduleNotAvailable ? (
+        renderActionButtons()
+      ) : requiresSelection ? (
+        requiredCta
+      ) : hasOptions && !isMobile ? (
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          justifyContent="space-between"
+          sx={{ width: "100%" }}
+        >
+          <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Typography
+                sx={{
+                  fontSize: { xs: "12px", md: "13px" },
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                }}
+              >
+                {t("Total")}
+              </Typography>
+              {/* <Typography
+                sx={{
+                  fontSize: { xs: "11px", md: "12px" },
+                  color: theme.palette.text.secondary,
+                }}
+              >
+                {t("(Inc. VAT/TAX)")}
+              </Typography> */}
+            </Stack>
+            <Stack direction="row" alignItems="baseline" spacing={1}>
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: { xs: "16px", md: "18px" },
+                  color: theme.palette.text.primary,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {getAmountWithSign(discountedTotalPrice)}
+              </Typography>
+              {totalHasDiscount && (
+                <Typography
+                  sx={{
+                    fontSize: { xs: "12px", md: "13px" },
+                    color: theme.palette.text.secondary,
+                    textDecoration: "line-through",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {getAmountWithSign(safeTotalPrice)}
+                </Typography>
+              )}
+            </Stack>
+          </Stack>
+          <Stack
+            direction="row"
+            alignItems="center"
+            spacing={1.5}
+            sx={{ width: { xs: "100%", sm: "auto" } }}
+          >
+            {qtyStepper}
+            <Box sx={{ flex: { xs: 1, sm: "0 0 auto" } }}>
+              {renderActionButtons()}
+            </Box>
+          </Stack>
+        </Stack>
+      ) : (
+        <Stack spacing={1} sx={{ width: "100%" }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            spacing={1}
+          >
+            <Stack direction="row" alignItems="center" spacing={0.5}>
+              <Typography
+                sx={{
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  color: theme.palette.text.primary,
+                }}
+              >
+                {t("Total")}
+              </Typography>
+              {/* <Typography
+                sx={{ fontSize: "11px", color: theme.palette.text.secondary }}
+              >
+                {t("(Inc. VAT/TAX)")}
+              </Typography> */}
+            </Stack>
+            <Stack direction="row" alignItems="baseline" spacing={0.75}>
+              {totalHasDiscount && (
+                <Typography
+                  sx={{
+                    fontSize: "13px",
+                    color: theme.palette.text.secondary,
+                    textDecoration: "line-through",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {getAmountWithSign(safeTotalPrice)}
+                </Typography>
+              )}
+              <Typography
+                sx={{
+                  fontWeight: 700,
+                  fontSize: "16px",
+                  color: theme.palette.text.primary,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {getAmountWithSign(discountedTotalPrice)}
+              </Typography>
+            </Stack>
+          </Stack>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+            spacing={1.5}
+          >
+            {qtyStepper}
+            {renderActionButtons()}
+          </Stack>
+        </Stack>
+      )}
+    </Box>
+  );
+
+  const notFoundContent = (
+    <Stack
+      alignItems="center"
+      justifyContent="center"
+      spacing={1.25}
+      sx={{
+        px: 3,
+        py: { xs: 6, md: 8 },
+        textAlign: "center",
+      }}
+    >
+      <Box
+        sx={{
+          width: 64,
+          height: 64,
+          borderRadius: "50%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: alpha(theme.palette.error.main, 0.12),
+          color: theme.palette.error.main,
+          fontSize: 32,
+          lineHeight: 1,
+        }}
+        aria-hidden
+      >
+        <i className="fi fi-rr-utensils" style={{ display: "flex" }} />
+      </Box>
+      <Typography fontSize="18px" fontWeight={700} color="text.primary">
+        {t("Food not found")}
+      </Typography>
+      <Typography fontSize="14px" color="text.secondary" sx={{ maxWidth: 320 }}>
+        {t(
+          "This item is no longer available. It may have been removed or replaced by the store."
+        )}
+      </Typography>
+    </Stack>
+  );
+
+  const scrollableBody = (
+    <Box
+      sx={{
+        flex: 1,
+        minHeight: 0,
+        overflowY: { xs: "auto", md: "hidden" },
+        overflowX: "hidden",
+        WebkitOverflowScrolling: "touch",
+        display: { xs: "block", md: "flex" },
+        flexDirection: { md: "column" },
+      }}
+    >
+      {cardDataIsLoading
+        ? shimmer
+        : itemNotFound
+        ? notFoundContent
+        : bodyContent}
+    </Box>
+  );
+
+  const clearCart = clearCartModal && (
+    <CustomModal
+      openModal={clearCartModal}
+      handleClose={() => cartResetHandler()}
+    >
+      <CartClearModal
+        handleClose={() => cartResetHandler()}
+        dispatchRedux={dispatch}
+      />
+    </CustomModal>
+  );
+
+  if (isMobile) {
+    return (
+      <>
+        <Drawer
+          anchor="bottom"
+          open={open}
+          onClose={handleModalClose}
+          sx={{ zIndex: (t) => t.zIndex.modal + 10 }}
+          PaperProps={{
+            sx: {
+              borderTopLeftRadius: "20px",
+              borderTopRightRadius: "20px",
+              maxHeight: "70vh",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            },
+          }}
+        >
+          {closeButton}
+          {scrollableBody}
+          {stickyBar}
+        </Drawer>
+        {clearCart}
+      </>
+    );
+  }
 
   return (
     <>
       <Modal open={open} onClose={handleModalClose} disableAutoFocus={true}>
         <FoodDetailModalStyle
-          sx={{ bgcolor: "background.paper" }}
-          foodmodal="true"
+          foodmodal={!guessedHasOptions ? "true" : undefined}
+          sx={{
+            bgcolor: "background.paper",
+            borderRadius: "16px",
+            overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            height: { md: "560px" },
+            maxHeight: { md: "560px" },
+            boxShadow: "0 24px 56px rgba(17,24,39,0.16)",
+          }}
         >
-          <CustomStackFullWidth
-            direction="row"
-            alignItems="center"
-            justifyContent="flex-end"
-            sx={{ position: "relative" }}
-          >
-            <IconButton
-              onClick={handleModalClose}
-              sx={{
-                zIndex: "99",
-                position: "absolute",
-                top: 10,
-                right: 5,
-                backgroundColor: (theme) => theme.palette.neutral[100],
-                borderRadius: "50%",
-                [theme.breakpoints.down("md")]: {
-                  top: 10,
-                  right: 5,
-                },
-              }}
-            >
-              <CloseIcon sx={{ fontSize: "16px", fontWeight: "500" }} />
-            </IconButton>
-          </CustomStackFullWidth>
-
-          {cardDataIsLoading ? (
-            <Box sx={{ p: "1rem" }}>
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <Skeleton variant="rectangular" width="100%" sx={{ minWidth: { sm: 200 }, height: { xs: 200, sm: 220 }, borderRadius: "10px" }} />
-                <Stack spacing={1.5} flex={1}>
-                  <Skeleton variant="text" width="70%" height={28} />
-                  <Skeleton variant="text" width="40%" height={20} />
-                  <Skeleton variant="text" width="55%" height={20} />
-                  <Skeleton variant="text" width="35%" height={20} />
-                  <Skeleton variant="rectangular" width="50%" height={32} sx={{ borderRadius: "6px", mt: 1 }} />
-                </Stack>
-              </Stack>
-              <Stack direction="row" justifyContent="space-between" alignItems="center" mt={2}>
-                <Skeleton variant="text" width="30%" height={28} />
-                <Skeleton variant="rectangular" width={120} height={36} sx={{ borderRadius: "8px" }} />
-              </Stack>
-              <Stack spacing={1} mt={2}>
-                <Skeleton variant="text" width="25%" height={22} />
-                
-              </Stack>
-              <Stack direction="row" spacing={2} mt={1}>
-                <Skeleton variant="rectangular" width="50%" height={50} sx={{ borderRadius: "8px" }} />
-                <Skeleton variant="rectangular" width="50%" height={50} sx={{ borderRadius: "8px" }} />
-              </Stack>
-              
-            </Box>
-          ) : (
-          <>
-          <FoodDetailsManager
-            configData={configData}
-            handleDiscountChip={handleDiscountChip}
-            imageBaseUrl={imageBaseUrl}
-            modalData={modalData}
-            product={data || fromCard}
-            t={t}
-            router={router}
-            isInList={isInList}
-            theme={theme}
-            addToWishlistHandler={addToWishlistHandler}
-            removeFromWishlistHandler={removeFromWishlistHandler}
-            isWishlisted={isWishlisted}
-            handleRouteToStore={handleRouteToStore}
-          />
-          <SimpleBar style={{ maxHeight: "30vh " }}>
-            <Grid
-              container
-              justifyContent="space-between"
-              alignItems="center"
-              paddingX="1rem"
-              direction="row"
-            >
-              <Grid item md={12} pt=".5rem">
-                <CustomStackFullWidth
-                  direction="row"
-                  alignItems="center"
-                  flexWrap="wrap"
-                  justifyContent="space-between"
-                  gap={{ xs: "10px", sm: "10px", md: "35px" }}
-                >
-                  {modalData.length > 0 && (
-                    <StartPriceView
-                      data={modalData[0]}
-                      configData={configData}
-                    />
-                  )}
-                  <IncrementDecrementManager
-                    decrementPrice={decrementPrice}
-                    totalPrice={totalPrice}
-                    quantity={quantity}
-                    incrementPrice={incrementPrice}
-                  />
-                </CustomStackFullWidth>
-              </Grid>
-            </Grid>
-            <Stack paddingX="1rem">
-              {modalData.length > 0 &&
-                modalData[0].food_variations?.length > 0 && (
-                  <VariationsManager
-                    t={t}
-                    modalData={modalData}
-                    radioCheckHandler={radioCheckHandler}
-                    changeChoices={changeChoices}
-                  />
-                )}
-              {modalData.length > 0 && modalData[0].add_ons?.length > 0 && (
-                <AddOnsManager
-                  t={t}
-                  modalData={modalData}
-                  changeAddOns={changeAddOns}
-                  selectedAddons={selectedAddons}
-                />
-              )}
-            </Stack>
-          </SimpleBar>
-          <Stack paddingX="1rem" pt=".5rem">
-            <TotalAmountVisibility
-              modalData={modalData}
-              totalPrice={totalPrice}
-              t={t}
-              productDiscount={product?.discount}
-              productDiscountType={product?.discount_type}
-              productRestaurantDiscount={product?.store_discount}
-              productQuantity={quantity}
-              selectedAddOns={selectedAddons}
-            />
-          </Stack>
-          <Box sx={{ marginTop: "20px" }}>
-            <Grid container direction="row" paddingX="1rem" pb="1rem">
-              <Grid
-                item
-                md={6}
-                sm={12}
-                xs={12}
-                alignSelf="center"
-                paddingLeft={{ xs: "10px", md: "0px" }}
-                paddingBottom={{ sm: "10px", md: "0px" }}
-              ></Grid>
-              <Grid item md={12} sm={12} xs={12}>
-                {/*this check is for normal food if the food is available*/}
-                {modalData.length > 0 &&
-                  isAvailable(
-                    modalData[0].available_time_starts,
-                    modalData[0].available_time_ends
-                  ) &&
-                  !modalData[0]?.available_date_starts && (
-                    <AddOrderToCart
-                      isInCart={isInCart}
-                      product={product}
-                      t={t}
-                      addToCard={addToCard}
-                      orderNow={orderNow}
-                      router={router}
-                      isLoading={isLoading}
-                      updateIsLoading={updateIsLoading}
-                    />
-                  )}
-                {/*this check is for normal food if the food is not available but the schedule order is on*/}
-                {modalData.length > 0 &&
-                  !isAvailable(
-                    modalData[0].available_time_starts,
-                    modalData[0].available_time_ends
-                  ) &&
-                  !modalData[0]?.available_date_starts && (
-                    <AddOrderToCart
-                      isLoading={isLoading}
-                      isInCart={isInCart}
-                      product={product}
-                      t={t}
-                      addToCard={addToCard}
-                      orderNow={orderNow}
-                      router={router}
-                      isScheduled={
-                        modalData[0].schedule_order ? "true" : "false"
-                      }
-                      updateIsLoading={updateIsLoading}
-                    />
-                  )}
-                {/*this check is for campaign food if the food is available*/}
-                {modalData.length > 0 &&
-                  isAvailable(
-                    modalData[0].available_time_starts,
-                    modalData[0].available_time_ends
-                  ) &&
-                  modalData[0]?.available_date_starts && (
-                    <AddUpdateOrderToCart
-                      modalData={modalData}
-                      isInCart={isInCart}
-                      addToCard={addToCard}
-                      t={t}
-                      product={product}
-                      orderNow={orderNow}
-                      isCampaign
-                      isLoading={isLoading}
-                      updateIsLoading={updateIsLoading}
-                    />
-                  )}
-              </Grid>
-            </Grid>
-          </Box>
-          </>
-          )}
-          {clearCartModal && (
-            <CustomModal
-              openModal={clearCartModal}
-              handleClose={() => cartResetHandler()}
-            >
-              <CartClearModal
-                handleClose={() => cartResetHandler()}
-                dispatchRedux={dispatch}
-              />
-            </CustomModal>
-          )}
+          {closeButton}
+          {scrollableBody}
+          {stickyBar}
+          {clearCart}
         </FoodDetailModalStyle>
       </Modal>
     </>

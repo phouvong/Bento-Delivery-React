@@ -13,8 +13,8 @@ const ClosedNowOverlay = ({ borderRadius }) => {
         bottom: 0,
         left: 0,
         width: "100%",
-        background: (theme) => alpha(theme.palette.primary.overLay, 0.7),
-        
+        background: (theme) => alpha(theme.palette.primary.overLay, 0.65),
+
         color: (theme) => theme.palette.neutral[100],
         padding: "10px",
         height: "100%",
@@ -25,11 +25,19 @@ const ClosedNowOverlay = ({ borderRadius }) => {
     >
       <Typography
         align="center"
-        color={theme.palette.mode === "dark" ? theme.palette.neutral[1000] : theme.palette.neutral[100]}
-        fontWeight="600"
-        fontSize="12px"
+        color={
+          theme.palette.mode === "dark"
+            ? theme.palette.neutral[1000]
+            : theme.palette.neutral[100]
+        }
+        fontWeight="700"
+        sx={{
+          fontSize: "11px",
+          lineHeight: 1.2,
+          letterSpacing: "-0.2px",
+        }}
       >
-        {t("CLOSED NOW")}
+        {t("Closed")}
       </Typography>
     </Stack>
   );

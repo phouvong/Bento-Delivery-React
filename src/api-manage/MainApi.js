@@ -1,3 +1,5 @@
+
+
 import axios from "axios";
 export const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 const MainApi = axios.create({
@@ -41,7 +43,7 @@ MainApi.interceptors.request.use(function (config) {
   if (zoneidIsValid) {
     config.headers.zoneid = zoneid;
   }
-  if (moduleid) config.headers.moduleId = moduleid;
+  if (moduleid && !config.headers.moduleId) config.headers.moduleId = moduleid;
   if (token) config.headers.authorization = `Bearer ${token}`;
   if (language) config.headers["X-localization"] = language;
   if (hostname) config.headers["origin"] = hostname;

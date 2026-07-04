@@ -9,25 +9,37 @@ import { useGetConfigData } from "api-manage/hooks/useGetConfigData";
 import { setConfigData } from "redux/slices/configData";
 import { useEffect } from "react";
 import RentalProviderDetailsPage from "../../../../src/components/home/module-wise-components/rental/components/rental-provider-details/RentalProviderDetailsPage";
+import SimpleMobileHeader from "components/common/SimpleMobileHeader";
 import { NoSsr } from "@mui/material";
 
-const Index = ({ providerMetaData,configData }) => {
+const Index = ({ providerMetaData, configData }) => {
   const dispatch = useDispatch();
 
   const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
 
+  // Hydrate redux from whichever source we have:
+  //  - SSR succeeded → push the prop into redux so navbar/TaxiView etc.
+  //    don't read `null` on first render.
+  //  - SSR missed → trigger the client-side fetch (the hook is
+  //    `enabled: false` by default, so we have to kick it manually).
+  // Dependencies are empty because `configData` is an SSR prop that
+  // doesn't change after mount.
   useEffect(() => {
-    if (!configData) {
+    if (configData) {
+      dispatch(setConfigData(configData));
+    } else {
       configRefetch();
     }
-  }, [configData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // When the client-side fallback resolves, push it into redux too.
   useEffect(() => {
     if (dataConfig) {
       dispatch(setConfigData(dataConfig));
     }
-  }, [dataConfig]);
-  console.log({ providerMetaData});
+  }, [dataConfig, dispatch]);
+  console.log({ providerMetaData });
   return (
     <>
       <CssBaseline />
@@ -40,6 +52,7 @@ const Index = ({ providerMetaData,configData }) => {
         robotsMeta={providerMetaData?.meta_data}
       />
       <MainLayout configData={configData}>
+        <SimpleMobileHeader title="Provider Details" />
         <NoSsr>
           <RentalProviderDetailsPage configData={configData} />
         </NoSsr>

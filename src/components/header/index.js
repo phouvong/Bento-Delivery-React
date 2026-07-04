@@ -1,10 +1,9 @@
 import { AppBarStyle } from "./NavBar.style";
 
-import { Card, NoSsr, useMediaQuery, useScrollTrigger, useTheme } from "@mui/material";
+import { NoSsr, useMediaQuery, useTheme } from "@mui/material";
 import { Box } from "@mui/system";
 import { useSelector } from "react-redux";
-import SecondNavBar from "./second-navbar/SecondNavbar";
-import TopNavBar from "./top-navbar/TopNavBar";
+import NewNavBar from "./new-navbar/NewNavBar";
 import useGetZoneId from "api-manage/hooks/react-query/google-api/useGetZone";
 import { useEffect, useState } from "react";
 
@@ -13,18 +12,6 @@ const HeaderComponent = () => {
 
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-  const scrolling = useScrollTrigger();
-
-  // ✅ read localStorage on first CLIENT render (state initializer runs during render on client)
-  const [location] = useState(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("location");
-  });
-
-  const [token] = useState(() => {
-    if (typeof window === "undefined") return null;
-    return localStorage.getItem("token");
-  });
 
   const [currentLocation] = useState(() => {
     if (typeof window === "undefined") return null;
@@ -36,10 +23,7 @@ const HeaderComponent = () => {
     }
   });
 
-  // ✅ enable query only when we have location
-  const zoneIdEnabled = !!currentLocation;
-
-  const { data: zoneData } = useGetZoneId(currentLocation, zoneIdEnabled);
+  const { data: zoneData } = useGetZoneId(currentLocation, !!currentLocation);
 
   // ✅ store zoneid when received
   useEffect(() => {
@@ -50,13 +34,10 @@ const HeaderComponent = () => {
   }, [zoneData]);
 
   return (
-    <AppBarStyle scrolling={location || token ? scrolling : false} isSmall={isSmall}>
-      <Box>
+    <AppBarStyle scrolling={false} isSmall={isSmall}>
+      <Box sx={{ width: "100%" }}>
         <NoSsr>
-          <Card sx={{ boxShadow: "none" }}>
-            <TopNavBar configData={configData} />
-          </Card>
-          <SecondNavBar configData={configData} />
+          <NewNavBar configData={configData} />
         </NoSsr>
       </Box>
     </AppBarStyle>

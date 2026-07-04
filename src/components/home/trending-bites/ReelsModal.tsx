@@ -21,8 +21,21 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import React from "react";
 import { useRouter } from "next/router";
+import dynamic from "next/dynamic";
 import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
+import { handleProductRedirect } from "helper-functions/handleProductRedirect";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { ModuleTypes } from "helper-functions/moduleTypes";
+import { useDispatch, useSelector } from "react-redux";
+import { useAddToWishlist } from "api-manage/hooks/react-query/wish-list/useAddWishList";
+import { useWishListDelete } from "api-manage/hooks/react-query/wish-list/useWishListDelete";
+import { addWishList, removeWishListItem } from "redux/slices/wishList";
 import VerifiedStoreBadgeJs from "components/cards/VerifiedStoreBadge";
+
+const FoodDetailModal = dynamic(
+  () => import("components/food-details/foodDetail-modal/FoodDetailModal")
+);
+const ModuleModal = dynamic(() => import("components/cards/ModuleModal"));
 
 const VerifiedStoreBadge = VerifiedStoreBadgeJs as React.FC<{
   verified?: boolean | number;
@@ -53,21 +66,21 @@ const reelPreloadInFlight = new Map<number, Promise<string | null>>();
 
 // Build proxy URL with auth query params (runs in browser — reads localStorage).
 const buildProxyUrl = (reelId: number): string => {
-  const token    = localStorage.getItem("token");
-  const zoneid   = localStorage.getItem("zoneid");
+  const token = localStorage.getItem("token");
+  const zoneid = localStorage.getItem("zoneid");
   const moduleId = JSON.parse(localStorage.getItem("module") || "null")?.id;
-  const lang     = JSON.parse(localStorage.getItem("language-setting") || "null");
-  const loc      = JSON.parse(localStorage.getItem("currentLatLng") || "null");
-  const guestId  = !token ? localStorage.getItem("guest_id") : null;
+  const lang = JSON.parse(localStorage.getItem("language-setting") || "null");
+  const loc = JSON.parse(localStorage.getItem("currentLatLng") || "null");
+  const guestId = !token ? localStorage.getItem("guest_id") : null;
 
   const params = new URLSearchParams({ reel_id: String(reelId) });
-  if (token)    params.set("t",        token);
-  if (moduleId) params.set("mid",      String(moduleId));
-  if (zoneid)   params.set("zid",      zoneid);
-  if (lang)     params.set("lang",     lang);
-  if (loc?.lat) params.set("lat",      String(loc.lat));
-  if (loc?.lng) params.set("lng",      String(loc.lng));
-  if (guestId)  params.set("guest_id", guestId);
+  if (token) params.set("t", token);
+  if (moduleId) params.set("mid", String(moduleId));
+  if (zoneid) params.set("zid", zoneid);
+  if (lang) params.set("lang", lang);
+  if (loc?.lat) params.set("lat", String(loc.lat));
+  if (loc?.lng) params.set("lng", String(loc.lng));
+  if (guestId) params.set("guest_id", guestId);
   return `/api/reels/stream?${params.toString()}`;
 };
 
@@ -173,6 +186,12 @@ export interface TrendingBiteItem {
   dishName: string;
   viewCount: string;
   videoUrl?: string;
+  // Reel product fields
+  item_id?: number;
+  product_id?: number;
+  order_now_button?: boolean;
+  item?: Record<string, any>;
+  module_type?: string;
 }
 
 interface ReelsModalProps {
@@ -196,12 +215,18 @@ const ReelsModal = ({
 }: ReelsModalProps) => {
   const { t } = useTranslation();
   const router = useRouter();
+  const dispatch = useDispatch();
   const item = items[activeIndex];
   const isFirst = activeIndex === 0;
   const isLast = activeIndex === items.length - 1;
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const lastClickRef = useRef<number>(0);
+  // Vertical-swipe state for mobile reel navigation (TikTok / Instagram-style).
+  const touchStartYRef = useRef<number | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
+  const touchHandledRef = useRef<boolean>(false);
+  const SWIPE_THRESHOLD = 60; // px
 
   // Callback ref: sets videoRef AND triggers a re-render so the streaming
   // effect re-runs once the video element is actually in the DOM.
@@ -222,15 +247,105 @@ const ReelsModal = ({
 
   const isLoggedIn = !!getToken();
   const guestId = isLoggedIn ? undefined : getGuestId();
+  const { configData } = useSelector((s: any) => s.configData);
+  const { wishLists } = useSelector((s: any) => s.wishList);
+  const [openFoodModal, setOpenFoodModal] = useState(false);
+  const [openModuleModal, setOpenModuleModal] = useState(false);
 
-  const { data: reelDetails } = useGetReelsDetails(item?.id ?? null, {}, guestId);
-  const { data: reelStats } = useGetReelsStats(item?.id ?? null, {}, guestId);
+  // ── Wishlist ───────────────────────────────────────────────────────────────
+  const { mutate: addFavoriteMutation } = useAddToWishlist();
+  const { mutate: wishlistDeleteMutate } = useWishListDelete();
+
+  // ── Order Now logic ────────────────────────────────────────────────────────
+  const itemId = item?.item_id ?? item?.product_id ?? item?.item?.id;
+  const shouldShowOrderNow = !!(itemId && item?.order_now_button !== false);
+
+  // Build a minimal product object the modals can use
+  const productData = itemId
+    ? {
+        id: itemId,
+        name: item?.item?.name ?? item?.dishName,
+        price: item?.item?.price,
+        image_full_url: item?.item?.image_full_url ?? item?.foodImage,
+        store_id: item?.item?.store_id ?? item?.storeId,
+        ...(item?.item ?? {}),
+      }
+    : null;
+
+  const isWishlisted =
+    isLoggedIn && !!wishLists?.item?.find((w: any) => w.id === productData?.id);
+
+  const toggleWishlist = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isLoggedIn) {
+      toast.error(t(not_logged_in_message));
+      return;
+    }
+    if (!productData) return;
+    if (isWishlisted) {
+      wishlistDeleteMutate(productData.id, {
+        onSuccess: (res: any) => {
+          dispatch(removeWishListItem(productData.id));
+          toast.success(res?.message ?? t("Removed from wishlist"));
+        },
+        onError: (err: any) => {
+          toast.error(
+            err?.response?.data?.message ?? t("Something went wrong")
+          );
+        },
+      });
+    } else {
+      addFavoriteMutation(productData.id, {
+        onSuccess: (res: any) => {
+          dispatch(addWishList(productData));
+          toast.success(res?.message ?? t("Added to wishlist"));
+        },
+        onError: (err: any) => {
+          toast.error(
+            err?.response?.data?.message ?? t("Something went wrong")
+          );
+        },
+      });
+    }
+  };
+
+  const handleOrderNow = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!productData) return;
+    const moduleType = getCurrentModuleType();
+    if (moduleType === ModuleTypes.FOOD) {
+      setOpenFoodModal(true);
+    } else if (moduleType === ModuleTypes.ECOMMERCE) {
+      handleProductRedirect(productData, router);
+       onClose();
+    } else if (moduleType === ModuleTypes.RENTAL) {
+      const vehicleSlug = (productData as any)?.slug ?? productData?.id;
+      onClose();
+      router.push(`/rental/vehicle/${vehicleSlug}`);
+    } else {
+      setOpenModuleModal(true);
+    }
+  };
+
+  const { data: reelDetails } = useGetReelsDetails(
+    item?.id ?? null,
+    { enabled: open && !!item?.id },
+    guestId
+  );
+  const { data: reelStats } = useGetReelsStats(
+    item?.id ?? null,
+    { enabled: open && !!item?.id },
+    guestId
+  );
   const { mutate: postLike } = usePostReelLike();
   const { mutate: postVisit } = usePostReelVisit();
 
   // Derive a primitive so the effect below never re-runs due to object reference churn
   const serverLiked: boolean =
-    reelStats?.is_liked ?? reelStats?.liked ?? reelStats?.stats?.is_liked ?? false;
+    reelStats?.is_liked ??
+    reelStats?.liked ??
+    reelStats?.stats?.is_liked ??
+    false;
 
   // Seed liked state from API so previously liked reels show correctly on open
   useEffect(() => {
@@ -272,10 +387,16 @@ const ReelsModal = ({
       });
     };
 
-    const onCanPlay    = () => { setIsBuffering(false); tryPlay(); };
-    const onPlaying    = () => { setIsBuffering(false); setIsPlaying(true); };
-    const onPause      = () => setIsPlaying(false);
-    const onWaiting    = () => setIsBuffering(true);
+    const onCanPlay = () => {
+      setIsBuffering(false);
+      tryPlay();
+    };
+    const onPlaying = () => {
+      setIsBuffering(false);
+      setIsPlaying(true);
+    };
+    const onPause = () => setIsPlaying(false);
+    const onWaiting = () => setIsBuffering(true);
     const onTimeUpdate = () => {
       if (!video.duration) return;
       setProgress((video.currentTime / video.duration) * 100);
@@ -284,30 +405,32 @@ const ReelsModal = ({
     // Keeps the buffered bar in sync with what's actually on disk.
     const onBufferProgress = () => {
       if (!video.duration || video.buffered.length === 0) return;
-      setBuffered((video.buffered.end(video.buffered.length - 1) / video.duration) * 100);
+      setBuffered(
+        (video.buffered.end(video.buffered.length - 1) / video.duration) * 100
+      );
     };
 
-    video.addEventListener("canplay",    onCanPlay);
-    video.addEventListener("playing",    onPlaying);
-    video.addEventListener("pause",      onPause);
-    video.addEventListener("waiting",    onWaiting);
+    video.addEventListener("canplay", onCanPlay);
+    video.addEventListener("playing", onPlaying);
+    video.addEventListener("pause", onPause);
+    video.addEventListener("waiting", onWaiting);
     video.addEventListener("timeupdate", onTimeUpdate);
-    video.addEventListener("progress",   onBufferProgress);
+    video.addEventListener("progress", onBufferProgress);
 
     const removeListeners = () => {
-      video.removeEventListener("canplay",    onCanPlay);
-      video.removeEventListener("playing",    onPlaying);
-      video.removeEventListener("pause",      onPause);
-      video.removeEventListener("waiting",    onWaiting);
+      video.removeEventListener("canplay", onCanPlay);
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("pause", onPause);
+      video.removeEventListener("waiting", onWaiting);
       video.removeEventListener("timeupdate", onTimeUpdate);
-      video.removeEventListener("progress",   onBufferProgress);
+      video.removeEventListener("progress", onBufferProgress);
     };
 
     // ── Cache hit — instant play ──
     const cached = reelVideoCache.get(item.id);
     if (cached) {
       video.muted = isMuted;
-      video.src   = cached;
+      video.src = cached;
       setHasVideo(true);
       if (video.readyState >= 3) tryPlay();
       return () => {
@@ -324,7 +447,7 @@ const ReelsModal = ({
     //   encoded, playback starts after the first ~2 MB chunk.
     const proxyUrl = buildProxyUrl(item.id);
     video.muted = isMuted;
-    video.src   = proxyUrl;
+    video.src = proxyUrl;
     setHasVideo(true);
 
     // Also kick off a background chunked download so the blob is cached for
@@ -340,7 +463,6 @@ const ReelsModal = ({
       video.load();
     };
   }, [open, item?.id, videoMounted]);
-
 
   // Sync muted state to video element
   useEffect(() => {
@@ -361,8 +483,11 @@ const ReelsModal = ({
 
   const isLiked = !!likedMap[item?.id];
   const baseLikeCount =
-    reelStats?.total_likes ?? reelStats?.stats?.total_likes ??
-    reelDetails?.stats?.total_likes ?? reelDetails?.like_count ?? 0;
+    reelStats?.total_likes ??
+    reelStats?.stats?.total_likes ??
+    reelDetails?.stats?.total_likes ??
+    reelDetails?.like_count ??
+    0;
   const likeCount = baseLikeCount + (isLiked ? 1 : 0);
   const liveViewCount =
     reelStats?.total_views ?? reelStats?.stats?.total_views ?? null;
@@ -389,7 +514,9 @@ const ReelsModal = ({
     postLike({ reelId: item.id, guestId });
   };
 
-  const seekTo = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+  const seekTo = (
+    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
+  ) => {
     const video = videoRef.current;
     if (!video || !video.duration) return;
     const bar = e.currentTarget as HTMLDivElement;
@@ -421,9 +548,38 @@ const ReelsModal = ({
     }, 290);
   };
 
+  // Touch handlers: vertical swipe changes reels (up = next, down = prev).
+  // Only triggers when the vertical delta clearly exceeds horizontal — so a
+  // diagonal scroll or a tap doesn't accidentally flip the reel.
+  const handleSwipeStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const t = e.touches[0];
+    if (!t) return;
+    touchStartYRef.current = t.clientY;
+    touchStartXRef.current = t.clientX;
+    touchHandledRef.current = false;
+  };
+
+  const handleSwipeEnd = (e: React.TouchEvent<HTMLDivElement>) => {
+    const startY = touchStartYRef.current;
+    const startX = touchStartXRef.current;
+    touchStartYRef.current = null;
+    touchStartXRef.current = null;
+    if (startY == null || startX == null || touchHandledRef.current) return;
+    const t = e.changedTouches[0];
+    if (!t) return;
+    const deltaY = t.clientY - startY;
+    const deltaX = t.clientX - startX;
+    if (Math.abs(deltaY) < SWIPE_THRESHOLD) return;
+    if (Math.abs(deltaY) <= Math.abs(deltaX)) return; // horizontal-ish gesture
+    touchHandledRef.current = true;
+    if (deltaY < 0) {
+      if (!isLast) onNext();
+    } else if (!isFirst) {
+      onPrev();
+    }
+  };
+
   if (!item) return null;
-  console.log({item});
-  
 
   return (
     <Dialog
@@ -486,6 +642,8 @@ const ReelsModal = ({
       >
         {/* Video card */}
         <Box
+          onTouchStart={handleSwipeStart}
+          onTouchEnd={handleSwipeEnd}
           sx={{
             position: "relative",
             width: { xs: "100%", md: "450px" },
@@ -496,6 +654,7 @@ const ReelsModal = ({
             borderRadius: { xs: 0, md: "10px" },
             overflow: "hidden",
             flexShrink: 0,
+            touchAction: { xs: "pan-x", md: "auto" },
           }}
         >
           {/* Thumbnail — visible until video starts */}
@@ -529,7 +688,6 @@ const ReelsModal = ({
               ref={videoCallbackRef}
               loop
               playsInline
-              
               style={{
                 width: "100%",
                 height: "100%",
@@ -570,11 +728,12 @@ const ReelsModal = ({
                   sx={{
                     color: "white",
                     "@keyframes spinFade": {
-                      "0%":   { opacity: 1 },
-                      "50%":  { opacity: 0.6 },
+                      "0%": { opacity: 1 },
+                      "50%": { opacity: 0.6 },
                       "100%": { opacity: 1 },
                     },
-                    animation: "spinFade 1.2s ease-in-out infinite, MuiCircularProgress-keyframes-circular-rotate 0.9s linear infinite",
+                    animation:
+                      "spinFade 1.2s ease-in-out infinite, MuiCircularProgress-keyframes-circular-rotate 0.9s linear infinite",
                   }}
                 />
               </Box>
@@ -607,9 +766,7 @@ const ReelsModal = ({
           {/* Center play indicator */}
           {hasVideo && !isPlaying && !isBuffering && (
             <Box
-              onClick={() =>
-                videoRef.current?.play().catch(() => undefined)
-              }
+              onClick={() => videoRef.current?.play().catch(() => undefined)}
               sx={{
                 position: "absolute",
                 inset: 0,
@@ -690,44 +847,44 @@ const ReelsModal = ({
                 "&:hover > .bar-track": { height: 5 },
               }}
             >
-            <Box className="bar-track" sx={{ position: "relative" }}>
-              {/* Buffered layer */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  width: `${buffered}%`,
-                  height: "100%",
-                  backgroundColor: alpha("#ffffff", 0.4),
-                  transition: "width 0.3s ease",
-                }}
-              />
-              {/* Played layer */}
-              <Box
-                sx={{
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  width: `${progress}%`,
-                  height: "100%",
-                  backgroundColor: "primary.main",
-                  transition: "width 0.1s linear",
-                  "&::after": {
-                    content: '""',
+              <Box className="bar-track" sx={{ position: "relative" }}>
+                {/* Buffered layer */}
+                <Box
+                  sx={{
                     position: "absolute",
-                    right: -4,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    width: 8,
-                    height: 8,
-                    borderRadius: "50%",
+                    left: 0,
+                    top: 0,
+                    width: `${buffered}%`,
+                    height: "100%",
+                    backgroundColor: alpha("#ffffff", 0.4),
+                    transition: "width 0.3s ease",
+                  }}
+                />
+                {/* Played layer */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    left: 0,
+                    top: 0,
+                    width: `${progress}%`,
+                    height: "100%",
                     backgroundColor: "primary.main",
-                    boxShadow: "0 0 4px rgba(0,0,0,0.4)",
-                  },
-                }}
-              />
-            </Box>
+                    transition: "width 0.1s linear",
+                    "&::after": {
+                      content: '""',
+                      position: "absolute",
+                      right: -4,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      backgroundColor: "primary.main",
+                      boxShadow: "0 0 4px rgba(0,0,0,0.4)",
+                    },
+                  }}
+                />
+              </Box>
             </Box>
           )}
 
@@ -746,37 +903,91 @@ const ReelsModal = ({
               zIndex: 2,
             }}
           >
+            {/* Store row + Order Now button */}
             <Stack
               direction="row"
               alignItems="center"
+              justifyContent="space-between"
               gap={1}
               mb={0.5}
-              onClick={() => {
-                postVisit({ reelId: item.id, guestId });
-                handleStoreRedirect(
-                  { id: item.storeId, slug: item.storeSlug },
-                  router
-                );
-              }}
-              sx={{ cursor: "pointer" }}
             >
-              <Avatar
-                src={item.storeLogo}
-                alt={item.storeName}
-                sx={{ width: 24, height: 24, border: "1.5px solid white" }}
-              />
-              <Typography
-                sx={{ color: "white", fontWeight: 700, fontSize: "13px" }}
+              {/* Store info (clickable) */}
+              <Stack
+                direction="row"
+                alignItems="center"
+                gap={1}
+                onClick={() => {
+                  postVisit({ reelId: item.id, guestId });
+                  handleStoreRedirect(
+                    { id: item.storeId, slug: item.storeSlug },
+                    router
+                  );
+                }}
+                sx={{ cursor: "pointer", minWidth: 0, flex: 1 }}
               >
-                {item.storeName}
-              </Typography>
-              <VerifiedStoreBadge
-                verified={item.storeVerified}
-                fontSize="13px"
-                color="#1c6641"
-                sx={{ marginInlineStart: "0px" }}
-              />
+                <Avatar
+                  src={item.storeLogo}
+                  alt={item.storeName}
+                  sx={{
+                    width: 24,
+                    height: 24,
+                    border: "1.5px solid white",
+                    flexShrink: 0,
+                  }}
+                />
+                <Typography
+                  sx={{
+                    color: "white",
+                    fontWeight: 700,
+                    fontSize: "13px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {item.storeName}
+                </Typography>
+                <VerifiedStoreBadge
+                  verified={item.storeVerified}
+                  fontSize="13px"
+                  color="#1c6641"
+                  sx={{ marginInlineStart: "0px", flexShrink: 0 }}
+                />
+              </Stack>
+
+              {/* Order Now button */}
+              {shouldShowOrderNow && (
+                <Box
+                  onClick={handleOrderNow}
+                  sx={{
+                    flexShrink: 0,
+                    px: { xs: "14px", md: "18px" },
+                    py: { xs: "8px", md: "10px" },
+                    borderRadius: "8px",
+                    backgroundColor: "primary.main",
+                    cursor: "pointer",
+                    transition: "opacity 0.15s",
+                    "&:hover": { opacity: 0.88 },
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      color: "white",
+                      fontSize: { xs: "12px", md: "14px" },
+                      fontWeight: 700,
+                      lineHeight: 1,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {getCurrentModuleType() === ModuleTypes.RENTAL
+                      ? t("Book Now")
+                      : t("Order Now")}
+                  </Typography>
+                </Box>
+              )}
             </Stack>
+
+            {/* Description */}
             <Typography
               sx={{
                 color: alpha("#ffffff", 0.8),
@@ -887,12 +1098,42 @@ const ReelsModal = ({
               <Typography
                 sx={{ color: "white", fontSize: "11px", fontWeight: 500 }}
               >
-                {liveViewCount != null ? formatViewCount(liveViewCount) : item.viewCount}
+                {liveViewCount != null
+                  ? formatViewCount(liveViewCount)
+                  : item.viewCount}
               </Typography>
             </Stack>
           </Stack>
         </Stack>
       </Stack>
+
+      {/* ── Order Now modals ───────────────────────────────────────────── */}
+      {openFoodModal && productData && (
+        <FoodDetailModal
+          product={productData}
+          imageBaseUrl={configData?.base_urls?.item_image_url}
+          open={openFoodModal}
+          handleModalClose={() => setOpenFoodModal(false)}
+          setOpen={setOpenFoodModal}
+          productUpdate={undefined}
+          addToWishlistHandler={toggleWishlist}
+          removeFromWishlistHandler={toggleWishlist}
+          isWishlisted={isWishlisted}
+          setOpenLocationAlert={undefined}
+        />
+      )}
+      {openModuleModal && productData && (
+        <ModuleModal
+          open={openModuleModal}
+          handleModalClose={() => setOpenModuleModal(false)}
+          configData={configData}
+          productDetailsData={productData}
+          productUpdate={undefined}
+          addToWishlistHandler={toggleWishlist}
+          removeFromWishlistHandler={toggleWishlist}
+          isWishlisted={isWishlisted}
+        />
+      )}
     </Dialog>
   );
 };

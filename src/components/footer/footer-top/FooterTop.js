@@ -1,109 +1,64 @@
-import {
-  alpha,
-  Grid,
-  Stack,
-  Typography,
-  useMediaQuery,
-  useTheme,
-} from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import CustomContainer from "../../container";
-import { StyledFooterTop } from "../Footer.style";
 import Subscribe from "./Subscribe";
-import SubscribeImage from "./SubscribeImage";
+import { useTranslation } from "react-i18next";
 
 const FooterTop = (props) => {
   const { landingPageData } = props;
-
-  const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
+  const { t } = useTranslation();
 
   return (
-    <>
-      <StyledFooterTop>
-        <CustomContainer>
-          <Grid
-            container
-            alignItems="flex-end"
-            justifyContent="center"
-            sx={{ height: "100%" }}
-          >
-            <Grid item xs={8} sm={6} md={3} position="relative">
-              <Box
-                sx={{
-                  mt: "-65px",
-                  textAlign: { xs: "center", md: "left" },
-                  ml: { md: "-30px" },
-                  position: { sm: "absolute", bottom: "5px" },
-                }}
-              >
-                <SubscribeImage />
-              </Box>
-            </Grid>
-            <Grid
-              item
-              xs={12}
-              sm={6}
-              md={9}
-              container
-              alignItems="center"
-              justifyContent="center"
+    <Box>
+      <Box
+        sx={{
+          maxWidth: "1312px",
+          mx: "auto",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: { xs: "flex-start", md: "center" },
+            gap: { xs: "20px", md: "50px" },
+            backgroundColor: "background.secondary",
+            borderRadius: "20px",
+            px: { xs: "24px", md: "40px" },
+            py: "25px",
+          }}
+        >
+          {/* Left: text */}
+          <Stack gap="10px" sx={{ flexShrink: 0, width: { xs: "100%", md: "439px" } }}>
+            <Typography
               sx={{
-                py: 3,
-                pl: { lg: 2 },
-                pb: { lg: 4 },
+                fontSize: "24px",
+                fontWeight: 700,
+                color: "neutral.1050",
+                lineHeight: 1.1,
+                letterSpacing: "-1.2px",
               }}
             >
-              <Grid
-                item
-                xs={12}
-                sm={12}
-                md={5}
-                align={isSmall ? "center" : "left"}
-              >
-                <Stack
-                  height="100%"
-                  alignItems={isSmall ? "center" : "flex-start"}
-                  justifyContent="center"
-                  spacing={1}
-                  p="10px"
-                  pt={0}
-                >
-                  <Typography
-                    fontWeight={700}
-                    fontSize={{ xs: "1rem", md: "2.25rem" }}
-                    component="h2"
-                  >
-                    {landingPageData?.footer_section?.fixed_newsletter_title}
-                  </Typography>
-                  <Typography
-                    variant="h7"
-                    fontSize={{ xs: "12px", md: "14px" }}
-                    fontWeight="400"
-                    sx={{
-                      color: (theme) => alpha(theme.palette.neutral[500], 0.8),
-                      textAlign: "left",
-                    }}
-                    component="p"
-                  >
-                    {landingPageData?.footer_section?.fixed_newsletter_sub_title}
-                  </Typography>
-                </Stack>
-              </Grid>
-              <Grid item xs={12} sm={12} md={7}>
-                <Stack
-                  alignItems="end"
-                  justifyContent="flex-end"
-                  sx={{ ml: { md: 6 } }}
-                >
-                  <Subscribe />
-                </Stack>
-              </Grid>
-            </Grid>
-          </Grid>
-        </CustomContainer>
-      </StyledFooterTop>
-    </>
+              {landingPageData?.footer_section?.fixed_newsletter_title ?? t("Join Us!")}
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: "14px",
+                fontWeight: 400,
+                color: "neutral.500",
+                lineHeight: 1.3,
+              }}
+            >
+              {landingPageData?.footer_section?.fixed_newsletter_sub_title}
+            </Typography>
+          </Stack>
+
+          {/* Right: subscribe input */}
+          <Box sx={{ flex: 1, width: { xs: "100%", md: "auto" } }}>
+            <Subscribe />
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   );
 };
 

@@ -5,6 +5,7 @@ import SignIn from "components/auth/sign-in";
 import SignUp from "components/auth/sign-up/SignUp";
 import AddUserInfo from "components/auth/AddUserInfo";
 import ExitingUser from "components/auth/ExitingUser";
+import AuthLanding from "components/auth/AuthLanding";
 import { useTheme } from "@mui/styles";
 import { useSignIn } from "api-manage/hooks/react-query/auth/useSignIn";
 import {
@@ -50,9 +51,16 @@ export const setUpRecaptcha = () => {
   }
 };
 
-const AuthModal = ({ modalFor, open, handleClose, setModalFor }) => {
+const AuthModal = ({
+  modalFor,
+  open,
+  handleClose,
+  setModalFor,
+  initialView = "landing",
+}) => {
   const { configData } = useSelector((state) => state.configData);
   const [loginInfo, setLoginInfo] = useState({});
+  const [internalView, setInternalView] = useState(initialView); // "landing" | "password" | "otp"
   const [userInfo, setUserInfo] = useState(null);
   const theme = useTheme();
   const { userInfo: fbUserInfo, jwtToken: fbJwtToken } = useSelector(
@@ -89,7 +97,7 @@ const AuthModal = ({ modalFor, open, handleClose, setModalFor }) => {
   const onSuccessHandler = (res) => {
     dispatch(setWishList(res));
   };
-  const { refetch } = useWishListGet(onSuccessHandler);
+  const { refetch } = useWishListGet({}, false, onSuccessHandler);
   const { refetch: rentalWishlistRefetch } = useGetWishList(onSuccessHandler);
 
   const handleSuccess = async (value) => {
@@ -162,6 +170,15 @@ const AuthModal = ({ modalFor, open, handleClose, setModalFor }) => {
     };
   }, []);
 
+  // Reset internalView whenever the modal is opened. The caller can ask
+  // for a non-default starting view (e.g. ForgotPassword's "Back to
+  // Login" jumps straight to SignInForm via initialView="password").
+  useEffect(() => {
+    if (open) {
+      setInternalView(initialView);
+    }
+  }, [open, initialView]);
+
   const sendOTP = (response, setOtpData, setMainToken, phone) => {
     const phoneNumber = phone;
     if (!phoneNumber) {
@@ -186,6 +203,24 @@ const AuthModal = ({ modalFor, open, handleClose, setModalFor }) => {
   const renderModalContent = () => {
     switch (modalFor) {
       case "sign-in":
+        if (internalView === "landing") {
+          return (
+            <AuthLanding
+              handleClose={handleClose}
+              onSelectPassword={() => setInternalView("password")}
+              onSelectOtp={() => setInternalView("otp")}
+              onGuestContinue={handleClose}
+              configData={configData}
+              setJwtToken={setJwtToken}
+              setUserInfo={setUserInfo}
+              handleSuccess={handleSuccess}
+              setModalFor={setModalFor}
+              setMedium={setMedium}
+              loginMutation={loginMutation}
+              setLoginInfo={setLoginInfo}
+            />
+          );
+        }
         return (
           <SignIn
             handleClose={handleClose}
@@ -202,6 +237,8 @@ const AuthModal = ({ modalFor, open, handleClose, setModalFor }) => {
             verificationId={verificationId}
             sendOTP={sendOTP}
             modalFor={modalFor}
+            forceStatus={internalView === "otp" ? "otp" : "manual"}
+            onBack={() => setInternalView("landing")}
           />
         );
       case "phone_modal":
@@ -257,7 +294,12 @@ const AuthModal = ({ modalFor, open, handleClose, setModalFor }) => {
   };
 
   return (
-    <CustomModal handleClose={handleClose} openModal={open}>
+    <CustomModal
+      handleClose={handleClose}
+      openModal={open}
+      drawerHeight="90dvh"
+      maxWidth={modalFor === "sign-up" ? "700px" : "500px"}
+    >
       <div ref={recaptchaWrapperRef}>
         <div id="recaptcha-container"></div>
       </div>

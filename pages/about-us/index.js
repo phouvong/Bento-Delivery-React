@@ -3,6 +3,7 @@ import useGetPolicyPage from "../../src/api-manage/hooks/react-query/useGetPolic
 import React, { useEffect } from "react";
 import CssBaseline from "@mui/material/CssBaseline";
 import MainLayout from "../../src/components/layout/MainLayout";
+import SimpleMobileHeader from "components/common/SimpleMobileHeader";
 import PolicyPage from "../../src/components/policy-page";
 import SEO from "../../src/components/seo";
 import { getImageUrl } from "utils/CustomFunctions";
@@ -39,6 +40,7 @@ const Index = ({ configData, metaData }) => {
         robotsMeta={metadata.robotsMeta}
       />
       <MainLayout configData={configData} >
+        <SimpleMobileHeader title="About Us" />
         <PolicyPage data={data} title={t("About us")} isFetching={isFetching} />
       </MainLayout>
     </>

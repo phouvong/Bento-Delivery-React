@@ -1,5 +1,6 @@
 import "../src/styles/globals.css";
 import "../src/styles/nprogress.css";
+import "@flaticon/flaticon-uicons/css/all/all.css";
 import { CacheProvider } from "@emotion/react";
 import { Provider as ReduxProvider } from "react-redux";
 import createEmotionCache from "../src/utils/create-emotion-cache";
@@ -22,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import useScrollToTop from "../src/api-manage/hooks/custom-hooks/useScrollToTop";
 import { useEffect } from "react";
 import ModuleChecker from "../src/components/module-select/ModuleChecker";
+import ProSubscriptionExpiredModal from "../src/components/pro-plan/ProSubscriptionExpiredModal";
 import App from "next/app";
 
 Router.events.on("routeChangeStart", nProgress.start);
@@ -85,8 +87,9 @@ function MyApp(props) {
                   >
                     <RTL direction={value?.settings?.direction}>
                       <CssBaseline />
-                      <Toaster position="top-center" />
+                      <Toaster position="top-center" containerStyle={{ zIndex: 99999 }} />
                       <ModuleChecker />
+                      <ProSubscriptionExpiredModal />
                       {getLayout(<Component {...pageProps} />)}
                     </RTL>
                   </ThemeProvider>
@@ -94,7 +97,7 @@ function MyApp(props) {
               </SettingsConsumer>
             </SettingsProvider>
           </ReduxProvider>
-          <ReactQueryDevtools initialIsOpen={false} position="bottom-right" />
+          {/* <ReactQueryDevtools initialIsOpen={false} position="bottom-right" /> */}
         </QueryClientProvider>
       </CacheProvider>
     </>

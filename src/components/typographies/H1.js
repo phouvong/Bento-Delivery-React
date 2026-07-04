@@ -12,7 +12,7 @@ const H1 = (props) => {
 			textAlign={textAlign ? textAlign : "center"}
 			fontWeight={fontWeight ? fontWeight : "700"}
 			lineHeight={IsSmallScreen() ? "10px" : "30px"}
-			sx={{ fontSize: { xs: "15px", md: "22px" } }}
+			sx={{ fontSize: { xs: "15px", md: "22px", color: "neutral.1050" } }}
 			textTransform={textTransform}
 			{...rest}
 		>

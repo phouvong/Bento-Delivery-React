@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import { getRecentSearches } from "utils/recentSearchStorage";
 
 import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import SearchFilterWithResults from "./SearchFilterWithResults";
@@ -49,11 +50,8 @@ const ProductSearchPage = ({ configData }) => {
 		if (router.query.searchValue) {
 			setSearchValue(router.query.searchValue);
 		} else {
-			let searchValues = [];
 			if (typeof window !== "undefined") {
-				searchValues = JSON.parse(
-					localStorage.getItem("searchedValues")
-				);
+				const searchValues = getRecentSearches();
 				if (searchValues.length > 0 && searchValues[0]) {
 					setSearchValue(searchValues[0]);
 				} else {

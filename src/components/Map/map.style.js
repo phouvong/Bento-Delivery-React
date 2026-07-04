@@ -5,8 +5,11 @@ import { Button, Stack } from "@mui/material";
 export const WrapperCurrentLocationPick = styled(Stack)(
   ({ theme, isXSmall }) => ({
     position: "absolute",
-    right: isXSmall ? 16 : 25,
-    bottom: isXSmall ? 20 : 80,
+    flexDirection: "column",
+    alignItems: "center",
+    gap: isXSmall ? 8 : 12,
+    right: isXSmall ? 12 : 16,
+    bottom: isXSmall ? 12 : 16,
   })
 );
 export const CustomBoxWrapper = styled(Box)(({ theme, expand }) => ({

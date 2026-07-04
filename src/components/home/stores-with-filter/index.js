@@ -9,13 +9,12 @@ import {HomeComponentsWrapper} from "../HomePageComponents";
 const StoresWithFilter = () => {
     const [storesType, setStoresType] = useState("all");
     const [type, setType] = useState("all");
-    const [offset, setOffset] = useState(1);
     const [limit, setLimit] = useState(10);
 
-    const {data, refetch, isFetching, isSuccess, isRefetching, isStale} = useGetStoresByFiltering({
+    const {data, refetch, isFetching, isSuccess, isRefetching} = useGetStoresByFiltering({
         type: type,
-        offset: offset,
         limit: limit,
+        enabled: true,
     });
     let queryKey = "homepage-popular-stores";
     const {
@@ -43,21 +42,21 @@ const StoresWithFilter = () => {
     };
 
 
+    const allStores = (data?.pages ?? []).flatMap((p) => p?.stores ?? []);
+    const totalSize = data?.pages?.[0]?.total_size;
+
     const handleDataVisibility = () => {
         if (storesType === "all") {
-            if (data &&
-                data?.stores?.length > 0) {
+            if (allStores.length > 0) {
                 return <CardsGrid
-                    data={data?.stores}
-                    totalSize={data?.total_size}
+                    data={allStores}
+                    totalSize={totalSize}
                     handleMore={handleMore}
                     isFetching={!isSuccess ? false : isRefetching}
                 />
             }
         } else {
-            if (
-                popularStore &&
-                popularStore.length > 0) {
+            if (popularStore && popularStore.length > 0) {
                 return <CardsGrid
                     data={popularStore}
                     totalSize={popularStore?.length}
@@ -69,8 +68,7 @@ const StoresWithFilter = () => {
     return (
         <>
             {
-                data &&
-                data?.stores?.length > 0 && <HomeComponentsWrapper sx={{paddingTop: ".5rem"}} spacing={2}>
+                allStores.length > 0 && <HomeComponentsWrapper sx={{paddingTop: ".5rem"}} spacing={2}>
                     <StoresFilteringNav
                         storesType={storesType}
                         setStoresType={setStoresType}

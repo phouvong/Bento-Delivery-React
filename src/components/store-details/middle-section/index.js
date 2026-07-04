@@ -1,22 +1,31 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useMemo, useReducer, useRef, useState } from "react";
 import CustomSearch from "../../custom-search/CustomSearch";
 import {
   alpha,
+  Box,
   Grid,
   IconButton,
+  InputBase,
   NoSsr,
   Skeleton,
   Stack,
-  Typography, useMediaQuery, useTheme,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
-import Sidebar from "./Sidebar";
+import CategoryTabs from "./CategoryTabs";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
-import useGetStoresCategoriesItem from "../../../api-manage/hooks/react-query/stores-categories/useGetStoresCategoriesItem";
+import useGetStoreCategoriesItems from "../../../api-manage/hooks/react-query/stores-categories/useGetStoreCategoriesItems";
 import ProductCard, { CardWrapper } from "../../cards/ProductCard";
+import NewProductCard from "../../cards/newCard/NewProductCard";
+import ProductCardSimmer from "components/Shimmer/ProductCardSimmer";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import { useRouter } from "next/router";
 import useGetSearchedStoreItems from "../../../api-manage/hooks/react-query/store/useGetSearchedStoreItems";
 import { ACTION, initialState, reducer } from "./states";
@@ -29,7 +38,6 @@ import HighToLow from "../../../sort/HighToLow";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { useSelector } from "react-redux";
 
-
 import { getDiscountedAmount } from "helper-functions/CardHelpers";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import { useInView } from "react-intersection-observer";
@@ -37,74 +45,53 @@ import { removeDuplicates } from "utils/CustomFunctions";
 import DotSpin from "../../DotSpin";
 import SearchIcon from "@mui/icons-material/Search";
 import StoreFilter from "components/store-details/middle-section/StoreFilter";
-import {filterTypeItems} from "components/search/filterTypes";
-import { CustomPaperBox } from "components/multiple-checkbox-with-title";
-import useScrollYThresholdValue from "api-manage/hooks/custom-hooks/useScrollYThresholdValue";
-import { Scrollbar } from "components/srollbar";
+import { filterTypeItems } from "components/search/filterTypes";
+import SliderSectionHeader from "components/common/SliderSectionHeader";
 
 export const handleShimmerProducts = () => {
   return (
     <>
-      {[...Array(3)].map((item, index) => {
-        return (
-          <Grid item key={index} xs={6} sm={4} md={3} lg={3}>
-            <CardWrapper>
-              <CustomStackFullWidth
-                spacing={1}
-                alignItems="center"
-                justifyContent="center"
-              >
-                <Skeleton
-                  variant="rectangular"
-                  animation="pulse"
-                  width="100%"
-                  height={170}
-                />
-                <CustomStackFullWidth
-                  padding="1rem"
-                  alignItems="center"
-                  justifyContent="center"
-                >
-                  <Skeleton
-                    variant="text"
-                    animation="wave"
-                    height={20}
-                    width="80%"
-                  />
-                  <Skeleton
-                    variant="text"
-                    animation="wave"
-                    height={20}
-                    width="40%"
-                  />
-                  <Skeleton
-                    variant="text"
-                    animation="wave"
-                    height={20}
-                    width="30%"
-                  />
-                  {/*<RatingStarIcon fontSize="small" color="#808080" />*/}
-                  <Stack direction="row" spacing={2}>
-                    <Skeleton
-                      variant="text"
-                      animation="wave"
-                      width={70}
-                      height={20}
-                    />
+      {/* Vertical slider section skeleton */}
+      <Grid item xs={12}>
+        <Stack gap={2}>
+          <Skeleton
+            variant="rectangular"
+            animation="wave"
+            width={140}
+            height={22}
+            sx={{ borderRadius: "6px" }}
+          />
+          <Box sx={{ display: "flex", gap: "12px", overflow: "hidden" }}>
+            {[...Array(4)].map((_, i) => (
+              <ProductCardSimmer key={i} variant="vertical" />
+            ))}
+          </Box>
+        </Stack>
+      </Grid>
 
-                    <Skeleton
-                      variant="text"
-                      animation="wave"
-                      width={70}
-                      height={20}
-                    />
-                  </Stack>
-                </CustomStackFullWidth>
-              </CustomStackFullWidth>
-            </CardWrapper>
-          </Grid>
-        );
-      })}
+      {/* Horizontal grid section skeleton */}
+      <Grid item xs={12}>
+        <Stack gap={2} sx={{ mt: 2 }}>
+          <Skeleton
+            variant="rectangular"
+            animation="wave"
+            width={120}
+            height={22}
+            sx={{ borderRadius: "6px" }}
+          />
+          <Box
+            sx={{
+              display: "grid",
+              gap: 2,
+              gridTemplateColumns: { xs: "1fr", sm: "repeat(2, 1fr)" },
+            }}
+          >
+            {[...Array(4)].map((_, i) => (
+              <ProductCardSimmer key={i} variant="horizontal" maxWidth="100%" />
+            ))}
+          </Box>
+        </Stack>
+      </Grid>
     </>
   );
 };
@@ -139,24 +126,188 @@ export const getLowToHigh = (data) => {
   }
 };
 const MiddleSection = (props) => {
-  const { storeDetails, ownCategories, isSmall, storeShare, setExpanded } =
-    props;
-  const theme =useTheme()
+  const {
+    storeDetails,
+    ownCategories,
+    isSmall,
+    storeShare,
+    setExpanded,
+    condensedHeaderVisible,
+  } = props;
+  const theme = useTheme();
   const isSmallSize = useMediaQuery(theme.breakpoints.down("sm"));
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [filterData,setFilterData] = useState([])
-  const [ratingCount,setRatingCount] = useState(0)
+  const [filterData, setFilterData] = useState([]);
+  const [ratingCount, setRatingCount] = useState(0);
   const [checkState, setCheckState] = React.useState({
     veg: false,
     non_veg: false,
   });
   const [open, setOpen] = useState(false);
+  const [categoryList, setCategoryList] = useState([]);
+  const [searchInputValue, setSearchInputValue] = useState("");
   const { t } = useTranslation();
   const { configData } = useSelector((state) => state.configData);
   const router = useRouter();
   const { id } = router.query;
   const storeId = storeDetails?.id;
-  const limit = 12;
+
+  // Categories now come from the combined /store-categories/items endpoint.
+  // Tabs use first-page `categories`; respect `ownCategories` whitelist if
+  // provided by the parent store config.
+
+  // Section refs — tab click scrolls to the matching category section instead
+  // of filtering. The "Most Popular" tab scrolls to the top section.
+  const popularSliderRef = useRef(null);
+  const [popularCurrentSlide, setPopularCurrentSlide] = useState(0);
+  const sectionRefs = useRef({});
+  const [selectedCategoryTabId, setSelectedCategoryTabId] = useState(null);
+
+  // Detect when the toolbar is "stuck" (pinned to top) so we can show a shadow.
+  const stickySentinelRef = useRef(null);
+  const [isToolbarStuck, setIsToolbarStuck] = useState(false);
+  useEffect(() => {
+    const sentinel = stickySentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsToolbarStuck(!entry.isIntersecting),
+      { threshold: 0 }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
+  // Suppress scroll spy during programmatic smooth scroll (tab click)
+  const programmaticScrollRef = useRef(false);
+  const programmaticScrollTimeoutRef = useRef(null);
+
+  // Keep the latest categoryList accessible inside the (mount-once) scroll
+  // spy effect's closure.
+  const categoryListRef = useRef([]);
+  useEffect(() => {
+    categoryListRef.current = categoryList;
+  }, [categoryList]);
+
+  const handleSelectCategoryTab = (categoryId) => {
+    const key = categoryId == null ? "popular" : categoryId;
+    setSelectedCategoryTabId(categoryId);
+    const node = sectionRefs.current[key];
+    if (node) {
+      // Page header + sub-nav (~110px) + sticky toolbar (~70px) ≈ 180px, +10px breathing
+      const offset = 190;
+      const top = node.getBoundingClientRect().top + window.scrollY - offset;
+      programmaticScrollRef.current = true;
+      if (programmaticScrollTimeoutRef.current) {
+        clearTimeout(programmaticScrollTimeoutRef.current);
+      }
+      window.scrollTo({ top, behavior: "smooth" });
+      programmaticScrollTimeoutRef.current = setTimeout(() => {
+        programmaticScrollRef.current = false;
+      }, 800);
+    }
+  };
+
+  // Scroll spy: auto-highlight the tab whose section is currently in view.
+  // Attaches once on mount; always reads the latest refs from
+  // `sectionRefs.current` at scroll time, so it stays in sync as sections are
+  // added/removed by re-renders.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const computeActiveKey = () => {
+      if (programmaticScrollRef.current) return;
+      const refs = sectionRefs.current || {};
+      const sorted = Object.entries(refs)
+        .filter(([, el]) => el && el.isConnected)
+        .map(([key, el]) => ({
+          key,
+          top: el.getBoundingClientRect().top,
+        }))
+        .sort((a, b) => a.top - b.top);
+      if (sorted.length === 0) return;
+
+      // Active line ≈ sticky toolbar bottom + small breathing
+      const activeLine = 220;
+      let activeKey = sorted[0].key;
+      for (const entry of sorted) {
+        if (entry.top - activeLine <= 0) {
+          activeKey = entry.key;
+        } else {
+          break;
+        }
+      }
+      // If page scrolled to very bottom, force-select the last section
+      const scrollEl = document.scrollingElement || document.documentElement;
+      const scrollY = window.scrollY ?? scrollEl.scrollTop;
+      const nearBottom =
+        window.innerHeight + scrollY >= scrollEl.scrollHeight - 4;
+      if (nearBottom) {
+        activeKey = sorted[sorted.length - 1].key;
+      }
+
+      // section keys are stringified ids; map back to the original id type
+      // (numbers from API) so it matches `tab.id` strict-equality in
+      // CategoryTabs.
+      let nextId = null;
+      if (activeKey !== "popular") {
+        const match = (categoryListRef.current || []).find(
+          (c) => String(c?.id) === activeKey
+        );
+        nextId = match?.id ?? activeKey;
+      }
+      setSelectedCategoryTabId((prev) => (prev === nextId ? prev : nextId));
+    };
+
+    // rAF-throttle the handler
+    let rafId = null;
+    const onScroll = () => {
+      if (rafId != null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        computeActiveKey();
+      });
+    };
+
+    // Some apps scroll the body/html, others put scroll on a different
+    // element. Listening on window catches the most common case. We also
+    // listen on document to catch capture-phase events from inner containers.
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("scroll", onScroll, {
+      passive: true,
+      capture: true,
+    });
+    window.addEventListener("resize", onScroll);
+
+    // Initial passes — refs may still be empty on the very first effect run,
+    // so re-check shortly after to catch sections that mounted in the same
+    // commit.
+    computeActiveKey();
+    const t1 = setTimeout(computeActiveKey, 200);
+    const t2 = setTimeout(computeActiveKey, 800);
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("scroll", onScroll, true);
+      window.removeEventListener("resize", onScroll);
+      clearTimeout(t1);
+      clearTimeout(t2);
+      if (rafId != null) cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (programmaticScrollTimeoutRef.current) {
+        clearTimeout(programmaticScrollTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Infinite scroll removed for /store-categories/items: fetch a single
+  // large page instead of paging by offset. The search endpoint still uses
+  // the same `offset` state but the inView-driven bump effect below is
+  // also disabled, so neither path keeps requesting more.
+  const limit = 100;
   const { ref, inView } = useInView();
   const [offset, setOffset] = useState(1);
   const pageParams = {
@@ -167,7 +318,8 @@ const MiddleSection = (props) => {
     type: state.type,
     limit: limit,
     filterData: filterData,
-    ratingCount:ratingCount,
+    ratingCount: ratingCount,
+    sortBy: state.sortBy,
     ...storeShare,
   };
   const searchPageParams = {
@@ -231,15 +383,16 @@ const MiddleSection = (props) => {
       if (res?.products?.length > 0) {
         handleLocalStorageSave(res?.products);
       }
-      const initialHigh2LowSortedData = getHighToLow(res?.products);
+      // Sort is performed by the backend via the `sort_by` query param —
+      // do NOT re-order client-side here. Previously this called
+      // getHighToLow() which forced a price-desc order regardless of the
+      // user's selected sort, overriding the backend response.
+      const backendOrdered = res?.products ?? [];
 
       if (offset > 1) {
         if (state?.data) {
-          if (initialHigh2LowSortedData?.length > 0) {
-            const newArray = [
-              ...state?.data?.products,
-              ...initialHigh2LowSortedData,
-            ];
+          if (backendOrdered.length > 0) {
+            const newArray = [...state?.data?.products, ...backendOrdered];
             const withoutDuplicacy = removeDuplicates(newArray, "id");
             dispatch({
               type: ACTION.setData,
@@ -254,7 +407,7 @@ const MiddleSection = (props) => {
             type: ACTION.setData,
             payload: {
               ...res,
-              products: initialHigh2LowSortedData,
+              products: backendOrdered,
             },
           });
         }
@@ -262,8 +415,8 @@ const MiddleSection = (props) => {
         dispatch({ type: ACTION.setIsSidebarOpen, payload: false });
       } else {
         if (state?.data) {
-          if (initialHigh2LowSortedData?.length > 0) {
-            const newArray = [...initialHigh2LowSortedData];
+          if (backendOrdered.length > 0) {
+            const newArray = [...backendOrdered];
             const withoutDuplicacy = removeDuplicates(newArray, "id");
             dispatch({
               type: ACTION.setData,
@@ -277,7 +430,7 @@ const MiddleSection = (props) => {
               type: ACTION.setData,
               payload: {
                 ...res,
-                products: initialHigh2LowSortedData,
+                products: backendOrdered,
               },
             });
           }
@@ -286,7 +439,7 @@ const MiddleSection = (props) => {
             type: ACTION.setData,
             payload: {
               ...res,
-              products: initialHigh2LowSortedData,
+              products: backendOrdered,
             },
           });
         }
@@ -303,12 +456,38 @@ const MiddleSection = (props) => {
     hasNextPage,
     isLoading: isLoadingStoresCategories,
     isFetchingNextPage,
-  } = useGetStoresCategoriesItem(pageParams);
+  } = useGetStoreCategoriesItems(pageParams);
+
+  // categoriesLoading kept for the CategoryTabs skeleton; mirrors the items
+  // loading state since both come from the same request now.
+  const categoriesLoading = isLoading;
+
+  // offset is part of the query key, so each page increment creates a NEW
+  // query (isLoading=true) rather than triggering isFetchingNextPage.
+  // isLoadingMore detects this "load more" case: loading but data already exists.
+  const isLoadingMore = isLoading && (state.data?.products?.length ?? 0) > 0;
+
+  // Pull categories from the first page. The new /store-categories/items
+  // endpoint already returns only categories relevant to this store, so no
+  // client-side `ownCategories` whitelist is needed.
+  useEffect(() => {
+    const firstPageCategories = data?.pages?.[0]?.categories;
+    if (Array.isArray(firstPageCategories)) {
+      setCategoryList(firstPageCategories);
+    }
+  }, [data]);
   useEffect(() => {
     if (state.searchKey === "" || !state.searchKey) {
       refetch();
     }
-  }, [state.categoryId, state.type, id,pageParams?.filterData,ratingCount]);
+  }, [
+    state.categoryId,
+    state.type,
+    state.sortBy,
+    id,
+    pageParams?.filterData,
+    ratingCount,
+  ]);
   useEffect(() => {
     if (state.searchKey) {
       if (searchData?.pages?.length > 0) {
@@ -329,14 +508,10 @@ const MiddleSection = (props) => {
     setOffset(1);
   }, [storeId]);
 
-  useEffect(() => {
-    if (inView && limit < data?.pages[0]?.total_size) {
-      if (!isLoadingStoresCategories) {
-        dispatch({ type: ACTION.setOffSet, payload: 1 });
-        setOffset((prev) => prev + 1);
-      }
-    }
-  }, [inView]);
+  // Infinite scroll disabled: previously this effect bumped `offset` when
+  // the sentinel scrolled into view, which kept hitting
+  // /store-categories/items?offset=N. With a single high-limit page (see
+  // `limit` above) we no longer want to auto-paginate.
 
   const handleCategoryId = (id) => {
     setOffset(1);
@@ -355,6 +530,20 @@ const MiddleSection = (props) => {
     }
     dispatch({ type: ACTION.setIsSidebarOpen, payload: false });
   };
+
+  // Debounce search input → dispatch to state after 500ms
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setOffset(1);
+      dispatch({ type: ACTION.setOffSet, payload: 1 });
+      if (searchInputValue && searchInputValue !== "") {
+        dispatch({ type: ACTION.setSearchKey, payload: searchInputValue });
+      } else {
+        dispatch({ type: ACTION.setSearchKey, payload: null });
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInputValue]);
 
   useEffect(() => {
     if (state.searchKey && state.searchKey !== "") {
@@ -377,11 +566,8 @@ const MiddleSection = (props) => {
     }
   }, [state.minMax]);
 
-  useEffect(() => {
-    if (state?.data?.products?.length > 0) {
-      sortWiseDataHandle();
-    }
-  }, [state.sortBy]);
+  // Client-side resort removed — sort_by is sent to the backend (see the
+  // refetch effect above) and the API returns items in the correct order.
 
   const handleChangePrice = (value) => {
     dispatch({ type: ACTION.setMinMax, payload: value });
@@ -419,9 +605,10 @@ const MiddleSection = (props) => {
     ? getModuleId()
     : parseInt(router.query.module || router.query.module_id);
   const handleSearchResult = (value) => {
+    setSearchInputValue(value ?? "");
     setOffset(1);
     dispatch({ type: ACTION.setOffSet, payload: 1 });
-    if (value !== "") {
+    if (value && value !== "") {
       dispatch({ type: ACTION.setSearchKey, payload: value });
       dispatch({ type: ACTION.setMinMax, payload: [0, 1] });
     } else {
@@ -429,21 +616,8 @@ const MiddleSection = (props) => {
     }
   };
 
-  const sortWiseDataHandle = () => {
-    let newData;
-    if (state.sortBy === "high") {
-      newData = {
-        ...state.data,
-        products: getHighToLow(state.data.products),
-      };
-    } else {
-      newData = {
-        ...state.data,
-        products: getLowToHigh(state.data.products),
-      };
-    }
-    dispatch({ type: ACTION.setData, payload: newData });
-  };
+  // Removed `sortWiseDataHandle` — sorting is delegated to the backend via
+  // the `sort_by` query parameter (see pageParams).
 
   const handleSortBy = (value) => {
     dispatch({
@@ -453,331 +627,661 @@ const MiddleSection = (props) => {
     dispatch({ type: ACTION.setIsSidebarOpen, payload: false });
   };
 
-  const priceRangeWiseSorted = (products) => {
-    if (products.length > 0) {
-      return products?.filter(
-        (newItem) =>
-          newItem?.price >= state.minMax[0] && newItem?.price <= state.minMax[1]
-      );
-    }
-  };
-
-  const minMaxWiseSorted = (products) => {
-    if (state.minMax[0] === 0 && state.minMax[1] === 1) {
-      return products;
-    } else {
-      return priceRangeWiseSorted(products);
-    }
-  };
-
-  const getCategoryWiseProduct = (products) => {
-    const isAllExist = state.categoryId?.length === 0 ? true : false;
-    if (isAllExist) {
-      return minMaxWiseSorted(products);
-    } else {
-      const categoryToString = state.categoryId?.map(String);
-      const filteredData = products?.filter((item) =>
-        item?.category_ids.filter((item) => categoryToString?.includes(item.id))
-      );
-
-      return minMaxWiseSorted(filteredData);
-    }
-  };
-
   const handleOpenSerach = () => {
     setOpen(!open);
   };
   if (inView) {
     setExpanded(false);
   }
-  const checkModuleWiseFilterItem= () => {
-    if(getCurrentModuleType() === ModuleTypes.FOOD){
-      return filterTypeItems
-    }else{
-      return filterTypeItems?.filter((item)=>item.value!=="available_now")
-
+  const checkModuleWiseFilterItem = () => {
+    if (getCurrentModuleType() === ModuleTypes.FOOD) {
+      return filterTypeItems;
+    } else {
+      return filterTypeItems?.filter((item) => item.value !== "available_now");
     }
-  }
-  const scrollbarMaxHeight = useScrollYThresholdValue({
-      threshold: 300,
-      belowValue: "45vh",
-      aboveValue: "100vh",
-    });
-    console.log({scrollbarMaxHeight});
-    
+  };
   return (
     <NoSsr>
-      <CustomBoxFullWidth>
+      <CustomStackFullWidth>
         {moduleId && (
-          <Grid container sx={{ mt: { xs: "5px", sm: "20px" } }} spacing={2}>
-            <Grid
-              item
-              xs={12}
-              container
-              justifyContent="center"
-              alignItems="center"
-            >
-              <Grid item xs={3} md={5} align="left">
-                {getCurrentModuleType() === "pharmacy" ? (
-                  <Typography
-                    fontSize={{ xs: "13px", md: "15px" }}
-                    textAlign="start"
-                    fontWeight="600"
-                  >
-                    {t("All Items")}
-                  </Typography>
-                ) : (
-                  <Typography
-                    fontSize={{ xs: "13px", md: "15px" }}
-                    textAlign="start"
-                    fontWeight="600"
-                  >
-                    {t("All Products")}{data?.pages[0]?.total_size &&` (${data?.pages[0]?.total_size})`}
-                  </Typography>
-                )}
-              </Grid>
-              <Grid item xs={9} md={7} container spacing={3}>
-                {isSmall ? (
-                  <Grid item xs={12}>
-                    <CustomStackFullWidth
-                      direction="row"
-                      alignItems="center"
-                      justifyContent="flex-end"
-                      // spacing={1}
+          <Grid container gap={{ xs: 0, md: 0 }} sx={{ position: "relative" }}>
+            {/* <Grid
+                item
+                xs={12}
+                container
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Grid item xs={3} md={5} align="left">
+                  {getCurrentModuleType() === "pharmacy" ? (
+                    <Typography
+                      fontSize={{ xs: "13px", md: "15px" }}
+                      textAlign="start"
+                      fontWeight="600"
                     >
-                      {!open ? (
-                        <IconButton
-                          onClick={handleOpenSerach}
-                          sx={{
-                            color: "primary.main",
-                            display: { lg: "none" },
-                          }}
-                        >
-                          <SearchIcon />
-                        </IconButton>
-                      ) : (
-                        <CustomBoxFullWidth
-                          sx={{
-                            width: open ? "200px" : "0px",
-                            transition: "width 0.5s ease-in-out",
-                          }}
-                        >
-                          {open && (
-                            <CustomSearch
-                              label={t("Search for items...")}
-                              selectedValue={state.searchKey}
-                              handleSearchResult={handleSearchResult}
-                              type2
-                            />
-                          )}
-                        </CustomBoxFullWidth>
-                      )}
-                      <IconButton
-                        onClick={() =>
-                          dispatch({
-                            type: ACTION.setIsSidebarOpen,
-                            payload: true,
-                          })
-                        }
-                        sx={{ color: "primary.main", display: { lg: "none" } }}
+                      {t("All Items")}
+                    </Typography>
+                  ) : (
+                    <Typography
+                      fontSize={{ xs: "13px", md: "15px" }}
+                      textAlign="start"
+                      fontWeight="600"
+                    >
+                      {t("All Products")}{data?.pages[0]?.total_size &&` (${data?.pages[0]?.total_size})`}
+                    </Typography>
+                  )}
+                </Grid>
+                <Grid item xs={9} md={7} container spacing={3}>
+                  {isSmall ? (
+                    <Grid item xs={12}>
+                      <CustomStackFullWidth
+                        direction="row"
+                        alignItems="center"
+                        justifyContent="flex-end"
+                        // spacing={1}
                       >
-                        <MenuOpenIcon />
-                      </IconButton>
-                      {getCurrentModuleType() === "food" && !isSmall && (
-                        <VegNonVegCheckBox
-                          selected={state.type}
-                          handleSelection={handleSelection}
-                          checkState={checkState}
-                          setCheckState={setCheckState}
-                        />
-                      )}
-                    </CustomStackFullWidth>
-                  </Grid>
-                ) : (
-                  <>
-                    <Grid item xs={7} md={getCurrentModuleType() === ModuleTypes.FOOD?4:6} >
-                      {getCurrentModuleType() === ModuleTypes.FOOD ? (
-                        <VegNonVegCheckBox
-                          selected={state.type}
-                          handleSelection={handleSelection}
-                          checkState={checkState}
-                          setCheckState={setCheckState}
-                        />
-                      ) : (
-                        <CustomSearch
-                          label={t("Search for items...")}
-                          selectedValue={state.searchKey}
-                          handleSearchResult={handleSearchResult}
-                          type2
-                        />
-                      )}
+                        {!open ? (
+                          <IconButton
+                            onClick={handleOpenSerach}
+                            sx={{
+                              color: "primary.main",
+                              display: { lg: "none" },
+                            }}
+                          >
+                            <SearchIcon />
+                          </IconButton>
+                        ) : (
+                          <CustomBoxFullWidth
+                            sx={{
+                              width: open ? "200px" : "0px",
+                              transition: "width 0.5s ease-in-out",
+                            }}
+                          >
+                            {open && (
+                              <CustomSearch
+                                label={t("Search for items...")}
+                                selectedValue={state.searchKey}
+                                handleSearchResult={handleSearchResult}
+                                type2
+                              />
+                            )}
+                          </CustomBoxFullWidth>
+                        )}
+                        <IconButton
+                          onClick={() =>
+                            dispatch({
+                              type: ACTION.setIsSidebarOpen,
+                              payload: true,
+                            })
+                          }
+                          sx={{ color: "primary.main", display: { lg: "none" } }}
+                        >
+                          <MenuOpenIcon />
+                        </IconButton>
+                        {getCurrentModuleType() === "food" && !isSmall && (
+                          <VegNonVegCheckBox
+                            selected={state.type}
+                            handleSelection={handleSelection}
+                            checkState={checkState}
+                            setCheckState={setCheckState}
+                          />
+                        )}
+                      </CustomStackFullWidth>
                     </Grid>
-                    <Grid item xs={7}  md={getCurrentModuleType() === ModuleTypes.FOOD?8:6}  align="right">
-                      {getCurrentModuleType() === ModuleTypes.FOOD ? (
-                        <Stack direction="row" spacing={1} alignItems="center" justifyContent="right">
+                  ) : (
+                    <>
+                      <Grid item xs={7} md={getCurrentModuleType() === ModuleTypes.FOOD?4:6} >
+                        {getCurrentModuleType() === ModuleTypes.FOOD ? (
+                          <VegNonVegCheckBox
+                            selected={state.type}
+                            handleSelection={handleSelection}
+                            checkState={checkState}
+                            setCheckState={setCheckState}
+                          />
+                        ) : (
                           <CustomSearch
                             label={t("Search for items...")}
                             selectedValue={state.searchKey}
                             handleSearchResult={handleSearchResult}
                             type2
                           />
-                          <StoreFilter
-                            key={storeId}
-                            setRatingCount={setRatingCount}
-                            ratingCount={ratingCount}
-                            filterTypeItems={checkModuleWiseFilterItem()}
-                            setFilterData={setFilterData}
-                          />
-                        </Stack>
-                      ) : (
-                        <Stack direction="row" spacing={1} alignItems="center">
-                          <HighToLow
-                            handleSortBy={handleSortBy}
-                            sortBy={state.sortBy}
-                          />
-                          <StoreFilter
-                            key={storeId}
-                            setRatingCount={setRatingCount}
-                            ratingCount={ratingCount}
-                            filterTypeItems={checkModuleWiseFilterItem()}
-                            setFilterData={setFilterData}
-                          />
-                        </Stack>
+                        )}
+                      </Grid>
+                      <Grid item xs={7}  md={getCurrentModuleType() === ModuleTypes.FOOD?8:6}  align="right">
+                        {getCurrentModuleType() === ModuleTypes.FOOD ? (
+                          <Stack direction="row" spacing={1} alignItems="center" justifyContent="right">
+                            <CustomSearch
+                              label={t("Search for items...")}
+                              selectedValue={state.searchKey}
+                              handleSearchResult={handleSearchResult}
+                              type2
+                            />
+                            <StoreFilter
+                              key={storeId}
+                              setRatingCount={setRatingCount}
+                              ratingCount={ratingCount}
+                              filterTypeItems={checkModuleWiseFilterItem()}
+                              setFilterData={setFilterData}
+                              minMax={state.minMax}
+                              setMinMax={(v) =>
+                                dispatch({
+                                  type: ACTION.setMinMax,
+                                  payload: v,
+                                })
+                              }
+                              sortBy={state.sortBy}
+                              setSortBy={(v) =>
+                                dispatch({
+                                  type: ACTION.setSortBy,
+                                  payload: v,
+                                })
+                              }
+                              type={state.type}
+                              setType={(v) =>
+                                dispatch({
+                                  type: ACTION.setType,
+                                  payload: v,
+                                })
+                              }
+                            />
+                          </Stack>
+                        ) : (
+                          <Stack direction="row" spacing={1} alignItems="center">
+                            <HighToLow
+                              handleSortBy={handleSortBy}
+                              sortBy={state.sortBy}
+                            />
+                            <StoreFilter
+                              key={storeId}
+                              setRatingCount={setRatingCount}
+                              ratingCount={ratingCount}
+                              filterTypeItems={checkModuleWiseFilterItem()}
+                              setFilterData={setFilterData}
+                              minMax={state.minMax}
+                              setMinMax={(v) =>
+                                dispatch({
+                                  type: ACTION.setMinMax,
+                                  payload: v,
+                                })
+                              }
+                              sortBy={state.sortBy}
+                              setSortBy={(v) =>
+                                dispatch({
+                                  type: ACTION.setSortBy,
+                                  payload: v,
+                                })
+                              }
+                              type={state.type}
+                              setType={(v) =>
+                                dispatch({
+                                  type: ACTION.setType,
+                                  payload: v,
+                                })
+                              }
+                            />
+                          </Stack>
 
-                      )}
+                        )}
 
-                    </Grid>{" "}
-                  </>
-                )}
+                      </Grid>{" "}
+                    </>
+                  )}
+                </Grid>
               </Grid>
-            </Grid>
-            <Grid item xs={12}>
-              <Stack
-                width="100%"
-                sx={{
-                  mt: "20px",
-                  mb: "20px",
-                  borderBottom: (theme) =>
-                    `2px solid ${alpha(theme.palette.neutral[400], 0.2)}`,
-                }}
-              ></Stack>
-            </Grid>
-            <Grid item xs={0} sm={0} md={0} lg={3} >
-              <CustomPaperBox sx={{
-                position: "sticky",
-                top: "90px",
-                paddingY:"1.5rem"
-                //height:"100%"
-                
-              }}>
-                <Scrollbar  style={{
-	            maxHeight: scrollbarMaxHeight,
-	            transition: "max-height 300ms ease",
-	            willChange: "max-height",
-              
-	          }} scrollbarMinSize={5}>
-              <Sidebar
-                {...props}
-                onClose={() =>
-                  dispatch({ type: ACTION.setIsSidebarOpen, payload: false })
-                }
-                open={state.isSidebarOpen}
-                handleCategoryId={handleCategoryId}
-                handleChangePrice={handleChangePrice}
-                selectedCategories={state.categoryId}
-                // priceFilterRange={handlePriceFilterRange(
-                //   storeDetails?.price_range
-                // )}
-                ownCategories={ownCategories}
-                priceFilterRange={storeDetails?.price_range}
-                storesApiLoading={isRefetching}
-                searchIsLoading={refetchSearchData}
-                storeId={id}
-                handleSortBy={handleSortBy}
-                sortBy={state.sortBy}
-                isSmall={isSmall}
-                selected={state.type}
-                handleSelection={handleSelection}
-                checkState={checkState}
-                setCheckState={setCheckState}
-                filterItem={checkModuleWiseFilterItem()}
-                setFilterData={setFilterData}
-                ratingCount={ratingCount}
-                setRatingCount={setRatingCount}
-              />
-              </Scrollbar>
-              </CustomPaperBox>
-            </Grid>
+              <Grid item xs={12}>
+                <Stack
+                  width="100%"
+                  sx={{
+                    mt: "20px",
+                    mb: "20px",
+                    borderBottom: (theme) =>
+                      `2px solid ${alpha(theme.palette.neutral[400], 0.2)}`,
+                  }}
+                ></Stack>
+              </Grid> */}
+            <Box
+              ref={stickySentinelRef}
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                height: 1,
+                width: "100%",
+                pointerEvents: "none",
+              }}
+              aria-hidden="true"
+            />
             <Grid
               item
               xs={12}
-              sm={12}
-              md={12}
-              lg={9}
-              container
-              spacing={3}
-              alignItems="flex-start"
+              sx={{
+                position: "sticky",
+                top: { xs: condensedHeaderVisible ? 46 : 0, md: 63 },
+                zIndex: "199",
+              }}
             >
-              <Grid item xs={12} container spacing={2}>
-                {isLoading && !isFetchingNextPage ? (
-                  handleShimmerProducts()
-                ) : (
-                  <>
-                    {state.data &&
-                      state.data?.products?.length > 0 &&
-                      getCategoryWiseProduct(state.data?.products)?.map(
-                        (item, index) => {
-                          return (
-                            <Grid item key={index} xs={6} sm={4} md={3} lg={3}>
-                              <ProductCard
-                                key={item?.id}
-                                item={item}
-                                cardheight="365px"
-                                cardFor="vertical"
-                                cardType="vertical-type"
-                                // cardFor="popular items"
-                              />
-                            </Grid>
-                          );
-                        }
-                      )}
-                  </>
-                )}
-                {(isFetchingNextPage || isRefetchingSearch) && (
-                  <Grid item container xs={12}>
-                    <Grid item xs={12}>
-                      <Stack sx={{ minHeight: "40vh", marginTop: "2rem" }}>
-                        <DotSpin />
-                      </Stack>
-                    </Grid>
-                  </Grid>
-                )}
-                {state.data?.products?.length === 0 && !isRefetching && (
-                  <Stack width="100%" paddingTop={{ xs: "0px", md: "30px" }}>
-                    <CustomEmptyResult
-                      image={notFoundImage}
-                      label="Nothing found"
-                      width="200px"
-                      height="200px"
+              <Stack
+                direction={{ xs: "column", md: "row" }}
+                alignItems={{ xs: "stretch", md: "center" }}
+                spacing={{ xs: 1, md: 2 }}
+                sx={{
+                  py: { xs: 1, md: 1.25 },
+                  px: { xs: 1, md: 0 },
+                  mx: { xs: -1, md: 0 },
+                  backgroundColor: (theme) => theme.palette.background.default,
+                  boxShadow: isToolbarStuck
+                    ? "0 6px 12px rgba(0,0,0,0.08)"
+                    : "none",
+                  transition: "box-shadow 200ms ease",
+                }}
+              >
+                <Box
+                  sx={{
+                    order: { xs: 2, md: 1 },
+                    flex: { md: 1 },
+                    minWidth: 0,
+                    pt: { xs: 2, md: 0 },
+                    pb: { xs: 2, md: 0 },
+                  }}
+                >
+                  <CategoryTabs
+                    categories={categoryList}
+                    selectedId={selectedCategoryTabId}
+                    onSelect={handleSelectCategoryTab}
+                    isLoading={categoriesLoading && categoryList.length === 0}
+                  />
+                </Box>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  spacing={1}
+                  sx={{
+                    flexShrink: 0,
+                    order: { xs: 1, md: 2 },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: { xs: "100%", sm: 200 },
+                      flex: { xs: 1, sm: "0 0 auto" },
+                      height: 40,
+                      borderRadius: "8px",
+                      backgroundColor: "background.paper",
+                      border: (t) => `1px solid ${t.palette.divider}`,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      px: 1.5,
+                      transition:
+                        "border-color 120ms ease, box-shadow 120ms ease",
+                      "&:focus-within": {
+                        borderColor: (t) => t.palette.primary.main,
+                        boxShadow: (t) =>
+                          `0 0 0 3px ${alpha(t.palette.primary.main, 0.12)}`,
+                      },
+                    }}
+                  >
+                    <Box
+                      component="i"
+                      className="fi fi-rs-search"
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        fontSize: 16,
+                        lineHeight: 1,
+                        color: (t) => t.palette.text.primary,
+                      }}
                     />
-                  </Stack>
+                    <InputBase
+                      placeholder={t("Search from here")}
+                      value={searchInputValue}
+                      onChange={(e) => setSearchInputValue(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          handleSearchResult(e.target.value);
+                        }
+                      }}
+                      sx={{
+                        flex: 1,
+                        fontSize: 14,
+                        lineHeight: 1.3,
+                        color: (t) => t.palette.text.primary,
+                        "& input::placeholder": {
+                          color: (t) => t.palette.neutral?.[400] || "#A3A3A3",
+                          opacity: 1,
+                        },
+                      }}
+                    />
+                  </Box>
+                  <StoreFilter
+                    key={storeId}
+                    setRatingCount={setRatingCount}
+                    ratingCount={ratingCount}
+                    filterTypeItems={checkModuleWiseFilterItem()}
+                    setFilterData={setFilterData}
+                    minMax={state.minMax}
+                    setMinMax={(v) =>
+                      dispatch({ type: ACTION.setMinMax, payload: v })
+                    }
+                    sortBy={state.sortBy}
+                    setSortBy={(v) =>
+                      dispatch({ type: ACTION.setSortBy, payload: v })
+                    }
+                    type={state.type}
+                    setType={(v) =>
+                      dispatch({ type: ACTION.setType, payload: v })
+                    }
+                  />
+                </Stack>
+              </Stack>
+            </Grid>
+            <Grid item xs={12} sx={{ position: "relative" }}>
+              {/* Overlay loader while a filter / sort / category change is
+                  fetching new items. Shown only when there's already data on
+                  screen (we use the full shimmer for the first load). */}
+              {(isRefetching ||
+                isRefetchingSearch ||
+                isFetchingNextPage ||
+                isLoadingMore) &&
+                state.data?.products?.length > 0 && (
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      inset: 0,
+                      zIndex: 5,
+                      display: "flex",
+                      alignItems: "flex-start",
+                      justifyContent: "center",
+                      pt: { xs: "30vh", md: "20vh" },
+                      backgroundColor: (theme) =>
+                        alpha(theme.palette.background.default, 0.55),
+                      backdropFilter: "blur(2px)",
+                      borderRadius: 1,
+                    }}
+                  >
+                    <DotSpin />
+                  </Box>
                 )}
-              </Grid>
+              {isLoading && !state.data?.products?.length ? (
+                <Stack gap={4}>{handleShimmerProducts()}</Stack>
+              ) : state.data?.products?.length === 0 &&
+                !isRefetching &&
+                !isRefetchingSearch ? (
+                <Stack width="100%" paddingTop={{ xs: "0px", md: "30px" }}>
+                  <CustomEmptyResult
+                    image={notFoundImage}
+                    label="Nothing found"
+                    width="200px"
+                    height="200px"
+                  />
+                </Stack>
+              ) : (
+                (() => {
+                  const allProducts = state.data?.products ?? [];
+                  console.log({ allProducts });
 
-              {(hasNextPage || hasNextPageSearch) && (
-                <Grid item xs={12} sx={{ marginBottom: "2rem" }}>
-                  <CustomBoxFullWidth
-                    ref={ref}
-                    sx={{ height: "10px" }}
-                  ></CustomBoxFullWidth>
-                </Grid>
+                  // Group products by their category id. Defensive: handle both
+                  // `category_ids: [{id, ...}]` (object form) and
+                  // `category_ids: [25, 40]` (id-only form), and fall back to
+                  // the primary `category_id` if the array is missing/empty.
+                  const productsByCategory = {};
+                  allProducts.forEach((p) => {
+                    const ids = new Set();
+                    (p?.category_ids || []).forEach((c) => {
+                      const id = c?.id ?? c;
+                      if (id != null) ids.add(String(id));
+                    });
+                    if (ids.size === 0 && p?.category_id != null) {
+                      ids.add(String(p.category_id));
+                    }
+                    ids.forEach((id) => {
+                      if (!productsByCategory[id]) productsByCategory[id] = [];
+                      productsByCategory[id].push(p);
+                    });
+                  });
+
+                  // Sort the popular section client-side using the same
+                  // discounted-price helpers used elsewhere. The backend
+                  // sort_by is honored for the API call (and for the
+                  // category sections, which keep backend order), but the
+                  // popular slider is sorted again here to guarantee the
+                  // visual order matches the user's selection regardless
+                  // of whether the endpoint actually honored sort_by.
+                  // Copy the array before sorting — getHighToLow/Low
+                  // mutate in place.
+                  const popularSource = allProducts.slice(0, 10);
+                  let popularItems = popularSource;
+                  if (state.sortBy === "high") {
+                    popularItems = getHighToLow([...popularSource]);
+                  } else if (state.sortBy === "low") {
+                    popularItems = getLowToHigh([...popularSource]);
+                  }
+
+                  const sections = [
+                    {
+                      key: "popular",
+                      title: t("Most Popular"),
+                      items: popularItems,
+                    },
+                    ...categoryList.map((cat) => ({
+                      key: String(cat?.id),
+                      title: cat?.name,
+                      items: productsByCategory[String(cat?.id)] || [],
+                    })),
+                  ].filter((s) => s.items?.length > 0);
+
+                  const popularSliderSettings = {
+                    dots: false,
+                    arrows: false,
+                    infinite: false,
+                    speed: 400,
+                    slidesToShow: 4.5,
+                    slidesToScroll: 4,
+                    swipeToSlide: true,
+                    responsive: [
+                      {
+                        breakpoint: 1200,
+                        settings: {
+                          slidesToShow: 3.2,
+                          slidesToScroll: 3,
+                          swipeToSlide: true,
+                        },
+                      },
+                      {
+                        breakpoint: 900,
+                        settings: {
+                          slidesToShow: 2.5,
+                          slidesToScroll: 2,
+                          swipeToSlide: true,
+                        },
+                      },
+                      {
+                        breakpoint: 600,
+                        settings: {
+                          slidesToShow: 2.8,
+                          slidesToScroll: 2,
+                          swipeToSlide: true,
+                        },
+                      },
+                      {
+                        breakpoint: 500,
+                        settings: {
+                          slidesToShow: 2.8,
+                          slidesToScroll: 2,
+                          swipeToSlide: true,
+                        },
+                      },
+                      {
+                        breakpoint: 450,
+                        settings: {
+                          slidesToShow: 2.3,
+                          slidesToScroll: 2,
+                          swipeToSlide: true,
+                        },
+                      },
+                      {
+                        breakpoint: 400,
+                        settings: {
+                          slidesToShow: 2.2,
+                          slidesToScroll: 1,
+                          swipeToSlide: true,
+                        },
+                      },
+                      {
+                        breakpoint: 370,
+                        settings: {
+                          slidesToShow: 2,
+                          slidesToScroll: 1,
+                          swipeToSlide: true,
+                        },
+                      },
+                      {
+                        breakpoint: 340,
+                        settings: {
+                          slidesToShow: 1.8,
+                          slidesToScroll: 1,
+                          swipeToSlide: true,
+                        },
+                      },
+                    ],
+                  };
+
+                  return (
+                    <Stack spacing={{ xs: 2, md: 4 }}>
+                      {sections.map((section) => {
+                        const isPopular = section.key === "popular";
+                        return (
+                          <Stack
+                            key={section.key}
+                            ref={(el) => {
+                              sectionRefs.current[section.key] = el;
+                            }}
+                          >
+                            {isPopular ? (
+                              <>
+                                <SliderSectionHeader
+                                  sliderRef={popularSliderRef}
+                                  currentSlide={popularCurrentSlide}
+                                  totalSlides={section.items.length}
+                                  slidesToShow={
+                                    popularSliderSettings.slidesToShow
+                                  }
+                                  sx={{ mb: 2, mt: { xs: "0rem", md: "1rem" } }}
+                                  heading={
+                                    <Typography
+                                      sx={{
+                                        fontSize: { xs: "16px", md: "18px" },
+                                        fontWeight: 700,
+                                        lineHeight: 1.2,
+                                        color: theme.palette.text.primary,
+                                      }}
+                                    >
+                                      {section.title}
+                                    </Typography>
+                                  }
+                                />
+                                <Box
+                                  sx={{
+                                    position: "relative",
+                                    "& .slick-list": {
+                                      py: 0.5,
+                                      overflow: "hidden",
+                                      maskImage:
+                                        "linear-gradient(to right, black 0, black 88%, transparent 100%)",
+                                      WebkitMaskImage:
+                                        "linear-gradient(to right, black 0, black 88%, transparent 100%)",
+                                    },
+                                    "& .slick-slide": { px: 0 },
+                                    "& .slick-slide > div": { px: 1 },
+                                    "& .slick-track": {
+                                      display: "flex",
+                                      alignItems: "stretch",
+                                      ml: 0,
+                                    },
+                                  }}
+                                >
+                                  <Slider
+                                    // react-slick caches its rendered tree
+                                    // and won't reorder when the children
+                                    // change to a different order (only
+                                    // when count changes). Keying the
+                                    // Slider on the active sort forces a
+                                    // remount so the popular section
+                                    // visibly reorders for high/low.
+                                    key={`popular-${state.sortBy}`}
+                                    ref={popularSliderRef}
+                                    afterChange={(i) =>
+                                      setPopularCurrentSlide(i)
+                                    }
+                                    {...popularSliderSettings}
+                                  >
+                                    {section.items.map((item) => (
+                                      <Box key={`${section.key}-${item?.id}`}>
+                                        <NewProductCard
+                                          item={item}
+                                          variant="vertical"
+                                          isStore
+                                        />
+                                      </Box>
+                                    ))}
+                                  </Slider>
+                                </Box>
+                              </>
+                            ) : (
+                              <>
+                                <Typography
+                                  sx={{
+                                    fontSize: { xs: "16px", md: "18px" },
+                                    fontWeight: 700,
+                                    lineHeight: 1.2,
+                                    color: theme.palette.text.primary,
+                                    mb: 2,
+                                  }}
+                                >
+                                  {section.title}
+                                </Typography>
+                                <Box
+                                  sx={{
+                                    display: "grid",
+                                    gap: 2,
+                                    gridTemplateColumns: {
+                                      xs: "1fr",
+                                      sm: "repeat(2, 1fr)",
+                                    },
+                                  }}
+                                >
+                                  {section.items.map((item) => (
+                                    <NewProductCard
+                                      key={`${section.key}-${item?.id}`}
+                                      item={item}
+                                      variant="horizontal"
+                                      isStore
+                                      max_width="100%"
+                                    />
+                                  ))}
+                                </Box>
+                              </>
+                            )}
+                          </Stack>
+                        );
+                      })}
+
+                      {/* Inline DotSpin removed — the overlay loader at
+                          the top of this Grid item now handles the
+                          "applying filter" indicator. */}
+
+                      {/* Infinite-scroll sentinel removed — see `limit`
+                          and the disabled inView effect above. */}
+                    </Stack>
+                  );
+                })()
               )}
             </Grid>
           </Grid>
         )}
-      </CustomBoxFullWidth>
+      </CustomStackFullWidth>
     </NoSsr>
   );
 };
 
-export default  React.memo(MiddleSection);
+export default React.memo(MiddleSection);

@@ -63,7 +63,7 @@ const ChatSideBar = ({
 	return (
 		<>
 			{open && (
-				<CustomPaperBigCard padding="14px" sx={{ minHeight: "70vh" }}>
+				<CustomPaperBigCard padding="0px" sx={{ minHeight: "70vh" }}>
 					{" "}
 					<ChatContent
 						setIsSidebarOpen={setIsSidebarOpen}

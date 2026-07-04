@@ -63,15 +63,16 @@ const TopBanner = () => {
 
   return (
     <CustomBoxFullWidth
-      sx={{
-        minHeight: {
-          xs: moduleType === "parcel" ? "250px" : "160px",
-          sm: "270px",
-          md: "270px"
-        },
-        backgroundColor: theme.palette.neutral[100],
+   sx={{
+        display: { xs: "none", md: "block" },
+        width: "100%",
+        borderRadius: "12px",
+        backgroundColor: "background.paper",
+        boxShadow: (theme) => theme.shadows[1],
         position: "relative",
-        overflow: "hidden",
+        py: { xs: 4, md: 6 },
+        px: { xs: 3, md: 8 },
+        mb: 1,
       }}
     >
       {moduleType === "rental" ? (
@@ -97,19 +98,7 @@ const TopBanner = () => {
             }),
           }}
         >
-          <BannerCityIcon height="100%" width="100%" objectFit="cover" />
-          <CustomImageContainer
-            className="left_img"
-            src={LeftCar?.src}
-            width={238}
-            height={94}
-          />
-          <CustomImageContainer
-            className="right_img"
-            src={RightCar?.src}
-            width={246}
-            height={122}
-          />
+       
         </Box>
       ) : (
         <Box sx={{ position: "absolute", height: "100%", width: "100%", "img": { objectFit: "cover", width: "100%", height: "100%" } }}>

@@ -7,6 +7,7 @@ export const settings = {
   speed: 500,
   slidesToShow: 4,
   slidesToScroll: 4,
+  swipeToSlide: true,
   slidesPerRow: 1,
   rows: 2,
   autoplay: true,
@@ -16,6 +17,7 @@ export const settings = {
       settings: {
         slidesToShow: 4,
         slidesToScroll: 3,
+        swipeToSlide: true,
         rows: 4,
       },
     },
@@ -24,6 +26,7 @@ export const settings = {
       settings: {
         slidesToShow: 3,
         slidesToScroll: 2,
+        swipeToSlide: true,
         rows: 2,
       },
     },
@@ -32,6 +35,7 @@ export const settings = {
       settings: {
         slidesToShow: 4,
         slidesToScroll: 1,
+        swipeToSlide: true,
         rows: 2,
       },
     },
@@ -40,6 +44,7 @@ export const settings = {
       settings: {
         slidesToShow: 2,
         slidesToScroll: 1,
+        swipeToSlide: true,
         rows: 2,
         dots: false,
       },
@@ -49,6 +54,7 @@ export const settings = {
       settings: {
         slidesToShow: 3,
         slidesToScroll: 1,
+        swipeToSlide: true,
         rows: 2,
         dots: false,
       },
@@ -58,6 +64,7 @@ export const settings = {
       settings: {
         slidesToShow: 1,
         slidesToScroll: 1,
+        swipeToSlide: true,
         rows: 4,
         dots: false,
       },
@@ -67,6 +74,7 @@ export const settings = {
       settings: {
         slidesToShow: 1,
         slidesToScroll: 1,
+        swipeToSlide: true,
         rows: 5,
         dots: false,
       },

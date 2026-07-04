@@ -13,6 +13,8 @@ import { no_chatting_plan } from "utils/toasterMessages";
 
 export const StoreChatButton = styled(Button)(({ theme }) => ({
   height: "42px",
+  whiteSpace: "nowrap",
+  flexShrink: 0,
   [theme.breakpoints.down("md")]: {
     height: "33px",
     padding: "6px 6px",

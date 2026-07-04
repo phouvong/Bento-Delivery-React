@@ -15,10 +15,7 @@ const PricePreviewWithStock = (props) => {
 				display="flex"
 				alignItems="center"
 				fontWeight="700"
-				color={theme.palette.primary.main}
-				sx={{
-					fontSize: { xs: "15px", sm: "24px" },
-				}}
+				sx={{ fontSize: { xs: "15px", sm: "24px" }, color: "neutral.1050" }}
 				component="h2"
 			>
 				{price ===
@@ -66,10 +63,7 @@ const PricePreviewWithStock = (props) => {
 				display="flex"
 				alignItems="center"
 				fontWeight="700"
-				color={theme.palette.primary.main}
-				sx={{
-					fontSize: { xs: "15px", sm: "24px" },
-				}}
+				sx={{ fontSize: { xs: "15px", sm: "24px" }, color: "neutral.1050" }}
 			>
 				{Number(state?.modalData?.[0]?.discount ?? 0) === 0 ? (
 					<>

@@ -264,12 +264,7 @@ const Chatting = ({ configData }) => {
 	return (
 		<PushNotificationLayout refetch={refetch} pathName="chat">
 			<CustomBoxFullWidth
-				mt={{
-					xs: "1rem",
-					md: "2rem",
-					paddingInlineEnd: "1rem",
-					paddingBlockEnd: "1rem",
-				}}
+				p={{ xs: "0px", md: "16px" }}
 			>
 				<CustomStackFullWidth spacing={1} direction="row">
 					{mdDown ? (
@@ -334,15 +329,15 @@ const Chatting = ({ configData }) => {
 						/>
 					)}
 
-					<Stack
-						width={mdDown ? (isSidebarOpen ? "" : "100%") : "100%"}
+					{(!mdDown || !isSidebarOpen) && <Stack
+						width="100%"
 						backgroundColor={alpha(
 							theme.palette.background.default,
 							0.6
 						)}
-						borderRadius="0px 10px 10px 0px"
+						borderRadius={mdDown ? "10px" : "0px 10px 10px 0px"}
 						sx={{
-							borderLeft: `1px solid ${theme.palette.neutral[200]}`,
+							borderLeft: mdDown ? "none" : `1px solid ${theme.palette.neutral[200]}`,
 						}}
 					>
 						{!isSidebarOpen && resetState && (
@@ -388,7 +383,7 @@ const Chatting = ({ configData }) => {
 						{isFetchingNextPage && <LoadingBox />}
 
 						{!channelId && !mdDown && <EmptyView />}
-					</Stack>
+					</Stack>}
 				</CustomStackFullWidth>
 			</CustomBoxFullWidth>
 		</PushNotificationLayout>
