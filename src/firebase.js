@@ -8,12 +8,12 @@ import {
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: "",
+  apiKey: "AIzaSyBV4ueEuzRBy0Yehx-OvUi68pHznhGnT0E",
+  authDomain: "bento-delivery-service.firebaseapp.com",
+  projectId: "bento-delivery-service",
+  storageBucket: "bento-delivery-service.firebasestorage.app",
+  messagingSenderId: "787586896333",
+  appId: "1:787586896333:web:f6fead1c4225e3e0c6b484",
 };
 
 const firebaseApp = !getApps().length
