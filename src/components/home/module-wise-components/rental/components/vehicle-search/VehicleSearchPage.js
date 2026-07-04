@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import RentalFilterLayout from "../global/RentalFilterLayout";
+//import RentalFilterLayout from "../global/RentalFilterLayout";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import TaxiSearchPanel from "../global/search/TaxiSearchPanel";
 import { Box } from "@mui/system";
@@ -63,31 +63,6 @@ const VehicleSearchPage = () => {
         </Box>
       )}
 
-      <RentalFilterLayout
-        api_endpoint={search_api}
-        isSticky={isSticky}
-        topContent={
-          <CustomStackFullWidth sx={{ position: "relative" }}>
-            <CustomContainer>
-              <ModuleSearchBanner
-                isRental
-                title="Rent the Perfect Car for Every Journey"
-                subtitle="Choose from a wide range of cars and enjoy a smooth, reliable rental experience."
-                component={
-                  <Box ref={searchPanelRef}>
-                    <TaxiSearchPanel
-                      showSearch={false}
-                      position="relative"
-                      mt="40px"
-                    />
-                  </Box>
-                }
-                maxWidth="1200px"
-              />
-            </CustomContainer>
-          </CustomStackFullWidth>
-        }
-      />
     </Box>
   );
 };
