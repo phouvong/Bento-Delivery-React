@@ -33,9 +33,9 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.7",
     "emoji-picker-react": "^4.4.11",
-    "eslint": "8.29.0",
-    "eslint-config-next": "13.0.6",
-    "firebase": "^9.15.0",
+    "eslint": "^9.26.0",
+    "eslint-config-next": "^15.5.9",
+    "firebase": "^10.9.0",
     "formik": "^2.2.9",
     "google-map-react": "^2.2.0",
     "i18next": "^22.0.8",
@@ -88,9 +88,18 @@
     "typescript": "6.0.3"
   },
   "resolutions": {
-    "@swc/helpers": "^0.5.0"
+    "@swc/helpers": "^0.5.0",
+    "postcss": "^8.5.10",
+    "@grpc/grpc-js": "^1.9.16",
+    "undici": "^6.27.0",
+    "**/isomorphic-fetch/node-fetch": "^2.6.7"
   },
-  "engines": {
-    "node": "24.x"
+  "overrides": {
+    "postcss": "^8.5.10",
+    "@grpc/grpc-js": "^1.9.16",
+    "undici": "^6.27.0",
+    "isomorphic-fetch": {
+      "node-fetch": "^2.6.7"
+    }
   }
 }

@@ -42,5 +42,6 @@ next-env.d.ts
 
 .ai-rules.md
 .ai/
+CLAUDE.md
 .CLAUDE.md
 .claude/
