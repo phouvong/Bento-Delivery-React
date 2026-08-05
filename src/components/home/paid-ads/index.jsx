@@ -253,7 +253,6 @@ const PaidAds = () => {
       window.removeEventListener("resize", compute);
     };
   }, [ads.length]);
-
   if (isFetched && ads.length === 0) return null;
 
   // variableWidth lets react-slick lay slides out by their real pixel width, so
@@ -306,6 +305,8 @@ const PaidAds = () => {
             >
               {getCurrentModuleType() === ModuleTypes.FOOD
                 ? t("Featured Restaurants")
+                : getCurrentModuleType() === ModuleTypes.SERVICE
+                ? t("Featured Providers")
                 : t("Featured Stores")}
             </Typography>
             <SponsoredPill>

@@ -64,14 +64,11 @@ export const getDiscountedAmount = (
   storeDiscount,
   quantity
 ) => {
-  console.log({discount,discountType})
-  //product wise discount
   let mainPrice = price;
   let q = quantity ? quantity : 1;
   if (discount > 0) {
     if (discountType === "amount") {
       mainPrice = price - discount * q;
-console.log({mainPrice,price});
     } else if (discountType === "percent" || discountType === "fixed") {
       mainPrice = price - (discount / 100) * price;
     }

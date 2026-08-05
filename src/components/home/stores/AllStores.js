@@ -7,6 +7,8 @@ import {
 } from "styled-components/CustomStyles.style";
 import useGetStoresByFiltering from "../../../api-manage/hooks/react-query/store/useGetStoresByFiltering";
 import NewStoreCard from "components/cards/newCard/NewStoreCard";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { normalizeServiceStore, MOCK_SERVICES } from "components/home/module-wise-components/service/components/global/serviceStoreModel";
 import NewStoreCardSkeleton from "components/Shimmer/NewStoreCardSkeleton";
 import DotSpin from "../../DotSpin";
 import EmptySearchResults from "components/EmptySearchResults";

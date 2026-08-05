@@ -75,7 +75,6 @@ const BusinessPlan = ({ formSubmit, isLoading }) => {
       },
     ],
   };
-  console.log({ configData });
   const handleSubmit = () => {
     const tempValues = {
       business_plan: selectedPlan,

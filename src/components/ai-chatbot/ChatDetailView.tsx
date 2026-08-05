@@ -36,6 +36,7 @@ interface ChatDetailViewProps {
   messagesCount?: number;
   onSend: (text: string) => void;
   onAddToCart?: (product: ChatProduct) => void;
+  onProductSelect?: (product: ChatProduct) => void;
   onStoreSelect?: (store: ChatStore) => void;
   onCategorySelect?: (category: ChatCategory) => void;
   addingProductId?: number | null;
@@ -51,6 +52,7 @@ const ChatDetailView = ({
   messagesCount = 0,
   onSend,
   onAddToCart,
+  onProductSelect,
   onStoreSelect,
   onCategorySelect,
   addingProductId,
@@ -96,13 +98,22 @@ const ChatDetailView = ({
     const byId = new Map<string, ChatMessage>();
     fetchedMessages.forEach((m) => byId.set(m.id, m));
     pendingMessages.forEach((pending) => {
-      const duplicate = fetchedMessages.some(
+      const duplicate = fetchedMessages.find(
         (fetched) =>
           fetched.role === pending.role &&
           fetched.text === pending.text &&
           Math.abs(fetched.createdAt - pending.createdAt) < 60_000
       );
-      if (!duplicate) byId.set(pending.id, pending);
+      if (!duplicate) {
+        byId.set(pending.id, pending);
+        return;
+      }
+      // The fetched copy wins the dedup, but the send response is the one
+      // carrying metadata (cart_items/products) — keep it if the fetched
+      // message came back without it.
+      if (pending.metadata && !duplicate.metadata) {
+        byId.set(duplicate.id, { ...duplicate, metadata: pending.metadata });
+      }
     });
     return Array.from(byId.values()).sort((a, b) => a.createdAt - b.createdAt);
   }, [fetchedMessages, pendingMessages]);
@@ -308,6 +319,7 @@ const ChatDetailView = ({
 
             const tailTop = d.isFirstInBurst ? 16 : 6;
             const tailBottom = d.isLastInBurst ? 16 : 6;
+            console.log({ cartItems });
 
             return (
               <Box key={m.id} data-msg-id={m.id}>
@@ -365,46 +377,52 @@ const ChatDetailView = ({
                     sx={{ maxWidth: "85%" }}
                     spacing={0.5}
                   >
-                    <Box
-                      sx={{
-                        px: 1.5,
-                        py: 0.875,
-                        borderRadius: 2,
-                        borderTopRightRadius: isUser ? tailTop : 16,
-                        borderBottomRightRadius: isUser ? tailBottom : 16,
-                        borderTopLeftRadius: isUser ? 16 : tailTop,
-                        borderBottomLeftRadius: isUser ? 16 : tailBottom,
-                        backgroundColor: isUser
-                          ? theme.palette.primary.main
-                          : theme.palette.background.paper,
-                        color: isUser
-                          ? theme.palette.primary.contrastText
-                          : theme.palette.text.primary,
-                        boxShadow: isUser
-                          ? `0 1px 2px ${alpha(
-                              theme.palette.primary.main,
-                              0.25
-                            )}`
-                          : `0 1px 2px ${alpha(
-                              theme.palette.text.primary,
-                              0.06
-                            )}`,
-                        border: isUser
-                          ? "none"
-                          : `1px solid ${theme.palette.divider}`,
-                      }}
-                    >
-                      <Typography
-                        fontSize={13.5}
-                        sx={{ whiteSpace: "pre-wrap", lineHeight: 1.45 }}
+                    {/* The cart card already presents everything the text
+                        restates (items, subtotals, grand total) — skip the
+                        text bubble for cart replies. */}
+                    {!(!isUser && cartItems.length > 0) && (
+                      <Box
+                        sx={{
+                          px: 1.5,
+                          py: 0.875,
+                          borderRadius: 2,
+                          borderTopRightRadius: isUser ? tailTop : 16,
+                          borderBottomRightRadius: isUser ? tailBottom : 16,
+                          borderTopLeftRadius: isUser ? 16 : tailTop,
+                          borderBottomLeftRadius: isUser ? 16 : tailBottom,
+                          backgroundColor: isUser
+                            ? theme.palette.primary.main
+                            : theme.palette.background.paper,
+                          color: isUser
+                            ? theme.palette.primary.contrastText
+                            : theme.palette.text.primary,
+                          boxShadow: isUser
+                            ? `0 1px 2px ${alpha(
+                                theme.palette.primary.main,
+                                0.25
+                              )}`
+                            : `0 1px 2px ${alpha(
+                                theme.palette.text.primary,
+                                0.06
+                              )}`,
+                          border: isUser
+                            ? "none"
+                            : `1px solid ${theme.palette.divider}`,
+                        }}
                       >
-                        {m.text}
-                      </Typography>
-                    </Box>
+                        <Typography
+                          fontSize={13.5}
+                          sx={{ whiteSpace: "pre-wrap", lineHeight: 1.45 }}
+                        >
+                          {m.text}
+                        </Typography>
+                      </Box>
+                    )}
                     {products.length > 0 && (
                       <ChatProductChips
                         products={products}
                         productImageUrl={productImageUrl}
+                        onSelect={onProductSelect}
                         onAddToCart={onAddToCart}
                         addingProductId={addingProductId}
                       />

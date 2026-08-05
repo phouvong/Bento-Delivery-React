@@ -112,6 +112,8 @@ const text = {
   disabled: "rgba(255, 255, 255, 0.48)",
   custom: "#ede8e8",
   customText1: "#EDF2F7",
+  info: "#3979E0",
+  link: "#2A61BA",
 };
 const footer = {
   inputButton: "#BBFFDF",
@@ -127,6 +129,7 @@ const customColor = {
   textGrayDeep: "#787676",
   buyButton: "#F9E091",
   parcelWallet: "#8B3FFD",
+  rebookIcon: "#6464EE",
   starAmber: "#F59E0B",
   vegGreen: "#4caf50",
   vegIcon: "#71B63A",
@@ -135,6 +138,15 @@ const customColor = {
   ratingCount: "#888888",
   deliveryText: "#a0a0a0",
   tagBg: "#3a3a3a",
+  proBannerBg: "#2D1F4A",      // Pro plan banner background (dark)
+  proSubscribeText: "#A78BFA", // Pro plan subscribe link text (dark)
+  proBannerBlueBg: "#3A5CD4", // Pro plan blue banner background (dark)
+  statusPendingBg: "#1b2d4a",
+  statusPendingText: "#7eb3f7",
+  statusReviewBg: "#1a3529",
+  statusReviewText: "#4cd680",
+  statusCancelledBg: "#3a2f1f",
+  statusCancelledText: "#e0a94c",
 };
 const whiteContainer = {
   main: "#ffffff",
@@ -144,6 +156,11 @@ const pink = {
 };
 const toolTipColor = "#88908C";
 const paperBoxShadow = "#E5EAF1";
+const couponBg = {
+  pro: "#1a2b3c",
+  discount: "#2d2200",
+  ticket: "#2d1515",
+};
 export const darkThemeOptions = {
   components: {
     MuiUseMediaQuery: { defaultProps: { noSsr: true } }, // ⚡ Fix hydration
@@ -273,6 +290,7 @@ export const darkThemeOptions = {
     roundStackOne,
     roundStackTwo,
     toolTipColor,
+    couponBg,
   },
   shadows: [
     "none",

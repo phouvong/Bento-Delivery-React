@@ -95,7 +95,6 @@ const MapModal = ({
     searchKey,
     enabled
   );
-  console.log({ predictions });
 
   const dispatch = useDispatch();
   const { coords, isGeolocationAvailable, isGeolocationEnabled, getPosition } =
@@ -300,10 +299,23 @@ const MapModal = ({
           expand={isModalExpand ? "true" : "false"}
           sx={{
             display: openModuleSelection ? "none" : "inherit",
-            padding: { xs: "15px", md: "1.5rem" },
+            padding: isModalExpand ? 0 : { xs: "15px", md: "1.5rem" },
             borderRadius: isModalExpand ? "0px" : { xs: "8px", md: "20px" },
-            position: "relative",
             minHeight: "400px",
+            // Fullscreen when expanded: pin to the viewport so width/height 100%
+            // actually fills. A plain `position: relative` box wouldn't expand
+            // reliably. Collapsed keeps the centered dialog from map.style.
+            ...(isModalExpand
+              ? {
+                  position: "fixed",
+                  inset: 0,
+                  width: "100%",
+                  height: "100%",
+                  maxWidth: "none",
+                  transform: "none",
+                  m: 0,
+                }
+              : { position: "relative" }),
           }}
         >
           <IconButton
@@ -316,33 +328,42 @@ const MapModal = ({
             <SimpleBar
               style={{
                 maxHeight: isModalExpand ? "100vh" : "65vh",
-                paddingRight: "15px",
+                paddingRight: isModalExpand ? "0px" : "15px",
               }}
             >
-              <Typography
-                fontSize={{ xs: "14px", md: "1rem" }}
-                fontWeight={500}
-              >
-                {t("Pick Location")}
-              </Typography>
-              <Typography
-                fontSize={{ xs: "12px", md: "14px" }}
-                fontWeight={400}
-                color={theme.palette.neutral[500]}
-              >
-                {t(
-                  "Sharing your location improves search accuracy and delivery estimates for smoother order delivery."
-                )}
-              </Typography>
+              {/* Header hidden in fullscreen — expanded view is just the map,
+                  search bar, and close button. */}
+              {!isModalExpand && (
+                <>
+                  <Typography
+                    fontSize={{ xs: "14px", md: "1rem" }}
+                    fontWeight={500}
+                  >
+                    {t("Pick Location")}
+                  </Typography>
+                  <Typography
+                    fontSize={{ xs: "12px", md: "14px" }}
+                    fontWeight={400}
+                    color={theme.palette.neutral[500]}
+                  >
+                    {t(
+                      "Sharing your location improves search accuracy and delivery estimates for smoother order delivery."
+                    )}
+                  </Typography>
+                </>
+              )}
               <CustomStackFullWidth
                 sx={{
                   position: { xs: "relative", md: "absolute" },
                   width: { xs: "100%", md: "90%" },
-                  top: { md: "20%" },
+                  // Fullscreen: float the search near the top edge over the map;
+                  // collapsed keeps the original 20% offset next to the header.
+                  top: { md: isModalExpand ? "16px" : "20%" },
                   zIndex: 999,
                   maxWidth: { xs: "100%", md: "600px" },
-                  right: { md: "5%" },
+                  right: { md: isModalExpand ? "60px" : "5%" },
                   mt: { xs: 1, md: 0 },
+                  px: { xs: isModalExpand ? "12px" : 0, md: 0 },
                 }}
               >
                 {loadingAuto ? (
@@ -429,26 +450,30 @@ const MapModal = ({
               </CustomStackFullWidth>
               <CustomBoxFullWidth
                 sx={{
-                  mt: 1,
+                  mt: isModalExpand ? 0 : 1,
                   color: (theme) => theme.palette.neutral[1000],
-                  p: "5px",
+                  p: isModalExpand ? 0 : "5px",
                   position: "relative",
                 }}
               >
-                <LocationView>
-                  {geoCodeResults?.results?.length > 0 ? (
-                    <>
-                      <RoomIcon fontSize="small" color="primary" />
-                      <Typography>
-                        {geoCodeResults?.results[0]?.formatted_address}
-                      </Typography>
-                    </>
-                  ) : (
-                    <>
-                      <Skeleton variant="rounded" width={300} height={20} />
-                    </>
-                  )}
-                </LocationView>
+                {/* Address bar hidden in fullscreen — expanded view keeps only
+                    the map, search bar, and close button. */}
+                {!isModalExpand && (
+                  <LocationView>
+                    {geoCodeResults?.results?.length > 0 ? (
+                      <>
+                        <RoomIcon fontSize="small" color="primary" />
+                        <Typography>
+                          {geoCodeResults?.results[0]?.formatted_address}
+                        </Typography>
+                      </>
+                    ) : (
+                      <>
+                        <Skeleton variant="rounded" width={300} height={20} />
+                      </>
+                    )}
+                  </LocationView>
+                )}
                 {!!location ? (
                   <GoogleMapComponent
                     mapmodal
@@ -507,64 +532,69 @@ const MapModal = ({
                 </WrapperCurrentLocationPick>
               </CustomBoxFullWidth>
             </SimpleBar>
-            <CustomStackFullWidth
-              alignItems="center"
-              justifyContent="flex-end"
-              direction={{ xs: "column", md: "row" }}
-              sx={{
-                gap: "1rem",
-                paddingInlineEnd: "1rem",
-                width: "100%",
-              }}
-            >
-              <Button
-                onClick={handleClose}
-                variant="outlined"
+            {/* Footer actions hidden in fullscreen — the shrink control on the
+                map returns to the normal view to pick the location. */}
+            {!isModalExpand && (
+              <CustomStackFullWidth
+                alignItems="center"
+                justifyContent="flex-end"
+                direction={{ xs: "column", md: "row" }}
                 sx={{
-                  width: { xs: "100%", md: "auto" }, // 👈 full width only mobile
-                  minWidth: { md: "150px" },
-                  backgroundColor: (theme) => theme.palette.neutral[300],
-                  color: (theme) => theme.palette.neutral[1000],
+                  gap: "1rem",
+                  paddingInlineEnd: "1rem",
+                  width: "100%",
                 }}
               >
-                {t("Cancel")}
-              </Button>
+                <Button
+                  onClick={handleClose}
+                  variant="outlined"
+                  sx={{
+                    width: { xs: "100%", md: "auto" }, // 👈 full width only mobile
+                    minWidth: { md: "150px" },
+                    backgroundColor: (theme) => theme.palette.neutral[300],
+                    color: (theme) => theme.palette.neutral[1000],
+                  }}
+                >
+                  {t("Cancel")}
+                </Button>
 
-              {errorLocation?.response?.data ? (
-                <Button
-                  aria-label="picklocation"
-                  disabled={locationLoading}
-                  variant="contained"
-                  color="error"
-                  sx={{
-                    width: { xs: "100%", md: "auto" }, // 👈 full width only mobile
-                    minWidth: { md: "150px" },
-                  }}
-                  onClick={() => {
-                    if (zoneId) {
-                      localStorage.setItem("zoneid", zoneId);
+                {errorLocation?.response?.data ? (
+                  <Button
+                    aria-label="picklocation"
+                    disabled={locationLoading}
+                    variant="contained"
+                    color="error"
+                    sx={{
+                      width: { xs: "100%", md: "auto" }, // 👈 full width only mobile
+                      minWidth: { md: "150px" },
+                    }}
+                    onClick={() => {
+                      if (zoneId) {
+                        localStorage.setItem("zoneid", zoneId);
+                      }
+                      handleClose();
+                    }}
+                  >
+                    {errorLocation?.response?.data?.errors[0]?.message}
+                  </Button>
+                ) : (
+                  <Button
+                    disabled={
+                      isLoading ||
+                      !geoCodeResults?.results[0]?.formatted_address
                     }
-                    handleClose();
-                  }}
-                >
-                  {errorLocation?.response?.data?.errors[0]?.message}
-                </Button>
-              ) : (
-                <Button
-                  disabled={
-                    isLoading || !geoCodeResults?.results[0]?.formatted_address
-                  }
-                  variant="contained"
-                  sx={{
-                    width: { xs: "100%", md: "auto" }, // 👈 full width only mobile
-                    minWidth: { md: "150px" },
-                  }}
-                  onClick={() => handlePickLocationOnClick()}
-                >
-                  {t("Pick Locations")}
-                </Button>
-              )}
-            </CustomStackFullWidth>
+                    variant="contained"
+                    sx={{
+                      width: { xs: "100%", md: "auto" }, // 👈 full width only mobile
+                      minWidth: { md: "150px" },
+                    }}
+                    onClick={() => handlePickLocationOnClick()}
+                  >
+                    {t("Pick Locations")}
+                  </Button>
+                )}
+              </CustomStackFullWidth>
+            )}
           </CustomStackFullWidth>
         </CustomBoxWrapper>
       </Modal>

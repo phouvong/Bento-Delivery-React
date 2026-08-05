@@ -24,6 +24,8 @@ import FeaturedCategories from "../../featured-categories";
 import LoveItem from "../../love-item";
 import NewArrivalStores from "../../new-arrival-stores";
 import RunningCampaigns from "../../running-campaigns";
+import PromotionalBanner from "../../PromotionalBanner";
+import SinglePoster from "../ecommerce/SinglePoster";
 import TrendingBites from "../../trending-bites";
 import VisitAgain from "../../visit-again";
 import FeaturedCategoriesWithFilter from "../ecommerce/FeaturedCategoriesWithFilter";
@@ -134,9 +136,8 @@ const FoodModule = (props) => {
         </CustomContainer>
       </S>
 
-      {configData?.repeat_order_option && token ? (
+      {token ? (
         <S>
-          {/* 🔥 new feature your last order - user logged in wise */}
           <CustomContainer noMobilePadding>
             <LastOrdersSection />
           </CustomContainer>
@@ -226,6 +227,12 @@ const FoodModule = (props) => {
       </S>
 
       <S>
+        <CustomContainer>
+          <PromotionalBanner bannerData={data} />
+        </CustomContainer>
+      </S>
+
+      <S>
         <CustomContainer
           sx={{
             paddingLeft: "16px !important",
@@ -233,6 +240,11 @@ const FoodModule = (props) => {
           }}
         >
           <NewArrivalStores />
+        </CustomContainer>
+      </S>
+<S>
+        <CustomContainer noMobilePadding>
+          <SinglePoster bannerData={data} />
         </CustomContainer>
       </S>
 

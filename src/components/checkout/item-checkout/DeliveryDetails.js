@@ -180,25 +180,27 @@ const DeliveryDetails = (props) => {
         </Box>
       )}
       {orderType === "schedule_order" && (
-				<RestaurantScheduleTime
-					storeData={storeData}
-					handleChange={handleChange}
-					today={today}
-					tomorrow={tomorrow}
-					numberOfDay={numberOfDay}
-					configData={configData}
-					setScheduleAt={setScheduleAt}
-				/>
-			)}
-      <DeliverySpeedOptions
-        storeData={storeData}
-        zoneData={zoneData}
-        orderType={orderType}
-        deliveryFee={deliveryFee}
-        couponDiscount={couponDiscount}
-        selectedDeliveryOption={selectedDeliveryOption}
-        setSelectedDeliveryOption={setSelectedDeliveryOption}
-      />
+        <RestaurantScheduleTime
+          storeData={storeData}
+          handleChange={handleChange}
+          today={today}
+          tomorrow={tomorrow}
+          numberOfDay={numberOfDay}
+          configData={configData}
+          setScheduleAt={setScheduleAt}
+        />
+      )}
+      {!!storeData?.self_delivery_system ? null : (
+        <DeliverySpeedOptions
+          storeData={storeData}
+          zoneData={zoneData}
+          orderType={orderType}
+          deliveryFee={deliveryFee}
+          couponDiscount={couponDiscount}
+          selectedDeliveryOption={selectedDeliveryOption}
+          setSelectedDeliveryOption={setSelectedDeliveryOption}
+        />
+      )}
 
       <DeliveryAddress
         setAddress={setAddress}

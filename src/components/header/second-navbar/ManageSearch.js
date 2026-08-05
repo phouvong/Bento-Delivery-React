@@ -115,6 +115,7 @@ const ManageSearch = ({
     isRefetching: isRefetchingItemOrStoreSuggestion,
   } = useGetItemOrStore(removeSpecialCharacters(searchValue));
 
+
   let searchTimeout;
 
   const getSearchSuggestions = async () => {
@@ -185,6 +186,7 @@ const ManageSearch = ({
     [ModuleTypes.PHARMACY]: t("Medicine"),
     [ModuleTypes.ECOMMERCE]: t("Products"),
     [ModuleTypes.PARCEL]: t("Parcel"),
+    [ModuleTypes.SERVICE]: t("Services"),
   };
 
   const moduleType = getCurrentModuleType();

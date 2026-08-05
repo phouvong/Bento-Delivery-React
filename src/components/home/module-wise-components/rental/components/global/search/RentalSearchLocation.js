@@ -1,3 +1,15 @@
+import React, { useEffect, useRef, useState } from "react";
+import {
+  alpha,
+  Autocomplete,
+  InputAdornment,
+  Paper,
+  TextField,
+} from "@mui/material";
+
+import RecentAddresses from "../../../../../../common/RecentAddress";
+import MapModal from "components/Map/MapModal";
+
 const RentalSearchLocation = (props) => {
   const {
     HandleChangeForSearch,

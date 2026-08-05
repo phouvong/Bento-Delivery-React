@@ -1,4 +1,5 @@
 import { useQuery } from "react-query";
+import { getModuleId } from "../../../../helper-functions/getModuleId";
 
 import { categories_api } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
@@ -19,7 +20,7 @@ export const useGetCategories = (
 ) => {
   const moduleType = getCurrentModuleType();
   return useQuery(
-    [queryKey ? queryKey : "catogories-list", moduleType, searchKey ?? ""],
+    [queryKey ? queryKey : "catogories-list", getModuleId(), moduleType, searchKey ?? ""],
     () => getData(searchKey),
     {
       enabled: !!moduleType,
@@ -37,7 +38,7 @@ const getFeaturedData = async () => {
 export const useGetFeaturedCategories = (handleSuccess) => {
   const moduleType = getCurrentModuleType();
   return useQuery(
-    ["featured-categories-lists", moduleType],
+    ["featured-categories-lists", getModuleId(), moduleType],
     () => getFeaturedData(),
     {
       enabled: !!moduleType,

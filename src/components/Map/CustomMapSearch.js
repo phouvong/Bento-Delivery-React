@@ -94,7 +94,7 @@ const CustomMapSearch = ({
                   }}
                 >
                   <MapIcon />
-                  <Typography variant="body1" onClick={() => setOpen(true)} color={theme.palette.text.main}>{t("Set from map")}</Typography>
+                  <Typography variant="body1" color={theme.palette.text.main}>{t("Set from map")}</Typography>
                 </Button>
                 )}
                 

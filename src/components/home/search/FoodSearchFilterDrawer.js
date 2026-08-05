@@ -28,10 +28,17 @@ const QUICK_ACTION_OPTIONS = [
     value: "free_delivery",
     label: "Free Delivery",
     icon: "fi fi-rs-biking-mountain",
+    hidden: getCurrentModuleType() === ModuleTypes.SERVICE,
+  },
+  {
+    value: "verified_seller",
+    label: "Verified Only",
+    icon: "fi fi-rr-shield-trust",
+    hidden: getCurrentModuleType() !== ModuleTypes.SERVICE,
   },
   { value: "top_rated", label: "Top Rated", icon: "fi fi-rr-star" },
   { value: "nearby", label: "Nearby", icon: "fi fi-rs-marker" },
-];
+].filter((item) => !item?.hidden);
 
 // Values map 1:1 to the legacy `filter` API param values from
 // `src/components/search/filterTypes.js`. Sent as a JSON array on
@@ -74,7 +81,7 @@ const INITIAL_STATE = {
 const stateFromFilter = (f = {}) => ({
   sortBy: f.sort_by
     ? Object.keys(SORT_VALUE_MAP).find(
-        (k) => SORT_VALUE_MAP[k] === f.sort_by
+        (k) => SORT_VALUE_MAP[k] === f.sort_by,
       ) ?? ""
     : "",
   quickAction: f.quick_action ?? "",
@@ -878,7 +885,7 @@ const FoodSearchFilterDrawer = ({
 
   const toggleCategory = (id) =>
     setSelectedCategoryIds((prev) =>
-      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id],
     );
 
   const handleReset = () => {

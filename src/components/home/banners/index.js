@@ -20,7 +20,30 @@ import {
 import CustomImageContainer from "../../CustomImageContainer";
 import FoodDetailModal from "../../food-details/foodDetail-modal/FoodDetailModal";
 import NextImage from "components/NextImage";
-import { handleProductRedirect } from "helper-functions/handleProductRedirect";
+import {
+  handleProductRedirect,
+  handleServiceRedirect,
+} from "helper-functions/handleProductRedirect";
+
+// Service module banners come in 3 flavors:
+// - "default"    → admin sets a custom URL directly on the banner (banner.link)
+// - "store_wise" → links to a provider (banner.store)
+// - "item_wise"  → links to a service (banner.service, banner.item is null)
+const handleServiceModuleBannerClick = (banner, router) => {
+  switch (banner?.type) {
+    case "default":
+      if (banner?.link) window.open(banner.link, "_blank");
+      return;
+    case "store_wise":
+      handleStoreRedirect(banner?.store, router);
+      return;
+    case "item_wise":
+      handleServiceRedirect(banner?.service, router);
+      return;
+    default:
+      return;
+  }
+};
 
 export const BannersWrapper = styled(Box)(({ theme }) => ({
   cursor: "pointer",
@@ -29,9 +52,11 @@ export const BannersWrapper = styled(Box)(({ theme }) => ({
   height: "150px",
   position: "relative",
   overflow: "hidden",
+  backgroundColor: theme.palette.background.secondary,
   img: {
-    width: "100%",
-    height: "100%",
+    width: "100% !important",
+    height: "100% !important",
+    objectFit: "fill !important",
   },
 
   "&:hover": {
@@ -67,7 +92,7 @@ const Banners = ({ feature }) => {
       refetchBannerData();
     }
   }, [banners]);
-  console.log({ data, bannersData });
+  console.log("banner data :", { data, bannersData, banners });
   useEffect(() => {
     if (data) {
       dispatch(setBanners(data));
@@ -116,20 +141,24 @@ const Banners = ({ feature }) => {
             window.scrollTo({ top: 0, behavior: "smooth" });
           }, 100); // delay helps after DOM updates
         });
-    } else if (banner?.type === "default") {
-      window.open(banner?.link, "_blank");
-    } else {
-      if (banner?.type === "store_wise") {
-        handleStoreRedirect(banner?.store, router);
+      return;
+    }
+
+    if (getCurrentModuleType() === ModuleTypes.SERVICE) {
+      handleServiceModuleBannerClick(banner, router);
+      return;
+    }
+
+    if (banner?.type === "default") {
+      if (banner?.link) window.open(banner.link, "_blank");
+    } else if (banner?.type === "store_wise") {
+      handleStoreRedirect(banner?.store, router);
+    } else if (banner?.type === "item_wise") {
+      if (selectedModule?.module_type === "ecommerce") {
+        handleProductRedirect(banner?.item, router);
       } else {
-        if (banner?.type === "item_wise") {
-          if (selectedModule?.module_type !== "ecommerce") {
-            setFoodBanner(banner?.item);
-            setOpenModal(true);
-          } else {
-            handleProductRedirect(banner?.item, router);
-          }
-        }
+        setFoodBanner(banner?.item);
+        setOpenModal(true);
       }
     }
   };
@@ -171,6 +200,7 @@ const Banners = ({ feature }) => {
         } else {
           return 3.2;
         }
+      case ModuleTypes.SERVICE:
       case ModuleTypes.RIDE:
         if (bannersData.length === 1) {
           return 1;
@@ -179,6 +209,8 @@ const Banners = ({ feature }) => {
         } else {
           return 3.1;
         }
+      default:
+        return 1;
     }
   };
 
@@ -209,7 +241,7 @@ const Banners = ({ feature }) => {
     <>
       <CustomStackFullWidth
         sx={{
-          mt: { xs: 0, sm: "10px" },
+          mt: { xs: 0, sm:  bannersData?.length > 0 ? "10px" : 0   },
           "& .slick-track": { marginLeft: 0 },
           "& .slick-list": {
             marginRight: "-16px",
@@ -287,10 +319,11 @@ const Banners = ({ feature }) => {
                     <NextImage
                       src={item?.image_full_url}
                       alt={item?.title}
-                      height={isSmallScreen ? "160" : "150"}
-                      width={300}
-                      objectFit="cover"
+                      fill
+                      sizes="(max-width: 600px) 100vw, 300px"
+                      objectFit="fill"
                       borderRadius="16px"
+                   
                     />
                   </BannersWrapper>
                 ))}

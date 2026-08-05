@@ -66,7 +66,9 @@ const ModuleChecker = () => {
       const moduleIdStr = String(moduleIdFromUrl);
       const selectedModule = data.find(
         (item) =>
-          String(item?.slug) === moduleIdStr || String(item?.id) === moduleIdStr
+          String(item?.slug) === moduleIdStr ||
+          String(item?.module_type) === moduleIdStr ||
+          String(item?.id) === moduleIdStr
       );
       if (selectedModule) {
         localStorage.setItem("module", JSON.stringify(selectedModule));

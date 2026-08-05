@@ -9,6 +9,7 @@ import {
   IconButton,
   Stack,
   Typography,
+  useTheme,
 } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -38,6 +39,7 @@ const MODULE_TITLES: Record<string, string> = {
   ecommerce: "Trending Now",
   pharmacy: "Health Highlights",
   rental: "Quick Picks",
+  service: "Expert at Work",
 };
 
 const getModuleWiseTitle = (): string => {
@@ -272,6 +274,8 @@ interface TrendingBitesProps {
 
 const TrendingBites = ({ title, subtitle }: TrendingBitesProps) => {
   const { t } = useTranslation();
+  const muiTheme = useTheme();
+  const isRtl = muiTheme.direction === "rtl";
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(false);
   const [isHover, setIsHover] = useState(false);
@@ -302,7 +306,7 @@ const TrendingBites = ({ title, subtitle }: TrendingBitesProps) => {
   });
 
   const handleSuccess = (data: any) => {
-    if (data?.reels) {
+    if (data?.reels && data.reels.length > 0) {
       setItems(data.reels.map(mapReel));
       setTotalSize(Number(data?.total_size ?? 0));
       setNextOffset(2);
@@ -353,8 +357,13 @@ const TrendingBites = ({ title, subtitle }: TrendingBitesProps) => {
   const updateArrows = useCallback(() => {
     const el = trackRef.current;
     if (!el) return;
-    setShowLeft(el.scrollLeft > 4);
-    setShowRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+    // In RTL, scrollLeft runs 0 → negative; use the absolute distance from the
+    // start so the logic holds in both directions. showLeft = "can go back
+    // toward the start", showRight = "can go forward" (stylis flips the
+    // buttons' physical position in RTL to match).
+    const scrolled = Math.abs(el.scrollLeft);
+    setShowLeft(scrolled > 4);
+    setShowRight(scrolled + el.clientWidth < el.scrollWidth - 4);
   }, []);
 
   useEffect(() => {
@@ -376,7 +385,10 @@ const TrendingBites = ({ title, subtitle }: TrendingBitesProps) => {
     const card = el.querySelector<HTMLElement>("[data-card]");
     const gap = window.innerWidth >= 1200 ? GAP_DESKTOP : GAP_MOBILE;
     const step = (card ? card.offsetWidth + gap : 220) * 2;
-    el.scrollBy({ left: dir === "right" ? step : -step, behavior: "smooth" });
+    // "right" = forward through the list. In RTL, forward means scrollLeft
+    // decreasing (toward negative), so invert the delta.
+    const delta = dir === "right" ? step : -step;
+    el.scrollBy({ left: isRtl ? -delta : delta, behavior: "smooth" });
   };
 
   const openReel = useCallback((index: number) => {
@@ -485,7 +497,9 @@ const TrendingBites = ({ title, subtitle }: TrendingBitesProps) => {
                 "&:hover": { backgroundColor: "background.paper" },
               }}
             >
-              <ChevronLeftIcon />
+              <ChevronLeftIcon
+                sx={{ transform: isRtl ? "scaleX(-1)" : "none" }}
+              />
             </IconButton>
 
             {/* Scrollable track */}
@@ -569,7 +583,9 @@ const TrendingBites = ({ title, subtitle }: TrendingBitesProps) => {
                       boxShadow: 3,
                     }}
                   >
-                    <ArrowForwardIcon />
+                    <ArrowForwardIcon
+                      sx={{ transform: isRtl ? "scaleX(-1)" : "none" }}
+                    />
                   </Box>
                   <Typography
                     fontWeight={600}
@@ -603,7 +619,9 @@ const TrendingBites = ({ title, subtitle }: TrendingBitesProps) => {
                 "&:hover": { backgroundColor: "background.paper" },
               }}
             >
-              <ChevronRightIcon />
+              <ChevronRightIcon
+                sx={{ transform: isRtl ? "scaleX(-1)" : "none" }}
+              />
             </IconButton>
           </Box>
         </CustomStackFullWidth>

@@ -2,6 +2,7 @@ import { alpha, Skeleton, Typography } from "@mui/material";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
 import useGetDiscountedItems from "../../../api-manage/hooks/react-query/product-details/useGetDiscountedItems";
 import { getLanguage } from "helper-functions/getLanguage";
 import { CustomBoxFullWidth } from "styled-components/CustomStyles.style";
@@ -20,80 +21,47 @@ const SpecialFoodOffers = ({ title }) => {
   const lanDirection = getLanguage() ? getLanguage() : "ltr";
   const products = data?.products ?? [];
 
-  const settings = {
+  const sliderSettings = {
     dots: false,
     infinite: false,
+    speed: 500,
     slidesToShow: 5.2,
+    slidesToScroll: 1,
     swipeToSlide: true,
-    slidesToScroll: 2,
-    cssEase: "ease-in-out",
-    speed: 800,
     arrows: false,
     responsive: [
       {
-        breakpoint: 1200,
-        settings: {
-          slidesToShow: 4,
-          slidesToScroll: 1,
-          swipeToSlide: true,
-          infinite: data?.products?.length > 4,
-        },
-      },
-
-      {
-        breakpoint: 821,
-        settings: {
-          slidesToShow: 4,
-          infinite: data?.products?.length > 3,
-        },
+        breakpoint: 1450,
+        settings: { slidesToShow: 5.2, slidesToScroll: 1, infinite: false , swipeToSlide: true},
       },
       {
-        breakpoint: 768,
-        settings: {
-          slidesToShow: 3.6,
-          infinite: false,
-        },
+        breakpoint: 1024,
+        settings: { slidesToShow: 4, slidesToScroll: 1, infinite: false , swipeToSlide: true},
       },
       {
-        breakpoint: 576,
-        settings: {
-          slidesToShow: 2,
-          infinite: false,
-        },
+        breakpoint: 760,
+        settings: { slidesToShow: 3, slidesToScroll: 2, infinite: false , swipeToSlide: true},
+      },
+      {
+        breakpoint: 600,
+        settings: { slidesToShow: 2, slidesToScroll: 1, infinite: false , swipeToSlide: true},
       },
       {
         breakpoint: 480,
-        settings: {
-          slidesToShow: 2.3,
-          infinite: false,
-          swipeToSlide: true,
-        },
+        settings: { slidesToShow: 2.3, slidesToScroll: 1, infinite: false , swipeToSlide: true},
       },
       {
         breakpoint: 400,
-        settings: {
-          slidesToShow: 2.1,
-          infinite: false,
-          swipeToSlide: true,
-        },
+        settings: { slidesToShow: 2, slidesToScroll: 1, infinite: false , swipeToSlide: true},
       },
+
       {
         breakpoint: 360,
-        settings: {
-          slidesToShow: 1.8,
-          slidesToScroll: 1,
-          infinite: false,
-          swipeToSlide: true,
-        },
+        settings: { slidesToShow: 1.8, slidesToScroll: 1, infinite: false , swipeToSlide: true},
       },
       {
         breakpoint: 340,
-        settings: {
-          slidesToShow: 1.7,
-          slidesToScroll: 1,
-          infinite: false,
-          swipeToSlide: true,
-        },
+        settings: { slidesToShow: 1.7, slidesToScroll: 1, infinite: false , swipeToSlide: true},
       },
     ],
   };
@@ -142,7 +110,7 @@ const SpecialFoodOffers = ({ title }) => {
           }}
         >
           <Slider
-            {...settings}
+            {...sliderSettings}
             ref={slider}
             afterChange={(idx) => setCurrentSlide(idx)}
           >

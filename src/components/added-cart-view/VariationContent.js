@@ -14,7 +14,7 @@ const VariationContent = ({ cartItem }) => {
           {cartItem?.choice_options?.map((item, index) => {
             return (
               <React.Fragment key={index}>
-                <Typography color="customColor.textGray" fontSize="12px">
+                <Typography color="theme.palette.text.primary" fontSize="12px">
                   {item?.title}:
                 </Typography>
                 <Typography color="text.primary" fontSize="12px">

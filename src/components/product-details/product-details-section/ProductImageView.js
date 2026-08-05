@@ -8,13 +8,12 @@ import {
 import { Box, Stack } from "@mui/system";
 import CustomModal from "../../modal";
 import { useEffect, useRef, useState } from "react";
-import ReactImageMagnify from "react-image-magnify";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
-import { getLanguage } from "../../../helper-functions/getLanguage";
 import { SliderCustom } from "../../../styled-components/CustomStyles.style";
 import CustomImageContainer from "../../CustomImageContainer";
+import ImageMagnifier from "./ImageMagnifier";
 import { ProductsThumbnailsSettings } from "./ProductsThumbnailsSettings";
 import VideoPlayer from "./VideoPlayer";
 
@@ -52,7 +51,7 @@ const VIDEO_SENTINEL = "__VIDEO__";
 const buildEmbedAutoplayUrl = (url) => {
   if (!url) return url;
   const ytMatch = url.match(
-    /(?:youtube\.com\/(?:embed\/|watch\?v=|v\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
+    /(?:youtube\.com\/(?:embed\/|watch\?v=|v\/|shorts\/)|youtu\.be\/)([\w-]{11})/
   );
   let baseUrl = url;
   let videoId = null;
@@ -141,7 +140,7 @@ const ProductImageView = ({
       if (modalPlayingRef.current) {
         inline.play().then(
           () => setIsInlineVideoPlaying(true),
-          () => {},
+          () => {}
         );
       } else {
         inline.pause();
@@ -158,7 +157,7 @@ const ProductImageView = ({
     const tryPlay = () =>
       v.play().then(
         () => setIsInlineVideoPlaying(true),
-        () => setIsInlineVideoPlaying(false),
+        () => setIsInlineVideoPlaying(false)
       );
     if (v.readyState >= 2) {
       tryPlay();
@@ -168,7 +167,6 @@ const ProductImageView = ({
     }
   }, [isVideoSelected, videoMeta?.inlineUrl]);
   const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const tempProduct = productImage;
   useEffect(() => {
@@ -283,24 +281,6 @@ const ProductImageView = ({
                 height: { xs: "282px", md: "282px" },
                 aspectRatio: { xs: "auto", md: "1 / 1" },
                 overflow: "hidden",
-                "& .magnify-container": {
-                  position: "absolute",
-                  inset: 0,
-                  width: "100% !important",
-                  height: "100% !important",
-                },
-                "& .magnify-container > div": {
-                  width: "100% !important",
-                  height: "100% !important",
-                  borderRadius: containerRadius,
-                  overflow: "hidden",
-                },
-                "& .magnify-image": {
-                  width: "100% !important",
-                  height: "100% !important",
-                  objectFit: "cover",
-                  borderRadius: containerRadius,
-                },
               }}
             >
               {isVideoSelected && hasVideo ? (
@@ -423,34 +403,10 @@ const ProductImageView = ({
                   ) : null}
                 </Box>
               ) : (
-                <ReactImageMagnify
-                  className="magnify-container"
-                  {...{
-                    smallImage: {
-                      alt: "image",
-                      isFluidWidth: true,
-                      src: preViewImage,
-                      objectFit: "cover",
-                    },
-                    imageClassName: "magnify-image",
-                    largeImage: {
-                      src: preViewImage,
-                      width: 1200,
-                      height: 1800,
-                      objectFit: "cover",
-                    },
-                    enlargedImageContainerStyle: {
-                      backgroundColor: theme.palette.neutral[100],
-                      zIndex: "1500",
-                    },
-                    enlargedImageContainerDimensions: {
-                      width: "150%",
-                      height: "100%",
-                    },
-                    enlargedImagePosition: isSmall ? "over" : "beside",
-                    enlargedImageContainerClassName:
-                      getLanguage() === "rtl" && "rtl-large-image",
-                  }}
+                <ImageMagnifier
+                  src={preViewImage}
+                  alt={productDetailsData?.name || "image"}
+                  radius={containerRadius}
                 />
               )}
 

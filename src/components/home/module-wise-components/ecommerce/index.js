@@ -164,9 +164,8 @@ const Shop = ({ configData, routeSection }) => {
           />
         </CustomContainer>
       </S>
-      {configData?.repeat_order_option && token ? (
+      {token ? (
         <S>
-          {/* 🔥 new feature your last order - user logged in wise */}
           <CustomContainer noMobilePadding={true}>
             <LastOrdersSection />
           </CustomContainer>
@@ -206,7 +205,12 @@ const Shop = ({ configData, routeSection }) => {
         </CustomContainer>
       </S>
       <S>
-        <CustomContainer noMobilePadding={true}>
+        <CustomContainer
+          sx={{
+            paddingLeft: "16px !important",
+            paddingRight: "0 !important",
+          }}
+        >
           <SpecialFoodOffers />
         </CustomContainer>
       </S>
@@ -257,7 +261,7 @@ const Shop = ({ configData, routeSection }) => {
     </Stack>
   );
 
-  const ecommerceSections = getEcommerceSections();
+  const ecommerceSections = getEcommerceSections(configData);
   return (
     <ModuleHomeSidebarLayout
       overviewContent={overviewContent}

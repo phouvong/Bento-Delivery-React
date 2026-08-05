@@ -10,7 +10,7 @@ import useGetGroupedCart from "api-manage/hooks/react-query/add-cart/useGetGroup
 import { store } from "redux/store";
 
 // Modules where the floating button is visible
-const ALLOWED_MODULES = new Set(["food", "grocery", "pharmacy", "shop"]);
+const ALLOWED_MODULES = new Set(["food", "grocery", "pharmacy", "shop", "service"]);
 
 // Next.js route patterns where the button is visible
 const ALLOWED_PATHNAMES = new Set([
@@ -64,7 +64,6 @@ const FloatingCartButton = () => {
   // Badge count — current module items only
   const cartItems = getCartListModuleWise(cartList) ?? [];
   const itemCount = cartItems.length;
-  console.log({ cartItems, cartGroups });
 
   // Grand total = sum of every cart line's (price × quantity).
   // `price` on the cart line already includes variation/addon pricing — prefer
@@ -141,7 +140,7 @@ const FloatingCartButton = () => {
                 top: "-8px",
                 insetInlineEnd: "-8px",
                 borderRadius: "9999px",
-                backgroundColor: "#039d55",
+                backgroundColor: theme.palette.primary.main,
                 border: `2px solid ${theme.palette.background.paper}`,
                 display: "flex",
                 alignItems: "center",
@@ -155,7 +154,7 @@ const FloatingCartButton = () => {
         {/* ── Bottom section: amount ── */}
         <Box
           sx={{
-            backgroundColor: "#f1f6fd",
+            backgroundColor: theme.palette.primary.main,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
@@ -167,7 +166,7 @@ const FloatingCartButton = () => {
             sx={{
               fontSize: "14px",
               fontWeight: 700,
-              color: theme.palette.text.primary,
+              color: "#ffff",
               lineHeight: 1.3,
               textAlign: "center",
               fontVariantNumeric: "tabular-nums",

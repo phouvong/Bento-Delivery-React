@@ -33,7 +33,6 @@ export const CustomButton = styled(Button)(({ theme, graybackground }) => ({
 const AppLinks = (props) => {
   const { graybackground, landingPageData, align = "center" } = props;
   const theme = useTheme();
-  console.log({ landingPageData });
 
   let language_direction;
   if (typeof window !== "undefined") {

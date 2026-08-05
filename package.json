@@ -85,7 +85,7 @@
     "@types/react-transition-group": "^4.4.12",
     "chokidar": "^5.0.0",
     "prettier": "2.8.0",
-    "typescript": "6.0.3"
+    "typescript": "5.8.2"
   },
   "resolutions": {
     "@swc/helpers": "^0.5.0",

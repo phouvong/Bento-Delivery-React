@@ -125,6 +125,48 @@ export const getLowToHigh = (data) => {
     return data;
   }
 };
+// The /store-categories/items endpoint changed shape: instead of a flat
+// `products` array it now returns `category_wise_items` — a dict keyed by
+// category id ({"11": [...items]}) whose items no longer carry
+// category_id/category_ids. Flatten it back to a products array, tagging
+// each item with its group's category id (merging ids when the same item
+// appears under several categories) so the section grouping keeps working.
+export const normalizeItemsResponse = (res) => {
+  const cwi = res?.category_wise_items;
+  // Prefer the grouped payload whenever it has content — a flat `products`
+  // array may coexist in the response but carries no category tags, which
+  // would leave every category section empty.
+  const cwiHasContent =
+    cwi &&
+    (Array.isArray(cwi) ? cwi.length > 0 : Object.keys(cwi).length > 0);
+  if (!cwiHasContent) {
+    return Array.isArray(res?.products) ? res.products : [];
+  }
+  const groups = Array.isArray(cwi)
+    ? cwi.map((g) => [g?.id, g?.items ?? g?.products ?? []])
+    : Object.entries(cwi);
+  const byId = new Map();
+  groups.forEach(([catId, items]) => {
+    (Array.isArray(items) ? items : []).forEach((item) => {
+      const existing = byId.get(item?.id);
+      if (existing) {
+        existing.category_ids = [
+          ...new Set([...(existing.category_ids || []), String(catId)]),
+        ];
+      } else {
+        byId.set(item?.id, {
+          ...item,
+          category_id: item?.category_id ?? catId,
+          category_ids: item?.category_ids?.length
+            ? item.category_ids.map((c) => String(c?.id ?? c))
+            : [String(catId)],
+        });
+      }
+    });
+  });
+  return [...byId.values()];
+};
+
 const MiddleSection = (props) => {
   const {
     storeDetails,
@@ -380,14 +422,15 @@ const MiddleSection = (props) => {
 
   const handleSuccess = (res) => {
     if (res) {
-      if (res?.products?.length > 0) {
-        handleLocalStorageSave(res?.products);
+      const normalizedProducts = normalizeItemsResponse(res);
+      if (normalizedProducts.length > 0) {
+        handleLocalStorageSave(normalizedProducts);
       }
       // Sort is performed by the backend via the `sort_by` query param —
       // do NOT re-order client-side here. Previously this called
       // getHighToLow() which forced a price-desc order regardless of the
       // user's selected sort, overriding the backend response.
-      const backendOrdered = res?.products ?? [];
+      const backendOrdered = normalizedProducts;
 
       if (offset > 1) {
         if (state?.data) {
@@ -601,9 +644,15 @@ const MiddleSection = (props) => {
     setOffset(1);
   }, [checkState?.veg, checkState.non_veg]);
 
-  let moduleId = getModuleId()
-    ? getModuleId()
-    : parseInt(router.query.module || router.query.module_id);
+  // Shared links carry the module SLUG (?module=grocery) — parseInt on a slug
+  // yields NaN, and `{NaN && ...}` makes React render the literal text "NaN".
+  // Resolve to a finite id or null so the section simply waits for data.
+  const parsedQueryModuleId = Number.parseInt(
+    router.query.module || router.query.module_id
+  );
+  let moduleId =
+    getModuleId() ??
+    (Number.isFinite(parsedQueryModuleId) ? parsedQueryModuleId : null);
   const handleSearchResult = (value) => {
     setSearchInputValue(value ?? "");
     setOffset(1);
@@ -1122,7 +1171,7 @@ const MiddleSection = (props) => {
                       {
                         breakpoint: 400,
                         settings: {
-                          slidesToShow: 2.2,
+                          slidesToShow: 2.1,
                           slidesToScroll: 1,
                           swipeToSlide: true,
                         },

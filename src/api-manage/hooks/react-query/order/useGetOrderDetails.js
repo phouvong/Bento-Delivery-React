@@ -5,14 +5,25 @@ import MainApi from "../../../MainApi";
 
 const getData = async (order_id, guestId) => {
   const { data } = await MainApi.get(
-    `${order_details_api}?order_id=${order_id}&guest_id=${guestId}`,
+    `${order_details_api}?order_id=${order_id}&guest_id=${guestId}`
   );
   return data;
 };
 
 export default function useGetOrderDetails(order_id, guestId) {
-  return useQuery("order-details", () => getData(order_id, guestId), {
-    enabled: false,
-    onError: onSingleErrorResponse,
-  });
+  // Key by order_id (+ guestId) so each order is its own cache entry. With a
+  // static key, switching orders reused the previous order's cached data — so
+  // `isLoading` stayed false (no shimmer) and stale details flashed until the
+  // background refetch resolved.
+  return useQuery(
+    ["order-details", order_id, guestId],
+    ({ queryKey }) => {
+      const [, currentOrderId, currentGuestId] = queryKey;
+      return getData(currentOrderId, currentGuestId);
+    },
+    {
+      enabled: false,
+      onError: onSingleErrorResponse,
+    }
+  );
 }

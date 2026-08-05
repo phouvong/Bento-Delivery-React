@@ -28,7 +28,7 @@ const ModuleTabbedLayout = ({
   // Hide the rider/rental (ride-share) module from the order/coupon tab bar —
   // it doesn't belong to the order or coupon flows.
   const modules = allModules?.filter((m) => m?.module_type !== "ride-share");
-console.log({allModules});
+  console.log({ allModules });
 
   const activeModule =
     modules?.find((m) => m.id === activeModuleId) ?? modules?.[0];
@@ -118,6 +118,7 @@ console.log({allModules});
             display: "flex",
             alignItems: "flex-end",
             clipPath: "inset(-20px -20px 0 -20px)",
+            overflowX: "auto",
             scrollbarWidth: "none",
             "&::-webkit-scrollbar": { display: "none" },
             backgroundColor: "background.default",
@@ -130,7 +131,11 @@ console.log({allModules});
                 key={mod.id}
                 onClick={() => onModuleChange?.(mod)}
                 sx={{
-                  flex: 1,
+                  // Grow to share the row, but never shrink below the nowrap
+                  // label — a fixed 100px minimum let long module names
+                  // (centered) overflow their tab and overlap the neighbors.
+                  // If all tabs can't fit, the row scrolls instead.
+                  flex: "1 0 auto",
                   minWidth: "100px",
                   px: "24px",
                   py: "16px",

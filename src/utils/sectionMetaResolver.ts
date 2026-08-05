@@ -75,6 +75,7 @@ export const findModuleTypeByParam = async (
         "X-server": "server",
         "X-localization": language,
         origin: process.env.NEXT_CLIENT_HOST_URL || "",
+        "ngrok-skip-browser-warning": "true",
       },
     });
     if (!res.ok) return null;

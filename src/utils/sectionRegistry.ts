@@ -8,7 +8,7 @@
  *   backend `get-page-meta-data` endpoint and the translation file return nothing.
  */
 
-export type ModuleKey = "pharmacy" | "grocery" | "food" | "ecommerce" | "shop";
+export type ModuleKey = "pharmacy" | "grocery" | "food" | "ecommerce" | "shop" | "service";
 
 export type SectionEntry = {
   id: string;
@@ -32,17 +32,29 @@ const ECOMMERCE_SECTIONS: SectionEntry[] = [
   { id: "verified-seller", defaultLabel: "Verified Seller", sidebarLabel: "Verified Seller" },
 ];
 
+// Service module uses "Available Now" instead of "Offers"
+const SERVICE_SECTIONS: SectionEntry[] = [
+  { id: "discounted", defaultLabel: "Discounted Items", hiddenFromSidebar: true },
+  { id: "available-now", defaultLabel: "Available Now", sidebarLabel: "Available Now" },
+  { id: "free-delivery", defaultLabel: "Free Delivery", sidebarLabel: "Free Delivery" },
+  { id: "top-rated", defaultLabel: "Top Rated", sidebarLabel: "Top Rated" },
+  { id: "nearby", defaultLabel: "Nearby", sidebarLabel: "Nearby" },
+  { id: "verified-seller", defaultLabel: "Verified Seller", sidebarLabel: "Verified Seller" },
+];
+
 export const SECTION_REGISTRY: Record<ModuleKey, SectionEntry[]> = {
   food: COMMON_SECTIONS,
   grocery: COMMON_SECTIONS,
   pharmacy: COMMON_SECTIONS,
   ecommerce: ECOMMERCE_SECTIONS,
   shop: ECOMMERCE_SECTIONS,
+  service: SERVICE_SECTIONS,
 };
 
 export const SECTION_BACKEND_KEY_MAP: Record<string, string> = {
   discounted: "discounted_page",
   offers: "offers_page",
+  "available-now": "available_now_page",
   "top-rated": "top_rated_page",
   nearby: "nearby_page",
 };

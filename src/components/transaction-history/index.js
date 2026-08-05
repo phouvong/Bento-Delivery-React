@@ -56,6 +56,10 @@ export const transaction_options = [
     label: "Cash back Transactions",
     value: "CashBack",
   },
+  {
+    label: "Subscription Transactions",
+    value: "pro_subscription",
+  }
 ];
 
 const TransactionHistory = (props) => {

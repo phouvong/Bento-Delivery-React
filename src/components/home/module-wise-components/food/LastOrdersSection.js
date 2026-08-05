@@ -96,6 +96,8 @@ const LastOrdersSection = ({ title, store_id }) => {
 
   const { data } = useGetLastOrders({ store_id });
   const { cartList } = useSelector((state) => state.cart);
+  const { configData } = useSelector((state) => state.configData);
+  const canReorder = Boolean(configData?.repeat_order_option);
 
   // Normalize rental trips into the same shape the card expects (store,
   // items_preview, created_at, order_amount, order_id). Detected by the
@@ -128,7 +130,7 @@ const LastOrdersSection = ({ title, store_id }) => {
   const { mutate: reorderMutate } = usePostReorder();
 
   const handleReorder = (orderId) => {
-    if (reorderingId) return;
+    if (!canReorder || reorderingId) return;
     setReorderingId(orderId);
     reorderMutate(
       { order_id: orderId },
@@ -147,6 +149,7 @@ const LastOrdersSection = ({ title, store_id }) => {
 
   // ── Confirm modal handlers ─────────────────────────────────────────────────
   const handleReorderClick = (order) => {
+    if (!canReorder) return;
     const storeId = order.store?.id;
     const hasCartFromSameStore =
       Array.isArray(cartList) &&
@@ -270,6 +273,7 @@ const LastOrdersSection = ({ title, store_id }) => {
                 totalPrice={order.order_amount ?? order.totalPrice}
                 onReorder={() => handleReorderClick(order)}
                 isReordering={reorderingId === order.order_id}
+                showReorder={canReorder}
               />
             ))}
           </Slider>

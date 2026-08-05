@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
-import { alpha, Avatar, Badge, Stack, styled, Typography } from "@mui/material";
+import { alpha, Badge, Stack, styled, Typography } from "@mui/material";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
+import NextImage from "components/NextImage";
 
 import { useSelector } from "react-redux";
 import { useTheme } from "@mui/material/styles";
@@ -70,9 +71,7 @@ const InfoCard = ({
 		refetch();
 	}, []);
 	const userImage =
-		userList.receiver_type === "admin"
-			? adminImage
-			: userList?.receiver?.image;
+		userList.receiver_type === "admin" ? adminImage : userList?.receiver?.image;
 	const isSender = data?.userinfo?.id === userList.last_message.sender_id;
 	const isRead = !isLoading && !isSender && unRead > 0;
 	const language_direction = localStorage.getItem("direction");
@@ -85,8 +84,7 @@ const InfoCard = ({
 			padding={{ xs: "10px 0px", md: "10px 15px 10px 10px" }}
 			sx={{
 				background:
-					selectedId === currentId &&
-					alpha(theme.palette.primary.main, 0.2),
+					selectedId === currentId && alpha(theme.palette.primary.main, 0.2),
 				borderRadius: "5px",
 			}}
 		>
@@ -94,11 +92,18 @@ const InfoCard = ({
 				overlap="circular"
 				anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
 
-				//variant="dot"
+			//variant="dot"
 			>
-				<Avatar
+				<NextImage
 					src={ChatImageUrl()}
-					sx={{ width: "48px", height: "48px" }}
+					alt={name || "chat"}
+					width={48}
+					height={48}
+					objectFit="contain"
+					borderRadius="50%"
+					sx={{
+						objectFit: "contain",
+					}}
 				/>
 			</StyledBadge>
 			<CustomStackFullWidth>

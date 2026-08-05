@@ -29,7 +29,7 @@ const TAB_ITEMS = "items";
 const TAB_STORES = "stores";
 
 // ─── Empty state ───────────────────────────────────────────────────────────
-const SearchEmptyState = ({ label }) => {
+const SearchEmptyState = ({ label, large = false }) => {
   const { t } = useTranslation();
   return (
     <Stack
@@ -43,8 +43,8 @@ const SearchEmptyState = ({ label }) => {
         src="/static/nodata.png"
         alt=""
         sx={{
-          width: { xs: 32, md: 44 },
-          height: { xs: 32, md: 44 },
+          width: large ? { xs: 56, md: 72 } : { xs: 32, md: 44 },
+          height: large ? { xs: 56, md: 72 } : { xs: 32, md: 44 },
           objectFit: "contain",
           opacity: 0.5,
         }}
@@ -175,6 +175,16 @@ const AllResult = ({
       { breakpoint: 400, settings: { slidesToShow: 1, slidesToScroll: 1 , swipeToSlide: true} },
     ],
   };
+
+  const bothEmpty =
+    !itemsLoading &&
+    !storesLoading &&
+    items.length === 0 &&
+    stores.length === 0;
+
+  if (bothEmpty) {
+    return <SearchEmptyState label="No results found" large />;
+  }
 
   return (
     <>
@@ -413,6 +423,7 @@ const CategoryResult = ({
   appliedFilterCount,
   onFilterOpen,
   storesOnly = false,
+  hideAllTab = false,
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
@@ -600,11 +611,13 @@ const CategoryResult = ({
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          <FilterPill
-            label={t("All")}
-            active={activeTab === TAB_ALL}
-            onClick={() => onTabChange(TAB_ALL)}
-          />
+          {!hideAllTab && (
+            <FilterPill
+              label={t("All")}
+              active={activeTab === TAB_ALL}
+              onClick={() => onTabChange(TAB_ALL)}
+            />
+          )}
           <FilterPill
             label={itemsLabel}
             active={activeTab === TAB_ITEMS}
@@ -638,11 +651,13 @@ const CategoryResult = ({
         </Box>
 
         <Stack direction="row" gap="8px" alignItems="center" flexShrink={0}>
-          <FilterPill
-            label={t("All")}
-            active={activeTab === TAB_ALL}
-            onClick={() => onTabChange(TAB_ALL)}
-          />
+          {!hideAllTab && (
+            <FilterPill
+              label={t("All")}
+              active={activeTab === TAB_ALL}
+              onClick={() => onTabChange(TAB_ALL)}
+            />
+          )}
           <FilterPill
             label={itemsLabel}
             active={activeTab === TAB_ITEMS}

@@ -66,6 +66,10 @@ const DeliveryInfo = ({
   setSelectedPaymentMethod,
   walletBalance,
   payableAmount,
+  // Lifted to the parent so the free-text order note reaches the order
+  // payload (`order_note`). Falls back to local state if not provided.
+  customNote: customNoteProp,
+  setCustomNote: setCustomNoteProp,
 }) => {
   console.log({ walletBalance });
 
@@ -73,7 +77,9 @@ const DeliveryInfo = ({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { t } = useTranslation();
   const [openModal, setOpenModal] = useState(false);
-  const [customNote, setCustomNote] = useState("");
+  const [localCustomNote, setLocalCustomNote] = useState("");
+  const customNote = setCustomNoteProp ? customNoteProp : localCustomNote;
+  const setCustomNote = setCustomNoteProp || setLocalCustomNote;
   const [selectedInstruction, setSelectedInstruction] = useState(null);
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [paymentMethodImage, setPaymentMethodImage] = useState("");
@@ -229,7 +235,7 @@ const DeliveryInfo = ({
                       lineHeight={1.45}
                     >
                       {t(
-                        "An account is set up with sender’s name, phone & email to unlocking all the awesome features just for you!",
+                        "An account is set up with sender’s name, phone & email to unlocking all the awesome features just for you!"
                       )}
                     </Typography>
                   </Stack>
@@ -378,7 +384,7 @@ const DeliveryInfo = ({
                     backgroundColor: alpha(theme.palette.primary.main, 0.06),
                     border: `1px solid ${alpha(
                       theme.palette.primary.main,
-                      0.18,
+                      0.18
                     )}`,
                   }}
                 >

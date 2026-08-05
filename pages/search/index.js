@@ -42,7 +42,8 @@ const SearchPage = ({ configData, metaData }) => {
     moduleType === ModuleTypes.FOOD ||
     moduleType === ModuleTypes.GROCERY ||
     moduleType === ModuleTypes.PHARMACY ||
-    moduleType === ModuleTypes.ECOMMERCE;
+    moduleType === ModuleTypes.ECOMMERCE ||
+    moduleType === ModuleTypes.SERVICE;
 
   const searchResult = (
     <SearchResult

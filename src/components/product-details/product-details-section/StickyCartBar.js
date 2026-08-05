@@ -62,16 +62,45 @@ const StickyCartBar = ({
   const isInModal = modalmanage === "true" || modalmanage === true;
   const [portalTarget, setPortalTarget] = useState(null);
   const { cartList } = useSelector((state) => state.cart);
-  // Find the cart row for this product+store. If present, the bar should
-  // act as Update-to-Cart (correct label + route click to update handler)
-  // instead of always saying Add To Cart and creating a duplicate row.
+  // Signature of the CURRENTLY SELECTED variation — food picks live in
+  // food_variations[].values[].isSelected, other modules in selectedOption.
+  // Products without variations yield an empty signature.
+  const selectionSignature = (item) => {
+    if (
+      Array.isArray(item?.food_variations) &&
+      item.food_variations.length > 0
+    ) {
+      const picks = [];
+      item.food_variations.forEach((variation) => {
+        (variation?.values || []).forEach((value) => {
+          if (value?.isSelected) {
+            picks.push(`${variation?.name}:${value?.label}`);
+          }
+        });
+      });
+      return `fv|${picks.sort().join(",")}`;
+    }
+    if (Array.isArray(item?.selectedOption) && item.selectedOption.length > 0) {
+      const picks = item.selectedOption.map((option) =>
+        typeof option === "object"
+          ? option?.type ?? option?.label ?? JSON.stringify(option)
+          : String(option)
+      );
+      return `so|${picks.sort().join(",")}`;
+    }
+    return "";
+  };
+  // Find the cart row for this product+store AND the same selected
+  // variation. Update-to-Cart only applies when the exact variation is
+  // already in the cart — a different variation should Add a new row.
   const inCartItem =
     cartList?.length > 0
       ? cartList.find(
           (item) =>
             String(item?.id) === String(modalData?.id) &&
             (modalData?.store_id == null ||
-              String(item?.store_id) === String(modalData?.store_id))
+              String(item?.store_id) === String(modalData?.store_id)) &&
+            selectionSignature(item) === selectionSignature(modalData)
         )
       : null;
 

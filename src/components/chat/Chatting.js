@@ -12,6 +12,7 @@ import { useRouter } from "next/router";
 import { useTheme } from "@mui/material/styles";
 import ConversationInfoTop from "./ConversationInfoTop";
 import LoadingBox from "./LoadingBox";
+import ChatDetailShimmer from "../ai-chatbot/ChatDetailShimmer";
 import { useGetChannelList } from "api-manage/hooks/react-query/chat/useGetChannelLists";
 import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { useGetConversation } from "api-manage/hooks/react-query/chat/useGetConversation";
@@ -36,6 +37,7 @@ const Chatting = ({ configData }) => {
 	const [receiverImage, setReceiverImage] = useState();
 	const [userType, setUserType] = useState("");
 	const [resetState, setResetState] = useState(false);
+	const [isConversationLoading, setIsConversationLoading] = useState(false);
 	const mdUp = useMediaQuery((theme) => theme.breakpoints.up("md"));
 	const mdDown = useMediaQuery((theme) => theme.breakpoints.down("md"));
 	const router = useRouter();
@@ -76,9 +78,9 @@ const Chatting = ({ configData }) => {
 		isLoading: channelLoading,
 	} = useGetChannelList(handleChatListOnSuccess);
 
-	const handleConFetchOnSuccess = (res) => {
-		setConversationData(res.pages[0]);
-	};
+	// const handleConFetchOnSuccess = (res) => {
+	// 	setConversationData(res.pages[0]);
+	// };
 	const {
 		data,
 		isSuccess,
@@ -139,16 +141,18 @@ const Chatting = ({ configData }) => {
 
 	useEffect(() => {
 		if (channelId) {
-			refetch();
+			setMessagesData([]);
+			setIsConversationLoading(true);
+			refetch().finally(() => setIsConversationLoading(false));
 		}
 	}, [channelId]);
 
 	useEffect(() => {
 		setMessagesData([data]);
 	}, [data]);
-	const handleChannelOnClick = async (value) => {
+	const handleChannelOnClick = (value) => {
 		setReceiverId(null);
-		await refetchChannelList();
+		refetchChannelList();
 		if (value.receiver_type === "admin") {
 			setApiFor("admin_id");
 			setChannelId("admin");
@@ -362,6 +366,15 @@ const Chatting = ({ configData }) => {
 						)}
 
 						{channelId &&
+							isConversationLoading &&
+							!isSidebarOpen && (
+								<CustomBoxFullWidth p={2}>
+									<ChatDetailShimmer />
+								</CustomBoxFullWidth>
+							)}
+
+						{channelId &&
+							!isConversationLoading &&
 							messagesData.length > 0 &&
 							!isFetchingNextPage &&
 							!isSidebarOpen && (

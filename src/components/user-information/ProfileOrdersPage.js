@@ -5,17 +5,15 @@ import ProfileOrdersList from "./ProfileOrdersList";
 import ProfileRidesList from "./ProfileRidesList";
 import MyTrips from "components/home/module-wise-components/rental/components/my-trips/MyTrips";
 import useGetMyOrdersList from "api-manage/hooks/react-query/order/useGetMyOrdersList";
+import useGetServiceBookingList from "../home/module-wise-components/service/service-api-manage/hooks/react-query/booking/useGetServiceBookingList";
 import ModuleTabbedLayout from "./ModuleTabbedLayout";
+import MyBookings from "../home/module-wise-components/service/components/my-bookings/MyBookings";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 
 // ── Tab values ────────────────────────────────────────────────────────────────
 const TAB_ALL = "all";
 
-// URL query key that persists the currently selected order module tab.
-// Intentionally separate from the system-wide `module` param so the two never
-// collide. The selected module is derived from this key so it survives reloads
-// and the "Back to Orders" round-trip, while an Orders & Trips menu click (which
-// pushes a URL without this key) naturally resets to the first module.
+
 export const ORDER_TAB_MODULE_KEY = "orderTabModule";
 
 const ProfileOrdersPage = ({ configData }) => {
@@ -24,9 +22,6 @@ const ProfileOrdersPage = ({ configData }) => {
   const [offset, setOffset] = useState(1);
   const [activeFilterTab, setActiveFilterTab] = useState(TAB_ALL);
 
-  // Active module is derived from the URL. Falls back to the first module when
-  // the param is missing (e.g. after the Orders & Trips menu item resets the
-  // query) or when it points to a module that no longer exists.
   const urlModuleId = router.query[ORDER_TAB_MODULE_KEY];
   const activeModule =
     (urlModuleId != null &&
@@ -34,12 +29,14 @@ const ProfileOrdersPage = ({ configData }) => {
     modules?.[0];
   const activeModuleId = activeModule?.id ?? null;
 
-  // Reset paging + filter whenever the resolved module changes (tab click,
-  // back navigation, or menu reset).
   useEffect(() => {
     setOffset(1);
     setActiveFilterTab(TAB_ALL);
   }, [activeModuleId]);
+
+  const isService = activeModule?.module_type === ModuleTypes.SERVICE;
+  const isRental = activeModule?.module_type === ModuleTypes.RENTAL;
+  const isRide = activeModule?.module_type === ModuleTypes.RIDE;
 
   const {
     data: ordersData,
@@ -52,16 +49,20 @@ const ProfileOrdersPage = ({ configData }) => {
       moduleId: activeModuleId,
       type: activeFilterTab || TAB_ALL,
     },
-    router.isReady && Boolean(activeModuleId),
+    router.isReady && Boolean(activeModuleId) && !isService,
   );
 
-  const isRental = activeModule?.module_type === ModuleTypes.RENTAL;
-  const isRide = activeModule?.module_type === ModuleTypes.RIDE;
+  const {
+    data: bookingsData,
+    isFetching: isFetchingBookings,
+    isLoading: isLoadingBookings,
+  } = useGetServiceBookingList(
+    { offset, tab: activeFilterTab, only_parent: 1 },
+    router.isReady && Boolean(activeModuleId) && isService,
+  );
 
   const onModuleChange = (module) => {
     if (!module || module.id === activeModuleId) return;
-    // Persist the selection in the URL (shallow) so it survives reloads and the
-    // order-details → back round-trip.
     router.push(
       {
         pathname: "/profile",
@@ -93,6 +94,19 @@ const ProfileOrdersPage = ({ configData }) => {
             configData,
           }}
         />
+      ) : isService ? (
+          <MyBookings
+            {...{
+              offset,
+              setOffset,
+              activeFilterTab,
+              onFilterTabChange,
+              isLoadingOrder: isFetchingBookings || isLoadingBookings,
+              ordersData: bookingsData,
+              moduleId: activeModule?.id,
+              configData,
+            }}
+          />
       ) : isRide ? (
         <ProfileRidesList
           {...{

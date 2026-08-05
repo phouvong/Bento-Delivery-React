@@ -546,7 +546,7 @@ const DeliveryAddress = ({
                     fontSize="16px"
                     color={theme.palette.neutral[1000]}
                   >
-                    {t("Create account with exiting info.")}
+                    {t("Create account with existing info.")}
                   </Typography>
                 }
               />

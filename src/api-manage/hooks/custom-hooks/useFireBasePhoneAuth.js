@@ -11,7 +11,9 @@ const useFirebasePhoneAuth = () => {
 
   const setUpRecaptcha = () => {
     if (!window.recaptchaVerifier) {
+      // Firebase v9+ modular signature: (auth, containerOrId, parameters).
       window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
         "recaptcha-container",
         {
           size: "invisible",
@@ -19,8 +21,7 @@ const useFirebasePhoneAuth = () => {
           "expired-callback": () => {
             window.recaptchaVerifier?.reset();
           },
-        },
-        auth
+        }
       );
     } else {
       window.recaptchaVerifier?.clear();

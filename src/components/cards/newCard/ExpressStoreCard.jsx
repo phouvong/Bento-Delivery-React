@@ -4,6 +4,7 @@ import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge";
 import NextImage from "components/NextImage";
 import ClosedNow from "components/closed-now";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
+import { getStoreItemCardPricing } from "helper-functions/getStoreItemCardPricing";
 import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
@@ -76,14 +77,8 @@ const EmptyItems = styled(Box)(({ theme }) => ({
 // ─── Item card ─────────────────────────────────────────────────────────────
 
 const ItemCard = ({ item }) => {
-  const displayPrice =
-    item?.discount > 0
-      ? item.price -
-        (item.discount_type === "percent"
-          ? (item.price * item.discount) / 100
-          : item.discount)
-      : item?.price;
-  const showStrike = item?.discount > 0 && item?.price > displayPrice;
+  const { displayPrice, originalPrice, showStrike } =
+    getStoreItemCardPricing(item);
 
   return (
     <Box
@@ -96,7 +91,7 @@ const ItemCard = ({ item }) => {
     >
       <ItemThumb>
         <NextImage
-          src={item?.image_full_url}
+          src={item?.image_full_url ?? item?.thumbnail_full_url}
           alt={item?.name}
           width="84"
           height="84"
@@ -152,7 +147,7 @@ const ItemCard = ({ item }) => {
                 fontVariantNumeric: "tabular-nums",
               }}
             >
-              {getAmountWithSign(item.price)}
+              {getAmountWithSign(originalPrice)}
             </Typography>
           )}
         </Stack>
@@ -279,6 +274,7 @@ const ExpressStoreCard = ({
               />
               {store?.delivery_time && (
                 <Typography
+                  dir="ltr"
                   sx={{
                     fontSize: "12px",
                     fontWeight: 600,
@@ -286,6 +282,7 @@ const ExpressStoreCard = ({
                     lineHeight: 1.3,
                     whiteSpace: "nowrap",
                     fontVariantNumeric: "tabular-nums",
+                    unicodeBidi: "isolate",
                   }}
                 >
                   {store.delivery_time}
@@ -293,6 +290,7 @@ const ExpressStoreCard = ({
               )}
               {formatDistance(store?.distance) && (
                 <Typography
+                  dir="ltr"
                   sx={{
                     fontSize: "12px",
                     fontWeight: 600,
@@ -300,6 +298,7 @@ const ExpressStoreCard = ({
                     lineHeight: 1.3,
                     whiteSpace: "nowrap",
                     fontVariantNumeric: "tabular-nums",
+                    unicodeBidi: "isolate",
                   }}
                 >
                   ({formatDistance(store.distance)})

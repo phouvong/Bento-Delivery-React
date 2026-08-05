@@ -16,7 +16,8 @@ import AuthGuard from "src/components/route-guard/AuthGuard";
 import { useRouter } from "next/router";
 import { processMetadata } from "utils/fetchPageMetaData";
 import WishListLayout from "components/wishlist/WishListLayout";
-import RentalWishListLayout from "components/home/module-wise-components/rental/components/home/RentalWishListLayout";
+import RentalWishListLayout from "src/components/home/module-wise-components/rental/components/home/RentalWishListLayout";
+import { getServiceSections } from "components/home/module-wise-components/service/serviceSectionsConfig";
 
 const WishlistPage = ({ configData, metaData }) => {
   const dispatch = useDispatch();
@@ -40,7 +41,8 @@ const WishlistPage = ({ configData, metaData }) => {
     moduleType === ModuleTypes.FOOD ||
     moduleType === ModuleTypes.GROCERY ||
     moduleType === ModuleTypes.PHARMACY ||
-    moduleType === ModuleTypes.ECOMMERCE;
+    moduleType === ModuleTypes.ECOMMERCE ||
+    moduleType === ModuleTypes.SERVICE;
 
   const sections =
     moduleType === ModuleTypes.FOOD
@@ -51,6 +53,8 @@ const WishlistPage = ({ configData, metaData }) => {
       ? getPharmacySections()
       : moduleType === ModuleTypes.ECOMMERCE
       ? getEcommerceSections()
+      : moduleType === ModuleTypes.SERVICE
+      ? getServiceSections()
       : [];
 
   return (

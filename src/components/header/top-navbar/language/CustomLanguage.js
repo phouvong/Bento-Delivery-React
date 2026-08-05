@@ -15,7 +15,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import i18n, { t } from "i18next";
 import cookie from "js-cookie";
+import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
+import { useQueryClient } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useSettings } from "../../../../contexts/use-settings";
 import {
@@ -55,6 +57,8 @@ const CustomLanguage = ({
   const anchorRef = useRef(null);
   //const { configData } = useSelector((state) => state.configDataSettings);
   const dispatch = useDispatch();
+  const router = useRouter();
+  const queryClient = useQueryClient();
   useEffect(() => {
     if (typeof window !== "undefined") {
       let languageSetting = JSON.parse(
@@ -105,29 +109,30 @@ const CustomLanguage = ({
   };
 
   const handleChangeLanguage = (lan) => {
-    //i18n.changeLanguage(lan?.languageCode);
     dispatch(setLanguage(lan?.languageCode));
     dispatch(setCountryCode(lan?.countryCode));
     cookie.set("languageSetting", lan?.languageCode);
     localStorage.setItem("language-setting", JSON.stringify(lan?.languageCode));
     localStorage.setItem("country", JSON.stringify(lan?.countryCode));
-    toast.success(t("Language has been changed"), {
-      id: "lan",
-    });
 
     saveSettings({
       ...values,
       direction: isRTLLanguage(lan?.languageCode) ? "rtl" : "ltr",
     });
-    window.location.reload();
-    handleClose?.();
 
-    // window.location.reload();
-    // setTimeout(() => {
-    //   // toast.success(t("Language has been changed"),{
-    //   //     id:'lan'
-    //   // });
-    // }, 300);
+    // Switch UI strings in place, then refetch data instead of reloading the page.
+    // MainApi reads localStorage["language-setting"] fresh on every request, so
+    // invalidated React Query calls re-fire with the new X-localization header.
+    i18n.changeLanguage(lan?.languageCode);
+    queryClient.invalidateQueries();
+    // Re-run getServerSideProps for the current route (reads the languageSetting
+    // cookie) via a soft navigation — no full-page reload.
+    router.replace(router.asPath, undefined, { scroll: false });
+
+    toast.success(t("Language has been changed"), {
+      id: "lan",
+    });
+    handleClose?.();
   };
   const handleSelection = (lan) => {
     setSelectedLanguage(lan);
@@ -237,7 +242,7 @@ const CustomLanguage = ({
                       </Typography>
                       <Typography variant="h8">
                         {t(
-                          "The browser will refresh to get translated content."
+                          "The content will be translated to the selected language."
                         )}
                       </Typography>
                     </CustomStackFullWidth>

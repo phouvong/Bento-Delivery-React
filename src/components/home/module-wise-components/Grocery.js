@@ -56,6 +56,12 @@ const Grocery = (props) => {
     (state) => state.utilsData,
   );
   const { data, refetch, isLoading } = useGetOtherBanners();
+  // The other-banners query is enabled:false — fetch it here so the
+  // promotional banner doesn't depend on another page priming the cache.
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const {
     data: visitedStores,
     refetch: refetchVisitAgain,
@@ -86,7 +92,6 @@ const Grocery = (props) => {
   }, [visitedStores, newStore?.stores, moduleId]);
 
   const isSmallScreen = useMediaQuery("(max-width:600px)");
-  console.log({ configData });
 
   const overviewContent = (
     <Stack gap={{ xs: "16px", lg: "32px" }}>
@@ -145,7 +150,7 @@ const Grocery = (props) => {
         </CustomContainer>
       </S>
 
-      {configData?.repeat_order_option && token ? (
+      {token ? (
         <S>
           <CustomContainer noMobilePadding={true}>
             <LastOrdersSection />
@@ -205,7 +210,12 @@ const Grocery = (props) => {
       </S>
 
       <S>
-        <CustomContainer>
+        <CustomContainer
+          sx={{
+            paddingLeft: "16px !important",
+            paddingRight: "0 !important",
+          }}
+        >
           <SpecialFoodOffers />
         </CustomContainer>
       </S>

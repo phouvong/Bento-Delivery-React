@@ -26,12 +26,14 @@ import { getFoodSections } from "../home/module-wise-components/food/foodSection
 import { getGrocerySections } from "../home/module-wise-components/grocery/grocerySectionsConfig";
 import { getPharmacySections } from "../home/module-wise-components/pharmacy/pharmacySectionsConfig";
 import { getEcommerceSections } from "../home/module-wise-components/ecommerce/ecommerceSectionsConfig";
+import { getServiceSections } from "components/home/module-wise-components/service/serviceSectionsConfig";
 
 const SECTIONS_MAP = {
   [ModuleTypes.FOOD]: getFoodSections,
   [ModuleTypes.GROCERY]: getGrocerySections,
   [ModuleTypes.PHARMACY]: getPharmacySections,
   [ModuleTypes.ECOMMERCE]: getEcommerceSections,
+  [ModuleTypes.SERVICE]: getServiceSections,
 };
 
 const PAGE_LIMIT = 9;
@@ -92,6 +94,8 @@ const AllStores = () => {
 
   const moduleType = getCurrentModuleType();
   const getSections = SECTIONS_MAP[moduleType] ?? (() => []);
+  const pageTitle =
+    moduleType === ModuleTypes.SERVICE ? "All Providers" : "All Stores";
 
   const pageContent = (
     <Box sx={{ width: "100%", pt: { xs: "16px", md: 0 } }}>
@@ -109,7 +113,7 @@ const AllStores = () => {
             letterSpacing: "-0.44px",
           }}
         >
-          {t("All Stores")}
+          {t(pageTitle)}
         </Typography>
         <Tooltip title={t("Filter")} arrow>
           <Box sx={{ position: "relative", flexShrink: 0 }}>
@@ -240,7 +244,7 @@ const AllStores = () => {
   return (
     <>
       <SimpleMobileHeader
-        title="All Stores"
+        title={pageTitle}
         sx={{ mx: { xs: "-10px" } }}
         action={
           <Tooltip title={t("Filter")} arrow>

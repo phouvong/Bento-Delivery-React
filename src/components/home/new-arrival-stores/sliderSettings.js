@@ -198,7 +198,7 @@ export const settings = {
 
 export const foodNewArrivalsettings = {
   dots: false,
-  infinite: true,
+  infinite: false,
   autoplay: true,
   autoplaySpeed: 2500,
   speed: 600,

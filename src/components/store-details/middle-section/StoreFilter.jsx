@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { IconButton, Tooltip } from "@mui/material";
+import { Badge, IconButton, Tooltip } from "@mui/material";
 import TuneIcon from "@mui/icons-material/Tune";
 import { useTranslation } from "react-i18next";
 import FoodSearchFilterDrawer from "../../home/search/FoodSearchFilterDrawer";
@@ -66,11 +66,16 @@ const StoreFilter = ({
     return out;
   }, [sortBy, minMax, ratingCount, type]);
 
-  const hasActiveFilter =
-    (sortBy && sortBy !== "Default") ||
-    (Array.isArray(minMax) && (minMax[0] !== 0 || minMax[1] !== 1)) ||
-    Number(ratingCount) > 0 ||
-    (type && type !== "all");
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (sortBy && sortBy !== "Default") count += 1;
+    if (Array.isArray(minMax) && (minMax[0] !== 0 || minMax[1] !== 1)) count += 1;
+    if (Number(ratingCount) > 0) count += 1;
+    if (type && type !== "all") count += 1;
+    return count;
+  }, [sortBy, minMax, ratingCount, type]);
+
+  const hasActiveFilter = activeFilterCount > 0;
 
   const handleApply = (next) => {
     const safe = next || {};
@@ -114,34 +119,47 @@ const StoreFilter = ({
   return (
     <>
       <Tooltip title={t("Filter")} arrow>
-        <IconButton
-          onClick={(e) => setAnchorEl(e.currentTarget)}
-          aria-label={t("Filter")}
+        <Badge
+          badgeContent={activeFilterCount}
+          invisible={activeFilterCount === 0}
+          color="primary"
           sx={{
-            width: 40,
-            height: 40,
-            borderRadius: "8px",
-            backgroundColor: "background.paper",
-            border: (theme) =>
-              `1px solid ${
-                hasActiveFilter
-                  ? theme.palette.primary.main
-                  : theme.palette.divider
-              }`,
-            color: (theme) =>
-              hasActiveFilter
-                ? theme.palette.primary.main
-                : theme.palette.neutral?.[700] || theme.palette.text.primary,
-            transition: "all 120ms ease",
-            "&:hover": {
-              backgroundColor: "background.paper",
-              borderColor: (theme) => theme.palette.primary.main,
-              color: (theme) => theme.palette.primary.main,
+            "& .MuiBadge-badge": {
+              fontSize: "10px",
+              height: "16px",
+              minWidth: "16px",
             },
           }}
         >
-          <TuneIcon sx={{ fontSize: 20 }} />
-        </IconButton>
+          <IconButton
+            onClick={(e) => setAnchorEl(e.currentTarget)}
+            aria-label={t("Filter")}
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: "8px",
+              backgroundColor: "background.paper",
+              border: (theme) =>
+                `1px solid ${
+                  hasActiveFilter
+                    ? theme.palette.primary.main
+                    : theme.palette.divider
+                }`,
+              color: (theme) =>
+                hasActiveFilter
+                  ? theme.palette.primary.main
+                  : theme.palette.neutral?.[700] || theme.palette.text.primary,
+              transition: "all 120ms ease",
+              "&:hover": {
+                backgroundColor: "background.paper",
+                borderColor: (theme) => theme.palette.primary.main,
+                color: (theme) => theme.palette.primary.main,
+              },
+            }}
+          >
+            <TuneIcon sx={{ fontSize: 20 }} />
+          </IconButton>
+        </Badge>
       </Tooltip>
 
       <FoodSearchFilterDrawer

@@ -123,6 +123,7 @@ const FoodDetailsManager = (props) => {
     !isAvailable(item?.available_time_starts, item?.available_time_ends);
 
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  console.log({ item });
 
   return (
     <Stack spacing={0} sx={{ width: "100%" }}>
@@ -168,35 +169,38 @@ const FoodDetailsManager = (props) => {
           </IconButton>
         )}
 
-        {/* Wishlist button — top-right of image */}
-        <Box
-          sx={{
-            position: "absolute",
-            top: { xs: 12, md: 10 },
-            right: { xs: 12, md: 10 },
-            zIndex: 5,
-            width: 36,
-            height: 36,
-            borderRadius: { xs: "50%", md: "8px" },
-            backgroundColor: theme.palette.background.paper,
-            boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <IconButton onClick={handleWishlistClick} size="small">
-            <i
-              className={isWishlisted ? "fi fi-sr-heart" : "fi fi-rr-heart"}
-              style={{
-                fontSize: 16,
-                display: "flex",
-                lineHeight: 1,
-                color: theme.palette.primary.main,
-              }}
-            />
-          </IconButton>
-        </Box>
+        {/* Wishlist button — top-right of image. Hidden for scheduled/
+            pre-order items (those carrying `available_date_starts`). */}
+        {!(item?.available_date_starts ?? product?.available_date_starts) && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: { xs: 12, md: 10 },
+              right: { xs: 12, md: 10 },
+              zIndex: 5,
+              width: 36,
+              height: 36,
+              borderRadius: { xs: "50%", md: "8px" },
+              backgroundColor: theme.palette.background.paper,
+              boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <IconButton onClick={handleWishlistClick} size="small">
+              <i
+                className={isWishlisted ? "fi fi-sr-heart" : "fi fi-rr-heart"}
+                style={{
+                  fontSize: 16,
+                  display: "flex",
+                  lineHeight: 1,
+                  color: theme.palette.primary.main,
+                }}
+              />
+            </IconButton>
+          </Box>
+        )}
 
         <FoodModalMediaPreview
           imageUrl={allImages}

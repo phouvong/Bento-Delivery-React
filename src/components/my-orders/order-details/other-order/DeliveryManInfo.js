@@ -9,7 +9,7 @@ import { Stack } from "@mui/system";
 import { hasChatAndReview, StoreChatButton } from "./StoreDetails";
 import { getToken } from "../../../../helper-functions/getToken";
 
-const DeliveryManInfo = ({ configData, deliveryManData, storeData }) => {
+const DeliveryManInfo = ({ configData, deliveryManData, storeData, isBooking, isServiceman }) => {
   const router = useRouter();
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
@@ -32,11 +32,15 @@ const DeliveryManInfo = ({ configData, deliveryManData, storeData }) => {
   return (
     <CustomStackFullWidth
       sx={{
-        padding: {
-          xs: "20px 10px",
-          md: "20px 20px",
-        },
-        minHeight: "30vh",
+        padding: isServiceman
+          ? { xs: "10px", md: "12px 10px" }
+          : {
+              xs: "20px 10px",
+              md: isBooking ? "20px 40px" : "20px 20px",
+            },
+        // The 30vh min-height sized a single full-tab delivery-man slide;
+        // the serviceman list stacks multiple compact cards instead.
+        minHeight: isServiceman ? "auto" : "30vh",
       }}
     >
       <Grid container>
@@ -47,8 +51,9 @@ const DeliveryManInfo = ({ configData, deliveryManData, storeData }) => {
               imageUrl={configData?.base_urls?.delivery_man_image_url}
               image={deliveryManData?.image_full_url}
               fromDelivery="true"
+              isServiceman={isServiceman}
             />
-            {getToken() && hasChatAndReview(storeData)?.isChat === 1 && (
+            {!isServiceman && getToken() && hasChatAndReview(storeData)?.isChat === 1 && (
               <StoreChatButton
                 variant="contained"
                 startIcon={!isSmall && <MessageSvg />}

@@ -14,7 +14,7 @@ import { styled } from "@mui/material/styles";
 
 import { Box, Stack } from "@mui/system";
 import { t } from "i18next";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import SimpleBar from "simplebar-react";
 import "simplebar/dist/simplebar.min.css";
@@ -30,7 +30,10 @@ import DotSpin from "components/DotSpin";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import { ReadMore } from "components/store-details/ReadMore";
 import { getModuleId } from "helper-functions/getModuleId";
-import { handleProductRedirect } from "helper-functions/handleProductRedirect";
+import {
+  handleProductRedirect,
+  handleServiceRedirect,
+} from "helper-functions/handleProductRedirect";
 
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import FoodDetailModal from "components/food-details/foodDetail-modal/FoodDetailModal";
@@ -82,7 +85,25 @@ const RestaurantReviewModal = ({
   const [isWishlisted, setIsWishlisted] = useState(false);
   const { mutate: addFavoriteMutation } = useAddToWishlist();
   const { mutate } = useWishListDelete();
-  console.log({ productData });
+
+  // Service module's review endpoint returns { reviews: [...] } instead of a
+  // bare array, and each review carries service_name/customer.f_name-l_name
+  // instead of item_name/customer_name — normalize both shapes here so the
+  // render below (shared across modules) can stay untouched.
+  const reviews = useMemo(() => {
+    const rawList = Array.isArray(data) ? data : (data?.reviews ?? []);
+    if (getCurrentModuleType() !== "service") return rawList;
+    return rawList.map((review) => ({
+      ...review,
+      customer_name:
+        review?.customer_name ??
+        [review?.customer?.f_name, review?.customer?.l_name]
+          .filter(Boolean)
+          .join(" ")
+          .trim(),
+      item_name: review?.item_name ?? review?.service_name,
+    }));
+  }, [data]);
 
   useEffect(() => {
     refetch();
@@ -101,12 +122,14 @@ const RestaurantReviewModal = ({
   const getPercentOfNumber = (percentRate) => {
     const total = restaurantDetails?.ratings.reduce(
       (sum, current) => sum + current,
-      0
+      0,
     );
     return percentRate ? ((percentRate / total) * 100).toFixed(1) : 0;
   };
   const handleClick = (itemReview) => {
-    console.log({ itemReview });
+    // Service module reviews have no linked `item` (they review a service
+    // booking, not a purchasable product) — nothing to open.
+    if (!itemReview) return;
 
     setProductData(itemReview);
 
@@ -272,7 +295,7 @@ const RestaurantReviewModal = ({
                       <BorderLinearProgress
                         variant="determinate"
                         value={getPercentOfNumber(
-                          restaurantDetails?.ratings[0]
+                          restaurantDetails?.ratings[0],
                         )}
                       />
                     </Box>
@@ -289,7 +312,7 @@ const RestaurantReviewModal = ({
                       <BorderLinearProgress
                         variant="determinate"
                         value={getPercentOfNumber(
-                          restaurantDetails?.ratings[1]
+                          restaurantDetails?.ratings[1],
                         )}
                       />
                     </Box>
@@ -306,7 +329,7 @@ const RestaurantReviewModal = ({
                       <BorderLinearProgress
                         variant="determinate"
                         value={getPercentOfNumber(
-                          restaurantDetails?.ratings[2]
+                          restaurantDetails?.ratings[2],
                         )}
                       />
                     </Box>
@@ -323,7 +346,7 @@ const RestaurantReviewModal = ({
                       <BorderLinearProgress
                         variant="determinate"
                         value={getPercentOfNumber(
-                          restaurantDetails?.ratings[3]
+                          restaurantDetails?.ratings[3],
                         )}
                       />
                     </Box>
@@ -340,7 +363,7 @@ const RestaurantReviewModal = ({
                       <BorderLinearProgress
                         variant="determinate"
                         value={getPercentOfNumber(
-                          restaurantDetails?.ratings[4]
+                          restaurantDetails?.ratings[4],
                         )}
                       />
                     </Box>
@@ -356,8 +379,8 @@ const RestaurantReviewModal = ({
             </Grid>
           </CustomStackFullWidth>
 
-          {data &&
-            data?.map((review) =>
+          {reviews &&
+            reviews.map((review) =>
               isDrawer ? (
                 <Stack
                   key={review?.id}
@@ -389,7 +412,7 @@ const RestaurantReviewModal = ({
                           borderRadius: "50%",
                           backgroundColor: alpha(
                             theme.palette.primary.main,
-                            0.12
+                            0.12,
                           ),
                           color: theme.palette.primary.main,
                           display: "flex",
@@ -442,7 +465,11 @@ const RestaurantReviewModal = ({
                     <Stack
                       spacing={0.5}
                       alignItems="center"
-                      onClick={() => handleClick(review?.item)}
+                      onClick={() =>
+                        getCurrentModuleType() === "service"
+                          ? handleServiceRedirect(review?.item, router)
+                          : handleClick(review?.item)
+                      }
                       sx={{
                         cursor: "pointer",
                         width: 84,
@@ -627,7 +654,7 @@ const RestaurantReviewModal = ({
                     ""
                   )}
                 </Grid>
-              )
+              ),
             )}
           {isLoading && (
             <Stack marginTop="2rem">

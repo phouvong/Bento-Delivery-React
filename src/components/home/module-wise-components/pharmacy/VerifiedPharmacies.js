@@ -18,7 +18,7 @@ const SliderWrapper = styled(CustomBoxFullWidth)(({ theme }) => ({
   },
 }));
 
-const VerifiedPharmacies = () => {
+const VerifiedPharmacies = ({ title, subtitle }) => {
   const { t } = useTranslation();
   const slider = useRef(null);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -80,7 +80,7 @@ const VerifiedPharmacies = () => {
                   letterSpacing: "-1.2px",
                 }}
               >
-                {t("Verified Pharmacies")}
+                {title ? title : t("Verified Pharmacies")}
               </Typography>
               <Typography
                 sx={{
@@ -91,7 +91,7 @@ const VerifiedPharmacies = () => {
                   mt: "4px",
                 }}
               >
-                {t("Trust & secure buying experience.")}
+                {subtitle ? subtitle : t("Trust & secure buying experience.")}
               </Typography>
             </Box>
           )

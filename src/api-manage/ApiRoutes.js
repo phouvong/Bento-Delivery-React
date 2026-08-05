@@ -46,6 +46,7 @@ export const last_orders_api = "/api/v1/customer/order/last";
 export const last_trips_api = "/api/v1/rental/customer/trip/last";
 export const reorder_api = "/api/v1/customer/order-again/reorder";
 export const rental_reorder_api = "/api/v1/rental/user/trip/reorder";
+export const service_rebook_api = "/api/v1/service/customer/booking/re-booking";
 export const user_info_api = "/api/v1/customer/info";
 export const remove_account_api = "/api/v1/customer/remove-account";
 export const profile_update_api = "/api/v1/customer/update-profile";
@@ -182,7 +183,6 @@ export const pro_cancel = "/api/v1/customer/pro-customer/cancel";
 export const pro_faqs = "/api/v1/pro-customer/faqs";
 export const pro_terms = "/api/v1/pro-customer/terms-and-conditions";
 export const trending_searches_api = "/api/v1/trending-searches";
-
 
 export const ai_chat_conversations_api =
   "/api/v1/customer/ai-chat/conversations";

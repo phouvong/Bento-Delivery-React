@@ -245,7 +245,9 @@ export const cartSlice = createSlice({
       state.campaignItemList = [action.payload];
     },
     setBuyNowItemList: (state = initialState, action) => {
-      state.buyNowItemList = [action.payload];
+      state.buyNowItemList = Array.isArray(action.payload)
+        ? action.payload
+        : [action.payload];
     },
     setCampaignItem: (state = initialState, action) => {
       state.campaignItem = action.payload;

@@ -84,7 +84,6 @@ const MobileAppBanner = () => {
   const { t } = useTranslation();
   const [dismissed, setDismissed] = useState(false);
   const { data } = useGetAppDownloadSection();
-  console.log({ data });
 
   const sectionEnabled = Number(data?.download_user_app_section_status) === 1;
   const title = data?.download_user_app_title || DEFAULT_TITLE;
@@ -229,7 +228,7 @@ const MobileAppBanner = () => {
           >
             {t(title)}
           </Typography>
-          <Stack direction="row" alignItems="center" gap={4} flexWrap="wrap">
+          <Stack direction="row" alignItems="center" gap={2} flexWrap="wrap">
             {playstore_url && (
               <StoreButton onClick={handleAndroidClick}>
                 <Stack direction="row" alignItems="center" gap={0.8}>
@@ -249,9 +248,7 @@ const MobileAppBanner = () => {
               </StoreButton>
             )}
             {apple_store_url && (
-              <StoreButton
-                onClick={handleIosClick}
-              >
+              <StoreButton onClick={handleIosClick}>
                 <Stack direction="row" alignItems="center" gap={0.8}>
                   <Box
                     component="img"

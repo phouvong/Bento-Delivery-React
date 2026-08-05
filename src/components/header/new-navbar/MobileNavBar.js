@@ -1,4 +1,11 @@
-import { Box, IconButton, Stack, Typography, useTheme } from "@mui/material";
+import {
+  alpha,
+  Box,
+  IconButton,
+  Stack,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -24,8 +31,9 @@ import { setCartList, clearCartGroups } from "redux/slices/cart";
 import { getCartListModuleWise } from "helper-functions/getCartListModuleWise";
 import { getModuleIdentifier, saveModuleParam } from "utils/moduleParamManager";
 import { setSelectedModule } from "redux/slices/utils";
-import useScrollDirection from "hooks/useScrollDirection";
+import { useScrollCollapseClass } from "hooks/useScrollDirection";
 import { useGetCategories } from "api-manage/hooks/react-query/all-category/all-categorys";
+import { getServiceSections } from "components/home/module-wise-components/service/serviceSectionsConfig";
 
 /**
  * Mobile navbar — three sections (default state):
@@ -123,13 +131,13 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
     localStorage.setItem("location", address?.address);
     localStorage.setItem(
       "currentLatLng",
-      JSON.stringify({ lat: address?.lat, lng: address?.lng })
+      JSON.stringify({ lat: address?.lat, lng: address?.lng }),
     );
     if (address.zone_ids && address.zone_ids.length > 0) {
       localStorage.setItem("zoneid", JSON.stringify(address.zone_ids));
       const isRental = getModule()?.module_type === "rental";
       toast.success(
-        t(`New ${isRental ? "Pickup" : "Delivery"} address selected.`)
+        t(`New ${isRental ? "Pickup" : "Delivery"} address selected.`),
       );
       setAddressPopoverOpen(false);
     }
@@ -141,6 +149,7 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
     [ModuleTypes.PHARMACY]: t("Medicine"),
     [ModuleTypes.ECOMMERCE]: t("Products"),
     [ModuleTypes.PARCEL]: t("Parcel"),
+    [ModuleTypes.SERVICE]: t("Service"),
   };
   const moduleNoun = MODULE_NOUN[getCurrentModuleType()] ?? t("Items");
 
@@ -209,9 +218,28 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
 
   const moduleTabsRef = useRef(null);
 
-  const { direction, scrollY } = useScrollDirection({ threshold: 8 });
-  // After 40px down-scroll, collapse top + module rows; on any up-scroll, restore.
-  const isCollapsed = scrollY > 40 && direction === "down";
+  // CSS-driven collapse: a vanilla scroll listener toggles
+  // `html.mobile-nav-collapsed`; the slide-away itself is a pure CSS
+  // transform on AppBarStyle (see NavBar.style.js). Zero React re-renders
+  // during scroll or while animating.
+  // Disabled on section/category pages: the back+title bar must never
+  // slide away — it is the primary navigation anchor for that screen.
+  useScrollCollapseClass(undefined, { enabled: !isSectionPage });
+
+  // Measure the grey wrapper (address row + module tabs) so the CSS knows
+  // exactly how far to slide the bar up, whatever the rows' real height is.
+  const collapseRowsRef = useRef(null);
+  useEffect(() => {
+    const el = collapseRowsRef.current;
+    if (!el) return;
+    const root = document.documentElement;
+    const setVar = () =>
+      root.style.setProperty("--mobile-nav-collapse", `${el.offsetHeight}px`);
+    setVar();
+    const observer = new ResizeObserver(setVar);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const cartCount = useMemo(() => {
     if (getCurrentModuleType() === ModuleTypes.RENTAL) {
@@ -227,6 +255,7 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
       [ModuleTypes.GROCERY]: getGrocerySections,
       [ModuleTypes.PHARMACY]: getPharmacySections,
       [ModuleTypes.ECOMMERCE]: getEcommerceSections,
+      [ModuleTypes.SERVICE]: getServiceSections,
     }[getCurrentModuleType()];
     if (!sectionsFn) return [];
     try {
@@ -275,7 +304,7 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
     router.push(
       { pathname: "/home", query: { module: moduleIdentifier } },
       undefined,
-      { shallow: isHome }
+      { shallow: isHome },
     );
   };
 
@@ -317,6 +346,10 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
     "/rental/provider/popular",
     "/rental/provider/[id]",
     "/rental/trip-status/[id]",
+    "/service/provider/[id]",
+    "/service/service-details/[id]",
+    "/campaigns",
+    "/campaigns/[id]",
   ];
   if (SIMPLE_HEADER_ROUTES.includes(router.pathname)) return null;
 
@@ -395,22 +428,35 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
           width: "100%",
           backgroundColor: theme.palette.background.default,
           transition: "box-shadow 0.25s ease",
-          boxShadow: isCollapsed
-            ? "0px 1px 2px rgba(0,0,0,0.10), 0px 1px 2px rgba(0,0,0,0.05)"
-            : "none",
+          boxShadow: "none",
+          "html.mobile-nav-collapsed &": {
+            boxShadow: `0px 1px 2px ${alpha(
+              theme.palette.common.black,
+              0.1,
+            )}, 0px 1px 2px ${alpha(theme.palette.common.black, 0.05)}`,
+          },
         }}
       >
-        {/* ── Grey header wrapper for Section 1 + 2 ── */}
-        <Box sx={{ backgroundColor: theme.palette.background.secondary }}>
+        {/* ── Grey header wrapper for Section 1 + 2 ──
+            Kept at natural height; the collapse slides the whole fixed bar
+            up by this wrapper's measured height (--mobile-nav-collapse).
+            The rows fade while sliding (opacity is compositor-friendly) —
+            out quickly on hide, back in with a slight delay on show so the
+            bar lands before the content reappears. */}
+        <Box
+          ref={collapseRowsRef}
+          sx={{
+            backgroundColor: theme.palette.background.secondary,
+            opacity: 1,
+            transition: "opacity 0.22s ease 0.08s",
+            "html.mobile-nav-collapsed &": {
+              opacity: 0,
+              transition: "opacity 0.18s ease",
+            },
+          }}
+        >
           {/* ── Section 1: Address + Cart ── */}
-          <Box
-            sx={{
-              overflow: "hidden",
-              maxHeight: isCollapsed ? "0px" : "60px",
-              opacity: isCollapsed ? 0 : 1,
-              transition: "max-height 0.25s ease, opacity 0.2s ease",
-            }}
-          >
+          <Box sx={{ overflow: "hidden" }}>
             <Stack
               direction="row"
               alignItems="center"
@@ -558,14 +604,7 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
 
           {/* ── Section 2: Module tabs ── */}
           {showModuleTabs && (
-            <Box
-              sx={{
-                overflow: "hidden",
-                maxHeight: isCollapsed ? "0px" : "56px",
-                opacity: isCollapsed ? 0 : 1,
-                transition: "max-height 0.25s ease, opacity 0.2s ease",
-              }}
-            >
+            <Box sx={{ overflow: "hidden" }}>
               <Box
                 ref={moduleTabsRef}
                 sx={{
@@ -665,13 +704,15 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
                 gap="8px"
                 onClick={() => setSearchOpen(true)}
                 sx={{
-                  height: isCollapsed ? "40px" : "44px",
+                  // Constant height: animating it would change the fixed
+                  // bar's layout height and shift the page content — the
+                  // collapse must stay transform-only.
+                  height: "44px",
                   px: "16px",
                   backgroundColor: theme.palette.background.secondary,
                   borderRadius: "9999px",
                   cursor: "pointer",
                   userSelect: "none",
-                  transition: "height 0.25s ease",
                 }}
               >
                 <i

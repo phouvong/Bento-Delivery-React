@@ -252,8 +252,15 @@ const CategoryPageContent = () => {
       ? t("Medicines")
       : moduleType === "ecommerce"
       ? t("Items")
+      : moduleType === "service"
+      ? t("Services")
       : t("Groceries");
-  const storesLabel = moduleType === "food" ? t("Restaurants") : t("Stores");
+  const storesLabel =
+    moduleType === "food"
+      ? t("Restaurants")
+      : moduleType === "service"
+      ? t("Service Providers")
+      : t("Stores");
 
   const searchPlaceholder = t("Search Here...");
 
@@ -265,6 +272,8 @@ const CategoryPageContent = () => {
     ? "Search for Medicine"
     : moduleType === "ecommerce"
     ? "Search for Products"
+    : moduleType === "service"
+    ? "Search for Services"
     : "Search for Grocery";
 
   return (

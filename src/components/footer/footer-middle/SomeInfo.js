@@ -3,6 +3,11 @@ import { Stack } from "@mui/system";
 import CustomImageContainer from "../../CustomImageContainer";
 import Link from "next/link";
 
+// Phone numbers (and similar "+880…" strings) must keep left-to-right digit
+// order even in RTL locales — otherwise the leading "+" jumps to the right.
+const isLtrValue = (value) =>
+  typeof value === "string" && /^\+?[\d\s()-]+$/.test(value.trim());
+
 const Inner = ({ image, alt, title, info, t, theme }) => (
   <Stack
     alignItems="center"
@@ -34,6 +39,7 @@ const Inner = ({ image, alt, title, info, t, theme }) => (
       </Typography>
       <Typography
         className="info-value"
+        dir={isLtrValue(info) ? "ltr" : undefined}
         sx={{
           fontSize: "14px",
           fontWeight: 400,
@@ -42,6 +48,7 @@ const Inner = ({ image, alt, title, info, t, theme }) => (
           lineHeight: 1.2,
           textAlign: "center",
           transition: "color 0.2s ease",
+          ...(isLtrValue(info) && { unicodeBidi: "isolate" }),
         }}
       >
         {info}
@@ -56,12 +63,28 @@ const SomeInfo = ({ image, alt, title, info, t, href }) => {
   if (href) {
     return (
       <Link href={href} style={{ flex: 1, textDecoration: "none" }}>
-        <Inner image={image} alt={alt} title={title} info={info} t={t} theme={theme} />
+        <Inner
+          image={image}
+          alt={alt}
+          title={title}
+          info={info}
+          t={t}
+          theme={theme}
+        />
       </Link>
     );
   }
 
-  return <Inner image={image} alt={alt} title={title} info={info} t={t} theme={theme} />;
+  return (
+    <Inner
+      image={image}
+      alt={alt}
+      title={title}
+      info={info}
+      t={t}
+      theme={theme}
+    />
+  );
 };
 
 SomeInfo.propTypes = {};

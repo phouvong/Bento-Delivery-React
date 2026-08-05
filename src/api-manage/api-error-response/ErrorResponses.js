@@ -17,18 +17,29 @@ export const handleTokenExpire = (item, status) => {
 };
 
 export const onErrorResponse = (error) => {
-  error?.response?.data?.errors?.forEach((item) => {
-    handleTokenExpire(item);
-  });
+  const errors = error?.response?.data?.errors;
+  if (Array.isArray(errors)) {
+    errors.forEach((item) => {
+      handleTokenExpire(item);
+    });
+  } else if (errors) {
+    // Some endpoints return a plain value instead of the usual array —
+    // e.g. { "errors": "Unauthorized" } on auth failures.
+    handleTokenExpire(
+      { message: typeof errors === "string" ? errors : errors?.message },
+      error?.response?.status
+    );
+  }
 };
 export const onSingleErrorResponse = (error) => {
-  if (
-    error?.response?.data?.errors &&
-    error?.response?.data?.errors?.length > 0
-  ) {
+  const errors = error?.response?.data?.errors;
+  if (Array.isArray(errors) && errors.length > 0) {
     return onErrorResponse(error);
   }
-  toast.error(error?.response?.data?.message, {
+  const message =
+    error?.response?.data?.message ||
+    (typeof errors === "string" ? errors : undefined);
+  toast.error(message, {
     id: "error",
   });
   handleTokenExpire(error, error?.response?.status);

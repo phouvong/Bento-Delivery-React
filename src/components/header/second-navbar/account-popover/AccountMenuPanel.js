@@ -5,12 +5,21 @@ import { useRouter } from "next/router";
 import { t } from "i18next";
 import toast from "react-hot-toast";
 import { setLogoutUser } from "redux/slices/profileInfo";
-import { setWelcomeModal } from "redux/slices/utils";
+import { setWelcomeModal, setSelectedModule } from "redux/slices/utils";
 import { clearAllCartData } from "redux/slices/cart";
 import { logoutSuccessFull } from "utils/toasterMessages";
 import CustomDialogConfirm from "../../../custom-dialog/confirm/CustomDialogConfirm";
 import ThemeSwitches from "../../top-navbar/ThemeSwitches";
 import AccountLanguageButton from "./AccountLanguageButton";
+import useServiceBusinessConfig from "components/home/module-wise-components/service/service-api-manage/hooks/custom-hooks/useServiceBusinessConfig";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { saveModuleParam, getModuleIdentifier } from "utils/moduleParamManager";
+
+// Menu items that only make sense inside the service module. Hidden
+// everywhere except /profile, where — since that page has no module tab bar
+// for the user to switch with — clicking one auto-switches the active
+// module to the account's first "service" module before navigating.
+const SERVICE_ONLY_KEYS = ["custom-service", "service-request"];
 
 /**
  * Reusable account menu panel — shows the full menu list (Dark Mode, Language,
@@ -40,8 +49,20 @@ const AccountMenuPanel = ({
   const router = useRouter();
   const dispatch = useDispatch();
   const { configData, modules, countryCode, language } = useSelector(
-    (state) => state.configData
+    (state) => state.configData,
   );
+  const { selectedModule } = useSelector((state) => state.utilsData);
+  const { biddingSystemEnabled } = useServiceBusinessConfig(configData);
+  const currentModuleType =
+    selectedModule?.module_type ?? getCurrentModuleType();
+  const isServiceModule = currentModuleType === "service";
+  // A service module must actually exist (be active) in this deployment —
+  // otherwise the service-only items would show on /profile and their click
+  // handler would try to switch to a module that isn't there.
+  const hasActiveServiceModule = Boolean(
+    modules?.some((m) => m?.module_type === "service")
+  );
+  const isOnProfilePage = router.pathname === "/profile";
 
   const [logoutDialogOpen, setLogoutDialogOpen] = useState(false);
   const [isLogoutLoading, setIsLogoutLoading] = useState(false);
@@ -172,6 +193,29 @@ const AccountMenuPanel = ({
       path: profilePath("inbox"),
       requireAuth: true,
     },
+
+    {
+      key: "custom-service",
+      label: "Custom Service",
+      icon: "fi fi-rr-file-edit",
+      path: profilePath("custom-service"),
+      requireAuth: true,
+      // Bidding system off → always hidden, no exceptions. Only once it's
+      // on do we apply the module/profile-page visibility rule.
+      hidden:
+        !biddingSystemEnabled ||
+        !hasActiveServiceModule ||
+        (!isServiceModule && !isOnProfilePage),
+    },
+    {
+      key: "service-request",
+      label: "Requested Services",
+      icon: "fi fi-rr-file-edit",
+      path: profilePath("service-request"),
+      requireAuth: true,
+      hidden:
+        !hasActiveServiceModule || (!isServiceModule && !isOnProfilePage),
+    },
     {
       key: "settings",
       label: "Settings",
@@ -181,6 +225,21 @@ const AccountMenuPanel = ({
     },
   ];
 
+  // Switches the active module to the account's first "service" module
+  // (redux + localStorage, same fields NewNavBar's module tabs write) and
+  // returns it, so a click from /profile lands on a fully-synced service
+  // module instead of racing the module-type check on the create page.
+  const switchToServiceModule = () => {
+    const serviceModuleItem = modules?.find(
+      (m) => m?.module_type === "service",
+    );
+    if (!serviceModuleItem) return null;
+    localStorage.setItem("module", JSON.stringify(serviceModuleItem));
+    dispatch(setSelectedModule(serviceModuleItem));
+    saveModuleParam(serviceModuleItem?.id, serviceModuleItem?.slug);
+    return serviceModuleItem;
+  };
+
   const handleItemClick = (item) => {
     if (item.requireAuth && !token) {
       onClose?.();
@@ -188,6 +247,26 @@ const AccountMenuPanel = ({
       return;
     }
     onClose?.();
+
+    if (SERVICE_ONLY_KEYS.includes(item.key) && !isServiceModule) {
+      const serviceModuleItem = switchToServiceModule();
+      const path = {
+        pathname: "/profile",
+        query: {
+          page: item.key,
+          module: serviceModuleItem
+            ? getModuleIdentifier(serviceModuleItem)
+            : "service",
+        },
+      };
+      if (onItemClick) {
+        onItemClick({ ...item, path });
+      } else {
+        router.push(path);
+      }
+      return;
+    }
+
     if (onItemClick) {
       onItemClick(item);
     } else {

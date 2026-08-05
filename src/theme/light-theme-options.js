@@ -113,6 +113,8 @@ const text = {
   disabled: "rgba(55, 65, 81, 0.48)",
   custom: "#3F3F3F",
   customText1: "#4B5563",
+  info: "#3979E0",
+  link: "#2A61BA",
 };
 
 const footer = {
@@ -130,6 +132,7 @@ const customColor = {
   textGrayDeep: "#787676",
   buyButton: "#F9E091",
   parcelWallet: "#8B3FFD",
+  rebookIcon: "#6464EE",
   starAmber: "#F59E0B", // star/rating color
   vegGreen: "#4caf50", // veg indicator green
   vegIcon: "#71B63A", // veg SVG icon fill
@@ -138,6 +141,13 @@ const customColor = {
   ratingCount: "#949494", // rating review count color (Figma text-neutral-tertiary)
   deliveryText: "#5a5a5a", // delivery info text (Figma text-neutral-secondary)
   tagBg: "#e0e0e0", // "+N" overflow badge, dividers (Figma background-default-tertiary)
+  statusPendingBg: "#DBE9FF",
+  statusPendingText: "#224A8A",
+  statusReviewBg: "#CFF7D3",
+  statusReviewText: "#009951",
+  statusCancelledBg: "#FDF0DC",
+  statusCancelledText: "#B5680A",
+  proBannerBlueBg: "#3979E0",
 };
 const whiteContainer = {
   main: "#ffffff",
@@ -147,6 +157,11 @@ const pink = {
 };
 const foodCardColor = "#FFF6EF";
 const paperBoxShadow = "#E5EAF1";
+const couponBg = {
+	pro: "#F1F6FD",
+	discount: "#FFFBEB",
+	ticket: "#FEE9E7",
+};
 const roundStackOne = "rgba(255, 255, 255, 0.04)";
 const roundStackTwo = "rgba(255, 255, 255, 0.06)";
 const toolTipColor = neutral[1000];
@@ -280,6 +295,7 @@ export const lightThemeOptions = {
     roundStackOne,
     roundStackTwo,
     toolTipColor,
+    couponBg,
   },
   shadows: [
     "none",

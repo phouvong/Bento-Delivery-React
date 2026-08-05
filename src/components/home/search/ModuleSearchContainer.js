@@ -25,12 +25,15 @@ import ModuleHomeSidebarLayout from "components/home/sidebar-layout/ModuleHomeSi
 import FoodSearchFilterDrawer from "./FoodSearchFilterDrawer";
 import ModuleSearchResult from "./ModuleSearchResult";
 import MobileSearchPageBar from "components/header/new-navbar/MobileSearchPageBar";
+import ServiceSearchBanner from "../module-wise-components/service/components/global/ServiceSearchBanner";
+import { getServiceSections } from "../module-wise-components/service/serviceSectionsConfig";
 
 const BANNER_MAP = {
   [ModuleTypes.FOOD]: FoodSearchBanner,
   [ModuleTypes.GROCERY]: GrocerySearchBanner,
   [ModuleTypes.PHARMACY]: PharmacySearchBanner,
   [ModuleTypes.ECOMMERCE]: EcommerceSearchBanner,
+  [ModuleTypes.SERVICE]: ServiceSearchBanner,
 };
 
 const SECTIONS_MAP = {
@@ -38,6 +41,7 @@ const SECTIONS_MAP = {
   [ModuleTypes.GROCERY]: getGrocerySections,
   [ModuleTypes.PHARMACY]: getPharmacySections,
   [ModuleTypes.ECOMMERCE]: getEcommerceSections,
+  [ModuleTypes.SERVICE]: getServiceSections,
 };
 
 const ALL_TAB_LIMIT = 10;

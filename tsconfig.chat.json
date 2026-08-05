@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/components/ai-chatbot/**/*.ts",
+    "src/components/ai-chatbot/**/*.tsx"
+  ]
+}

@@ -1,4 +1,4 @@
-import { Box, Typography, useTheme } from "@mui/material";
+import { alpha, Box, Typography, useTheme } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 /**
@@ -14,22 +14,33 @@ import { useTranslation } from "react-i18next";
 const useStatusConfig = (key) => {
   const theme = useTheme();
   const p = theme.palette;
+  const isDark = theme.palette.mode === "dark";
+
+  // Success (green) pill — the fixed pale-green bg glares on dark surfaces,
+  // so derive a translucent tint from the palette there instead.
+  const successStyle = {
+    bg: isDark ? alpha(p.success?.main ?? "#14B8A6", 0.16) : "#cff7d3",
+    color: isDark
+      ? p.success?.light ?? "#43C6B7"
+      : p.success?.dark ?? "#009951",
+  };
 
   const map = {
     pending: {
       bg: p.info?.tertiary ?? "#f1f6fd",
       color: p.info?.blue ?? "#224a8a",
     },
-    accepted: { bg: "#cff7d3", color: p.success?.dark ?? "#009951" },
+    accepted: successStyle,
+    booked: successStyle,
     processing: {
-      bg: p.warning?.light ?? "#fffbeb",
+      bg: p.warning?.lighter ?? "#fffbeb",
       color: p.warning?.secondary ?? "#bf6a02",
     },
     "on the way": {
-      bg: p.warning?.light ?? "#fffbeb",
+      bg: p.warning?.lighter ?? "#fffbeb",
       color: p.warning?.secondary ?? "#bf6a02",
     },
-    delivered: { bg: "#cff7d3", color: p.success?.dark ?? "#009951" },
+    delivered: successStyle,
     cancelled: {
       bg: p.error?.dangerLight ?? "#fdd3d0",
       color: p.error?.dangerText ?? "#c00f0c",
@@ -55,7 +66,7 @@ const useStatusConfig = (key) => {
       color: p.error?.dangerText ?? "#c00f0c",
     },
     refund_requested: {
-      bg: p.warning?.light ?? "#fffbeb",
+      bg: p.warning?.lighter ?? "#fffbeb",
       color: p.warning?.secondary ?? "#bf6a02",
     },
     returned: {
@@ -63,29 +74,33 @@ const useStatusConfig = (key) => {
       color: p.text?.primary ?? "#303030",
     },
     handover: {
-      bg: p.warning?.light ?? "#fffbeb",
+      bg: p.warning?.lighter ?? "#fffbeb",
       color: p.warning?.secondary ?? "#bf6a02",
     },
     picked_up: {
-      bg: p.warning?.light ?? "#fffbeb",
+      bg: p.warning?.lighter ?? "#fffbeb",
       color: p.warning?.secondary ?? "#bf6a02",
     },
     ongoing: {
-      bg: p.warning?.light ?? "#fffbeb",
+      bg: p.warning?.lighter ?? "#fffbeb",
       color: p.warning?.secondary ?? "#bf6a02",
     },
     completed: {
       bg: p.background?.secondary ?? "#f2f2f2",
       color: p.text?.primary ?? "#303030",
     },
-    paid: { bg: "#cff7d3", color: p.success?.dark ?? "#009951" },
+    paid: successStyle,
     unpaid: {
       bg: p.error?.dangerLight ?? "#fdd3d0",
       color: p.error?.dangerText ?? "#c00f0c",
     },
     partially_paid: {
-      bg: p.warning?.light ?? "#fffbeb",
+      bg: p.warning?.lighter ?? "#fffbeb",
       color: p.warning?.secondary ?? "#bf6a02",
+    },
+    expired: {
+      bg: p.error?.dangerLight ?? "#fdd3d0",
+      color: p.error?.dangerText ?? "#c00f0c",
     },
   };
 
@@ -97,7 +112,7 @@ const useStatusConfig = (key) => {
   );
 };
 
-const StatusBadge = ({ status = "pending", label, sx }) => {
+const StatusBadge = ({ status = "pending", label, sx = {} }) => {
   const { t } = useTranslation();
   const key = (status ?? "").toLowerCase().trim();
   const config = useStatusConfig(key);

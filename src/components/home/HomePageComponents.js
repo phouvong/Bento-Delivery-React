@@ -41,6 +41,7 @@ import PaymentMethod from "components/checkout/PaymentMethod";
 import ScrollUpButton from "components/common/ScrollUpButton";
 import IncompleteOrderModal from "components/home/IncompleteOrderModal";
 import Rental from "components/home/module-wise-components/rental/Rental";
+import ServiceModule from "components/home/module-wise-components/service/Service";
 import TaxiSearchPanel from "components/home/module-wise-components/rental/components/global/search/TaxiSearchPanel";
 import { useQuery } from "react-query";
 import {
@@ -195,6 +196,10 @@ const HomePageComponents = ({
       case ModuleTypes.RENTAL:
         return (
           <Rental configData={configData} landingPageData={landingPageData} />
+        );
+      case ModuleTypes.SERVICE:
+        return (
+          <ServiceModule configData={configData} routeSection={routeSection} />
         );
       case ModuleTypes.RIDE:
         return (

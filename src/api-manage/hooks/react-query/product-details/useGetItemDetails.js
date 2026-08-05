@@ -20,7 +20,7 @@ export const useGetItemDetails = (params, itemSuccess,productUpdate) => {
   return useQuery(queryKey, () => getData(params), {
     enabled: !productUpdate && Boolean(params.id),
     onSuccess: itemSuccess,
-    onError: onSingleErrorResponse,
+    //onError: onSingleErrorResponse,
     retry: false,
     cacheTime: 30000,
     staleTime: 30000,

@@ -33,6 +33,7 @@ const ChatCategoryChips = ({
     <Box
       sx={{
         width: "100%",
+        pt: "5px",
         overflowX: "auto",
         "&::-webkit-scrollbar": { height: 4 },
         "&::-webkit-scrollbar-thumb": {

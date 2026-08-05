@@ -76,7 +76,7 @@ const MapComponent = (props) => {
   const lineColor = theme.palette.primary.main;
   const [state, dispatch] = useReducer(reducer, initialState);
   const [directionsResponse, setDirectionsResponse] = useState(null);
-  const [zoom, setZoom] = useState(5);
+  const [zoom, setZoom] = useState(15);
   const [showStartInfo, setShowStartInfo] = useState(false);
   const [showDeliveryInfo, setShowDeliveryInfo] = useState(false);
 
@@ -135,6 +135,17 @@ const MapComponent = (props) => {
       dispatch({ type: ACTION.setIsMounted, payload: true });
     }
   }, [state.map]);
+
+  // The map is uncontrolled (no center/zoom props) so user pan/zoom isn't
+  // overridden on re-render — the viewport must be set imperatively, both on
+  // first load and when coordinates arrive asynchronously.
+  useEffect(() => {
+    if (!state.map) return;
+    if (state.map.getZoom() === undefined) {
+      state.map.setZoom(zoom);
+    }
+    state.map.setCenter(mapCenter);
+  }, [state.map, mapCenter.lat, mapCenter.lng]);
 
   const tryDirections = async () => {
     if (
@@ -227,8 +238,6 @@ const MapComponent = (props) => {
       </Stack>
       <GoogleMap
         mapContainerStyle={containerStyle}
-        defaultCenter={mapCenter}
-        defaultZoom={zoom}
         onLoad={onLoad}
         onUnmount={onUnmount}
         options={options}

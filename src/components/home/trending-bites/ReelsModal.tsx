@@ -23,7 +23,10 @@ import React from "react";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
-import { handleProductRedirect } from "helper-functions/handleProductRedirect";
+import {
+  handleProductRedirect,
+  handleServiceRedirect,
+} from "helper-functions/handleProductRedirect";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import { useDispatch, useSelector } from "react-redux";
@@ -322,6 +325,9 @@ const ReelsModal = ({
       const vehicleSlug = (productData as any)?.slug ?? productData?.id;
       onClose();
       router.push(`/rental/vehicle/${vehicleSlug}`);
+    } else if (moduleType === ModuleTypes.SERVICE) {
+      handleServiceRedirect(productData, router);
+      onClose();
     } else {
       setOpenModuleModal(true);
     }
@@ -979,7 +985,8 @@ const ReelsModal = ({
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {getCurrentModuleType() === ModuleTypes.RENTAL
+                    {getCurrentModuleType() === ModuleTypes.RENTAL ||
+                    getCurrentModuleType() === ModuleTypes.SERVICE
                       ? t("Book Now")
                       : t("Order Now")}
                   </Typography>

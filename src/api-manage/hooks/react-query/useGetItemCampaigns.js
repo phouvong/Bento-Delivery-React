@@ -10,7 +10,7 @@ const getData = async () => {
 };
 
 export default function useGetItemCampaigns() {
-  return useQuery(["item-campaigns",getModule()], getData, {
+  return useQuery(["item-campaigns", getModule()], getData, {
     enabled: true,
     onError: onSingleErrorResponse,
     cacheTime: 5 * 60 * 1000, // 5 minutes

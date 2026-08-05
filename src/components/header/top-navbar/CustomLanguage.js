@@ -7,12 +7,15 @@ import arabicImg from "../../../../public/landingpage/arabic-flag-svg.svg";
 
 import { useSelector } from "react-redux";
 import { toast } from "react-hot-toast";
+import { useQueryClient } from "react-query";
 
 import i18n, { t } from "i18next";
+import cookie from "js-cookie";
 import { useTheme } from "@mui/material/styles";
 import { StyledMenu, TopBarButton } from "../NavBar.style";
 import { useSettings } from "contexts/use-settings";
 import Image from "next/image";
+import { useRouter } from "next/router";
 
 const getValues = (settings) => ({
   direction: settings.direction,
@@ -28,6 +31,8 @@ const CustomLanguage = ({ formmobilemenu }) => {
   const { settings, saveSettings } = useSettings();
   const [values, setValues] = useState(getValues(settings));
   const anchorRef = useRef(null);
+  const router = useRouter();
+  const queryClient = useQueryClient();
   //const { configData } = useSelector((state) => state.configDataSettings);
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -72,20 +77,19 @@ const CustomLanguage = ({ formmobilemenu }) => {
     setLanguage(lan);
 
     localStorage.setItem("language-setting", JSON.stringify(lan));
-    if (lan === "en") {
-      saveSettings({
-        ...values,
-        direction: "ltr",
-      });
-    } else {
-      saveSettings({
-        ...values,
-        direction: "rtl",
-      });
-    }
-    toast.success(t("Language changed"));
+    cookie.set("languageSetting", lan);
+    saveSettings({
+      ...values,
+      direction: lan === "en" ? "ltr" : "rtl",
+    });
 
-    window.location.reload();
+    // Refetch data instead of reloading. MainApi reads localStorage["language-setting"]
+    // fresh per request, so invalidated queries re-fire with the new X-localization header.
+    queryClient.invalidateQueries();
+    // Re-run getServerSideProps for the current route via a soft navigation.
+    router.replace(router.asPath, undefined, { scroll: false });
+
+    toast.success(t("Language changed"));
   };
 
   return (
@@ -144,11 +148,11 @@ const CustomLanguage = ({ formmobilemenu }) => {
           >
             <ListItemIcon>
               <Image
-                  width={20}
-                  height={21}
-                  src={language === "en" ? eng.src : arabicImg.src}
-                  alt="Language Image"
-                  priority={true}
+                width={20}
+                height={21}
+                src={language === "en" ? eng.src : arabicImg.src}
+                alt="Language Image"
+                priority={true}
               />
             </ListItemIcon>
             {lan.value}

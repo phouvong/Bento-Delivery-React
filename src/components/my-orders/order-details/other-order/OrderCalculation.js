@@ -87,7 +87,7 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
           alignItems="center"
           justifyContent="space-between"
           spacing={2}
-          backgroundColor="primary.light"
+          backgroundColor="background.default"
           padding="10px 15px"
           borderRadius="8px"
         >
@@ -101,7 +101,13 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
         </CustomStackFullWidth>
       ) : null}
 
-      <Typography fontWeight="500">{t("Summary")}</Typography>
+      <Typography
+        sx={{
+          fontSize: "18px",
+          fontWeight: 700,
+          color: theme.palette.text.primary,
+        }}
+      >{t("Billing Summary")}</Typography>
       <CustomStackFullWidth
         direction="row"
         alignItems="center"
@@ -309,7 +315,7 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
               whiteSpace: "nowrap", // ensures single line
             }}
           >
-            {configData?.additional_charge_name}
+            {t(configData?.additional_charge_name)}
           </Typography>
           <Typography fontSize="14px">
             {trackOrderData && getAmountWithSign(configData?.additional_charge)}
@@ -325,7 +331,10 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
       >
         <Typography fontSize="14px">{t("Delivery fee")}</Typography>
         <Typography fontSize="14px">
-          {trackOrderData && getAmountWithSign(trackOrderData?.delivery_charge)}
+          {trackOrderData &&
+            (Number(trackOrderData?.delivery_charge) > 0
+              ? getAmountWithSign(trackOrderData?.delivery_charge)
+              : t("Free"))}
         </Typography>
       </CustomStackFullWidth>
       {trackOrderData?.delivery_type &&
@@ -368,7 +377,7 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
         justifyContent="space-between"
         spacing={2}
       >
-        <Typography component="span" fontWeight="bold" color="primary.main">
+        <Typography component="span" fontWeight="bold" color={theme.palette.text.primary}>
           {t("Total")}
           {trackOrderData?.tax_status === "included" && (
             <Typography

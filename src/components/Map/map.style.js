@@ -1,6 +1,6 @@
 import { styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
-import { Button, Stack } from "@mui/material";
+import { alpha, Button, Stack } from "@mui/material";
 
 export const WrapperCurrentLocationPick = styled(Stack)(
   ({ theme, isXSmall }) => ({
@@ -10,8 +10,44 @@ export const WrapperCurrentLocationPick = styled(Stack)(
     gap: isXSmall ? 8 : 12,
     right: isXSmall ? 12 : 16,
     bottom: isXSmall ? 12 : 16,
-  })
+    zIndex: 6,
+  }),
 );
+
+export const LocationView = styled(Stack)(({ theme }) => ({
+  flexDirection: "row",
+  alignItems: "center",
+  flex: "1 0",
+  maxWidth: "800px",
+  width: "97%",
+  background: theme.palette.neutral[100],
+  color: theme.palette.neutral[1000],
+  top: "15%",
+  height: "48px",
+  padding: "8px",
+  position: "absolute",
+  [theme.breakpoints.down("md")]: {
+    top: "22%",
+  },
+  [theme.breakpoints.down("sm")]: {
+    top: "32%",
+  },
+}));
+
+// Rounded, clipped viewport for the Google map. `overflow: hidden` keeps the
+// map tiles inside the rounded corners; the "use my location" controls are
+// positioned against this box.
+export const MapCanvas = styled(Box)(({ theme }) => ({
+  position: "relative",
+  width: "100%",
+  borderRadius: 16,
+  overflow: "hidden",
+  border: `1px solid ${theme.palette.neutral[200]}`,
+  backgroundColor: theme.palette.neutral[100],
+  [theme.breakpoints.down("sm")]: {
+    borderRadius: 12,
+  },
+}));
 export const CustomBoxWrapper = styled(Box)(({ theme, expand }) => ({
   outline: "none",
   position: "absolute",
@@ -37,29 +73,10 @@ export const CustomBoxWrapper = styled(Box)(({ theme, expand }) => ({
     maxWidth: expand === "false" && "90%",
   },
 }));
-export const LocationView = styled(Stack)(({ theme }) => ({
-  flexDirection: "row",
-  alignItems: "center",
-  flex: "1 0",
-  maxWidth: "800px",
-  width: "97%",
-  background: theme.palette.neutral[100],
-  color: theme.palette.neutral[1000],
-  top: "15%",
-  height: "48px",
-  padding: "8px",
-  position: "absolute",
-  [theme.breakpoints.down("md")]: {
-    top: "22%",
-  },
-  [theme.breakpoints.down("sm")]: {
-    top: "32%",
-  },
-}));
 export const PrimaryButton = styled(Button)(
   ({ theme, color, width, backgroundcolor }) => ({
     width: width ? width : "100%",
-    color: theme.palette.whiteContainer.main,
+    color: theme.palette.primary.contrastText,
     backgroundColor: backgroundcolor
       ? backgroundcolor
       : theme.palette.primary.main,
@@ -67,5 +84,13 @@ export const PrimaryButton = styled(Button)(
       backgroundColor: theme.palette.primary.dark,
       // color: theme.palette.neutral[100],
     },
-  })
+
+    "&.Mui-disabled": {
+      color: alpha(theme.palette.primary.contrastText, 0.7),
+      backgroundColor: alpha(
+        backgroundcolor ? backgroundcolor : theme.palette.primary.main,
+        0.5,
+      ),
+    },
+  }),
 );
