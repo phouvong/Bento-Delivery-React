@@ -804,7 +804,7 @@ export const lao = {
   "If available, your order will come with cutlery.":
     "ຖ້າມີ, ຄຳສັ່ງຊື້ຂອງທ່ານຈະມາພ້ອມກັບອຸປະກອນຮັບປະທານອາຫານ.",
   "If product is not available": "ຖ້າສິນຄ້າບໍ່ມີ",
-  "If you accidentally provided incorrect payment information, you can edit the details in the order details section while the order is still pending.": "ຖ້າທ່ານປ້ອນຂໍ້ມູນການຊຳລະເງິນຜິດໂດຍບໍ່ໄດ້ຕັ້ງໃຈ, ທ່ານສາມາດແກ້ໄຂລາຍລະອຽດໃນສ່ວນລາຍລະອຽດຄຳສັ່ງຊື້ໄດ້ໃນຂະນະທີ່ຄຳສັ່ງຊື້ຍັງຢູ່ໃນສະຖານະ "ລໍຖ້າການດຳເນີນການ".",
+  "If you accidentally provided incorrect payment information, you can edit the details in the order details section while the order is still pending.": "ຖ້າທ່ານປ້ອນຂໍ້ມູນການຊຳລະເງິນຜິດໂດຍບໍ່ໄດ້ຕັ້ງໃຈ, ທ່ານສາມາດແກ້ໄຂລາຍລະອຽດໃນສ່ວນລາຍລະອຽດຄຳສັ່ງຊື້ໄດ້ໃນຂະນະທີ່ຄຳສັ່ງຊື້ຍັງຢູ່ໃນສະຖານະ ລໍຖ້າການດຳເນີນການ.",
   "If you cancel, your parcel will be back to you when rider will be available. You will have to pay a return fee to your delivery man.": "ຖ້າທ່ານຍົກເລີກ, ພັດສະດຸຂອງທ່ານຈະຖືກສົ່ງຄືນໃຫ້ທ່ານເມື່ອພະນັກງານຈັດສົ່ງຫວ່າງ. ທ່ານຈະຕ້ອງຈ່າຍຄ່າທຳນຽມການສົ່ງຄືນໃຫ້ກັບພະນັກງານຈັດສົ່ງ.",
   "If you log in, your order history will be saved. However, if you continue as a guest, you won't be able to see your order history after completing your order.": "ຖ້າທ່ານເຂົ້າສູ່ລະບົບ, ປະວັດການສັ່ງຊື້ຂອງທ່ານຈະຖືກບັນທຶກໄວ້. ແນວໃດກໍຕາມ ຖ້າທ່ານດຳເນີນການຕໍ່ໃນຖານະຜູ້ໃຊ້ທົ່ວໄປ, ທ່ານຈະບໍ່ສາມາດເບິ່ງປະວັດການສັ່ງຊື້ໄດ້ຫຼັງຈາກສັ່ງຊື້ສຳເລັດ.",
   "If you want to add fund to your wallet then click add fund button": "ຖ້າທ່ານຕ້ອງການເຕີມເງິນເຂົ້າກະເປົາ ໃຫ້ກົດປຸ່ມເຕີມເງິນ",
