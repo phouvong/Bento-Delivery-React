@@ -128,14 +128,18 @@ const BasicInformationForm = ({
     onSubmit: async (values, helpers) => {
       try {
         formSubmitOnSuccess(values);
-      } catch (err) { }
+      } catch (err) {}
     },
   });
   const { mutate: fireBaseOtpMutation, isLoading: fireIsLoading } =
     useFireBaseOtpVerify();
   const setUpRecaptcha = () => {
     if (!window.recaptchaVerifier) {
+      // Firebase v9+ modular signature: (auth, containerOrId, parameters).
+      // Passing the container first makes the SDK read reCAPTCHA settings off
+      // the wrong object → "appVerificationDisabledForTesting" TypeError.
       window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
         "recaptcha-update",
         {
           size: "invisible",
@@ -145,8 +149,7 @@ const BasicInformationForm = ({
           "expired-callback": () => {
             window.recaptchaVerifier?.reset();
           },
-        },
-        auth
+        }
       );
     } else {
       window.recaptchaVerifier.clear();
@@ -298,7 +301,11 @@ const BasicInformationForm = ({
           </BackIconButton>
         </Stack>
       </Grid>
-      <form noValidate onSubmit={profileFormik.handleSubmit} style={{ width: "100%" }}>
+      <form
+        noValidate
+        onSubmit={profileFormik.handleSubmit}
+        style={{ width: "100%" }}
+      >
         <Grid
           container
           md={12}
@@ -318,7 +325,9 @@ const BasicInformationForm = ({
               <ImageUploaderWithPreview
                 type="file"
                 labelText={t("Upload your photo")}
-                hintText={t("Image format - jpg, png, jpeg, gif Image Size - maximum size 2 MB Image Ratio - 1:1")}
+                hintText={t(
+                  "Image format - jpg, png, jpeg, gif Image Size - maximum size 2 MB Image Ratio - 1:1"
+                )}
                 file={profileFormik.values.image}
                 onChange={singleFileUploadHandlerForImage}
                 imageOnChange={imageOnchangeHandlerForImage}
@@ -326,7 +335,7 @@ const BasicInformationForm = ({
                 // imageUrl={customerImageUrl}
                 borderRadius="50%"
                 objectFit
-              //height='140px'
+                //height='140px'
               />
               {image_full_url && (
                 <ImageAddIcon
@@ -397,21 +406,21 @@ const BasicInformationForm = ({
                   {email && (
                     <>
                       {data?.is_email_verified === 1 &&
-                        email === profileFormik?.values.email ? (
+                      email === profileFormik?.values.email ? (
                         <VerifiedIcon />
                       ) : (
                         <>
                           {configData?.centralize_login
                             ?.email_verification_status === 1 && (
-                              <ReportProblemIcon
-                                onClick={() => handleVerified("email")}
-                                sx={{
-                                  color: (theme) => theme.palette.error.main,
-                                  width: "1.2rem",
-                                  cursor: "pointer",
-                                }}
-                              />
-                            )}
+                            <ReportProblemIcon
+                              onClick={() => handleVerified("email")}
+                              sx={{
+                                color: (theme) => theme.palette.error.main,
+                                width: "1.2rem",
+                                cursor: "pointer",
+                              }}
+                            />
+                          )}
                         </>
                       )}
                     </>
@@ -473,15 +482,15 @@ const BasicInformationForm = ({
                   <>
                     {configData?.centralize_login?.phone_verification_status ===
                       1 && (
-                        <ReportProblemIcon
-                          onClick={() => handleVerified("phone")}
-                          sx={{
-                            color: (theme) => theme.palette.error.main,
-                            width: "1.2rem",
-                            cursor: "pointer",
-                          }}
-                        />
-                      )}
+                      <ReportProblemIcon
+                        onClick={() => handleVerified("phone")}
+                        sx={{
+                          color: (theme) => theme.palette.error.main,
+                          width: "1.2rem",
+                          cursor: "pointer",
+                        }}
+                      />
+                    )}
                   </>
                 )}
               </Stack>
@@ -502,8 +511,14 @@ const BasicInformationForm = ({
                   name="password"
                   label={t("Password")}
                   type={showPassword ? "text" : "password"}
-                  error={Boolean(profileFormik.touched.password && profileFormik.errors.password)}
-                  helperText={profileFormik.touched.password && profileFormik.errors.password}
+                  error={Boolean(
+                    profileFormik.touched.password &&
+                      profileFormik.errors.password
+                  )}
+                  helperText={
+                    profileFormik.touched.password &&
+                    profileFormik.errors.password
+                  }
                   InputProps={{
                     endAdornment: (
                       <InputAdornment position="end">
@@ -537,8 +552,14 @@ const BasicInformationForm = ({
                   type={showConfirmPassword ? "text" : "password"}
                   value={profileFormik.values.confirm_password}
                   onChange={profileFormik.handleChange}
-                  error={Boolean(profileFormik.touched.confirm_password && profileFormik.errors.confirm_password)}
-                  helperText={profileFormik.touched.confirm_password && profileFormik.errors.confirm_password}
+                  error={Boolean(
+                    profileFormik.touched.confirm_password &&
+                      profileFormik.errors.confirm_password
+                  )}
+                  helperText={
+                    profileFormik.touched.confirm_password &&
+                    profileFormik.errors.confirm_password
+                  }
                   touched={profileFormik.touched.confirm_password && "true"}
                   InputProps={{
                     endAdornment: (

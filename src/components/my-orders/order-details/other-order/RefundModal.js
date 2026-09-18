@@ -39,15 +39,17 @@ const RefundModal = (props) => {
     dialogTexts,
     formSubmit,
     refundIsLoading,
+    isBooking,
   } = props;
   const { data: reasonsData, refetch } = useGetRefundReasons();
   const theme = useTheme();
   useEffect(() => {
+    if (isBooking) return;
     if (getToken()) {
       refetch();
     }
 
-  }, []);
+  }, [isBooking]);
 
   const { t } = useTranslation();
   const RefundRequestFormik = useFormik({

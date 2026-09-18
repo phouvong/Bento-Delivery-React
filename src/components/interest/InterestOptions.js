@@ -36,7 +36,19 @@ const InterestOptions = ({ configData }) => {
   let searchKey = "";
   let queryKey = "";
   const { data: categories, isFetching, isLoading: rentalLoading } = useGetCategoryVehicleLists();
-  const { refetch } = useGetCategories(searchKey, onSuccessHandler, queryKey);
+  const {
+    refetch,
+    isLoading: categoriesLoading,
+    isFetching: categoriesFetching,
+  } = useGetCategories(searchKey, onSuccessHandler, queryKey);
+
+  // Loading state of the LIST fetch (module-aware). The `isLoading` further
+  // down belongs to the save mutation — using it here made the empty state
+  // flash before the categories arrived.
+  const isRental = getModule()?.module_type === "rental";
+  const listLoading = isRental
+    ? rentalLoading || isFetching
+    : categoriesLoading || categoriesFetching;
 
   useEffect(() => {
     getModule()?.module_type !== "rental" && refetch();
@@ -94,7 +106,7 @@ const InterestOptions = ({ configData }) => {
         {t("Get personalized food recommendations.")}
       </Typography>
       <Grid container spacing={2}>
-        {!isLoading || !rentalLoading ? (
+        {!listLoading || categoryList?.length > 0 ? (
           categoryList?.length > 0 ? (
             categoryList?.map((item, index) => {
               return (

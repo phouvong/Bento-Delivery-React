@@ -5,10 +5,22 @@ import { onErrorResponse } from "../../api-error-response/ErrorResponses";
 import { useEffect, useState } from "react";
 import { filterOutRiderShareModules } from "helper-functions/moduleFilter";
 
+const injectServiceModule = (data) => {
+  if (!Array.isArray(data)) return data;
+
+  const hasService = data.some((m) => m?.module_type === "service");
+  if (hasService) return data;
+
+  const activeZones = data[0]?.zones || [];
+
+  return [...data];
+};
+
 const getModule = async () => {
   const { data } = await MainApi.get(moduleList);
   // return filterOutRiderShareModules(data);
-  return data;
+  // return data;
+  return injectServiceModule(data);
 };
 
 const normalizeZoneIdForKey = (zoneId) => {

@@ -31,7 +31,9 @@ import { useGetWishList } from "api-manage/hooks/react-query/rental-wishlist/use
 export const setUpRecaptcha = () => {
   if (document.getElementById("recaptcha-container")) {
     if (!window.recaptchaVerifier) {
+      // Firebase v9+ modular signature: (auth, containerOrId, parameters).
       window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
         "recaptcha-container",
         {
           size: "invisible",
@@ -41,8 +43,7 @@ export const setUpRecaptcha = () => {
           "expired-callback": () => {
             window.recaptchaVerifier?.reset();
           },
-        },
-        auth
+        }
       );
     } else {
       window.recaptchaVerifier.clear();

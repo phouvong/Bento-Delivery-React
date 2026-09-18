@@ -6,6 +6,7 @@ const initialState = {
     store: [],
     vehicles: [],
     providers: [],
+    service: [],
   },
 };
 
@@ -27,6 +28,9 @@ export const wishListSlice = createSlice({
     },
     addWishListProvider: (state, action) => {
       state.wishLists.providers.push(action.payload);
+    },
+    addWishListService: (state, action) => {
+      state.wishLists.service.push(action.payload);
     },
     removeWishListItem: (state = initialState, action) => {
       let tempWishList = state.wishLists.item?.filter(
@@ -74,6 +78,17 @@ export const wishListSlice = createSlice({
         },
       };
     },
+    removeWishListService: (state = initialState, action) => {
+      let tempWishList = state.wishLists.service?.filter(
+        (item) => item.id !== action.payload
+      );
+      return {
+        wishLists: {
+          ...state.wishLists,
+          service: [...tempWishList],
+        },
+      };
+    },
     clearWishList: (state = initialState, action) => {
       state.wishLists.item = action.payload;
       state.wishLists.store = action.payload;
@@ -94,6 +109,8 @@ export const {
   removeWishListProvider,
   addWishListProvider,
   addWishListStore,
+  addWishListService,
+  removeWishListService,
   clearWishList,
 } = wishListSlice.actions;
 export default wishListSlice.reducer;

@@ -35,7 +35,8 @@ const AddressForm = ({
   handleLatLng,
   checkoutLocationOnly,
   contactInfoOnly,
-  address
+  address,
+  onAddressTypeMissing,
 }) => {
   const typeData = [
     {
@@ -123,8 +124,15 @@ const AddressForm = ({
     },
     
     onSubmit: async (values, helpers) => {
-    
-      
+      // Address type is picked outside the form (icon row in the modal) —
+      // block submit and hand focus back to that selector when it's missing.
+      if (!contactInfoOnly && !values.address_type && !values.address_label) {
+        toast.error(t("Please select an address type"), {
+          id: "address-type-missing",
+        });
+        onAddressTypeMissing?.();
+        return;
+      }
       try {
         let newData = {
           ...values,

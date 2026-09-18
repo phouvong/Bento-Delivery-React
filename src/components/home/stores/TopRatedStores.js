@@ -28,7 +28,7 @@ const TopRatedStores = (props) => {
     limit: page_limit,
   };
   const { data, refetch, fetchNextPage, isFetchingNextPage, isLoading } =
-    useGetTopRatedStores(pageParams);
+    useGetTopRatedStores({ pageParams });
   useEffect(() => {
     setOffSet(1);
   }, [selectedFilterValue]);
@@ -36,7 +36,7 @@ const TopRatedStores = (props) => {
     setTotalDataCount(item.total_size);
     if (selectedFilterValue === prevSelectedFilter?.current) {
       setStoreData((prev) =>
-        removeDuplicates([...new Set([...prev, ...item?.stores])], "id")
+        removeDuplicates([...new Set([...prev, ...item?.stores])], "id"),
       );
     } else {
       setStoreData(item?.stores);

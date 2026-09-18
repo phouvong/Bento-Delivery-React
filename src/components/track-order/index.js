@@ -1,51 +1,32 @@
-import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
-import { useRouter } from "next/router";
-import useGetTrackOrderData from "../../api-manage/hooks/react-query/order/useGetTrackOrderData";
-import {
-  CustomPaperBigCard,
-  CustomStackFullWidth,
-} from "../../styled-components/CustomStyles.style";
+import { useTheme } from "@emotion/react";
+import { Check } from "@mui/icons-material";
 import {
   alpha,
-  Divider,
-  Grid,
-  IconButton,
-  Skeleton,
   Step,
   StepConnector,
   stepConnectorClasses,
-  StepContent,
   StepLabel,
   Stepper,
   styled,
   Typography,
-  useMediaQuery,
+  useMediaQuery
 } from "@mui/material";
-import { HeadingBox } from "../my-orders/myorders.style";
-import CustomFormatedDateTime from "../date/CustomFormatedDateTime";
-import CustomFormatedTime from "../date/CustomFormatedTime";
-import { useTranslation } from "react-i18next";
-import DeliverymanInfo from "./DeliverymanInfo";
-import DeliverymanShimmer from "./DeliverymanShimmer";
-import MapComponent from "../Map/location-view/MapComponent";
-import SimpleBar from "simplebar-react";
-import "simplebar-react/dist/simplebar.min.css";
-import { CustomStepperStyled, StepBox } from "./trackOrder.style";
-import { useTheme } from "@emotion/react";
-import { t } from "i18next";
-import orderConfirmImage from "../my-orders/assets/order-confirmed.png";
-import shippedImage from "../my-orders/assets/shhiped.png";
-import outForDelivery from "../my-orders/assets/out-for-delivery.png";
-import delivered from "../my-orders/assets/delivery.png";
-import { StepperCustomBorder } from "../checkout/CheckOut.style";
-import { Check } from "@mui/icons-material";
-import CustomImageContainer from "../CustomImageContainer";
 import { Stack } from "@mui/system";
-import moment from "moment";
-import GpsFixedIcon from "@mui/icons-material/GpsFixed";
-import { useGeolocated } from "react-geolocated";
 import TrackOrderMap from "components/track-order/TrackOrderMap";
+import moment from "moment";
+import { useEffect, useState } from "react";
+import { useGeolocated } from "react-geolocated";
+import { useTranslation } from "react-i18next";
+import "simplebar-react/dist/simplebar.min.css";
+import {
+  CustomStackFullWidth
+} from "../../styled-components/CustomStyles.style";
+import { StepperCustomBorder } from "../checkout/CheckOut.style";
+import CustomImageContainer from "../CustomImageContainer";
+import delivered from "../my-orders/assets/delivery.png";
+import orderConfirmImage from "../my-orders/assets/order-confirmed.png";
+import outForDelivery from "../my-orders/assets/out-for-delivery.png";
+import shippedImage from "../my-orders/assets/shhiped.png";
 const CustomStepperLabels = styled(Stepper)(({ theme }) => ({
   "& .MuiStepLabel-label.MuiStepLabel-alternativeLabel": {
     marginTop: "-80px",
@@ -98,7 +79,7 @@ const QontoStepIconRoot = styled("div")(({ theme, ownerState }) => ({
   },
 }));
 function QontoStepIcon(props) {
-  const { active, completed, className } = props;
+  const { active, completed, className, isBooking } = props;
   const theme = useTheme();
   return (
     <QontoStepIconRoot ownerState={{ active }} className={className}>
@@ -110,6 +91,15 @@ function QontoStepIcon(props) {
           boxshadow={`0px 4px 10px ${alpha(theme.palette.neutral[400], 0.3)}`}
         >
           <Check className="QontoStepIcon-completedIcon" />
+        </StepperCustomBorder>
+      ) : active && isBooking ? (
+        <StepperCustomBorder
+          background={theme.palette.primary.main}
+          padding="10px"
+          border={`3px solid ${theme.palette.neutral[100]}`}
+          boxshadow={`0px 4px 10px ${alpha(theme.palette.neutral[400], 0.3)}`}
+        >
+          <div className="QontoStepIcon-circle" />
         </StepperCustomBorder>
       ) : (
         <StepperCustomBorder
@@ -124,7 +114,13 @@ function QontoStepIcon(props) {
     </QontoStepIconRoot>
   );
 }
-const TrackOrder = ({ configData, trackOrderData }) => {
+const TrackOrder = ({
+  configData,
+  trackOrderData,
+  isBooking,
+  serviceBookingLog,
+  serviceBookingDetails,
+}) => {
   const [userLocation, setUserLocation] = useState({});
   const { t } = useTranslation();
   const [actStep, setActStep] = useState(1);
@@ -140,7 +136,38 @@ const TrackOrder = ({ configData, trackOrderData }) => {
       lng: trackOrderData?.delivery_address?.longitude,
     });
   }, []);
-  const steps = [
+  // A sub-booking's /booking/log returns the sibling list (no `tracking`),
+  // so fall back to the details endpoint's status_history to build the stages.
+  const buildTrackingFromHistory = (details) => {
+    const history = details?.status_history;
+    if (!history || typeof history !== "object") return [];
+    const currentStatus = (details?.booking_status ?? "").toLowerCase();
+    return ["confirmed", "ongoing", "completed"].map((status) => ({
+      status,
+      reached: Boolean(history?.[status]),
+      is_current: currentStatus === status,
+      timestamp: history?.[status] ?? null,
+    }));
+  };
+
+  const bookingTracking =
+    Array.isArray(serviceBookingLog?.tracking) &&
+    serviceBookingLog.tracking.length > 0
+      ? serviceBookingLog.tracking
+      : buildTrackingFromHistory(serviceBookingDetails);
+    
+  const currentTrackingIndex = bookingTracking.findIndex((step) => step?.is_current);
+  const reachedStepCount = bookingTracking.filter((step) => step?.reached).length;
+  const bookingActiveStep =
+    currentTrackingIndex === -1
+      ? reachedStepCount === 0
+        ? -1
+        : reachedStepCount
+      : currentTrackingIndex === bookingTracking.length - 1
+        ? bookingTracking.length
+        : currentTrackingIndex;
+
+  const orderSteps = [
     {
       label: "Order Confirmed",
       time: trackOrderData?.confirmed,
@@ -167,18 +194,42 @@ const TrackOrder = ({ configData, trackOrderData }) => {
     },
   ];
 
+  const bookingStepDefaults = [
+    { status: "confirmed", label: "Confirmed", img: orderConfirmImage.src },
+    { status: "ongoing", label: "Ongoing", img: outForDelivery.src },
+    { status: "completed", label: "Completed", img: delivered.src },
+  ];
+
+  const bookingSteps = bookingStepDefaults.map((defaultStep) => {
+    const trackingStep = bookingTracking.find(
+      (step) => step?.status === defaultStep.status
+    );
+    return {
+      label: trackingStep?.label ?? defaultStep.label,
+      time: trackingStep?.timestamp,
+      img: defaultStep.img,
+    };
+  });
+
+  const steps = isBooking ? bookingSteps : orderSteps;
+
   const handleStepper = () => {
+    if (isBooking) {
+      setActStep(bookingActiveStep);
+      return;
+    }
     if (trackOrderData?.order_status === "pending") {
       setActStep(1);
     } else if (trackOrderData?.order_status === "confirmed") {
       setActStep(2);
     } else if (
       trackOrderData?.order_status === "processing" ||
-      trackOrderData?.order_status === "handover"
+      trackOrderData?.order_status === "handover" || 
+      trackOrderData?.order_status === "picked_up"
     ) {
       setActStep(3);
     } else if (trackOrderData?.order_status === "picked_up") {
-      setActStep(4);
+      setActStep(3);
     } else if (
       trackOrderData?.order_status === "delivered" ||
       trackOrderData?.order_status === "returned"
@@ -188,7 +239,7 @@ const TrackOrder = ({ configData, trackOrderData }) => {
   };
   useEffect(() => {
     handleStepper();
-  }, [actStep, trackOrderData]);
+  }, [actStep, trackOrderData, isBooking, serviceBookingLog]);
   const { coords, isGeolocationAvailable, isGeolocationEnabled, getPosition } =
     useGeolocated({
       positionOptions: {
@@ -216,7 +267,7 @@ const TrackOrder = ({ configData, trackOrderData }) => {
         >
           {steps.map((labels, index) => (
             <Step key={labels.label}>
-              <StepLabel StepIconComponent={QontoStepIcon}>
+              <StepLabel StepIconComponent={QontoStepIcon} StepIconProps={{ isBooking }}>
                 <Stack
                   justifyContent="center"
                   alignItems="center"
@@ -248,7 +299,7 @@ const TrackOrder = ({ configData, trackOrderData }) => {
         >
           {steps.map((labels, index) => (
             <Step key={labels}>
-              <StepLabel StepIconComponent={QontoStepIcon}>
+              <StepLabel StepIconComponent={QontoStepIcon} StepIconProps={{ isBooking }}>
                 <Stack
                   justifyContent="center"
                   alignItems="center"
@@ -272,11 +323,13 @@ const TrackOrder = ({ configData, trackOrderData }) => {
           ))}
         </CustomStepperLabels>
       )}
-      <TrackOrderMap
-        getCurrentLocation={getCurrentLocation}
-        trackOrderData={trackOrderData}
-        userLocation={userLocation}
-      />
+      {!isBooking && (
+        <TrackOrderMap
+          getCurrentLocation={getCurrentLocation}
+          trackOrderData={trackOrderData}
+          userLocation={userLocation}
+        />
+      )}
     </CustomStackFullWidth>
   );
 };

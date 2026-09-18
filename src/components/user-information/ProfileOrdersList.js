@@ -120,21 +120,31 @@ const ProfileOrdersList = ({
     });
   };
 
-  // Tab definitions
+  // Tab definitions — `text` and `count` are kept separate so the count can
+  // render as a shimmer while the orders request is in flight (instead of a
+  // misleading "(0)").
   const tabs = [
     {
       key: TAB_ALL,
-      label: `${t("All")} (${ordersData?.all_count || allCount || 0})`,
+      text: t("All"),
+      count: ordersData?.all_count || allCount || 0,
     },
     {
       key: TAB_RUNNING,
-      label: `${t("Running")} (${ordersData?.running_count || 0})`,
+      text: t("Running"),
+      count: ordersData?.running_count || 0,
     },
     {
       key: TAB_HISTORY,
-      label: `${t("History")} (${ordersData?.previous_count || 0})`,
+      text: t("History"),
+      count: ordersData?.previous_count || 0,
     },
-  ];
+  ].map((tab) => ({
+    ...tab,
+    // Kept for consumers that read `label` (e.g. onFilterTabChange handlers).
+    label: `${tab.text} (${tab.count})`,
+  }));
+  const countsLoading = isLoadingOrder && !ordersData;
 
   return (
     <Box
@@ -179,6 +189,7 @@ const ProfileOrdersList = ({
                 }}
               >
                 <Typography
+                  component="span"
                   sx={{
                     fontSize: { xs: "14px", md: "18px" },
                     fontWeight: isActive ? 700 : 400,
@@ -187,9 +198,21 @@ const ProfileOrdersList = ({
                     letterSpacing: "-0.54px",
                     whiteSpace: "nowrap",
                     fontVariantNumeric: "tabular-nums",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
                   }}
                 >
-                  {tab.label}
+                  {tab.text}{" "}
+                  {countsLoading ? (
+                    <Skeleton
+                      variant="text"
+                      width={26}
+                      sx={{ display: "inline-block" }}
+                    />
+                  ) : (
+                    `(${tab.count})`
+                  )}
                 </Typography>
               </Box>
             );

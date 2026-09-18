@@ -18,6 +18,7 @@ import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 import ChevronLeftRoundedIcon from "@mui/icons-material/ChevronLeftRounded";
 import ChevronRightRoundedIcon from "@mui/icons-material/ChevronRightRounded";
 import { useTranslation } from "react-i18next";
+import { useSelector } from "react-redux";
 
 import useGetProPlans from "../../api-manage/hooks/react-query/pro-plans/useGetProPlans";
 import useGetProFaqs, {
@@ -25,17 +26,7 @@ import useGetProFaqs, {
   toFaqList,
 } from "../../api-manage/hooks/react-query/pro-plans/useGetProFaqs";
 import ProTermsModal from "./ProTermsModal";
-
-// Fallback benefits — shown when the API hasn't returned a benefits object
-// yet, so the empty state still looks like a real plan card.
-const FALLBACK_BENEFITS = [
-  { title: "Discount on all orders", description: "Get 10% off on all orders" },
-  { title: "Free delivery", description: "Enjoy unlimited free deliveries" },
-  {
-    title: "Exclusive coupon on order",
-    description: "Unlock exclusive coupon deals for all orders",
-  },
-];
+import { getAmountWithSign } from "helper-functions/CardHelpers";
 
 const PURPLE =
   "linear-gradient(93.06deg, rgba(255, 255, 255, 0.46) 0.4%, rgba(255, 255, 255, 0.3) 99.81%)";
@@ -63,11 +54,32 @@ const mapApiPlan = (raw) => {
   };
 };
 
-// Pretty label for a module key like "ride-share" → "Ride Share".
+// Prettified fallback label for a module key like "ride-share" → "Ride Share"
+// — only used when the module isn't found in the app's own module list
+// below, so it's an English string as a last resort, not the normal path.
 const prettifyModuleName = (key) =>
   String(key || "")
     .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (c) => c.toUpperCase());
+
+const normalizeModuleKey = (key) =>
+  String(key || "")
+    .toLowerCase()
+    .replace(/[-_\s]+/g, "");
+
+// Resolves a benefits-object module key (e.g. "ride_share") to the SAME
+// module_name the rest of the app already shows (module tabs, home page —
+// see NewNavBar.js) — that name comes from the backend already localized to
+// the active language, so this avoids inventing new translation keys per
+// module per language. Falls back to a prettified (English) key only if the
+// module truly isn't in the account's module list.
+const makeModuleLabelResolver = (modules) => (key) => {
+  const target = normalizeModuleKey(key);
+  const match = modules?.find(
+    (m) => normalizeModuleKey(m?.module_type) === target,
+  );
+  return match?.module_name || prettifyModuleName(key);
+};
 
 // Build one bullet per module from the modules map. Used when the
 // backend ships `setup_mode: "individual"` and the actual percentages
@@ -78,17 +90,66 @@ const hasModulesMap = (group) =>
   typeof group.modules === "object" &&
   Object.keys(group.modules).length > 0;
 
-const buildDiscountLines = (discount) => {
+// Every sentence below is composed via t() + interpolation (never a plain JS
+// template string handed to t() after the fact) — i18next only translates on
+// an exact key match, so a pre-built string like "10% off on Grocery (up to
+// $100)" can never match a translation entry and silently renders in English
+// regardless of the active language. The {{percent}}/{{module}}/{{cap}}/
+// {{min}} keys below must stay in sync with src/language/*.js.
+const buildDiscountLines = (discount, t, moduleLabel) => {
   const out = [];
   if (!discount || discount.active !== 1) return out;
-  const minQualifier = (mod) =>
-    mod?.min_order_status === 1 && toNumber(mod?.min_order_amount, 0) > 0
-      ? ` (on orders above $${toNumber(mod.min_order_amount, 0)})`
-      : "";
-  const cap = (mod) => {
-    const max = toNumber(mod?.max_amount, 0);
-    return max > 0 ? ` (up to $${max})` : "";
+  const hasMin = (mod) =>
+    mod?.min_order_status === 1 && toNumber(mod?.min_order_amount, 0) > 0;
+  const hasCap = (mod) => toNumber(mod?.max_amount, 0) > 0;
+
+  const titleFor = (pct, moduleName, mod) => {
+    const cap = getAmountWithSign(toNumber(mod?.max_amount, 0));
+    const min = getAmountWithSign(toNumber(mod?.min_order_amount, 0));
+    if (hasCap(mod) && hasMin(mod)) {
+      return t("{{percent}}% off on {{module}} (up to {{cap}}) (on orders above {{min}})", {
+        percent: pct,
+        module: moduleName,
+        cap,
+        min,
+      });
+    }
+    if (hasCap(mod)) {
+      return t("{{percent}}% off on {{module}} (up to {{cap}})", {
+        percent: pct,
+        module: moduleName,
+        cap,
+      });
+    }
+    if (hasMin(mod)) {
+      return t("{{percent}}% off on {{module}} (on orders above {{min}})", {
+        percent: pct,
+        module: moduleName,
+        min,
+      });
+    }
+    return t("{{percent}}% off on {{module}}", { percent: pct, module: moduleName });
   };
+
+  const descFor = (pct, mod) => {
+    const cap = getAmountWithSign(toNumber(mod?.max_amount, 0));
+    const min = getAmountWithSign(toNumber(mod?.min_order_amount, 0));
+    if (hasCap(mod) && hasMin(mod)) {
+      return t("Get {{percent}}% off (up to {{cap}}) (on orders above {{min}})", {
+        percent: pct,
+        cap,
+        min,
+      });
+    }
+    if (hasCap(mod)) {
+      return t("Get {{percent}}% off (up to {{cap}})", { percent: pct, cap });
+    }
+    if (hasMin(mod)) {
+      return t("Get {{percent}}% off (on orders above {{min}})", { percent: pct, min });
+    }
+    return t("Get {{percent}}% off", { percent: pct });
+  };
+
   // Per-module mode — emit one bullet for each module the admin
   // configured. We trigger this whenever a `modules` map is present
   // (setup_mode is optional on some backend versions).
@@ -97,10 +158,8 @@ const buildDiscountLines = (discount) => {
       const pct = toNumber(mod?.percentage, 0);
       if (pct <= 0) return;
       out.push({
-        title: `${pct}% off on ${prettifyModuleName(key)}${cap(
-          mod
-        )}${minQualifier(mod)}`,
-        description: `Get ${pct}% off${cap(mod)}${minQualifier(mod)}`,
+        title: titleFor(pct, moduleLabel(key), mod),
+        description: descFor(pct, mod),
       });
     });
     return out;
@@ -108,34 +167,74 @@ const buildDiscountLines = (discount) => {
   const pct = toNumber(discount.percentage, 0);
   const max = toNumber(discount.max_amount, 0);
   out.push({
-    title: "Discount on all orders",
-    description: max
-      ? `Get ${pct}% off on all orders (up to $${max})`
-      : `Get ${pct}% off on all orders`,
+    title: t("Discount on all orders"),
+    description:
+      max > 0
+        ? t("Get {{percent}}% off on all orders (up to {{cap}})", {
+            percent: pct,
+            cap: getAmountWithSign(max),
+          })
+        : t("Get {{percent}}% off on all orders", { percent: pct }),
   });
   return out;
 };
 
-const buildDeliveryFeeLines = (deliveryFee) => {
+const buildDeliveryFeeLines = (deliveryFee, t, moduleLabel) => {
   const out = [];
   if (!deliveryFee || deliveryFee.active !== 1) return out;
-  const minQualifier = (mod) =>
-    mod?.min_order_status === 1 && toNumber(mod?.min_order_amount, 0) > 0
-      ? ` (on orders above $${toNumber(mod.min_order_amount, 0)})`
-      : "";
-  const describe = (mod) => {
-    if (mod?.offer_type === "full_free" || mod?.offer_type === "free") {
-      return "Free delivery";
+  const hasMin = (mod) =>
+    mod?.min_order_status === 1 && toNumber(mod?.min_order_amount, 0) > 0;
+  const isFree = (mod) =>
+    mod?.offer_type === "full_free" || mod?.offer_type === "free";
+
+  const titleFor = (moduleName, mod) => {
+    const min = getAmountWithSign(toNumber(mod?.min_order_amount, 0));
+    if (isFree(mod)) {
+      return hasMin(mod)
+        ? t("Free delivery on {{module}} (on orders above {{min}})", { module: moduleName, min })
+        : t("Free delivery on {{module}}", { module: moduleName });
     }
     const pct = toNumber(mod?.charge_discount_percentage, 0);
-    return pct > 0 ? `${pct}% off on delivery fee` : "Delivery fee benefit";
+    if (pct > 0) {
+      return hasMin(mod)
+        ? t("{{percent}}% off on delivery fee on {{module}} (on orders above {{min}})", {
+            percent: pct,
+            module: moduleName,
+            min,
+          })
+        : t("{{percent}}% off on delivery fee on {{module}}", {
+            percent: pct,
+            module: moduleName,
+          });
+    }
+    return hasMin(mod)
+      ? t("Delivery fee benefit on {{module}} (on orders above {{min}})", { module: moduleName, min })
+      : t("Delivery fee benefit on {{module}}", { module: moduleName });
   };
+
+  const descFor = (mod) => {
+    const min = getAmountWithSign(toNumber(mod?.min_order_amount, 0));
+    if (isFree(mod)) {
+      return hasMin(mod)
+        ? t("Free delivery (on orders above {{min}})", { min })
+        : t("Free delivery");
+    }
+    const pct = toNumber(mod?.charge_discount_percentage, 0);
+    if (pct > 0) {
+      return hasMin(mod)
+        ? t("{{percent}}% off on delivery fee (on orders above {{min}})", { percent: pct, min })
+        : t("{{percent}}% off on delivery fee", { percent: pct });
+    }
+    return hasMin(mod)
+      ? t("Delivery fee benefit (on orders above {{min}})", { min })
+      : t("Delivery fee benefit");
+  };
+
   if (hasModulesMap(deliveryFee)) {
     Object.entries(deliveryFee.modules).forEach(([key, mod]) => {
-      const desc = describe(mod);
       out.push({
-        title: `${desc} on ${prettifyModuleName(key)}${minQualifier(mod)}`,
-        description: `${desc}${minQualifier(mod)}`,
+        title: titleFor(moduleLabel(key), mod),
+        description: descFor(mod),
       });
     });
     return out;
@@ -143,26 +242,26 @@ const buildDeliveryFeeLines = (deliveryFee) => {
   const fullFree = deliveryFee.offer_type === "full_free";
   const pct = toNumber(deliveryFee.charge_discount_percentage, 0);
   out.push({
-    title: "Free delivery",
+    title: t("Free delivery"),
     description: fullFree
-      ? "Enjoy unlimited free deliveries"
-      : `Get ${pct}% off delivery fee`,
+      ? t("Enjoy unlimited free deliveries")
+      : t("Get {{percent}}% off delivery fee", { percent: pct }),
   });
   return out;
 };
 
-const mapBenefitsObject = (b) => {
+const mapBenefitsObject = (b, t, moduleLabel) => {
   if (!b) return [];
   const out = [];
-  out.push(...buildDiscountLines(b.discount));
+  out.push(...buildDiscountLines(b.discount, t, moduleLabel));
   // The sample payload sometimes has the delivery_fee modules even when
   // `active: 0` — we treat the top-level flag as the source of truth so
   // we don't list inactive promises.
-  out.push(...buildDeliveryFeeLines(b.delivery_fee));
+  out.push(...buildDeliveryFeeLines(b.delivery_fee, t, moduleLabel));
   if (b.coupon?.active === 1) {
     out.push({
-      title: "Exclusive coupon on order",
-      description: "Unlock exclusive coupon deals for all orders",
+      title: t("Exclusive coupon on order"),
+      description: t("Unlock exclusive coupon deals for all orders"),
     });
   }
   return out;
@@ -186,6 +285,7 @@ const ChoosePlanContent = ({
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
+  const { modules } = useSelector((state) => state.configData);
 
   const { data: plansResponse, isLoading: plansLoading } = useGetProPlans();
 
@@ -204,10 +304,16 @@ const ChoosePlanContent = ({
     return hideFreeTrial ? mapped.filter((p) => Number(p.price) > 0) : mapped;
   }, [response, hideFreeTrial]);
 
-  const benefits = useMemo(() => {
-    const mapped = mapBenefitsObject(response.benefits);
-    return mapped.length > 0 ? mapped : FALLBACK_BENEFITS;
-  }, [response]);
+  // Benefits are entirely backend-driven (per-module percentages/caps set by
+  // the admin) — there's no static fallback here anymore. Showing a fixed
+  // "10% off on all orders" placeholder when the account actually has no
+  // active Pro benefits configured would just be a promise the app can't
+  // keep, so an empty/loading response renders an empty list, not fake data.
+  const moduleLabel = useMemo(() => makeModuleLabelResolver(modules), [modules]);
+  const benefits = useMemo(
+    () => mapBenefitsObject(response.benefits, t, moduleLabel),
+    [response, t, moduleLabel],
+  );
 
   const headerTitle = response.pro_brand ?? "Pro Plan";
   const headerSubtitle = "Save more on every order";
@@ -299,7 +405,7 @@ const ChoosePlanContent = ({
 
   const benefitsList = (
     <Stack spacing={{ xs: 1.25, sm: 1.75 }}>
-      {plansLoading && benefits === FALLBACK_BENEFITS
+      {plansLoading && benefits.length === 0
         ? Array.from({ length: 3 }).map((_, i) => (
             <Stack
               key={`benefit-skel-${i}`}
@@ -342,10 +448,10 @@ const ChoosePlanContent = ({
                   fontWeight={600}
                   color="text.primary"
                 >
-                  {t(b.title)}
+                  {b.title}
                 </Typography>
                 <Typography fontSize={{ xs: "12px", sm: "14px" }} color="text.secondary">
-                  {t(b.description)}
+                  {b.description}
                 </Typography>
               </Stack>
             </Stack>

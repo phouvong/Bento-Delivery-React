@@ -1,4 +1,5 @@
 import MainApi from "../../../MainApi";
+import { getModuleId } from "../../../../helper-functions/getModuleId";
 import { data_limit, monthly_order_list_api } from "../../../ApiRoutes";
 import { useQuery } from "react-query";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
@@ -12,7 +13,7 @@ const getData = async ({ offset, moduleType }) => {
 
 export default function useGetMonthlyOrderList({ offset, moduleType }, enabled = false) {
   return useQuery(
-    ["monthly-order-list", moduleType, offset],
+    ["monthly-order-list", getModuleId(), moduleType, offset],
     () => getData({ offset, moduleType }),
     {
       staleTime: 60000,

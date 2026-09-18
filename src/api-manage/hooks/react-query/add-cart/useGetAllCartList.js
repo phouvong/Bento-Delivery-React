@@ -35,6 +35,10 @@ export default function useGetAllCartList(
       onSuccess: cartListSuccessHandler,
       enabled: Boolean(store_id),
       onError: onSingleErrorResponse,
+      staleTime: 0,
+      cacheTime: 0,
+      refetchOnMount: "always",
+      refetchOnWindowFocus: true,
     }
   );
 }

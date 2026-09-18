@@ -800,9 +800,14 @@ const ItemCheckout = (props) => {
     }
   };
 
+  // Literal keys per module — composing the key from the (already translated)
+  // getStoresOrRestaurants() output produces a string that never matches a
+  // translation entry, so the toast showed untranslated mixed text.
   const storeCloseToast = () =>
     toast.error(
-      t(`${getStoresOrRestaurants().slice(0, -1)} is closed. Try again later.`)
+      getCurrentModuleType() === "food"
+        ? t("Restaurant is closed. Try again later.")
+        : t("Store is closed. Try again later.")
     );
   //totalAmount
   const handlePlaceOrderBasedOnAvailability = () => {
@@ -1013,10 +1018,14 @@ const ItemCheckout = (props) => {
       setSwitchToWallet(false);
     }
   }, [paymentMethod]);
-  const handleBadWeatherUi = (zoneWiseData) => {
-    const currentZoneInfo = zoneWiseData?.find(
+  
+  const currentZoneInfo = zoneData?.zone_data?.find(
       (item) => item.id === storeData?.zone_id
     );
+    console.log({currentZoneInfo,zoneData,storeData});
+    
+  const handleBadWeatherUi = (zoneWiseData) => {
+    
 
     if (currentZoneInfo) {
       if (currentZoneInfo?.increased_delivery_fee_status === 1) {
@@ -1053,6 +1062,8 @@ const ItemCheckout = (props) => {
       }
     }
   };
+ 
+  
   const handleExtraPackaging = (e) => {
     setIsPackaging(e.target.checked);
   };
@@ -1074,7 +1085,17 @@ const ItemCheckout = (props) => {
       setIsPackaging(false);
     }
   }, [cartPrefs?.extraPackaging]);
-  const isZoneDigital = getDigitalMethodFromZone(storeData?.zone_id, zoneData);
+
+  const isZoneDigital = useMemo(() => {
+    const zoneDigitalMatch = getDigitalMethodFromZone(
+      storeData?.zone_id,
+      zoneData
+    );
+    return {
+      ...zoneDigitalMatch,
+      offline_payment: Boolean(configData?.offline_payment_status === 1),
+    };
+  }, [storeData?.zone_id, zoneData, configData?.offline_payment_status]);
 
   const hasOnlyPaymentMethod = () => {
     if (
@@ -1337,6 +1358,7 @@ const ItemCheckout = (props) => {
                     isLoading={isLoading}
                     selectedDeliveryOption={selectedDeliveryOption}
                     scheduleAt={scheduleAt}
+                    currentZoneInfo={currentZoneInfo}
                   />
 
                   <PlaceOrder

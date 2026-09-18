@@ -1,10 +1,5 @@
 const nextConfig = {
   reactStrictMode: true,
-  // Hide Next.js dev-mode indicator (bottom-left "N" badge)
-  devIndicators: {
-    buildActivity: false,
-    appIsrStatus: false,
-  },
   experimental: {
     swcPlugins: [],
   },
@@ -17,7 +12,7 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'http',
-        hostname: '**', // allows all https domains
+        hostname: '**', // allows all http domains
         pathname: '/**',
       },
       {
@@ -33,20 +28,3 @@ const nextConfig = {
 };
 
 module.exports = nextConfig;
-
-
-
-// /** @type {import('next').NextConfig} */
-// const nextConfig = {
-//   reactStrictMode: true,
-//   images: {
-//     domains: [
-//       "bjorn66.com",
-//       "6ammart-test.6amdev.xyz",
-//       "192.168.50.168",
-//       "6ammart-dev.6amdev.xyz",
-//     ], // Add the domain here
-//   },
-// };
-//
-// module.exports = nextConfig;

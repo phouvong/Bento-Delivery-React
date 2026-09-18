@@ -7,13 +7,16 @@ import NewStoreCard from "components/cards/newCard/NewStoreCard";
 import ClosedNow from "components/closed-now";
 import { createEnhancedArrows } from "components/common/EnhancedSliderArrows";
 import NextImage from "components/NextImage";
-import { getStoreRedirectURL } from "helper-functions/handleStoreRedirect";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { getStoreRedirectURL } from "helper-functions/handleStoreRedirect";
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import { CustomBoxFullWidth } from "styled-components/CustomStyles.style";
+import useGetTopRatedStores from "api-manage/hooks/react-query/store/useGetTopRatedStores";
+import { ModuleTypes } from "helper-functions/moduleTypes";
+import { useGetRecommendedServices } from "components/home/module-wise-components/service/service-api-manage/hooks/react-query/recommended-services";
 
 // ─── Styled (same as New Arrival food module) ──────────────────────────────
 
@@ -311,12 +314,14 @@ const TrendingSearchSection = ({ onItemClick, t, isLoading, items }) => {
   );
 };
 
-// ─── Section: Top Restaurants ────────────────────────────────────────────
+// ─── Section: Top Restaurants / Top Store / Top Providers ───────────────────
 
 const TopRestaurantsSection = ({ t, searchFromNav = false }) => {
   const [isSliderHovered, setIsSliderHovered] = useState(false);
   const slider = useRef(null);
-  const isFoodModule = getCurrentModuleType() === "food";
+  const moduleType = getCurrentModuleType();
+  const isFoodModule = moduleType === "food";
+  const isServiceModule = moduleType === "service";
 
   const { data: storesData, isLoading } = useGetSearchPageData(
     {
@@ -326,9 +331,30 @@ const TopRestaurantsSection = ({ t, searchFromNav = false }) => {
       quick_action: "top_rated",
     },
     () => {},
-    true,
+    moduleType !== ModuleTypes.SERVICE, // if not service module call the hooks
   );
-  const stores = storesData?.pages?.[0]?.stores ?? [];
+
+  const { data: topRatedStoreInfiniteDate, isLoading: topRatedLoading } =
+    useGetTopRatedStores({
+      pageParams: {
+        type: "service-search",
+        offset: 1,
+        limit: 20,
+      },
+      enabled: moduleType === ModuleTypes.SERVICE,
+    });
+
+  const flatTopRatedStoreList = useMemo(() => {
+    if (moduleType !== ModuleTypes.SERVICE) return [];
+    return (
+      topRatedStoreInfiniteDate?.pages?.flatMap(
+        (page) => page?.providers ?? [],
+      ) ?? []
+    );
+  }, [topRatedStoreInfiniteDate, moduleType]);
+
+  const rawStores = storesData?.pages?.[0]?.stores ?? [];
+  const stores = isServiceModule ? flatTopRatedStoreList : rawStores;
 
   const enhancedSettings = {
     ...sliderSettings(searchFromNav, stores.length),
@@ -338,14 +364,20 @@ const TopRestaurantsSection = ({ t, searchFromNav = false }) => {
     }),
   };
 
-  if (!isLoading && stores.length === 0) return null;
+  if (!isLoading && !topRatedLoading && stores.length === 0) return null;
+
+  const sectionTitle = isFoodModule
+    ? t("Top Restaurants")
+    : isServiceModule
+    ? t("Top Providers")
+    : t("Top Store");
 
   const sliderItems = (
     <SliderWrapper
       onMouseEnter={() => setIsSliderHovered(true)}
       onMouseLeave={() => setIsSliderHovered(false)}
     >
-      {isLoading ? (
+      {isLoading || topRatedLoading ? (
         <Slider {...enhancedSettings}>
           {[...Array(5)].map((_, i) => (
             <Stack key={i} alignItems="center" gap="6px">
@@ -407,11 +439,7 @@ const TopRestaurantsSection = ({ t, searchFromNav = false }) => {
     </SliderWrapper>
   );
 
-  return (
-    <Section title={isFoodModule ? t("Top Restaurants") : t("Top Store")}>
-      {sliderItems}
-    </Section>
-  );
+  return <Section title={sectionTitle}>{sliderItems}</Section>;
 };
 
 const FeaturedRestaurantsSection = ({
@@ -422,7 +450,9 @@ const FeaturedRestaurantsSection = ({
 }) => {
   const [isSliderHovered, setIsSliderHovered] = useState(false);
   const slider = useRef(null);
-  const isFoodModule = getCurrentModuleType() === "food";
+  const moduleType = getCurrentModuleType();
+  const isFoodModule = moduleType === "food";
+  const isServiceModule = moduleType === "service";
 
   const enhancedSettings = {
     dots: false,
@@ -560,7 +590,13 @@ const FeaturedRestaurantsSection = ({
 
   return (
     <Section
-      title={isFoodModule ? t("Featured Restaurants") : t("Featured Store")}
+      title={
+        isFoodModule
+          ? t("Featured Restaurants")
+          : isServiceModule
+          ? t("Featured Providers")
+          : t("Featured Store")
+      }
     >
       {sliderItems}
     </Section>
@@ -578,8 +614,12 @@ const SearchDropdownEmpty = ({
   searchFromNav = false,
 }) => {
   const { data, isLoading } = useGetTrendingSearches();
-  const { data: popularData, isLoading: popularIsLoading } =
+
+  const { data: rawPopularData, isLoading: popularIsLoading } =
     useGetRecommendStores();
+
+  const isServiceModule = getCurrentModuleType() === "service";
+  const popularData = rawPopularData;
   const items = (
     Array.isArray(data?.trending_searches) ? data?.trending_searches : []
   )

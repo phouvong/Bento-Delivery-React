@@ -21,7 +21,9 @@ import CheckoutFailed from "../checkout/CheckoutFailed";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { setOrderDetailsModal } from "redux/slices/offlinePaymentData";
 
-const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
+const OrderDetailsModal = ({ orderDetailsModalOpen, type = "order" }) => {
+  const isBooking = type === "booking";
+  const idLabel = isBooking ? "Booking ID" : "Order ID";
   const dispatch = useDispatch();
   const { configData } = useSelector((state) => state.configData);
   const theme = useTheme();
@@ -125,7 +127,9 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
             }}
           />
           <Typography fontSize="18px" fontWeight="700">
-            {`${t("Order Placed Successfully")}`}
+            {isBooking
+              ? `${t("Booking Placed Successfully")}`
+              : `${t("Order Placed Successfully")}`}
           </Typography>
           {/* <CustomStackFullWidth
             padding={{ xs: "0px 20px", md: "0px 38px" }}
@@ -144,7 +148,9 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
             </Typography>
           </CustomStackFullWidth> */}
           <Typography fontWeight="400" textAlign="center" maxWidth="380px">
-            We will begin processing your order shortly. Your Order ID is
+            {isBooking
+              ? "We will begin processing your booking shortly. Your Booking ID is"
+              : "We will begin processing your order shortly. Your Order ID is"}
               <Typography component="span" fontWeight={600}>{ " " }{guestUserOrderId || order_id}</Typography>,
               placed using the phone number
               <Typography component="span" fontWeight={600}>{" "}{guestUserInfo?.phone || orderInformation?.phone || "+880170987654"}</Typography>.
@@ -169,7 +175,7 @@ const OrderDetailsModal = ({ orderDetailsModalOpen }) => {
             }}
           >
             <Typography fontWeight={700}>
-              {t("Order ID")} #{guestUserOrderId || order_id}
+              {t(idLabel)} #{guestUserOrderId || order_id}
             </Typography>
             <Button
               variant="contained"

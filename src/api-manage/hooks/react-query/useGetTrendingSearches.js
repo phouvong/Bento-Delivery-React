@@ -1,4 +1,5 @@
 import { useQuery } from "react-query";
+import { getModuleId } from "../../../helper-functions/getModuleId";
 import MainApi from "../../MainApi";
 import { trending_searches_api } from "api-manage/ApiRoutes";
 import { onSingleErrorResponse } from "../../api-error-response/ErrorResponses";
@@ -11,7 +12,7 @@ const getData = async () => {
 
 const useGetTrendingSearches = () => {
   return useQuery(
-    ["trending-searches", getCurrentModuleType()],
+    ["trending-searches", getModuleId(), getCurrentModuleType()],
     getData,
     {
       staleTime: 5 * 60 * 1000,

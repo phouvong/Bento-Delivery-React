@@ -17,6 +17,7 @@ import OrderDetailsModal from "../../../order-details-modal/OrderDetailsModal";
 import Banners from "../../banners";
 import FeaturedCategories from "../../featured-categories";
 import RunningCampaigns from "../../running-campaigns";
+import PromotionalBanner from "../../PromotionalBanner";
 import Stores from "../../stores";
 import TrendingBites from "../../trending-bites";
 import VisitAgain from "../../visit-again";
@@ -27,6 +28,7 @@ import PharmacySearchBanner from "./PharmacySearchBanner";
 import { getPharmacySections } from "./pharmacySectionsConfig";
 import SelfCareOTCSection from "./SelfCareOTCSection";
 import VerifiedPharmacies from "./VerifiedPharmacies";
+import isVerifiedStoreEnabled from "helper-functions/isVerifiedStoreEnabled";
 
 const S = ({ children }) => children ?? null;
 
@@ -37,6 +39,12 @@ const Pharmacy = ({ configData, routeSection }) => {
   const { orderDetailsModalOpen } = useSelector((state) => state.utilsData);
   const [storeData, setStoreData] = React.useState([]);
   const { data, refetch, isLoading } = useGetOtherBanners();
+  // The other-banners query is enabled:false — fetch it here so the
+  // promotional banner doesn't depend on another page priming the cache.
+  useEffect(() => {
+    refetch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const {
     data: visitedStores,
     refetch: refetchVisitAgain,
@@ -93,9 +101,8 @@ const Pharmacy = ({ configData, routeSection }) => {
         </CustomContainer>
       </S>
 
-      {configData?.repeat_order_option && token ? (
+      {token ? (
         <S>
-          {/* 🔥 new feature your last order - user logged in wise */}
           <CustomContainer noMobilePadding={true}>
             <LastOrdersSection title={t("Refill Your Medicine")} />
           </CustomContainer>
@@ -164,17 +171,19 @@ const Pharmacy = ({ configData, routeSection }) => {
         </CustomContainer>
       </S>
 
-      <S>
-        {/* new feature */}
-        <CustomContainer
-          sx={{
-            paddingLeft: "16px !important",
-            paddingRight: "0 !important",
-          }}
-        >
-          <VerifiedPharmacies />
-        </CustomContainer>
-      </S>
+      {isVerifiedStoreEnabled(configData) && (
+        <S>
+          {/* new feature */}
+          <CustomContainer
+            sx={{
+              paddingLeft: "16px !important",
+              paddingRight: "0 !important",
+            }}
+          >
+            <VerifiedPharmacies />
+          </CustomContainer>
+        </S>
+      )}
 
       <S>
         <CustomContainer noMobilePadding>
@@ -201,6 +210,12 @@ const Pharmacy = ({ configData, routeSection }) => {
           }}
         >
           <RunningCampaigns />
+        </CustomContainer>
+      </S>
+
+      <S>
+        <CustomContainer>
+          <PromotionalBanner bannerData={data} />
         </CustomContainer>
       </S>
 

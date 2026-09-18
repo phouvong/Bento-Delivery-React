@@ -11,14 +11,22 @@ import ItemForm from "./ItemsFrom";
 import Shimmer from "./Shimmer";
 import DeliverymanForm from "./DeliverymanForm";
 import useGetTrackOrderData from "../../api-manage/hooks/react-query/order/useGetTrackOrderData";
-import { Skeleton, Typography } from "@mui/material";
+import { Box, Skeleton, Tab, Tabs, Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import CustomEmptyResult from "../custom-empty-result";
 import nodata from "../../../public/static/nodata.png";
 import { Stack } from "@mui/system";
+import CustomImageContainer from "../CustomImageContainer";
+import ServiceReviewForm from "./ServiceReviewForm";
+import ServicemanReviewForm from "./ServicemanReviewForm";
 
-
-const RateAndReview = ({ onAllItemsReviewed, trackData }) => {
+const RateAndReview = ({
+  onAllItemsReviewed,
+  trackData,
+  data: serviceData,
+  isServiceBooking,
+}) => {
+  const { t } = useTranslation();
   const { deliveryManInfo } = useSelector((state) => state.searchFilterStore);
   const [type, setType] = useState("items");
   const [items, setItems] = useState([]);
@@ -26,10 +34,13 @@ const RateAndReview = ({ onAllItemsReviewed, trackData }) => {
   const router = useRouter();
   const { orderId } = router.query;
   const { refetch, data, isRefetching } = useGetOrderDetails(orderId);
-  const {
-    refetch: refetchTrackOrder,
-    data: trackOrderData,
-  } = useGetTrackOrderData(orderId);
+  const { refetch: refetchTrackOrder, data: trackOrderData } =
+    useGetTrackOrderData(orderId);
+
+  // ── Service booking review ──
+  // Driven entirely by the booking payload (provider + details[]), not the
+  // order-details endpoint. Each service in details[] gets its own rating form.
+  const isService = isServiceBooking || !!serviceData?.provider;
 
   // Load items when data arrives for a new order, but preserve local state during refetches
   useEffect(() => {
@@ -45,10 +56,10 @@ const RateAndReview = ({ onAllItemsReviewed, trackData }) => {
   }, [data, orderId]);
 
   useEffect(() => {
-    if (!orderId) return;
+    if (!orderId || isService) return;
     refetch();
     refetchTrackOrder();
-  }, [orderId, refetch, refetchTrackOrder]);
+  }, [orderId, isService, refetch, refetchTrackOrder]);
 
   const handleItemReviewed = (itemId) => {
     if (itemId) {
@@ -63,7 +74,121 @@ const RateAndReview = ({ onAllItemsReviewed, trackData }) => {
       });
     }
   };
-  console.log({ trackOrderData });
+  console.log({ trackOrderData,serviceData });
+
+  const [serviceItems, setServiceItems] = useState([]);
+  const [servicemen, setServicemen] = useState([]);
+  const [serviceReviewType, setServiceReviewType] = useState("services");
+  useEffect(() => {
+    if (isService && Array.isArray(serviceData?.details)) {
+      setServiceItems(serviceData.details);
+    }
+    // Service module bookings never require a serviceman — reviewing one
+    // isn't part of the business flow here, so servicemen stays empty and
+    // the "Servicemen" tab (gated on servicemen.length > 0) never shows.
+  }, [isService, serviceData]);
+
+  // Close the drawer only once BOTH services and servicemen are fully reviewed.
+  const handleServiceReviewed = (serviceId) => {
+    setServiceItems((prev) => {
+      const filtered = prev.filter((s) => s?.service_id !== serviceId);
+      if (filtered.length === 0 && servicemen.length === 0)
+        onAllItemsReviewed?.();
+      return filtered;
+    });
+  };
+
+  const handleServicemanReviewed = (servicemanId) => {
+    setServicemen((prev) => {
+      const filtered = prev.filter((s) => s?.id !== servicemanId);
+      if (filtered.length === 0 && serviceItems.length === 0)
+        onAllItemsReviewed?.();
+      return filtered;
+    });
+  };
+console.log({serviceData});
+
+  if (isService) {
+    const provider = serviceData?.provider;
+    return (
+      <CustomStackFullWidth alignItems="center" spacing={2} mt="1rem">
+        {provider && (
+          <Stack
+            direction="row"
+            spacing={1.5}
+            alignItems="center"
+            sx={{ width: "100%", maxWidth: "600px" }}
+          >
+            <CustomImageContainer
+              src={provider?.logo_full_url}
+              width="48px"
+              height="48px"
+              borderRadius="50%"
+              objectFit="cover"
+            />
+            <Typography fontSize="16px" fontWeight="700">
+              {provider?.name}
+            </Typography>
+          </Stack>
+        )}
+        {servicemen?.length > 0 && (
+          <Box sx={{ width: "100%", maxWidth: "600px" }}>
+            <Tabs
+              value={serviceReviewType}
+              onChange={(e, value) => setServiceReviewType(value)}
+              centered
+              indicatorColor="primary"
+              textColor="primary"
+            >
+              <Tab label={t("Services")} value="services" />
+              <Tab label={t("Servicemen")} value="servicemen" />
+            </Tabs>
+          </Box>
+        )}
+        <CustomStackFullWidth spacing={3} sx={{ maxWidth: "600px" }}>
+          {serviceReviewType === "servicemen" ? (
+            servicemen?.length > 0 ? (
+              servicemen.map((serviceman) => (
+                <CustomPaperBigCard
+                  sx={{ padding: { xs: ".5rem", md: "1rem" } }}
+                  key={serviceman?.id}
+                >
+                  <ServicemanReviewForm
+                    bookingId={serviceData?.id}
+                    serviceman={serviceman}
+                    onReviewComplete={handleServicemanReviewed}
+                  />
+                </CustomPaperBigCard>
+              ))
+            ) : (
+              <CustomEmptyResult label="No servicemen to review" />
+            )
+          ) : serviceItems?.length > 0 ? (
+            serviceItems.map((service) => (
+              <CustomPaperBigCard
+                sx={{ padding: { xs: ".5rem", md: "1rem" } }}
+                key={service?.service_id}
+              >
+                <ServiceReviewForm
+                  bookingId={serviceData?.id}
+                  service={service}
+                  onReviewComplete={handleServiceReviewed}
+                />
+              </CustomPaperBigCard>
+            ))
+          ) : (
+            <CustomEmptyResult
+              label={
+                serviceData?.is_reviewed
+                  ? "You have already reviewed this booking"
+                  : "No services to review"
+              }
+            />
+          )}
+        </CustomStackFullWidth>
+      </CustomStackFullWidth>
+    );
+  }
 
   return (
     <CustomStackFullWidth
@@ -71,14 +196,14 @@ const RateAndReview = ({ onAllItemsReviewed, trackData }) => {
       justifyContent="center"
       spacing={2}
       mt="1rem"
-
     >
       <>
         {isRefetching && !items.length && !data ? (
           <Skeleton variant="ractangle" width="100px" height="100%" />
         ) : (
           trackData?.delivery_man &&
-          (data?.module_type !== "parcel" || items?.module_type !== "parcel") && (
+          (data?.module_type !== "parcel" ||
+            items?.module_type !== "parcel") && (
             <GroupButtonsRateAndReview
               setType={setType}
               type={type}
@@ -92,15 +217,21 @@ const RateAndReview = ({ onAllItemsReviewed, trackData }) => {
           justifyContent="center"
           spacing={3}
           sx={{
-            maxWidth: "600px"
+            maxWidth: "600px",
           }}
         >
-          {type === "items" && (data?.module_type !== "parcel") ? (
+          {type === "items" && data?.module_type !== "parcel" ? (
             items?.length > 0 ? (
               items?.map((item, index) => {
                 return (
-                  <CustomPaperBigCard sx={{ padding: { xs: ".5rem", md: "1rem" } }} key={item?.id}>
-                    <ItemForm data={item} onReviewComplete={handleItemReviewed} />
+                  <CustomPaperBigCard
+                    sx={{ padding: { xs: ".5rem", md: "1rem" } }}
+                    key={item?.id}
+                  >
+                    <ItemForm
+                      data={item}
+                      onReviewComplete={handleItemReviewed}
+                    />
                   </CustomPaperBigCard>
                 );
               })

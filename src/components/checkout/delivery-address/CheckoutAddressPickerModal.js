@@ -16,6 +16,8 @@ import dynamic from "next/dynamic";
 import { CustomButtonPrimary } from "styled-components/CustomButtons.style";
 import AddressSelectionList from "./AddressSelectionList";
 import useGetGeoCode from "api-manage/hooks/react-query/google-api/useGetGeoCode";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { ModuleTypes } from "helper-functions/moduleTypes";
 
 const MapModal = dynamic(() => import("components/Map/MapModal"));
 
@@ -39,6 +41,9 @@ const CheckoutAddressPickerModal = ({
 }) => {
   const theme = useTheme();
   const [openMapModal, setOpenMapModal] = useState(false);
+
+  const isServiceModule = getCurrentModuleType() === ModuleTypes.SERVICE;
+  const modalTitle = isServiceModule ? t("Service Address") : t("Delivery Address");
 
   // ── Geolocation ─────────────────────────────────────────────────────────
   const [geoLocation, setGeoLocation] = useState(null);
@@ -114,7 +119,7 @@ const CheckoutAddressPickerModal = ({
             >
               <Stack spacing={0.3}>
                 <Typography fontSize="18px" fontWeight={700} color="text.primary" lineHeight={1.2}>
-                  {t("Delivery Address")}
+                  {modalTitle}
                 </Typography>
                 <Typography fontSize="12px" color="text.secondary" lineHeight={1.4}>
                   {t("Select a saved address or choose a new location")}

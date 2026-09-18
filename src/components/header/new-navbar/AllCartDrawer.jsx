@@ -1,4 +1,5 @@
 import {
+  alpha,
   Box,
   Button,
   CircularProgress,
@@ -12,11 +13,12 @@ import {
 import useClearCart from "api-manage/hooks/react-query/add-cart/useClearCart";
 import useDeleteCartItem from "api-manage/hooks/react-query/add-cart/useDeleteCartItem";
 import CartStoreCard from "components/cards/newCard/CartStoreCard";
+import CustomModal from "components/modal";
 import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
 import { getGuestId, getToken } from "helper-functions/getToken";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { useRouter } from "next/router";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { removeCartGroupByStoreId } from "redux/slices/cart";
@@ -62,33 +64,22 @@ const groupByStore = (cartData = []) => {
   return Array.from(map.values());
 };
 
-// Normalize a server-grouped cart payload (from api/v1/customer/cart/get-all)
-// into the same { store, items, rawItems } shape consumed by CartStoreCard.
-// Accepts groups keyed by either `store` or `restaurant` defensively.
 const normalizeServerGroups = (cartGroups = []) => {
   if (!Array.isArray(cartGroups)) return [];
   return cartGroups
     .map((g) => {
-      const store = g?.store ?? g?.restaurant;
+      const store = g?.store;
       if (!store?.id) return null;
-      const rawItems = Array.isArray(g?.carts)
-        ? g.carts
-        : Array.isArray(g?.items)
-        ? g.items
-        : [];
+      const rawItems = Array.isArray(g?.carts) ? g.carts : [];
       return { store, items: rawItems, rawItems };
     })
     .filter(Boolean);
 };
 
 const calcStoreTotals = (rawItems = []) => {
-  console.log({rawItems});
   let total = 0;
   for (const ci of rawItems) {
-    // cartList items already have totalPrice; fallback to price * quantity
-    const price =
-      ci?.price ??
-      (ci?.item?.price ?? ci?.price ?? 0) * (ci?.quantity ?? 1);
+    const price = ci?.price ?? (ci?.item?.price ?? 0) * (ci?.quantity ?? 1);
     total += price;
   }
   return { totalPrice: total };
@@ -108,6 +99,8 @@ const AllCartDrawer = ({ open, onClose, cartData = [], refetch }) => {
   const { mutateAsync: deleteItem, isLoading: deletingItem } =
     useDeleteCartItem();
   const currentModuleType = getCurrentModuleType();
+  const [deletingStoreId, setDeletingStoreId] = useState(null);
+  const [confirmClearAllOpen, setConfirmClearAllOpen] = useState(false);
 
   // Prefer server-grouped data (cart/get-all) — re-synced after every
   // add/update/delete via react-query invalidation. Fall back to local
@@ -119,11 +112,12 @@ const AllCartDrawer = ({ open, onClose, cartData = [], refetch }) => {
       return groups.filter((g) => {
         const storeModuleType = g?.store?.module_type;
         if (storeModuleType) return storeModuleType === currentModuleType;
+        // Already normalized: row.module_type is always set
         const carts = g?.items ?? g?.carts ?? [];
         const firstCartItem = Array.isArray(carts) ? carts[0] : null;
-        const itemModuleType = firstCartItem?.item?.module_type;
+        const itemModuleType = firstCartItem?.module_type;
         if (itemModuleType) return itemModuleType === currentModuleType;
-        return false;
+        return true;
       });
     };
     const serverGroups = normalizeServerGroups(cartGroups);
@@ -141,7 +135,16 @@ const AllCartDrawer = ({ open, onClose, cartData = [], refetch }) => {
     router.push("/home");
   };
 
-  const handleClearAll = async () => {
+  const handleClearAllClick = () => {
+    setConfirmClearAllOpen(true);
+  };
+
+  const handleCancelClearAll = () => {
+    setConfirmClearAllOpen(false);
+  };
+
+  const handleConfirmClearAll = async () => {
+    setConfirmClearAllOpen(false);
     const wasOnCheckout = router.pathname === "/checkout";
     await clearCart();
     refetch?.();
@@ -152,30 +155,36 @@ const AllCartDrawer = ({ open, onClose, cartData = [], refetch }) => {
   };
 
   const handleDeleteStore = async (rawItems, storeId) => {
-    // Backend rejects (403) requests that include both Authorization and
-    // guest_id — only attach guest_id when there is no auth token.
+    if (deletingStoreId) return;
     redirectIfCheckoutAffected(storeId);
     const token = getToken();
     const guestId = !token ? getGuestId() : null;
-    // Optimistic: drop the group locally so the row vanishes immediately;
-    // react-query invalidation will reconcile from server on success.
-    if (storeId) dispatch(removeCartGroupByStoreId(storeId));
-    for (const ci of rawItems) {
-      // Local cartList rows: `id` is the product id; the server cart-row id
-      // lives on `cartItemId` (set by setItemIntoCart). Server-grouped rows
-      // from cart/get-all carry the cart-row id at the root `id` field.
-      // Prefer cartItemId first, then fall back to id / cart_id.
-      const cartItemId = ci?.cartItemId ?? ci?.id ?? ci?.cart_id;
-      if (!cartItemId) continue;
-      const itemStoreId =
-        ci?.store_id ?? ci?.store?.id ?? ci?.item?.store_id ?? storeId;
-      await deleteItem({
-        cart_id: cartItemId,
-        ...(itemStoreId != null ? { store_id: itemStoreId } : {}),
-        ...(guestId ? { guestId } : {}),
-      });
-    }
-    refetch?.();
+    // if (storeId) dispatch(removeCartGroupByStoreId(storeId));
+    // for (const ci of rawItems) {
+    //   const cartItemId = ci?.cartItemId ?? ci?.id ?? ci?.cart_id;
+    //   if (!cartItemId) continue;
+    //   const itemStoreId =
+    //     ci?.store_id ?? ci?.store?.id ?? ci?.item?.store_id ?? storeId;
+    //   await deleteItem({
+    //     cart_id: cartItemId,
+    //     ...(itemStoreId != null ? { store_id: itemStoreId } : {}),
+    //     ...(guestId ? { guestId } : {}),
+    //   });
+    // }
+    setDeletingStoreId(storeId);
+    clearCart(storeId, {
+      onSuccess: () => {
+        dispatch(removeCartGroupByStoreId(storeId));
+        refetch?.();
+        setDeletingStoreId(null);
+      },
+      onError: () => {
+        refetch?.();
+        // Mutation failed — skip refetch so the drawer doesn't re-sync
+        // against a store group that was never actually cleared.
+        setDeletingStoreId(null);
+      },
+    });
   };
 
   const handleViewCart = (store) => {
@@ -184,6 +193,7 @@ const AllCartDrawer = ({ open, onClose, cartData = [], refetch }) => {
   };
 
   return (
+    <>
     <Drawer
       anchor="right"
       open={open}
@@ -261,7 +271,7 @@ const AllCartDrawer = ({ open, onClose, cartData = [], refetch }) => {
               variant="ghost"
               color="error"
               disabled={clearingAll}
-              onClick={handleClearAll}
+              onClick={handleClearAllClick}
               sx={{
                 height: 32,
                 borderRadius: "8px",
@@ -356,6 +366,7 @@ const AllCartDrawer = ({ open, onClose, cartData = [], refetch }) => {
                   onAdd={() => handleViewCart(store)}
                   onViewCart={() => handleViewCart(store)}
                   onClick={() => handleViewCart(store)}
+                  isDeleting={deletingStoreId === store?.id}
                 />
               </Box>
             );
@@ -363,6 +374,96 @@ const AllCartDrawer = ({ open, onClose, cartData = [], refetch }) => {
         )}
       </Box>
     </Drawer>
+
+    <CustomModal
+      openModal={confirmClearAllOpen}
+      handleClose={handleCancelClearAll}
+      maxWidth="400px"
+    >
+      <Stack spacing={2.5} alignItems="center" sx={{ p: "28px 24px 24px" }}>
+        <Stack
+          alignItems="center"
+          justifyContent="center"
+          sx={{
+            width: 60,
+            height: 60,
+            borderRadius: "50%",
+            bgcolor: alpha(theme.palette.error.main, 0.1),
+          }}
+        >
+          <i
+            className="fi fi-rr-trash"
+            style={{
+              fontSize: "26px",
+              display: "flex",
+              lineHeight: 1,
+              color: theme.palette.error.main,
+            }}
+          />
+        </Stack>
+
+        <Stack alignItems="center" spacing={1}>
+          <Typography
+            fontSize="18px"
+            fontWeight={700}
+            textAlign="center"
+            color="text.primary"
+            lineHeight={1.2}
+          >
+            {t("Clear All Items?")}
+          </Typography>
+          <Typography
+            fontSize="13px"
+            color="text.secondary"
+            textAlign="center"
+            lineHeight={1.65}
+            sx={{ maxWidth: "290px" }}
+          >
+            {t("This will clear your entire cart from every store. This action cannot be undone.")}
+          </Typography>
+        </Stack>
+
+        <Stack direction="row" spacing={1.5} width="100%">
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={handleCancelClearAll}
+            sx={{
+              borderRadius: "10px",
+              fontWeight: 600,
+              textTransform: "none",
+              py: 1.25,
+              borderColor: theme.palette.divider,
+              color: theme.palette.text.secondary,
+              "&:hover": { borderColor: theme.palette.text.primary },
+            }}
+          >
+            {t("Cancel")}
+          </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            color="error"
+            disableElevation
+            disabled={clearingAll}
+            onClick={handleConfirmClearAll}
+            sx={{
+              borderRadius: "10px",
+              fontWeight: 600,
+              textTransform: "none",
+              py: 1.25,
+            }}
+          >
+            {clearingAll ? (
+              <CircularProgress size={18} thickness={5} sx={{ color: theme.palette.common.white }} />
+            ) : (
+              t("Yes, Clear All")
+            )}
+          </Button>
+        </Stack>
+      </Stack>
+    </CustomModal>
+    </>
   );
 };
 

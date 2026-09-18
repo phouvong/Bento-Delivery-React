@@ -35,7 +35,7 @@ const Root = (props) => {
   if (typeof window !== "undefined") {
     lanDirection = JSON.parse(localStorage.getItem("settings"));
   }
-  console.log({ configData });
+
   return (
     <>
       <CssBaseline />
@@ -72,7 +72,7 @@ export const getServerSideProps = async (context) => {
         "X-localization": language,
         origin: process.env.NEXT_CLIENT_HOST_URL,
       },
-    }
+    },
   );
   const config = await configRes.json();
 
@@ -95,13 +95,13 @@ export const getServerSideProps = async (context) => {
         "X-localization": language,
         origin: process.env.NEXT_CLIENT_HOST_URL,
       },
-    }
+    },
   );
   const landingPageData = await landingPageRes.json();
   // Set cache control headers for 1 hour (3600 seconds)
   res.setHeader(
     "Cache-Control",
-    "public, s-maxage=3600, stale-while-revalidate"
+    "public, s-maxage=3600, stale-while-revalidate",
   );
 
   return {

@@ -17,6 +17,10 @@ export const checkTaxiModule = (value, moduleOption) => {
   const moduleObj = moduleOption?.find((item) => item.value === value);
   return moduleObj?.type === "rental";
 };
+export const checkServiceModule = (value, moduleOption) => {
+  const moduleObj = moduleOption?.find((item) => item.value === value);
+  return moduleObj?.type === "service";
+};
 const RestaurantDetailsForm = ({
   RestaurantJoinFormik,
   restaurantNameHandler,
@@ -227,7 +231,12 @@ const RestaurantDetailsForm = ({
                       moduleOption
                     )
                       ? t("Min Pickup Time")
-                      : t("Min Delivery Time")
+                      : checkServiceModule(
+                        RestaurantJoinFormik?.values?.module_id,
+                        moduleOption
+                      )
+                        ? t("Min Service Time")
+                        : t("Min Delivery Time")
                   }
                   required="true"
                   type="number"
@@ -238,7 +247,12 @@ const RestaurantDetailsForm = ({
                       moduleOption
                     )
                       ? t("Minimum Pickup Time")
-                      : t("Minimum Delivery Time")
+                      : checkServiceModule(
+                        RestaurantJoinFormik?.values?.module_id,
+                        moduleOption
+                      )
+                        ? t("Minimum Service Time")
+                        : t("Minimum Delivery Time")
                   }
                   touched={RestaurantJoinFormik.touched.min_delivery_time}
                   errors={RestaurantJoinFormik.errors.min_delivery_time}
@@ -273,7 +287,12 @@ const RestaurantDetailsForm = ({
                       moduleOption
                     )
                       ? t("Max Pickup Time")
-                      : t("Max Delivery Time")
+                      : checkServiceModule(
+                        RestaurantJoinFormik?.values?.module_id,
+                        moduleOption
+                      )
+                        ? t("Max Service Time")
+                        : t("Max Delivery Time")
                   }
                   required="true"
                   type="number"
@@ -284,7 +303,12 @@ const RestaurantDetailsForm = ({
                       moduleOption
                     )
                       ? t("Maximum Pickup Time")
-                      : t("Maximum Delivery Time")
+                      : checkServiceModule(
+                        RestaurantJoinFormik?.values?.module_id,
+                        moduleOption
+                      )
+                        ? t("Maximum Service Time")
+                        : t("Maximum Delivery Time")
                   }
                   touched={RestaurantJoinFormik.touched.max_delivery_time}
                   errors={RestaurantJoinFormik.errors.max_delivery_time}

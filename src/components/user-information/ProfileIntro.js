@@ -118,8 +118,14 @@ const ProfileIntro = ({
     "monthly-cart-list": t("Monthly Cart List"),
     "subscription-plan": t("Subscription Plan"),
     "track-order": t("Track Orders"),
+    "custom-service": t("Custom Service"),
+    "service-request": t("Requested Services"),
   };
-  const pageLabel = pageLabels[page] || t("Profile");
+  // `page` can carry a query suffix on payment redirects (e.g.
+  // "wallet?flag=success", "subscription-plan?flag=cancel") — strip it so the
+  // label still resolves instead of falling back to "Profile".
+  const normalizedPage = typeof page === "string" ? page.split("?")[0] : page;
+  const pageLabel = pageLabels[normalizedPage] || t("Profile");
 
   const name = `${data?.f_name ?? ""} ${data?.l_name ?? ""}`.trim();
   const joinDate = data?.created_at ? CustomDateFormat(data.created_at) : null;

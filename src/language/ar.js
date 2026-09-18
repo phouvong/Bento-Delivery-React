@@ -1,4 +1,9 @@
 export const arabic = {
+  "Addresses": "العناوين",
+  "Settings": "الإعدادات",
+  "Inbox": "صندوق الوارد",
+  "Interests": "الاهتمامات",
+  "Orders & Trips": "الطلبات والرحلات",
   " ": " ",
   " Add New +": "أضف جديد +",
   " Add new address": "أضف عنوانًا جديدًا",
@@ -436,7 +441,7 @@ export const arabic = {
   "Cover photo is required": "صورة الغلاف مطلوبة",
   "Create Account With Sender Information":
     "إنشاء حساب باستخدام معلومات المُرسِل",
-  "Create account with exiting info.": "نشاء حساب بالمعلومات الموجودة.",
+  "Create account with existing info.": "نشاء حساب بالمعلومات الموجودة.",
   "Create account with sender info": "إنشاء حساب بمعلومات المرسل",
   "Cuisine Restaurant": "مطبخ مطعم",
   Cuisines: "المطبخ",
@@ -1245,7 +1250,7 @@ export const arabic = {
   "Order Placed": "تم تقديم الطلب",
   "Order Placed Successfully": "وضع النظام بنجاح.",
   "Order Status": "حالة الطلب",
-  "Order Summary": "طلب الصيف",
+  "Order Summary": "ملخص الطلب",
   "Order Summery": "ملخص الطلب",
   "Order Time": "وقت الطلب",
   "Order Transaction": "ترتيب المعاملة",
@@ -2470,7 +2475,7 @@ export const arabic = {
   "order ID and phone number": "رقم الطلب ورقم الهاتف",
   "order placed": "تم الطلب",
   "order refund": "ترتيب الاسترداد",
-  "order-summary": "طلب الصيف",
+  "order-summary": "ملخص الطلب",
   order_place: "تم تقديم الطلب",
   others: "آحرون",
   "out of limits": "خارج الحدود",
@@ -2566,4 +2571,350 @@ export const arabic = {
     "خصم {{percent}}٪ على رسوم التوصيل لأعضاء برو على عمليات التوصيل التي تزيد عن {{amount}}",
   "{{percent}}% off on delivery fee as a Pro member on orders above {{amount}}":
     "خصم {{percent}}٪ على رسوم التوصيل لأعضاء برو على الطلبات التي تزيد عن {{amount}}",
+  "Book Now": "Book Now",
+  "Offline Payment Information": "Offline Payment Information",
+  "Switch Module": "Switch Module",
+  "The category you want to view is not in your currently selected module. Switch the module to view this category.":
+    "The category you want to view is not in your currently selected module. Switch the module to view this category.",
+  "The item you want to view is not in your currently selected module. Switch the module to view this item.":
+    "The item you want to view is not in your currently selected module. Switch the module to view this item.",
+  "The store you want to view is not in your currently selected module. Switch the module to view this store.":
+    "The store you want to view is not in your currently selected module. Switch the module to view this store.",
+  Unavailable: "Unavailable",
+  item: "item",
+  "1 date was skipped because the selected time has already passed today.":
+    "1 date was skipped because the selected time has already passed today.",
+  "1 occurrence was skipped because the selected time has already passed.":
+    "1 occurrence was skipped because the selected time has already passed.",
+  "Address type": "Address type",
+  "Adjust quantities or remove variations from cart":
+    "Adjust quantities or remove variations from cart",
+  "All bids have been reviewed. Check back later for new offers.":
+    "All bids have been reviewed. Check back later for new offers.",
+  "Also Booked Together": "Also Booked Together",
+  Approve: "Approve",
+  "Are you sure you want to cancel this booking?":
+    "Are you sure you want to cancel this booking?",
+  "Are you sure you want to cancel this scheduled service":
+    "Are you sure you want to cancel this scheduled service",
+  "Are you sure you want to delete this service?":
+    "Are you sure you want to delete this service?",
+  "Arrival Time": "Arrival Time",
+  "Back To Main Booking": "Back To Main Booking",
+  "Back to Main Orders": "العودة إلى الطلبات الرئيسية",
+  "Bid rejected successfully": "Bid rejected successfully",
+  "Bid selected successfully": "Bid selected successfully",
+  Bidding: "Bidding",
+  "Billing Summary": "ملخص الفاتورة",
+  Booking: "Booking",
+  "Booking Date:": "Booking Date:",
+  "Booking ID:": "Booking ID:",
+  "Booking Id": "Booking Id",
+  "Booking cancelled successfully": "Booking cancelled successfully",
+  "Booking placed successfully": "Booking placed successfully",
+  "Browse by Categories": "Browse by Categories",
+  "By continuing, you will agree with": "By continuing, you will agree with",
+  "By selecting this service will get from provider location":
+    "By selecting this service will get from provider location",
+  "By selecting this service will provided at your location":
+    "By selecting this service will provided at your location",
+  "Can't find the service you need? Submit a request and help us improve our service offerings.":
+    "Can't find the service you need? Submit a request and help us improve our service offerings.",
+  "Cancel Booking": "Cancel Booking",
+  "Cancel Post": "Cancel Post",
+  "Cancel Request": "Cancel Request",
+  "Cash After Service": "Cash After Service",
+  "Category is required": "Category is required",
+  "Check this to repeat selected days in a date range":
+    "Check this to repeat selected days in a date range",
+  "Choose Booking Type": "Choose Booking Type",
+  "Choose when you want get your service":
+    "Choose when you want get your service",
+  "Choose when you want to get your service on selected days.":
+    "Choose when you want to get your service on selected days.",
+  "Choose which days you want your service":
+    "Choose which days you want your service",
+  "Choose which variation service you want":
+    "Choose which variation service you want",
+  "Clear All Items?": "Clear All Items?",
+  "Confirm Dates": "Confirm Dates",
+  "Confirm Days": "Confirm Days",
+  "Confirm Variation": "Confirm Variation",
+  "Create New": "Create New",
+  "Create a request with your own description and additional instructions.":
+    "Create a request with your own description and additional instructions.",
+  "Create a service request, share your requirements, and receive offers from qualified providers ready to help.":
+    "Create a service request, share your requirements, and receive offers from qualified providers ready to help.",
+  "Custom Schedule Service": "Custom Schedule Service",
+  "Custom Service": "Custom Service",
+  "Custom Service Created Successfully!":
+    "Custom Service Created Successfully!",
+  "Custom Service Details": "Custom Service Details",
+  "Custom Service List": "Custom Service List",
+  Customer: "Customer",
+  "Customer Details": "Customer Details",
+  Date: "Date",
+  "Date Range": "Date Range",
+  Day: "Day",
+  "Day Wise Arrival Time": "Day Wise Arrival Time",
+  "Delete Request": "Delete Request",
+  "Description is required": "Description is required",
+  "Download Invoice": "Download Invoice",
+  "Downloading invoice...": "Downloading invoice...",
+  "Edit Service Request": "Edit Service Request",
+  "Enter a description...": "Enter a description...",
+  "Enter a service description...": "Enter a service description...",
+  "Enter your booking ID and phone number to get live updates":
+    "Enter your booking ID and phone number to get live updates",
+  "Enter your booking id": "Enter your booking id",
+  "Est. Service Time": "Est. Service Time",
+  "Ex: 06:00 PM": "Ex: 06:00 PM",
+  "Ex: 20 Jul 26 – 20 Aug 26": "Ex: 20 Jul 26 – 20 Aug 26",
+  "Ex: Car Wash": "Ex: Car Wash",
+  "Ex: Saturday, Sunday": "Ex: Saturday, Sunday",
+  Expired: "Expired",
+  "Explore Our Services": "Explore Our Services",
+  "Featured Providers": "Featured Providers",
+  Feedback: "Feedback",
+  "Find the Right Provider for Your Service":
+    "Find the Right Provider for Your Service",
+  "Get Service At": "Get Service At",
+  "Get fastest service from your nearby Service Provides":
+    "Get fastest service from your nearby Service Provides",
+  ID: "ID",
+  "Instant Service": "Instant Service",
+  "Instant service is not available. Please select a future time":
+    "Instant service is not available. Please select a future time",
+  "Invoice downloaded": "Invoice downloaded",
+  Loading: "Loading",
+  "Make Request": "Make Request",
+  "Min Booking": "Min Booking",
+  "Most Popular Services": "Most Popular Services",
+  "Most trusted services chosen by thousands of users.":
+    "Most trusted services chosen by thousands of users.",
+  "Multiple Booking Type": "Multiple Booking Type",
+  "My Details": "My Details",
+  "My Location": "My Location",
+  "My Requested Services": "My Requested Services",
+  "Need a Service? Create a Request": "Need a Service? Create a Request",
+  "New Service Request": "New Service Request",
+  "Next Service": "Next Service",
+  "No Bids Yet": "No Bids Yet",
+  "No campaigns available": "No campaigns available",
+  "No changes to update": "No changes to update",
+  "No service could be added to cart": "No service could be added to cart",
+  "No service man assigned": "No service man assigned",
+  "No services available": "No services available",
+  "No sub category found": "No sub category found",
+  "Offer Price": "Offer Price",
+  Ongoing: "Ongoing",
+  "Ongoing Service": "Ongoing Service",
+  "Order Date:": "تاريخ الطلب:",
+  "Order Note": "Order Note",
+  "Parcel Received": "Parcel Received",
+  "Placing...": "Placing...",
+  "Please give a rating": "Please give a rating",
+  "Please log in to use Multiple Booking":
+    "Please log in to use Multiple Booking",
+  "Please select a date": "Please select a date",
+  "Please select a future date and time":
+    "Please select a future date and time",
+  "Please select a service address": "Please select a service address",
+  "Please select a time": "Please select a time",
+  "Please select a variation": "Please select a variation",
+  "Please select an address type": "Please select an address type",
+  "Please set arrival time for all selected dates":
+    "Please set arrival time for all selected dates",
+  "Please update the arrival time to resolve the conflict before confirming.":
+    "Please update the arrival time to resolve the conflict before confirming.",
+  "Post for Customised Service": "Post for Customised Service",
+  "Preferable Date": "Preferable Date",
+  "Privacy Policy,": "Privacy Policy,",
+  "Processing...": "Processing...",
+  "Product Video": "Product Video",
+  "Product video preview": "Product video preview",
+  Provider: "Provider",
+  "Provider List": "Provider List",
+  "Provider Location": "Provider Location",
+  "Provider is not available at the selected time on":
+    "Provider is not available at the selected time on",
+  "Quick & Emergency Experts": "Quick & Emergency Experts",
+  "Rate the serviceman": "Rate the serviceman",
+  "Rate this service": "Rate this service",
+  "Recommended Services Nearby": "Recommended Services Nearby",
+  "Reordering from {{name}} will clear your current provider cart. Do you want to continue?":
+    "Reordering from {{name}} will clear your current provider cart. Do you want to continue?",
+  "Repeat This Every Week": "Repeat This Every Week",
+  "Repeat This Service": "Repeat This Service",
+  "Request cancelled successfully": "Request cancelled successfully",
+  "Request deleted successfully": "Request deleted successfully",
+  "Request posted successfully": "Request posted successfully",
+  "Request updated successfully": "Request updated successfully",
+  "Requested Service": "Requested Service",
+  "Requested Service Name": "Requested Service Name",
+  "Requested Services": "Requested Services",
+  "Review submitted": "Review submitted",
+  "Schedule Days": "Schedule Days",
+  "Schedule Service": "Schedule Service",
+  "Search Booking": "Search Booking",
+  "Select Category": "Select Category",
+  "Select Date & Time": "Select Date & Time",
+  "Select Date and Time": "Select Date and Time",
+  "Select Days": "Select Days",
+  "Select Sub Category": "Select Sub Category",
+  "Select Variation": "Select Variation",
+  "Select a service category, describe your requirements, and receive offers from qualified providers.":
+    "Select a service category, describe your requirements, and receive offers from qualified providers.",
+  "Select dates from the calendar": "Select dates from the calendar",
+  "Selected Date & time": "Selected Date & time",
+  "Selected Days & Time": "Selected Days & Time",
+  "Send Request": "Send Request",
+  Service: "Service",
+  "Service Address": "Service Address",
+  "Service Date:": "Service Date:",
+  "Service Description": "Service Description",
+  "Service Details": "Service Details",
+  "Service Name": "Service Name",
+  "Service Provided at": "Service Provided at",
+  "Service Providers": "Service Providers",
+  "Service Time": "Service Time",
+  "Service updated!": "Service updated!",
+  Servicemen: "Servicemen",
+  "Services added to cart": "Services added to cart",
+  "Some selected date-times are in the past. Please choose a future time.":
+    "Some selected date-times are in the past. Please choose a future time.",
+  "Start a New Booking?": "Start a New Booking?",
+  "Sub Booking ID:": "Sub Booking ID:",
+  "Sub category is required": "Sub category is required",
+  "Submit Custom Service": "Submit Custom Service",
+  "Switch to Cash After Service": "Switch to Cash After Service",
+  "Tell Us More About Your Desired Service":
+    "Tell Us More About Your Desired Service",
+  "Terms & Condition": "Terms & Condition",
+  "The content will be translated to the selected language.":
+    "The content will be translated to the selected language.",
+  "This belongs to another module. Switch now to view it?":
+    "This belongs to another module. Switch now to view it?",
+  "This booking will be continued": "This booking will be continued",
+  "This provider has no available schedule":
+    "This provider has no available schedule",
+  "This will clear your entire cart from every store. This action cannot be undone.":
+    "This will clear your entire cart from every store. This action cannot be undone.",
+  "Top Providers": "Top Providers",
+  "Track Your Booking": "Track Your Booking",
+  Upcoming: "Upcoming",
+  "Update Cart": "Update Cart",
+  "Update Custom Service": "Update Custom Service",
+  "Update Request": "Update Request",
+  "Update Variation": "Update Variation",
+  "Variation Available": "Variation Available",
+  "Variation Selected": "Variation Selected",
+  "Variation {{num}}": "Variation {{num}}",
+  Variations: "Variations",
+  Video: "Video",
+  View: "View",
+  "View Post": "View Post",
+  "View Service Time": "View Service Time",
+  "Yes, Clear All": "Yes, Clear All",
+  "Yes, Rebook": "Yes, Rebook",
+  "You can get the service now or schedule it for a later time!":
+    "You can get the service now or schedule it for a later time!",
+  "You can have the service provided now or pick a time for scheduled service provide!":
+    "You can have the service provided now or pick a time for scheduled service provide!",
+  "You have to go to provider location in order to receive this service":
+    "You have to go to provider location in order to receive this service",
+  "You will receive this services in the upcoming":
+    "You will receive this services in the upcoming",
+  "You will receive this services total":
+    "You will receive this services total",
+  "Your Previous Booking": "Your Previous Booking",
+  "Your custom service has been created successfully. Providers can view your custom service and send offers based on your requirements.":
+    "Your custom service has been created successfully. Providers can view your custom service and send offers based on your requirements.",
+  "Your provider URL has been copied": "Your provider URL has been copied",
+  "Your service booking date": "Your service booking date",
+  "bookings placed successfully": "bookings placed successfully",
+  "dates were skipped because the selected time has already passed.":
+    "dates were skipped because the selected time has already passed.",
+  "decrease quantity": "decrease quantity",
+  image: "image",
+  "increase quantity": "increase quantity",
+  "occurrences were skipped because the selected time has already passed.":
+    "occurrences were skipped because the selected time has already passed.",
+  times: "times",
+  "week days.": "week days.",
+  "Service Completed": "Service Completed",
+  "At Customer's Location": "At Customer's Location",
+  "At Provider's Location": "At Provider's Location",
+  "Home Service": "Home Service",
+  "Visit Provider": "Visit Provider",
+  "Please visit provider location": "Please visit provider location",
+  "Provider will come to your location": "Provider will come to your location",
+  Canceled: "Canceled",
+  Cancelled: "Cancelled",
+  "Per booking": "Per booking",
+  "Total for": "Total for",
+  Validity: "Validity",
+  "View single booking": "View single booking",
+  "View total": "View total",
+  bookings: "bookings",
+  "Single booking": "Single booking",
+  "Coupon removed. Please re-apply after updating your booking.":
+    "Coupon removed. Please re-apply after updating your booking.",
+  FAQ: "FAQ",
+  "Frequently Bought Together": "Frequently Bought Together",
+  "Max Service Time": "Max Service Time",
+  "Maximum Service Time": "Maximum Service Time",
+  "Min Service Time": "Min Service Time",
+  "Minimum Service Time": "Minimum Service Time",
+  "Please provide a reason": "Please provide a reason",
+  "Reason for Cancellation": "Reason for Cancellation",
+  "Tell us why you're cancelling this booking":
+    "Tell us why you're cancelling this booking",
+  Booked: "Booked",
+  "Visit provider": "Visit provider",
+
+  "{{percent}}% off on {{module}} (up to {{cap}}) (on orders above {{min}})":
+    "خصم {{percent}}٪ على {{module}} (حتى {{cap}}) (على الطلبات التي تزيد عن {{min}})",
+  "{{percent}}% off on {{module}} (up to {{cap}})":
+    "خصم {{percent}}٪ على {{module}} (حتى {{cap}})",
+  "{{percent}}% off on {{module}} (on orders above {{min}})":
+    "خصم {{percent}}٪ على {{module}} (على الطلبات التي تزيد عن {{min}})",
+  "{{percent}}% off on {{module}}": "خصم {{percent}}٪ على {{module}}",
+  "Get {{percent}}% off (up to {{cap}}) (on orders above {{min}})":
+    "احصل على خصم {{percent}}٪ (حتى {{cap}}) (على الطلبات التي تزيد عن {{min}})",
+  "Get {{percent}}% off (up to {{cap}})":
+    "احصل على خصم {{percent}}٪ (حتى {{cap}})",
+  "Get {{percent}}% off (on orders above {{min}})":
+    "احصل على خصم {{percent}}٪ (على الطلبات التي تزيد عن {{min}})",
+  "Get {{percent}}% off": "احصل على خصم {{percent}}٪",
+  "Get {{percent}}% off on all orders (up to {{cap}})":
+    "احصل على خصم {{percent}}٪ على جميع الطلبات (حتى {{cap}})",
+  "Get {{percent}}% off on all orders":
+    "احصل على خصم {{percent}}٪ على جميع الطلبات",
+  "Free delivery on {{module}} (on orders above {{min}})":
+    "توصيل مجاني على {{module}} (على الطلبات التي تزيد عن {{min}})",
+  "Free delivery on {{module}}": "توصيل مجاني على {{module}}",
+  "{{percent}}% off on delivery fee on {{module}} (on orders above {{min}})":
+    "خصم {{percent}}٪ على رسوم التوصيل لـ {{module}} (على الطلبات التي تزيد عن {{min}})",
+  "{{percent}}% off on delivery fee on {{module}}":
+    "خصم {{percent}}٪ على رسوم التوصيل لـ {{module}}",
+  "Delivery fee benefit on {{module}} (on orders above {{min}})":
+    "ميزة رسوم التوصيل لـ {{module}} (على الطلبات التي تزيد عن {{min}})",
+  "Delivery fee benefit on {{module}}": "ميزة رسوم التوصيل لـ {{module}}",
+  "Free delivery (on orders above {{min}})":
+    "توصيل مجاني (على الطلبات التي تزيد عن {{min}})",
+  "{{percent}}% off on delivery fee (on orders above {{min}})":
+    "خصم {{percent}}٪ على رسوم التوصيل (على الطلبات التي تزيد عن {{min}})",
+  "{{percent}}% off on delivery fee": "خصم {{percent}}٪ على رسوم التوصيل",
+  "Delivery fee benefit (on orders above {{min}})":
+    "ميزة رسوم التوصيل (على الطلبات التي تزيد عن {{min}})",
+  "Delivery fee benefit": "ميزة رسوم التوصيل",
+  "Get {{percent}}% off delivery fee":
+    "احصل على خصم {{percent}}٪ على رسوم التوصيل",
+  "Grand Total": "Grand Total",
+	"No category found": "No category found",
+	"No options found": "No options found",
+	"Search category...": "Search category...",
+	"Search sub category...": "Search sub category..."
+
 };

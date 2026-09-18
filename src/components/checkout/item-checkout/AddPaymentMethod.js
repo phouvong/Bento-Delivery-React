@@ -5,6 +5,7 @@ import {
   Button,
   Drawer,
   IconButton,
+  Skeleton,
   Stack,
   Typography,
   useMediaQuery,
@@ -24,6 +25,7 @@ import wallet from "../assets/wallet.png";
 import money from "../assets/money.png";
 import OfflinePaymentIcon from "../assets/OfflinePaymentIcon";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
 const AddPaymentMethod = (props) => {
   const {
@@ -47,7 +49,16 @@ const AddPaymentMethod = (props) => {
     payableAmount,
     changeAmount,
     setChangeAmount,
+    onBeforeProceed,
+    locked,
+    repeatCount = 0,
+    isAmountReady = true,
   } = props;
+  // Repeat series shows the whole-series total; expose the per-booking figure.
+  const isRepeatSeries = repeatCount > 1;
+  const perBookingAmount = isRepeatSeries
+    ? (Number(payableAmount) || 0) / repeatCount
+    : 0;
   const [openModal, setOpenModel] = useState(false);
   const { offlineMethod } = useSelector((state) => state.offlinePayment);
   const theme = useTheme();
@@ -70,7 +81,7 @@ const AddPaymentMethod = (props) => {
     }
   }, [paymentMethod]);
 
-  const hasPaymentMethod = Boolean(paymentMethod || usePartialPayment);
+  const hasPaymentMethod = locked || Boolean(paymentMethod || usePartialPayment);
 
   const closeButton = (
     <IconButton
@@ -115,6 +126,7 @@ const AddPaymentMethod = (props) => {
       payableAmount={payableAmount}
       changeAmount={changeAmount}
       setChangeAmount={setChangeAmount}
+      onBeforeProceed={onBeforeProceed}
     />
   );
 
@@ -191,17 +203,49 @@ const AddPaymentMethod = (props) => {
                   ? `${paymentMethod?.replaceAll("_", " ")} (${
                       offlineMethod?.method_name
                     })`
+                  : paymentMethod === "cash_on_delivery" &&
+                    getCurrentModuleType() === "service"
+                  ? t("Cash After Service")
                   : t(paymentMethod?.replaceAll("_", " "))}
                 {" : "}
-                <Typography
-                  component="span"
-                  sx={{ fontWeight: 600, fontSize: "inherit" }}
-                >
-                  {getAmountWithSign(
-                    usePartialPayment ? walletBalance : payableAmount
-                  )}
-                </Typography>
+                {isAmountReady ? (
+                  <Typography
+                    component="span"
+                    sx={{ fontWeight: 600, fontSize: "inherit" }}
+                  >
+                    {getAmountWithSign(
+                      usePartialPayment ? walletBalance : payableAmount
+                    )}
+                  </Typography>
+                ) : (
+                  <Skeleton
+                    component="span"
+                    variant="text"
+                    width={60}
+                    sx={{ display: "inline-block", verticalAlign: "middle" }}
+                  />
+                )}
               </Typography>
+
+              {isRepeatSeries && isAmountReady && (
+                <Typography
+                  sx={{
+                    fontSize: { xs: "11px", md: "12px" },
+                    fontWeight: 500,
+                    color: theme.palette.text.secondary,
+                  }}
+                >
+                  {t("Single booking")}
+                  {" : "}
+                  <Typography
+                    component="span"
+                    sx={{ fontWeight: 600, fontSize: "inherit" }}
+                  >
+                    {getAmountWithSign(perBookingAmount)}
+                  </Typography>{" "}
+                  {`× ${repeatCount} ${t("bookings")}`}
+                </Typography>
+              )}
 
               {usePartialPayment && paymentMethod && (
                 <Typography
@@ -214,6 +258,9 @@ const AddPaymentMethod = (props) => {
                 >
                   {paymentMethod === "offline_payment"
                     ? `${t("offline payment")} (${offlineMethod?.method_name})`
+                    : paymentMethod === "cash_on_delivery" &&
+                      getCurrentModuleType() === "service"
+                    ? t("Cash After Service")
                     : t(paymentMethod.replaceAll("_", " "))}{" "}
                   {t("(Due)")}
                   {" : "}
@@ -238,36 +285,38 @@ const AddPaymentMethod = (props) => {
           )}
         </Stack>
 
-        <Button
-          onClick={handleClick}
-          variant="contained"
-          disableElevation
-          startIcon={
-            <AddCircleOutlineIcon
-              sx={{ fontSize: 18, color: theme.palette.whiteContainer.main }}
-            />
-          }
-          sx={{
-            flexShrink: 0,
-            px: { xs: 1.75, md: 2.5 },
-            py: { xs: 0.75, md: 1 },
-            borderRadius: "8px",
-            textTransform: "none",
-            fontWeight: 600,
-            fontSize: { xs: "13px", md: "14px" },
-            color: theme.palette.whiteContainer.main,
-            backgroundColor: theme.palette.primary.main,
-            "&:hover": {
-              backgroundColor: theme.palette.primary.dark,
-              boxShadow: "none",
-            },
-          }}
-        >
-          {hasPaymentMethod ? t("Change") : t("Add")}
-        </Button>
+        {!locked && (
+          <Button
+            onClick={handleClick}
+            variant="contained"
+            disableElevation
+            startIcon={
+              <AddCircleOutlineIcon
+                sx={{ fontSize: 18, color: theme.palette.whiteContainer.main }}
+              />
+            }
+            sx={{
+              flexShrink: 0,
+              px: { xs: 1.75, md: 2.5 },
+              py: { xs: 0.75, md: 1 },
+              borderRadius: "8px",
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: { xs: "13px", md: "14px" },
+              color: theme.palette.whiteContainer.main,
+              backgroundColor: theme.palette.primary.main,
+              "&:hover": {
+                backgroundColor: theme.palette.primary.dark,
+                boxShadow: "none",
+              },
+            }}
+          >
+            {hasPaymentMethod ? t("Change") : t("Add")}
+          </Button>
+        )}
       </Stack>
 
-      {openModal &&
+      {!locked && openModal &&
         (isMobile ? (
           <Drawer
             anchor="bottom"

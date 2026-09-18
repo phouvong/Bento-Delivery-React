@@ -11,7 +11,6 @@ const RideShareModuleLandingPage = ({ configData }) => {
     android: configData?.app_url_android_rider || "",
     ios: configData?.app_url_ios_rider || "",
   };
-  console.log({ configData });
 
   return (
     // <CustomContainer sx={{ mt: { md: "24px" } }}>

@@ -12,23 +12,26 @@ import { getModuleId } from "helper-functions/getModuleId";
 import { useRouter } from "next/router";
 
 const PharmacyStaticBanners = () => {
+  // this is basic campaign api call
   const router = useRouter();
-  const { data, refetch, isFetched,isLoading } = useGetBasicCampaigns();
+  const { data, refetch, isFetched, isLoading } = useGetBasicCampaigns();
 
   const handleBannerClick = (banner) => {
-    router.push(
-      {
-        pathname: "/campaigns/[id]",
-        query: { id: `${banner?.slug||banner?.id}` },
-      },
-      undefined,
-      { shallow: true }
-    ).then(() => {
-      // Add slight delay to ensure new page is mounted
-      setTimeout(() => {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }, 100); // delay helps after DOM updates
-    });
+    router
+      .push(
+        {
+          pathname: "/campaigns/[id]",
+          query: { id: `${banner?.slug || banner?.id}` },
+        },
+        undefined,
+        { shallow: true },
+      )
+      .then(() => {
+        // Add slight delay to ensure new page is mounted
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 100); // delay helps after DOM updates
+      });
   };
 
   const settings = {
@@ -56,62 +59,58 @@ const PharmacyStaticBanners = () => {
   return (
     <>
       {isLoading ? (
-          <CustomStackFullWidth
-              sx={{
-                "& .slick-list": {
-                  marginRight: { xs: "-10px", sm: "-20px" },
-                },
-                "& .slick-slide": {
-                  paddingRight: { xs: "10px", sm: "20px" },
-                },
-              }}
-          >
-                <Slider {...settings}>
-                  {[...Array(2)].map((_, index) => (
-                      <BannersWrapper key={index}>
-                        <Skeleton
-                            variant="rectangular"
-                            height="100%"
-                            width="100%"
-                        />
-                      </BannersWrapper>
-                  ))}
-                </Slider>
-          </CustomStackFullWidth>
+        <CustomStackFullWidth
+          sx={{
+            "& .slick-list": {
+              marginRight: { xs: "-10px", sm: "-20px" },
+            },
+            "& .slick-slide": {
+              paddingRight: { xs: "10px", sm: "20px" },
+            },
+          }}
+        >
+          <Slider {...settings}>
+            {[...Array(2)].map((_, index) => (
+              <BannersWrapper key={index}>
+                <Skeleton variant="rectangular" height="100%" width="100%" />
+              </BannersWrapper>
+            ))}
+          </Slider>
+        </CustomStackFullWidth>
       ) : (
-          data?.length > 0 && (
-              <CustomStackFullWidth
-                  sx={{
-                    "& .slick-list": {
-                      marginRight: { xs: "-10px", sm: "-20px" },
-                    },
-                    "& .slick-slide": {
-                      paddingRight: { xs: "10px", sm: "20px" },
-                    },
-                  }}
-              >
-                <SliderCustom float="center">
-                  <Slider {...settings}>
-                    {data.map((item, index) => (
-                        <BannersWrapper
-                            key={index}
-                            onClick={() => handleBannerClick(item)}
-                        >
-                          <CustomImageContainer
-                              src={item?.image_full_url}
-                              alt={item?.title}
-                              height="100%"
-                              width="100%"
-                              objectFit="cover"
-                              borderRadius="10px"
-                              bg="#ddd"
-                          />
-                        </BannersWrapper>
-                    ))}
-                  </Slider>
-                </SliderCustom>
-              </CustomStackFullWidth>
-          )
+        data?.length > 0 && (
+          <CustomStackFullWidth
+            sx={{
+              "& .slick-list": {
+                marginRight: { xs: "-10px", sm: "-20px" },
+              },
+              "& .slick-slide": {
+                paddingRight: { xs: "10px", sm: "20px" },
+              },
+            }}
+          >
+            <SliderCustom float="center">
+              <Slider {...settings}>
+                {data.map((item, index) => (
+                  <BannersWrapper
+                    key={index}
+                    onClick={() => handleBannerClick(item)}
+                  >
+                    <CustomImageContainer
+                      src={item?.image_full_url}
+                      alt={item?.title}
+                      height="100%"
+                      width="100%"
+                      objectFit="cover"
+                      borderRadius="10px"
+                      bg="#ddd"
+                    />
+                  </BannersWrapper>
+                ))}
+              </Slider>
+            </SliderCustom>
+          </CustomStackFullWidth>
+        )
       )}
     </>
   );

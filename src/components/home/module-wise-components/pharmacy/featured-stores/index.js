@@ -10,30 +10,43 @@ import {
   SliderCustom,
 } from "styled-components/CustomStyles.style";
 import useGetStoresByFiltering from "../../../../../api-manage/hooks/react-query/store/useGetStoresByFiltering";
+import useGetTopRatedStores from "../../../../../api-manage/hooks/react-query/store/useGetTopRatedStores";
 import NewStoreCardSkeleton from "components/Shimmer/NewStoreCardSkeleton";
 import { HomeComponentsWrapper } from "../../../HomePageComponents";
 import NewStoreCard from "components/cards/newCard/NewStoreCard";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
 const FeaturedStores = (props) => {
   const { title, slide } = props;
   const { t } = useTranslation();
   const theme = useTheme();
-  const pageParams = {
+
+  const isServiceModule = getCurrentModuleType() === "service";
+
+  const filterParams = {
     type: "all",
     limit: 20,
-    enabled: true,
+    enabled: !isServiceModule,
   };
-  const { data, isLoading } =
-    useGetStoresByFiltering(pageParams);
+  const topRatedParams = {
+    type: "all",
+    limit: 20,
+    enabled: isServiceModule,
+  };
+
+  const { data: filterData, isLoading: filterLoading } = useGetStoresByFiltering(filterParams);
+  const { data: topRatedData, isLoading: topRatedLoading } = useGetTopRatedStores({pageParams: topRatedParams, enabled: isServiceModule});
+
+  const data = isServiceModule ? topRatedData : filterData;
+  const isLoading = isServiceModule ? topRatedLoading : filterLoading;
+
   let featuredStores = [];
-  if (data) {
-    if (data?.pages?.length > 0) {
-      if (data?.pages?.[0]?.stores?.length > 0) {
-        data?.pages?.[0]?.stores?.forEach(
-          (item) => item?.featured === 1 && featuredStores.push(item)
-        );
-      }
-    }
+  if (isServiceModule) {
+    featuredStores = data?.pages?.[0]?.providers ?? data?.pages?.[0]?.stores ?? [];
+  } else if (data?.pages?.[0]?.stores?.length > 0) {
+    data.pages[0].stores.forEach(
+      (item) => item?.featured === 1 && featuredStores.push(item)
+    );
   }
 
   const settings = {
@@ -122,7 +135,7 @@ const FeaturedStores = (props) => {
         </CustomStackFullWidth>
       ) : (
         <>
-          {data && data?.pages?.length > 0 && featuredStores?.length > 0 && (
+          {data?.pages?.length > 0 && featuredStores?.length > 0 && (
             <CustomStackFullWidth
               alignItems="flex-start"
               justifyContent="flex-start"
@@ -132,7 +145,7 @@ const FeaturedStores = (props) => {
                 component="h2"
                 sx={{
                   fontWeight: 700,
-                  fontSize: { xs: "16px", md: "18px" },
+                  fontSize: isServiceModule ? { xs: "18px", md: "24px" } : { xs: "16px", md: "18px" },
                   color: theme.palette.text.primary,
                 }}
               >

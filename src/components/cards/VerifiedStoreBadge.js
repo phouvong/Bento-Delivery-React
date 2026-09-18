@@ -4,6 +4,7 @@ import StoreVerifiedSVG from "./assets/StoreVerifiedSVG";
 import { useTranslation } from "react-i18next";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
+import useIsVerifiedStoreEnabled from "api-manage/hooks/custom-hooks/useIsVerifiedStoreEnabled";
 
 const VerifiedStoreBadge = ({
   verified,
@@ -12,7 +13,8 @@ const VerifiedStoreBadge = ({
   containerSx,
 }) => {
   const { t } = useTranslation();
-  if (!verified) return null;
+  const verifiedStoreEnabled = useIsVerifiedStoreEnabled();
+  if (!verified || !verifiedStoreEnabled) return null;
 
   const size = parseInt(fontSize, 10) || 16;
 

@@ -25,7 +25,10 @@ import { getAmountWithSign } from "helper-functions/CardHelpers";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { getLanguage } from "helper-functions/getLanguage";
 import { getGuestId } from "helper-functions/getToken";
-import { handleProductRedirect } from "helper-functions/handleProductRedirect";
+import {
+  handleProductRedirect,
+  handleServiceRedirect,
+} from "helper-functions/handleProductRedirect";
 import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import dynamic from "next/dynamic";
@@ -38,11 +41,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { useQueryClient } from "react-query";
 import {
   setCart,
+  setCartList,
   setDecrementToCartItem,
   setIncrementToCartItem,
   setRemoveItemFromCart,
 } from "redux/slices/cart";
-import { addWishList, removeWishListItem } from "redux/slices/wishList";
+import {
+  addWishList,
+  removeWishListItem,
+  addWishListService,
+  removeWishListService,
+} from "redux/slices/wishList";
 import {
   not_logged_in_message,
   out_of_limits,
@@ -67,9 +76,12 @@ import ProductVegSvg from "../assets/ProductVegSvg";
 import ProductOrganicSvg from "../assets/ProductOrganicSvg";
 import ProductNonVegSvg from "../assets/ProductNonVegSvg";
 import StoreVerifiedSVG from "../assets/StoreVerifiedSVG";
+import useIsVerifiedStoreEnabled from "api-manage/hooks/custom-hooks/useIsVerifiedStoreEnabled";
+import VariationModal from "components/home/module-wise-components/service/components/global/VariationModal";
+import { getServiceCardPricing } from "components/home/module-wise-components/service/components/common/ServiceCardPricing";
 
 const FoodDetailModal = dynamic(() =>
-  import("../../food-details/foodDetail-modal/FoodDetailModal")
+  import("../../food-details/foodDetail-modal/FoodDetailModal"),
 );
 const ModuleModal = dynamic(() => import("../ModuleModal"));
 
@@ -303,11 +315,13 @@ const StoreRow = ({
   isStore,
   verifiedSeller,
   storeRedirectData,
+  isHorizontal,
 }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
-  const isStoreVerified = !!verifiedSeller;
+  const verifiedStoreEnabled = useIsVerifiedStoreEnabled();
+  const isStoreVerified = !!verifiedSeller && verifiedStoreEnabled;
 
   const moduleType = getCurrentModuleType();
   const verifiedLabel =
@@ -330,7 +344,7 @@ const StoreRow = ({
     <Stack
       direction="row"
       alignItems="center"
-      justifyContent="space-between"
+      justifyContent={isHorizontal ? "flex-start" : "space-between"}
       sx={{ overflow: "hidden", minWidth: 0 }}
     >
       {!isStore && (
@@ -338,7 +352,11 @@ const StoreRow = ({
           direction="row"
           alignItems="center"
           gap="4px"
-          sx={{ flex: 1, minWidth: 0, overflow: "hidden" }}
+          sx={{
+            minWidth: 0,
+            overflow: "hidden",
+            flex: isHorizontal ? "0 1 auto" : 1,
+          }}
         >
           <StoreBadge
             isStoreVerified={isStoreVerified}
@@ -371,7 +389,10 @@ const StoreRow = ({
           direction="row"
           alignItems="center"
           gap="2px"
-          sx={{ flexShrink: 0, ml: "4px" }}
+          sx={{
+            flexShrink: 0,
+            ml: isHorizontal ? "6px" : "4px",
+          }}
         >
           <StarIcon sx={{ fontSize: "12px", color: "customColor.starAmber" }} />
           <Typography
@@ -402,6 +423,7 @@ const CartControls = ({
   onDecrement,
   onIncrement,
   onAdd,
+  onContainerClick,
 }) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
@@ -450,7 +472,11 @@ const CartControls = ({
       ref={containerRef}
       onClick={(e) => {
         e.stopPropagation();
-        setExpanded(true);
+        if (onContainerClick) {
+          onContainerClick(e);
+        } else {
+          setExpanded(true);
+        }
       }}
       sx={isHorizontal ? { bottom: 7, right: 7 } : {}}
     >
@@ -740,9 +766,11 @@ const InfoSection = ({
       }}
     >
       <StoreRow
+        isHorizontal={isHorizontal}
         storeName={item?.store_name}
         storeLogoUrl={
           item?.store_logo_full_url ??
+          item?.provider_image_full_url ??
           item?.store?.logo_full_url ??
           item?.store_details?.logo_full_url
         }
@@ -750,6 +778,7 @@ const InfoSection = ({
         isStore={isStore}
         verifiedSeller={
           item?.verified_seller ??
+          item?.verified_provider ??
           item?.store?.verified_seller ??
           item?.store_details?.verified_seller
         }
@@ -829,7 +858,7 @@ const InfoSection = ({
               </Typography>
             </DiscountBadge>
           )}
-          {!!item?.store?.free_delivery && (
+          {(!!item?.store?.free_delivery || item?.free_delivery  ) && (
             <DeliveryBadge sx={{ flexShrink: 0 }}>
               <i
                 className="fi fi-rs-biking-mountain"
@@ -1092,7 +1121,7 @@ export const RentalImageOverlay = ({
   const theme = useTheme();
   const { t } = useTranslation();
   const totalVehicleCount = Number(
-    item?.total_vehicle_count ?? item?.total_vehicles ?? 0
+    item?.total_vehicle_count ?? item?.total_vehicles ?? 0,
   );
   const extraVehicleCount = Math.max(totalVehicleCount - 1, 0);
   const showInfoButton = totalVehicleCount > 1;
@@ -1100,7 +1129,7 @@ export const RentalImageOverlay = ({
     ? `${extraVehicleCount} ${t(
         extraVehicleCount === 1
           ? "More Similar Vehicle"
-          : "More Similar Vehicles"
+          : "More Similar Vehicles",
       )}`
     : "";
   return (
@@ -1383,6 +1412,7 @@ const NewProductCard = ({
   isStore,
   isPharmacy = false,
   isRental = false,
+  horizontalStyle,
 }) => {
   const theme = useTheme();
   const { t } = useTranslation();
@@ -1392,6 +1422,9 @@ const NewProductCard = ({
   const [state, dispatch] = useReducer(reducer, initialState);
   const [openLocationAlert, setOpenLocationAlert] = useState(false);
   const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
+  const [openVariationModal, setOpenVariationModal] = useState(false);
+  const [isVariationUpdating, setIsVariationUpdating] = useState(false);
+  const [selectedVariation, setSelectedVariation] = useState(null);
 
   const { cartList: aliasCartList } = useSelector((s) => s.cart);
   const { wishLists } = useSelector((s) => s.wishList);
@@ -1401,16 +1434,27 @@ const NewProductCard = ({
   const cartList = getCartListModuleWise(aliasCartList);
   const isInCart = cartList?.find((c) => c.id === item?.id);
   const isProductExist = !!isInCart;
-  const count = isInCart?.quantity ?? 0;
+  const isServiceModule = getCurrentModuleType() === ModuleTypes.SERVICE;
+  const count =
+    isServiceModule && item?.variations?.length > 0
+      ? cartList
+          ?.filter((c) => c.id === item?.id)
+          .reduce((sum, c) => sum + (c.quantity ?? 0), 0)
+      : isInCart?.quantity ?? 0;
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
   const isWishlisted =
-    !!token && !!wishLists?.item?.find((w) => w.id === item?.id);
+    !!token &&
+    !!(isServiceModule
+      ? wishLists?.service?.find((w) => w.id === item?.id)
+      : wishLists?.item?.find((w) => w.id === item?.id));
 
-  const { mutate: addToMutate, isLoading } = useAddCartItem();
+  const { mutate: addToMutate, mutateAsync: addToMutateAsync, isLoading } =
+    useAddCartItem();
   const { mutate: updateMutate, isLoading: updateLoading } =
     useCartItemUpdate();
-  const { mutate: cartItemRemoveMutate } = useDeleteCartItem();
+  const { mutate: cartItemRemoveMutate, mutateAsync: cartItemRemoveMutateAsync } =
+    useDeleteCartItem();
   const { mutate: addFavoriteMutation } = useAddToWishlist();
   const { mutate: wishlistDeleteMutate } = useWishListDelete();
   const wishlistPending = useRef(false);
@@ -1418,16 +1462,14 @@ const NewProductCard = ({
   // ── Cart add success handler ──
   const handleAddSuccess = (res) => {
     if (!res) return;
-    console.log({ res });
-
     let product = {};
     res.forEach((i) => {
       product = {
-        ...i?.item,
+        ...(i?.item ?? i?.service ?? {}),
         cartItemId: i?.id,
         quantity: i?.quantity,
         totalPrice: i?.price,
-        selectedOption: [],
+        selectedOption: i?.variation ?? null,
       };
     });
     reduxDispatch(setCart(product));
@@ -1450,7 +1492,7 @@ const NewProductCard = ({
             selectedAddons: i?.item?.addons,
             itemBasePrice: i?.item?.price,
             selectedOption: i?.variation,
-          })
+          }),
         );
       }
     });
@@ -1470,20 +1512,25 @@ const NewProductCard = ({
           selectedAddons: i?.item?.addons,
           itemBasePrice: i?.item?.price,
           selectedOption: i?.variation,
-        })
+        }),
       );
     });
   };
 
   // ── Direct add to cart (no variation) ──
   const addToCartHandler = () => {
+    const isService = item?.module_type === "service";
     const itemObject = {
       guest_id: getGuestId(),
-      model: item?.available_date_starts ? "ItemCampaign" : "Item",
-      add_on_ids: [],
-      add_on_qtys: [],
-      item_id: item?.id,
-      price: item?.price,
+      model: item?.available_date_starts
+        ? "ItemCampaign"
+        : isService
+        ? "Service"
+        : "Item",
+      ...(isService
+        ? { service_id: item?.id }
+        : { add_on_ids: [], add_on_qtys: [], item_id: item?.id }),
+      price: item?.base_price ?? item?.price,
       quantity: 1,
       variation: [],
     };
@@ -1498,7 +1545,7 @@ const NewProductCard = ({
             {
               onSuccess: handleAddSuccess,
               onError: onErrorResponse,
-            }
+            },
           );
       } else {
         dispatch({ type: ACTION.setClearCartModal, payload: true });
@@ -1510,7 +1557,7 @@ const NewProductCard = ({
           {
             onSuccess: handleAddSuccess,
             onError: onErrorResponse,
-          }
+          },
         );
     }
   };
@@ -1522,17 +1569,21 @@ const NewProductCard = ({
         {
           postData: {
             guest_id: getGuestId(),
-            model: item?.available_date_starts ? "ItemCampaign" : "Item",
-            add_on_ids: [],
-            add_on_qtys: [],
-            item_id: item?.id,
-            price: item?.price,
+            model: item?.available_date_starts
+              ? "ItemCampaign"
+              : item?.module_type === "service"
+              ? "Service"
+              : "Item",
+            ...(item?.module_type === "service"
+              ? { service_id: item?.id }
+              : { add_on_ids: [], add_on_qtys: [], item_id: item?.id }),
+            price: item?.base_price ?? item?.price,
             quantity: 1,
             variation: [],
           },
           store_id: item?.store_id,
         },
-        { onSuccess: handleAddSuccess, onError: onErrorResponse }
+        { onSuccess: handleAddSuccess, onError: onErrorResponse },
       );
     } else {
       dispatch({ type: ACTION.setClearCartModal, payload: false });
@@ -1548,7 +1599,7 @@ const NewProductCard = ({
       isInCart,
       updateQuantity,
       getPriceAfterQuantityChange(isInCart, updateQuantity),
-      getGuestId()
+      getGuestId(),
     );
 
     if (getCurrentModuleType() === ModuleTypes.FOOD) {
@@ -1608,7 +1659,7 @@ const NewProductCard = ({
             toast.success(t("Removed from cart."));
           },
           onError: onErrorResponse,
-        }
+        },
       );
     } else {
       const updateQuantity = isInCart.quantity - 1;
@@ -1617,12 +1668,12 @@ const NewProductCard = ({
           isInCart,
           updateQuantity,
           getPriceAfterQuantityChange(isInCart, updateQuantity),
-          getGuestId()
+          getGuestId(),
         ),
         {
           onSuccess: cartUpdateHandleSuccessDecrement,
           onError: onErrorResponse,
-        }
+        },
       );
     }
   };
@@ -1641,7 +1692,11 @@ const NewProductCard = ({
     if (isWishlisted) {
       wishlistDeleteMutate(item?.id, {
         onSuccess: (res) => {
-          reduxDispatch(removeWishListItem(item?.id));
+          reduxDispatch(
+            isServiceModule
+              ? removeWishListService(item?.id)
+              : removeWishListItem(item?.id),
+          );
           queryClient.invalidateQueries("wishlist");
           toast.success(res.message, { id: "wishlist" });
         },
@@ -1653,7 +1708,9 @@ const NewProductCard = ({
     } else {
       addFavoriteMutation(item?.id, {
         onSuccess: (res) => {
-          reduxDispatch(addWishList(item));
+          reduxDispatch(
+            isServiceModule ? addWishListService(item) : addWishList(item),
+          );
           queryClient.invalidateQueries("wishlist");
           toast.success(res?.message);
         },
@@ -1671,17 +1728,165 @@ const NewProductCard = ({
       onCardClick(item);
       return;
     }
-    if (item?.module_type === "ecommerce") {
+    if (item?.module_type === "service") {
+      handleServiceRedirect(item, router);
+    } else if (item?.module_type === "ecommerce") {
       handleProductRedirect(item, router);
     } else {
       dispatch({ type: ACTION.setOpenModal, payload: true });
     }
   };
 
+  // ── Service variation confirm — initial add (item NOT yet in cart) ──
+  const handleServiceVariationSelect = (selected) => {
+    setSelectedVariation(selected);
+    const computedPrice = selected.reduce(
+      (sum, { variation, quantity }) =>
+        sum + (variation?.price ?? 0) * (quantity ?? 1),
+      0,
+    );
+    const variants = selected.map(({ variation, quantity }) => ({
+      variant_key: variation?.variant_key,
+      quantity,
+    }));
+    const itemObject = {
+      guest_id: getGuestId(),
+      model: item?.available_date_starts ? "ItemCampaign" : "Service",
+      service_id: item?.id,
+      price: computedPrice,
+      quantity: 1,
+      ...(variants.length ? { variants } : {}),
+    };
+    addToMutate(
+      { postData: itemObject, store_id: item?.store_id },
+      { onSuccess: handleAddSuccess, onError: onErrorResponse },
+    );
+  };
+
+  // ── Service variation update — item IS already in cart, diff and sync ──
+  // Uses mutateAsync + Promise.allSettled with a try/finally so the modal's
+  // loading state ALWAYS resolves, even if a delete/add call errors or an
+  // edge case leaves counts mismatched — no more "stuck spinner forever".
+  const handleServiceVariationUpdate = async (newSelected) => {
+    // variations apart instead of collapsing them onto one key.
+    const identifyVariant = (variation) =>
+      variation?.variant_key ?? variation?.name;
+
+    const prevCartItems = cartList.filter(
+      (c) => c.id === item?.id && c.selectedOption != null,
+    );
+
+    const newVariantMap = new Map(
+      newSelected.map(({ variation, quantity }) => [
+        identifyVariant(variation),
+        quantity,
+      ]),
+    );
+    const prevVariantMap = new Map(
+      prevCartItems.map((c) => [identifyVariant(c.selectedOption), c.quantity]),
+    );
+
+    const nothingChanged =
+      newVariantMap.size === prevVariantMap.size &&
+      [...newVariantMap.entries()].every(
+        ([key, qty]) => prevVariantMap.get(key) === qty,
+      );
+
+    if (nothingChanged) {
+      toast(t("No changes to update"), { icon: "⚠️" });
+      setOpenVariationModal(false);
+      return;
+    }
+
+    const itemsToDelete = prevCartItems.filter(
+      (prevItem) => !newVariantMap.has(identifyVariant(prevItem.selectedOption)),
+    );
+
+    const hasChangedVariants = newSelected.some(({ variation, quantity }) => {
+      const prevQty = prevVariantMap.get(identifyVariant(variation));
+      return prevQty === undefined || prevQty !== quantity;
+    });
+
+    if (itemsToDelete.length === 0 && !hasChangedVariants) {
+      setOpenVariationModal(false);
+      return;
+    }
+
+    setIsVariationUpdating(true);
+    try {
+      const deleteResults = await Promise.allSettled(
+        itemsToDelete.map((prevItem) =>
+          cartItemRemoveMutateAsync({
+            cart_id: prevItem.cartItemId,
+            store_id: prevItem.store_id ?? prevItem.store?.id,
+            guestId: getGuestId(),
+          }).then(() => reduxDispatch(setRemoveItemFromCart(prevItem))),
+        ),
+      );
+      deleteResults
+        .filter((r) => r.status === "rejected")
+        .forEach((r) => onErrorResponse(r.reason));
+
+      if (hasChangedVariants) {
+        const computedPrice = newSelected.reduce(
+          (sum, { variation, quantity }) =>
+            sum + (variation?.price ?? 0) * (quantity ?? 1),
+          0,
+        );
+        const variants = newSelected.map(({ variation, quantity }) => ({
+          variant_key: variation?.variant_key,
+          quantity,
+        }));
+        const itemObject = {
+          guest_id: getGuestId(),
+          model: "Service",
+          service_id: item?.id,
+          price: computedPrice,
+          quantity: 1,
+          variants,
+        };
+        try {
+          const res = await addToMutateAsync({
+            postData: itemObject,
+            store_id: item?.store_id,
+          });
+          if (res) {
+            const updatedItems = res.map((i) => ({
+              ...(i?.item ?? i?.service ?? {}),
+              cartItemId: i?.id,
+              quantity: i?.quantity,
+              totalPrice: i?.price,
+              selectedOption: i?.variation ?? null,
+            }));
+            reduxDispatch(setCartList(updatedItems));
+            toast.success(t("Cart updated"));
+          }
+        } catch (err) {
+          onErrorResponse(err);
+        }
+      }
+    } finally {
+      setIsVariationUpdating(false);
+      setOpenVariationModal(false);
+    }
+  };
+
   // ── Add button click — exact addToCart from ProductCard ──
   const handleAddClick = (e) => {
     e.stopPropagation();
-    if (item?.module_type === "ecommerce") {
+    if (item?.module_type === "service") {
+      if (item?.variations?.length > 0) {
+        // If already in cart → open variation modal for update
+        // If NOT in cart → go to service details to add for the first time
+        if (isProductExist) {
+          setOpenVariationModal(true);
+        } else {
+          handleServiceRedirect(item, router);
+        }
+      } else {
+        addToCartHandler();
+      }
+    } else if (item?.module_type === "ecommerce") {
       if (item?.variations?.length > 0 || item?.has_variant) {
         handleProductRedirect(item, router);
       } else {
@@ -1703,26 +1908,38 @@ const NewProductCard = ({
   };
 
   // ── Computed price ──
-  const displayPrice =
-    item?.discount > 0
-      ? item.price -
-        (item.discount_type === "percent"
-          ? (item.price * item.discount) / 100
-          : item.discount)
-      : item?.price;
-  const originalPrice = item?.price;
-  const discountText =
-    item?.discount > 0
-      ? item.discount_type === "percent"
-        ? `-${item.discount}%`
-        : `-${getAmountWithSign(item.discount)}`
-      : null;
+  const isServiceCard = item?.module_type === "service";
+  const { displayPrice, originalPrice, discountText } = isServiceCard
+    ? getServiceCardPricing(item)
+    : (() => {
+        const price = item?.base_price ?? item?.price;
+        return {
+          displayPrice:
+            item?.discount > 0
+              ? price -
+                (item.discount_type === "percent"
+                  ? (price * item.discount) / 100
+                  : item.discount)
+              : price,
+          originalPrice: price,
+          discountText:
+            item?.discount > 0
+              ? item.discount_type === "percent"
+                ? `-${item.discount}%`
+                : `-${getAmountWithSign(item.discount)}`
+              : null,
+        };
+      })();
 
   // ── Shared overlay/info props ──
   const subName = Array.isArray(item?.generic_name)
     ? item?.generic_name?.[0]
     : item?.generic_name;
   const companyName = item?.manufacturer || "";
+
+  const isServiceWithVariations =
+    getCurrentModuleType() === ModuleTypes.SERVICE &&
+    item?.variations?.length > 0;
 
   const cartControlProps = {
     isProductExist,
@@ -1738,6 +1955,12 @@ const NewProductCard = ({
       handleIncrement();
     },
     onAdd: handleAddClick,
+    onContainerClick: isServiceWithVariations
+      ? (e) => {
+          e.stopPropagation();
+          setOpenVariationModal(true);
+        }
+      : undefined,
   };
 
   const isFood = getCurrentModuleType() === ModuleTypes.FOOD;
@@ -1870,7 +2093,7 @@ const NewProductCard = ({
         >
           <ImageContainer variant="vertical" className="card-img">
             <NextImage
-              src={item?.image_full_url}
+              src={item?.image_full_url || item?.thumbnail_full_url}
               alt={item?.name}
               width="190"
               height="190"
@@ -1936,9 +2159,10 @@ const NewProductCard = ({
             "&:hover": {
               boxShadow: `0px 4px 12px ${alpha(
                 theme.palette.neutral[1000],
-                0.08
+                0.08,
               )}`,
             },
+            ...horizontalStyle,
           }}
         >
           <PharmacyInfoSection
@@ -1960,7 +2184,7 @@ const NewProductCard = ({
             }}
           >
             <NextImage
-              src={item?.image_full_url}
+              src={item?.image_full_url || item?.thumbnail_full_url}
               alt={item?.name}
               width="126"
               height="126"
@@ -2013,7 +2237,7 @@ const NewProductCard = ({
         >
           <ImageContainer variant="vertical" className="card-img">
             <NextImage
-              src={item?.image_full_url}
+              src={item?.image_full_url || item?.thumbnail_full_url}
               alt={item?.name}
               width="190"
               height="190"
@@ -2042,6 +2266,8 @@ const NewProductCard = ({
               onWishlist={toggleWishlist}
               showVeg={
                 !!configData?.toggle_veg_non_veg &&
+                getCurrentModuleType() !== ModuleTypes.SERVICE &&
+                item?.module_type !== ModuleTypes.SERVICE &&
                 getCurrentModuleType() === ModuleTypes.FOOD
               }
               {...cartControlProps}
@@ -2082,9 +2308,10 @@ const NewProductCard = ({
             "&:hover": {
               boxShadow: `0px 4px 12px ${alpha(
                 theme.palette.neutral[1000],
-                0.08
+                0.08,
               )}`,
             },
+            ...horizontalStyle,
           }}
         >
           <InfoSection
@@ -2106,7 +2333,7 @@ const NewProductCard = ({
             }}
           >
             <NextImage
-              src={item?.image_full_url}
+              src={item?.image_full_url || item?.thumbnail_full_url}
               alt={item?.name}
               width="126"
               height="126"
@@ -2135,6 +2362,8 @@ const NewProductCard = ({
               onWishlist={toggleWishlist}
               showVeg={
                 !!configData?.toggle_veg_non_veg &&
+                getCurrentModuleType() !== ModuleTypes.SERVICE &&
+                item?.module_type !== ModuleTypes.SERVICE &&
                 getCurrentModuleType() === ModuleTypes.FOOD
               }
               {...cartControlProps}
@@ -2142,6 +2371,32 @@ const NewProductCard = ({
           </ImageContainer>
         </Box>
       )}
+
+      {/* ── Variations Modal ── */}
+      <VariationModal
+        open={openVariationModal}
+        onClose={() => {
+          if (!isVariationUpdating) setOpenVariationModal(false);
+        }}
+        items={item?.variations ?? []}
+        selectedVariation={
+          isServiceWithVariations
+            ? cartList
+                .filter((c) => c.id === item?.id && c.selectedOption != null)
+                .map((c) => ({
+                  variation: c.selectedOption,
+                  quantity: c.quantity ?? 1,
+                }))
+            : selectedVariation
+        }
+        onSelectVariation={
+          isProductExist && isServiceWithVariations
+            ? handleServiceVariationUpdate
+            : handleServiceVariationSelect
+        }
+        isUpdateFromCard={isProductExist && isServiceWithVariations}
+        isLoading={isVariationUpdating}
+      />
     </>
   );
 };

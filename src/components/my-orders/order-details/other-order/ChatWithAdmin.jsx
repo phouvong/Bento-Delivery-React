@@ -12,9 +12,12 @@ import { PrimaryButton } from "components/Map/map.style";
 import { useRouter } from "next/router";
 import CustomMessageReasonBox from "components/my-orders/order-details/other-order/CustomMessageReasonBox";
 
-const ChatWithAdmin = ({ automateMessageData, orderID }) => {
+const ChatWithAdmin = ({ automateMessageData, orderID, isBooking }) => {
   const theme = useTheme();
   const router = useRouter();
+  // The automated reasons are order/product-specific (admin-configured for the
+  // commerce flow) — for service-module bookings show only the custom message.
+  const reasonList = isBooking ? [] : automateMessageData;
   const [selected, setSelected] = React.useState(false);
   const [value, setValue] = React.useState("");
   const [text, setText] = React.useState("");
@@ -50,7 +53,7 @@ const ChatWithAdmin = ({ automateMessageData, orderID }) => {
       sx={{ paddingTop: "0px" }}
     >
       <CustomStackFullWidth spacing={1}>
-        {automateMessageData?.length > 0 && (
+        {reasonList?.length > 0 && (
           <DialogTitle
             id="alert-dialog-title"
             sx={{ padding: "0px 24px 10px 24px" }}
@@ -73,9 +76,9 @@ const ChatWithAdmin = ({ automateMessageData, orderID }) => {
             <CustomMessageReasonBox
               selected={selected}
               handleClick={handleClick}
-              automateMessageData={automateMessageData}
+              automateMessageData={reasonList}
             />
-            {automateMessageData?.length > 0 ? (
+            {reasonList?.length > 0 ? (
               <Typography textAlign="center" fontSize="14px" fontWeight="500">
                 {t("Or Custom Massage")}
               </Typography>

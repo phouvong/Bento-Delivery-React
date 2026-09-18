@@ -3,34 +3,34 @@ import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { last_orders_api, last_trips_api } from "api-manage/ApiRoutes";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { ModuleTypes } from "helper-functions/moduleTypes";
 
 const getData = async (store_id) => {
-  const base =
-    getCurrentModuleType() === "rental" ? last_trips_api : last_orders_api;
-  const url = store_id ? `${base}?store_id=${store_id}` : base;
-  const { data } = await MainApi.get(url);
+  const currentModule = getCurrentModuleType();
+  const dynamicUrl =
+    currentModule === ModuleTypes.RENTAL
+      ? `${last_trips_api}${store_id ? "?store_id=" + store_id : ""}`
+      : `${last_orders_api}${store_id ? "?store_id=" + store_id : ""}`;
+
+  const { data } = await MainApi.get(dynamicUrl);
   return data;
 };
 
 const useGetLastOrders = ({ store_id } = {}) => {
-  const isRental = getCurrentModuleType() === "rental";
+  const currentModule = getCurrentModuleType();
   return useQuery(
-    ["last-orders", getCurrentModuleType(), store_id],
+    ["last-orders", currentModule, store_id],
     () => getData(store_id),
     {
       cacheTime: 5 * 60 * 1000,
       select: (res) => {
-        // Rental endpoint returns `trips`; other modules return `orders`
-        // (and some return a bare array). Try every known shape.
         const list = res?.trips ?? res?.orders ?? res ?? [];
         if (!Array.isArray(list)) return [];
-        // Rental rows don't carry `can_reorder` — skip that gate, otherwise
-        // every trip gets filtered out and the section never renders.
-        if (isRental) return list;
+        if (currentModule === ModuleTypes.RENTAL) return list;
         return list.filter((o) => o?.can_reorder);
       },
       onError: onSingleErrorResponse,
-    }
+    },
   );
 };
 

@@ -98,6 +98,7 @@ const FeaturedCategories = () => {
     [ModuleTypes.GROCERY]: t("Shop by Categories"),
     [ModuleTypes.PHARMACY]: t("Shop by Categories"),
     [ModuleTypes.ECOMMERCE]: t("Explore Categories"),
+    [ModuleTypes.SERVICE]: t("Browse by Categories"),
   }[getCurrentModuleType()] ?? t("Find Your Flavour");
 
   return (

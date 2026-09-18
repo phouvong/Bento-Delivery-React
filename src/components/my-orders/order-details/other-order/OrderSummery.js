@@ -1,58 +1,68 @@
-import CloseIcon from "@mui/icons-material/Close";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { LoadingButton } from "@mui/lab";
 import {
+  Button,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Grid,
-  IconButton,
-  Skeleton,
+  TextField,
   Typography,
   alpha,
   useMediaQuery,
   useTheme,
-  Button,
 } from "@mui/material";
-import adminImage from "../../../../../public/static/profile/fi_4460756 (1).png";
 import { Box, Stack } from "@mui/system";
-import { FoodHalalHaram } from "components/cards/SpecialCard";
-import { getAmountWithSign } from "helper-functions/CardHelpers";
-import React, { memo, useEffect, useState } from "react";
+import useBookingRelation from "api-manage/hooks/custom-hooks/useBookingRelation";
+import { useGetOrderCancelReason } from "api-manage/hooks/react-query/order/useGetAutomatedMessage";
+import BookingInfo from "components/home/module-wise-components/service/components/my-bookings/booking-details/BookingInfo";
+import useCancelServiceBooking from "components/home/module-wise-components/service/service-api-manage/hooks/react-query/booking/useCancelServiceBooking";
+import ChatWithAdmin from "components/my-orders/order-details/other-order/ChatWithAdmin";
+import { getToken } from "helper-functions/getToken";
+import { memo, useState } from "react";
+import toast from "react-hot-toast";
 import "simplebar-react/dist/simplebar.min.css";
-import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import { CustomTypographyEllipsis } from "styled-components/CustomTypographies.style";
-import CustomDivider from "../../../CustomDivider";
+import adminImage from "../../../../../public/static/profile/fi_4460756 (1).png";
 import CustomImageContainer from "../../../CustomImageContainer";
 import CustomModal from "../../../modal";
-import CashSvg from "../../assets/CashSvg";
 import ParcelOrderSummery from "../ParcelOrderSummery";
-import OfflineOrderDenied from "../offline-order/OfflineOrderDenied";
-import OfflineOrderDetails from "../offline-order/OfflineOrderDetails";
-import OfflinePaymentEdit from "../offline-order/OfflinePaymentEdit";
 import PrescriptionOrderCalculation from "../prescription-order/PerscriptionOrderCalculation";
-import PrescriptionOrderSummery from "../prescription-order/PrescriptionOrderSummery";
-import SingleOrderAttachment from "../singleOrderAttachment";
 import InstructionBox from "./InstructionBox";
-import StatusBadge from "components/common/StatusBadge";
+import OrderActionActions from "./OrderActionActions";
 import OrderCalculation from "./OrderCalculation";
-import { getImageUrl } from "utils/CustomFunctions";
-import { WrapperForCustomDialogConfirm } from "components/custom-dialog/confirm/CustomDialogConfirm.style";
-import DialogTitle from "@mui/material/DialogTitle";
-import { t } from "i18next";
-import DialogContent from "@mui/material/DialogContent";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import ChatWithAdmin from "components/my-orders/order-details/other-order/ChatWithAdmin";
-import { useGetOrderCancelReason } from "api-manage/hooks/react-query/order/useGetAutomatedMessage";
-import { getToken } from "helper-functions/getToken";
-import { LoadingButton } from "@mui/lab";
+import OrderInfo from "./OrderInfo";
+import PaymentSummaryCard from "./PaymentSummaryCard";
+import BookingCalculation from "components/home/module-wise-components/service/components/my-bookings/booking-details/BookingCalculation";
 
-const getAddOnsNames = (addOns) => {
-  if (!addOns || addOns.length === 0) return "";
+const mapBookingOfflinePayment = (offlinePayment) => {
+  if (!offlinePayment) return null;
+  const { payment_info, method_fields, status, customer_note, note } =
+    offlinePayment;
 
-  const names = addOns.map(
-    (item, index) =>
-      `${item.name}(${item.quantity})${index !== addOns.length - 1 ? "," : ""}`,
-  );
+  let parsedMethodFields = [];
+  try {
+    parsedMethodFields =
+      typeof method_fields === "string"
+        ? JSON.parse(method_fields)
+        : method_fields ?? [];
+  } catch {
+    parsedMethodFields = [];
+  }
 
-  return names.join(" ");
+  const input = Object.entries(payment_info ?? {})
+    .filter(([key]) => key !== "method_id" && key !== "method_name")
+    .map(([key, value]) => ({ user_input: key, user_data: value }));
+
+  return {
+    data: {
+      status,
+      customer_note,
+      admin_note: note,
+      method_name: payment_info?.method_name,
+      method_id: payment_info?.method_id,
+    },
+    method_fields: parsedMethodFields,
+    input,
+  };
 };
 
 const OrderSummery = (props) => {
@@ -67,22 +77,109 @@ const OrderSummery = (props) => {
     setOpenPaymentMethod,
     handlePayment,
     repayOrderLoading,
+    id,
+    refetchOrderDetails,
+    setOpenModal,
+    isBooking,
   } = props;
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
+  const { isParentRepeatBooking, isSubBooking } = useBookingRelation({
+    isBooking,
+    data,
+  });
   const [openModal, setModalOpen] = useState(false);
   const [modalImage, setModalImage] = useState(null);
-  const [openOfflineDetails, setOpenOfflineDetails] = useState(false);
-  const [openOfflineModal, setOpenOfflineModal] = useState(false);
-  const [partialWithOffline, setPartialWithOffline] = useState(false);
   const [openAdmin, setOpenAdmin] = useState(false);
+  const [cancelBookingModalOpen, setCancelBookingModalOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelReasonError, setCancelReasonError] = useState(false);
   const { data: automateMessageData } = useGetOrderCancelReason();
+  const { mutate: cancelBookingMutate, isLoading: isCancellingBooking } =
+    useCancelServiceBooking();
 
-  useEffect(() => {
-    if (trackOrderData?.offline_payment !== null) {
-      setPartialWithOffline(true);
+  const closeCancelBookingModal = () => {
+    setCancelBookingModalOpen(false);
+    setCancelReason("");
+    setCancelReasonError(false);
+  };
+
+  const handleCancelBooking = () => {
+    if (!cancelReason.trim()) {
+      setCancelReasonError(true);
+      return;
     }
-  }, []);
+    cancelBookingMutate(
+      {
+        booking_id: data?.id,
+        guest_id: getGuestId(),
+        reason: cancelReason.trim(),
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(
+            response?.message ?? t("Booking cancelled successfully"),
+          );
+          closeCancelBookingModal();
+          refetchTrackOrder?.();
+        },
+      },
+    );
+  };
+
+  const summaryData = isBooking
+    ? {
+        id: data?.id,
+        order_status: data?.booking_status,
+        payment_status: data?.payment_status,
+        payment_method: data?.payment_method,
+        offline_payment: mapBookingOfflinePayment(data?.offline_payment),
+        // Per-installment breakdown for partial payments (method, status,
+        // amount). BookingCalculation reads payments[1] for the non-wallet
+        // "Paid By (…)" row; PaymentSummaryCard lists every entry.
+        payments: data?.partial_payments ?? [],
+        delivery_address: {
+          address: data?.service_location?.address,
+        },
+        order_amount: data?.amount?.booking_amount,
+        store_discount_amount: data?.amount?.discount_amount ?? 0,
+        flash_admin_discount_amount: 0,
+        flash_store_discount_amount: 0,
+        coupon_discount_amount: data?.amount?.coupon_discount_amount ?? 0,
+        pro_discount: data?.amount?.pro_discount ?? 0,
+        ref_bonus_amount: data?.amount?.ref_bonus_amount ?? 0,
+        tax_status: data?.amount?.tax_status,
+        total_tax_amount: data?.amount?.tax_amount ?? 0,
+        additional_charge: data?.amount?.additional_charge ?? 0,
+        delivery_charge: 0,
+        partially_paid_amount: data?.amount?.partially_paid_amount ?? 0,
+        bring_change_amount: data?.bring_change_amount ?? 0,
+        delivery_instruction: data?.booking_note,
+        cancellation_note: data?.cancellation_reason,
+      }
+    : trackOrderData;
+
+  const items = isBooking
+    ? (data?.booking_details ?? data?.details ?? []).map((detail) => {
+        const service = detail?.service ?? {};
+        const price =
+          detail?.price ?? service?.discounted_price ?? service?.price;
+        const calculatedPrice = detail?.calculated_price ?? price;
+        return {
+          id: detail?.id,
+          quantity: detail?.quantity ?? 1,
+          price: calculatedPrice,
+          add_ons: detail?.add_ons ?? [],
+          image_full_url: detail?.image_full_url ?? service?.thumbnail_full_url,
+          item_details: {
+            name: detail?.service_name ?? service?.name ?? detail?.name,
+            price,
+            calculated_price: calculatedPrice,
+            variations: detail?.variation ?? detail?.variations ?? [],
+          },
+        };
+      })
+    : data;
 
   const handleImageOnClick = (value) => {
     setModalImage(value);
@@ -92,32 +189,29 @@ const OrderSummery = (props) => {
     setModalOpen(value);
     setModalImage(null);
   };
-  const handleClickOffline = () => {
-    setOpenOfflineDetails(!openOfflineDetails);
-  };
-  const buttonBackgroundColor = () => {
-    if (trackOrderData?.offline_payment?.data?.status === "denied") {
-      return `${alpha(theme.palette.error.deepLight, 0.9)}`;
-    } else if (trackOrderData?.offline_payment?.data?.status === "unpaid") {
-      return theme.palette.info.main;
-    } else if (trackOrderData?.offline_payment?.data?.status === "verified") {
-      return theme.palette.success.main;
-    } else {
-      return theme.palette.warning.lite;
-    }
-  };
+
+  const REPEAT_PAYMENT_EDITABLE_STATUSES = ["confirmed", "ongoing"];
   const isPaymentFailed = () => {
-    return (
-      (trackOrderData?.order_status === "failed" ||
-        !trackOrderData?.offline_payment) &&
-      (trackOrderData?.payment_status === "unpaid" ||
-        (trackOrderData?.payments[1]?.payment_status === "unpaid" &&
-          trackOrderData?.payments[1]?.payment_method !==
-            "cash_on_delivery")) &&
-      trackOrderData?.payment_method !== "cash_on_delivery" &&
-      trackOrderData?.payment_method !== "wallet" &&
-      trackOrderData?.order_status !== "canceled"
-    );
+    const baseFailed =
+      (summaryData?.order_status === "failed" ||
+        !summaryData?.offline_payment) &&
+      (summaryData?.payment_status === "unpaid" ||
+        (summaryData?.payments?.[1]?.payment_status === "unpaid" &&
+          summaryData?.payments?.[1]?.payment_method !== "cash_on_delivery")) &&
+      summaryData?.payment_method !== "cash_on_delivery" &&
+      summaryData?.payment_method !== "wallet" &&
+      summaryData?.order_status !== "canceled";
+
+    if (!isBooking) return baseFailed;
+
+    if (
+      !isSubBooking ||
+      !REPEAT_PAYMENT_EDITABLE_STATUSES.includes(data?.booking_status)
+    ) {
+      return false;
+    }
+
+    return baseFailed;
   };
 
   return (
@@ -125,126 +219,39 @@ const OrderSummery = (props) => {
       {data && data.module_type === "parcel" ? (
         <ParcelOrderSummery
           data={data}
-          trackOrderData={trackOrderData}
+          trackOrderData={summaryData}
           configData={configData}
           refetchTrackOrder={refetchTrackOrder}
           isPaymentFailed={isPaymentFailed}
           repayOrderLoading={repayOrderLoading}
           setOpenPaymentMethod={setOpenPaymentMethod}
           handlePayment={handlePayment}
+          id={id}
+          refetchOrderDetails={refetchOrderDetails}
+          setOpenModal={setOpenModal}
         />
       ) : (
         <Grid container pr={{ xs: "0px", sm: "0px", md: "40px" }}>
           <Grid container item md={8} xs={12}>
-            <Grid item xs={12} sm={12} md={12}>
-              {!data?.prescription_order &&
-              trackOrderData?.module_type === "pharmacy" &&
-              trackOrderData?.order_attachment_full_url &&
-              trackOrderData?.order_attachment_full_url?.length &&
-              trackOrderData?.order_attachment ? (
-                <SingleOrderAttachment
-                  title="Prescription"
-                  trackOrderData={trackOrderData}
-                  configData={configData}
-                />
-              ) : null}
-              {data?.prescription_order ? (
-                <PrescriptionOrderSummery data={data} />
-              ) : null}
-              {data &&
-                data?.length > 0 &&
-                data?.map((product) => (
-                  <Grid
-                    container
-                    alignItems="flex-start"
-                    md={12}
-                    xs={12}
-                    spacing={{ xs: 1 }}
-                    key={product?.id}
-                    mb="13px"
-                    pl={{ xs: "0px", sm: "20px", md: "25px" }}
-                  >
-                    <Grid item xs={3} sm={1.2} md={1.2}>
-                      {product.item_campaign_id ? (
-                        <CustomImageContainer
-                          src={product?.image_full_url}
-                          height="63px"
-                          maxWidth="63px"
-                          width="100%"
-                          loading="lazy"
-                          smHeight="50px"
-                        />
-                      ) : (
-                        <CustomImageContainer
-                          src={product?.image_full_url}
-                          height="63px"
-                          maxWidth="63px"
-                          width="100%"
-                          loading="lazy"
-                          smHeight="70px"
-                          borderRadius=".7rem"
-                        />
-                      )}
-                    </Grid>
-                    <Grid item md={10.8} xs={9} sm={10.8} align="left">
-                      <Stack
-                        direction={{ xs: "column", md: "row" }}
-                        justifyContent="space-between"
-                        paddingBottom={{ xs: "5px", md: "0px" }}
-                      >
-                        <Stack>
-                          <CustomTypographyEllipsis
-                            fontWeight="500"
-                            fontSize="13px"
-                          >
-                            <Stack flexDirection={"row"} gap={"4px"}>
-                              {t(product?.item_details?.name)}
-                              {product?.item_details?.halal_tag_status &&
-                              product?.item_details?.is_halal ? (
-                                <FoodHalalHaram
-                                  position="relative"
-                                  width={23}
-                                />
-                              ) : (
-                                ""
-                              )}
-                            </Stack>
-                          </CustomTypographyEllipsis>
-                          <Typography variant="body2" mt="3px">
-                            {t(product?.item_details?.unit_type)}
-                          </Typography>
-                          <Typography variant="body2" mt="5px">
-                            {t("Unit Price")} :{" "}
-                            {getAmountWithSign(product?.item_details?.price)}
-                          </Typography>
-                          {product?.add_ons.length > 0 && (
-                            <Typography mt="3px" variant="body2">
-                              {t("Addons")}: {getAddOnsNames(product?.add_ons)}
-                            </Typography>
-                          )}
-                        </Stack>
-                        <Stack
-                          direction={isSmall ? "column-reverse" : "column"}
-                          gap="5px"
-                        >
-                          <Typography fontSize="14px" fontWeight="bold">
-                            {getAmountWithSign(product?.item_details?.price)}
-                          </Typography>
-
-                          <Typography variant="body2" mt="8px">
-                            {t("Qty")}: {product?.quantity}
-                          </Typography>
-                        </Stack>
-                      </Stack>
-
-                      {/*{product?.variation?.length > 0 && (*/}
-                      {/*    <>{getVariationNames(product, t)}</>*/}
-                      {/*)}*/}
-                    </Grid>
-                    <CustomDivider border="1px" />
-                  </Grid>
-                ))}
-            </Grid>
+            {isBooking ? (
+              <BookingInfo
+                data={data}
+                summaryData={summaryData}
+                configData={configData}
+                items={items}
+                t={t}
+                isSmall={isSmall}
+              />
+            ) : (
+              <OrderInfo
+                data={data}
+                summaryData={summaryData}
+                configData={configData}
+                items={items}
+                t={t}
+                isSmall={isSmall}
+              />
+            )}
             <Grid
               item
               xs={12}
@@ -256,39 +263,59 @@ const OrderSummery = (props) => {
               {/* Address + Payment + Cutlery — 2-column grid on sm+ */}
               <Box
                 sx={{
-                  display: "grid",
-                  gridTemplateColumns: { xs: "1fr", sm: "1fr 2fr" },
-                  gridTemplateRows: "auto",
-                  gap: "12px",
-                  alignItems: "start",
+                  border: (t) =>
+                    `1px solid ${alpha(t.palette.neutral[400], 0.2)}`,
+                  borderRadius: "14px",
+                  padding: { xs: "14px", md: "16px" },
                 }}
               >
                 {/* Left column: Address + Cutlery stacked */}
-                <Stack gap="12px">
-                  {/* Address card */}
-                  <Stack
-                    spacing={1}
-                    sx={{
-                      border: (t) =>
-                        `1px solid ${alpha(t.palette.neutral[400], 0.2)}`,
-                      borderRadius: "14px",
-                      padding: { xs: "14px", md: "16px" },
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        letterSpacing: "0.5px",
-                        textTransform: "uppercase",
-                        color:
-                          theme.palette.neutral?.[500] ||
-                          theme.palette.text.secondary,
-                      }}
+                <Stack gap="20px">
+                  <Stack>
+                    {/* Address card */}
+                    <Stack
+                      direction="row"
+                      alignItems="center"
+                      flexWrap="wrap"
+                      gap="8px"
+                      mb={1}
                     >
-                      {t("Delivery Address")}
-                    </Typography>
-                    {trackOrderData?.delivery_address?.contact_person_name && (
+                      <Typography
+                        sx={{
+                          fontSize: "16px",
+                          fontWeight: 700,
+                          letterSpacing: "0.5px",
+                          textTransform: "capitalize",
+                          color: theme.palette.text.primary,
+                        }}
+                      >
+                        {t("Address")}
+                      </Typography>
+                      {isBooking && data?.service_location?.get_service_at && (
+                        <Typography
+                          component="span"
+                          sx={{
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            px: 1,
+                            py: 0.4,
+                            borderRadius: "8px",
+                            backgroundColor: alpha(
+                              theme.palette.primary.main,
+                              0.12,
+                            ),
+                            color: theme.palette.primary.main,
+                            whiteSpace: "normal",
+                            lineHeight: 1.3,
+                          }}
+                        >
+                          {data.service_location.get_service_at === "provider"
+                            ? t("Please visit provider location")
+                            : t("Provider will come to your location")}
+                        </Typography>
+                      )}
+                    </Stack>
+                    {summaryData?.delivery_address?.contact_person_name && (
                       <Typography
                         sx={{
                           fontSize: "14px",
@@ -297,43 +324,33 @@ const OrderSummery = (props) => {
                           textTransform: "capitalize",
                         }}
                       >
-                        {trackOrderData.delivery_address.contact_person_name}
+                        {summaryData.delivery_address.contact_person_name}
                       </Typography>
                     )}
                     <Typography
                       sx={{
-                        fontSize: "13px",
+                        fontSize: "14px",
                         fontWeight: 500,
                         color: theme.palette.text.primary,
                         lineHeight: 1.55,
                         wordBreak: "break-word",
                       }}
                     >
-                      {trackOrderData?.delivery_address?.address || "—"}
+                      {summaryData?.delivery_address?.address || "—"}
                     </Typography>
                   </Stack>
-
                   {/* Cutlery card (inside left column) — food orders only */}
-                  {trackOrderData?.module_type === "food" &&
-                    trackOrderData?.cutlery && (
-                      <Stack
-                        spacing={1}
-                        sx={{
-                          border: (t) =>
-                            `1px solid ${alpha(t.palette.neutral[400], 0.2)}`,
-                          borderRadius: "14px",
-                          padding: { xs: "14px", md: "16px" },
-                        }}
-                      >
+                  {summaryData?.module_type === "food" &&
+                    summaryData?.cutlery && (
+                      <Stack>
                         <Typography
                           sx={{
-                            fontSize: "11px",
+                            fontSize: "16px",
                             fontWeight: 700,
                             letterSpacing: "0.5px",
-                            textTransform: "uppercase",
-                            color:
-                              theme.palette.neutral?.[500] ||
-                              theme.palette.text.secondary,
+                            textTransform: "capitalize",
+                            color: theme.palette.text.primary,
+                            mb: 1,
                           }}
                         >
                           {t("Cutlery")}
@@ -354,7 +371,7 @@ const OrderSummery = (props) => {
                               theme.palette.success.main,
                               0.25,
                             )}`,
-                            fontSize: "12px",
+                            fontSize: "14px",
                             fontWeight: 700,
                             textTransform: "capitalize",
                             lineHeight: 1.4,
@@ -364,228 +381,21 @@ const OrderSummery = (props) => {
                         </Box>
                       </Stack>
                     )}
-                </Stack>
-
-                {/* Payment card (right column, spans full height) */}
-                <Stack
-                  spacing={1.25}
-                  sx={{
-                    border: (t) =>
-                      `1px solid ${alpha(t.palette.neutral[400], 0.2)}`,
-                    borderRadius: "14px",
-                    padding: { xs: "14px", md: "16px" },
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    justifyContent="space-between"
-                    gap={1}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: "11px",
-                        fontWeight: 700,
-                        letterSpacing: "0.5px",
-                        textTransform: "uppercase",
-                        color:
-                          theme.palette.neutral?.[500] ||
-                          theme.palette.text.secondary,
+                  {!isParentRepeatBooking && (
+                    <PaymentSummaryCard
+                      {...{
+                        t,
+                        summaryData,
+                        data,
+                        isBooking,
+                        isPaymentFailed,
+                        setOpenPaymentMethod,
+                        handlePayment,
+                        repayOrderLoading,
+                        refetchTrackOrder,
+                        configData,
                       }}
-                    >
-                      {t("Payment")}
-                    </Typography>
-                    <Stack direction="row" alignItems="center" gap="6px">
-                      <StatusBadge
-                        status={trackOrderData?.payment_status}
-                        label={(() => {
-                          const s =
-                            trackOrderData?.payment_status?.replace(
-                              /_/g,
-                              " ",
-                            ) ?? "";
-                          return s.charAt(0).toUpperCase() + s.slice(1);
-                        })()}
-                      />
-                      {trackOrderData?.payment_method === "offline_payment" &&
-                        trackOrderData?.offline_payment && (
-                          <Stack
-                            direction="row"
-                            alignItems="center"
-                            gap={0.5}
-                            onClick={handleClickOffline}
-                            sx={{ cursor: "pointer" }}
-                          >
-                            <Typography
-                              component="span"
-                              fontSize="11px"
-                              sx={{
-                                textTransform: "capitalize",
-                                px: "8px",
-                                py: "2px",
-                                borderRadius: "999px",
-                                backgroundColor: alpha(
-                                  buttonBackgroundColor(),
-                                  0.14,
-                                ),
-                                color: buttonBackgroundColor(),
-                                fontWeight: 700,
-                                border: `1px solid ${alpha(
-                                  buttonBackgroundColor(),
-                                  0.3,
-                                )}`,
-                              }}
-                            >
-                              {trackOrderData?.offline_payment?.data?.status}
-                            </Typography>
-                            <ExpandMoreIcon
-                              sx={{
-                                fontSize: "20px",
-                                color: theme.palette.neutral[500],
-                                transform: openOfflineDetails
-                                  ? "rotate(180deg)"
-                                  : "none",
-                                transition: "transform 0.2s ease",
-                              }}
-                            />
-                          </Stack>
-                        )}
-                    </Stack>
-                  </Stack>
-
-                  {trackOrderData?.payment_method ? (
-                    <Stack direction="row" alignItems="center" gap="8px">
-                      <CashSvg />
-                      <Typography
-                        sx={{
-                          fontSize: "14px",
-                          fontWeight: 700,
-                          color: theme.palette.text.primary,
-                          textTransform: "capitalize",
-                          lineHeight: 1.4,
-                        }}
-                      >
-                        {t(trackOrderData?.payment_method.replaceAll("_", " "))}
-                      </Typography>
-                    </Stack>
-                  ) : (
-                    <Skeleton width="100px" variant="text" />
-                  )}
-
-                  {isPaymentFailed() && (
-                    <Typography
-                      fontSize={{ xs: "12px", md: "13px" }}
-                      fontWeight="400"
-                      color={theme.palette.neutral[500]}
-                    >
-                      {t(
-                        "Your payment was incomplete. Please choose an option below to complete your transaction.",
-                      )}
-                    </Typography>
-                  )}
-                  {isPaymentFailed() && (
-                    <Stack direction="row" spacing={1} width="100%">
-                      {getToken() && (
-                        <Button
-                          variant="contained"
-                          fullWidth
-                          onClick={() => setOpenPaymentMethod(true)}
-                        >
-                          {t("Pay Now")}
-                        </Button>
-                      )}
-                      <LoadingButton
-                        variant="outlined"
-                        loading={repayOrderLoading}
-                        fullWidth
-                        onClick={handlePayment}
-                      >
-                        {t("Switch to COD")}
-                      </LoadingButton>
-                    </Stack>
-                  )}
-
-                  {openOfflineDetails &&
-                    (trackOrderData?.payment_method === "offline_payment" ||
-                      partialWithOffline) && (
-                      <OfflineOrderDetails
-                        trackOrderData={trackOrderData}
-                        setOpenOfflineModal={setOpenOfflineModal}
-                        setOpenPaymentMethod={setOpenPaymentMethod}
-                        refetchTrackOrder={refetchTrackOrder}
-                      />
-                    )}
-
-                  {trackOrderData?.offline_payment?.data?.status === "denied" &&
-                    trackOrderData?.payment_method == "offline_payment" && (
-                      <OfflineOrderDenied trackOrderData={trackOrderData} />
-                    )}
-                  {trackOrderData?.offline_payment?.data?.status === "denied" &&
-                    trackOrderData?.payment_method === "offline_payment" &&
-                    getToken() && (
-                      <Stack
-                        direction="row"
-                        spacing={1}
-                        width="100%"
-                        marginTop="8px"
-                      >
-                        <LoadingButton
-                          variant="outlined"
-                          fullWidth
-                          loading={repayOrderLoading}
-                          onClick={handlePayment}
-                        >
-                          {t("Switch to COD")}
-                        </LoadingButton>
-                        <Button
-                          variant="contained"
-                          fullWidth
-                          onClick={() => setOpenPaymentMethod(true)}
-                        >
-                          {t("Update Payment")}
-                        </Button>
-                      </Stack>
-                    )}
-
-                  {openOfflineModal && (
-                    <CustomModal
-                      openModal={openOfflineModal}
-                      handleClose={() => setOpenOfflineModal(false)}
-                    >
-                      <CustomStackFullWidth
-                        direction="row"
-                        alignItems="center"
-                        justifyContent="flex-end"
-                        sx={{ position: "relative" }}
-                      >
-                        <IconButton
-                          onClick={() => setOpenOfflineModal(false)}
-                          sx={{
-                            zIndex: "99",
-                            position: "absolute",
-                            top: 10,
-                            right: 10,
-                            backgroundColor: (theme) =>
-                              theme.palette.neutral[100],
-                            borderRadius: "50%",
-                            [theme.breakpoints.down("md")]: {
-                              top: 10,
-                              right: 5,
-                            },
-                          }}
-                        >
-                          <CloseIcon
-                            sx={{ fontSize: "24px", fontWeight: "500" }}
-                          />
-                        </IconButton>
-                      </CustomStackFullWidth>
-                      <OfflinePaymentEdit
-                        trackOrderData={trackOrderData}
-                        refetchTrackOrder={refetchTrackOrder}
-                        data={data}
-                        setOpenOfflineModal={setOpenOfflineModal}
-                      />
-                    </CustomModal>
+                    />
                   )}
                 </Stack>
               </Box>
@@ -597,36 +407,36 @@ const OrderSummery = (props) => {
               md={12}
               pl={{ xs: "0px", sm: "20px", md: "25px" }}
             >
-              {trackOrderData?.unavailable_item_note && (
+              {summaryData?.unavailable_item_note && (
                 <InstructionBox
                   title="Unavailable item Note"
-                  note={trackOrderData?.unavailable_item_note}
+                  note={summaryData?.unavailable_item_note}
                 />
               )}
-              {trackOrderData?.delivery_instruction && (
+              {summaryData?.delivery_instruction && (
                 <InstructionBox
                   title="delivery instruction"
-                  note={trackOrderData?.delivery_instruction}
+                  note={summaryData?.delivery_instruction}
                 />
               )}
-              {trackOrderData?.order_status === "refund_requested" && (
+              {summaryData?.order_status === "refund_requested" && (
                 <InstructionBox
                   title="refund reason"
                   cxxx
-                  note={trackOrderData?.refund?.customer_reason}
+                  note={summaryData?.refund?.customer_reason}
                 />
               )}
-              {trackOrderData?.order_status === "refund_request_canceled" && (
+              {summaryData?.order_status === "refund_request_canceled" && (
                 <InstructionBox
                   title="refund cancellation note"
-                  note={trackOrderData?.refund_cancellation_note}
+                  note={summaryData?.refund_cancellation_note}
                 />
               )}
-              {trackOrderData?.order_status === "canceled" &&
-                trackOrderData?.cancellation_note && (
+              {summaryData?.order_status === "canceled" &&
+                summaryData?.cancellation_note && (
                   <InstructionBox
                     title="cancellation note"
-                    note={trackOrderData?.cancellation_note}
+                    note={summaryData?.cancellation_note}
                   />
                 )}
             </Grid>
@@ -637,17 +447,61 @@ const OrderSummery = (props) => {
               <PrescriptionOrderCalculation
                 data={data}
                 t={t}
-                trackOrderData={trackOrderData}
+                trackOrderData={summaryData}
                 configData={configData}
+              />
+            ) : isBooking ? (
+              <BookingCalculation
+                data={data}
+                t={t}
+                trackOrderData={summaryData}
               />
             ) : (
               <OrderCalculation
-                data={data}
+                data={items}
                 t={t}
-                trackOrderData={trackOrderData}
+                trackOrderData={summaryData}
                 configData={configData}
               />
             )}
+            {!data?.prescription_order && (
+              <Box mt="14px">
+                <OrderActionActions
+                  trackData={summaryData}
+                  data={data}
+                  configData={configData}
+                  id={id}
+                  refetchOrderDetails={refetchOrderDetails}
+                  refetchTrackData={refetchTrackOrder}
+                  setOpenModal={setOpenModal}
+                  isBooking={isBooking}
+                />
+              </Box>
+            )}
+            {isBooking &&
+              (data?.booking_status ?? "").toLowerCase() === "pending" && (
+                <Box mt="14px">
+                  <Box
+                    onClick={() => setCancelBookingModalOpen(true)}
+                    sx={{
+                      width: "100%",
+                      textAlign: "center",
+                      cursor: "pointer",
+                      borderRadius: "8px",
+                      padding: "12px",
+                      backgroundColor: alpha(theme.palette.error.main, 0.1),
+                    }}
+                  >
+                    <Typography
+                      fontWeight="700"
+                      fontSize="16px"
+                      color={theme.palette.error.main}
+                    >
+                      {t("Cancel Booking")}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
             {getToken() && !data?.prescription_order && (
               <Stack
                 direction="row"
@@ -691,8 +545,72 @@ const OrderSummery = (props) => {
       >
         <ChatWithAdmin
           automateMessageData={automateMessageData?.data}
-          orderID={trackOrderData?.id}
+          orderID={summaryData?.id}
+          isBooking={isBooking}
         />
+      </CustomModal>
+      <CustomModal
+        openModal={cancelBookingModalOpen}
+        handleClose={closeCancelBookingModal}
+        closeButton
+        maxWidth="460px"
+      >
+        <DialogTitle sx={{ pb: 0, textAlign: "center" }}>
+          <Typography
+            sx={{
+              fontSize: "18px",
+              fontWeight: 700,
+              color: theme.palette.text.primary,
+            }}
+          >
+            {t("Cancel Booking")}
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Typography
+            sx={{
+              fontSize: "14px",
+              color: theme.palette.text.secondary,
+              textAlign: "center",
+              mb: 2,
+            }}
+          >
+            {t("Are you sure you want to cancel this booking?")}
+          </Typography>
+          <TextField
+            label={t("Reason for Cancellation")}
+            required
+            multiline
+            rows={3}
+            fullWidth
+            value={cancelReason}
+            onChange={(e) => {
+              setCancelReason(e.target.value);
+              if (cancelReasonError) setCancelReasonError(false);
+            }}
+            error={cancelReasonError}
+            helperText={cancelReasonError ? t("Please provide a reason") : ""}
+            placeholder={t("Tell us why you're cancelling this booking")}
+          />
+        </DialogContent>
+        <DialogActions sx={{ px: "24px", pb: "20px", gap: "10px" }}>
+          <Button
+            onClick={closeCancelBookingModal}
+            variant="outlined"
+            sx={{ flex: 1 }}
+          >
+            {t("Back")}
+          </Button>
+          <LoadingButton
+            onClick={handleCancelBooking}
+            loading={isCancellingBooking}
+            variant="contained"
+            color="error"
+            sx={{ flex: 1 }}
+          >
+            {t("Cancel Booking")}
+          </LoadingButton>
+        </DialogActions>
       </CustomModal>
     </>
   );

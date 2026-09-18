@@ -1,21 +1,25 @@
 import { useMediaQuery, useTheme } from "@mui/material";
+import useGetLandingPage from "api-manage/hooks/react-query/useGetLandingPage";
+import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { ModuleTypes } from "helper-functions/moduleTypes";
+import useScrollDirection from "hooks/useScrollDirection";
 import { useRouter } from "next/router";
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useGetModule from "../../api-manage/hooks/react-query/useGetModule";
-import { setSelectedModule } from "../../redux/slices/utils";
 import { setModules } from "../../redux/slices/configData";
+import { setSelectedModule } from "../../redux/slices/utils";
 import { CustomStackFullWidth } from "../../styled-components/CustomStyles.style";
 import FooterComponent from "../footer";
 import HeaderComponent from "../header";
 import BottomNav from "../header/BottomNav";
 import { MainLayoutRoot } from "./LandingLayout";
-import useGetLandingPage from "api-manage/hooks/react-query/useGetLandingPage";
-import useScrollDirection from "hooks/useScrollDirection";
-import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
-import { ModuleTypes } from "helper-functions/moduleTypes";
+
+// import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+// import { ModuleTypes } from "helper-functions/moduleTypes";
 import SearchProductModal from "../home/search/SearchProductModal";
+// import { MainLayoutRoot } from "./LandingLayout";
 import FloatingCartButton from "../header/new-navbar/FloatingCartButton";
 
 // Routes that own their own sticky/in-flow header on mobile (no extra mt needed).
@@ -39,6 +43,8 @@ const FULL_BLEED_MOBILE_ROUTES = new Set([
   "/home/[...slug]",
   "/home/category/[slug]",
   "/home/wishlist",
+  "/campaigns",
+  "/campaigns/[id]",
   "/product/[id]",
   "/parcel-delivery-info",
   "/rental/vehicle-search",
@@ -49,16 +55,26 @@ const FULL_BLEED_MOBILE_ROUTES = new Set([
   "/rental/provider/popular",
   "/rental/provider/[id]",
   "/rental/trip-status/[id]",
+  "/service/service-details/[id]",
+  "/service/provider/[id]",
+  "/service/checkout",
+  "/service/checkout/custom-service",
+  "/service/custom-service/create",
+  "/service/custom-service/details/[id]",
+  "/service/all-providers"
 ]);
 
-const getMobileMarginTop = ({ pathname, currentModuleType, isCollapsed }) => {
+// Constant per route/module — sized for the EXPANDED header. The scroll-away
+// collapse is a pure transform on the fixed AppBar (see NavBar.style.js) and
+// never changes layout, so the content offset must not react to it either.
+const getMobileMarginTop = ({ pathname, currentModuleType }) => {
   if (FULL_BLEED_MOBILE_ROUTES.has(pathname)) return "0px";
   if (currentModuleType === ModuleTypes.RIDE) return "4.9rem";
   if (currentModuleType === ModuleTypes.RENTAL) {
     return pathname?.startsWith("/rental") ? "3rem" : "6.3rem";
   }
   if (currentModuleType === ModuleTypes.PARCEL) return "7.8rem";
-  return isCollapsed ? "10rem" : "11.9rem";
+  return "11.9rem";
 };
 
 const MainLayout = ({ children, configData }) => {
@@ -66,8 +82,6 @@ const MainLayout = ({ children, configData }) => {
   const { data, refetch } = useGetModule();
   const theme = useTheme();
   const isSmall = useMediaQuery("(max-width:1180px)");
-  const { direction, scrollY } = useScrollDirection({ threshold: 8 });
-  const isCollapsed = isSmall && scrollY > 40 && direction === "down";
   const router = useRouter();
   const { page } = router.query;
   const dispatch = useDispatch();
@@ -114,7 +128,7 @@ const MainLayout = ({ children, configData }) => {
   // }
   const { landingPageData } = useSelector((state) => state.configData);
   const selectedModule = useSelector(
-    (state) => state.utilsData?.selectedModule,
+    (state) => state.utilsData?.selectedModule
   );
   const queryModuleType =
     typeof router.query.module === "string" ? router.query.module : null;
@@ -158,7 +172,7 @@ const MainLayout = ({ children, configData }) => {
             query: { ...router.query, module: identifier },
           },
           undefined,
-          { shallow: true },
+          { shallow: true }
         );
       }
     };
@@ -177,7 +191,6 @@ const MainLayout = ({ children, configData }) => {
             xs: getMobileMarginTop({
               pathname: router.pathname,
               currentModuleType,
-              isCollapsed,
             }),
             md: router.pathname?.startsWith("/rental")
               ? "10rem"
@@ -190,10 +203,12 @@ const MainLayout = ({ children, configData }) => {
               ? "4.4rem"
               : "6.4rem",
           },
-          transition: "margin-top 0.25s ease",
         }}
       >
-        <CustomStackFullWidth sx={{ minHeight: { xs: "auto", md: "70vh" } }}>
+        {/* Reserve viewport height while content is still fetching so the
+            footer stays below the fold on mobile reload instead of flashing up
+            into an empty (auto-height) content area. */}
+        <CustomStackFullWidth sx={{ minHeight: { xs: "70dvh", md: "70vh" } }}>
           {children}
         </CustomStackFullWidth>
       </CustomStackFullWidth>
@@ -206,7 +221,9 @@ const MainLayout = ({ children, configData }) => {
       {isSmall &&
         page !== "parcel" &&
         router.pathname !== "/store/[id]" &&
-        router.pathname !== "/product/[id]" && <BottomNav />}
+        router.pathname !== "/product/[id]" &&
+        router.pathname !== "/service/provider/[id]" &&
+        router.pathname !== "/service/service-details/[id]" && <BottomNav />}
       <SearchProductModal />
       <FloatingCartButton />
     </MainLayoutRoot>

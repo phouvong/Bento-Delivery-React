@@ -7,9 +7,11 @@ const SCROLL_THRESHOLD = 300;
 const ScrollUpButton = () => {
   const { t } = useTranslation();
   const isMobile = useMediaQuery("(max-width:900px)");
-  const { scrollY } = useScrollDirection({ threshold: 8 });
+  const { isPastThreshold } = useScrollDirection({
+    pastThresholdAt: SCROLL_THRESHOLD,
+  });
 
-  const visible = isMobile && scrollY > SCROLL_THRESHOLD;
+  const visible = isMobile && isPastThreshold;
 
   const handleClick = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });

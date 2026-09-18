@@ -1170,7 +1170,7 @@ const Top = (props) => {
         openModal={openAnnouncementModal}
         handleClose={() => setOpenAnnouncementModal(false)}
         closeButton
-        maxWidth="sm"
+        maxWidth="500px"
       >
         <Box sx={{ pt: 0.5, px: { xs: 2, md: 3 }, pb: { xs: 8, md: 4 } }}>
           <Stack direction="row" alignItems="center" gap={1.5} sx={{ mb: 2 }}>

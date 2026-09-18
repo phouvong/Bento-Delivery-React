@@ -14,6 +14,7 @@ import { useRouter } from "next/router";
 import { useStoreFcm } from "api-manage/hooks/react-query/push-notifications/usePushNotification";
 import CongratulationsIcon from "../assets/img/CongratulationsIcon";
 import CloseIcon from "@mui/icons-material/Close";
+import NotificationsActiveRoundedIcon from "@mui/icons-material/NotificationsActiveRounded";
 import { t } from "i18next";
 
 const CustomPaperRefer = styled(Paper)(({ theme }) => ({
@@ -55,24 +56,52 @@ const PushNotificationLayout = ({
       },
       position: "top-center",
     });
-  const CustomToast = ({ title, description, icon }) => (
-    <CustomPaperRefer>
-      {icon && icon}
-      <Stack gap="7px">
-        <Typography
-          fontSize="14px"
-          fontWeight={700}
-          sx={{ color: "primary.main" }}
-        >
-          {t(title)}
-        </Typography>
-        <Typography fontSize="12px" sx={{ width: "100%", maxWidth: "283px" }}>
-          {t(description)}
-        </Typography>
+  const CustomToast = ({ title, description, icon, onClick, toastId }) => (
+    <CustomPaperRefer sx={{ position: "relative" }}>
+      <Stack
+        direction="row"
+        gap="14px"
+        sx={{ cursor: onClick ? "pointer" : "default", flex: 1, minWidth: 0 }}
+        onClick={() => {
+          onClick?.();
+          toast.dismiss(toastId);
+        }}
+      >
+        {icon && (
+          <Stack
+            alignItems="center"
+            justifyContent="center"
+            sx={{
+              width: 40,
+              height: 40,
+              borderRadius: "50%",
+              flexShrink: 0,
+              backgroundColor: (t) => `${t.palette.primary.main}1a`,
+              color: "primary.main",
+            }}
+          >
+            {icon}
+          </Stack>
+        )}
+        <Stack gap="4px" sx={{ minWidth: 0 }}>
+          <Typography
+            fontSize="14px"
+            fontWeight={700}
+            sx={{ color: "primary.main" }}
+          >
+            {t(title)}
+          </Typography>
+          <Typography
+            fontSize="12px"
+            sx={{ width: "100%", maxWidth: "283px", color: "text.secondary" }}
+          >
+            {t(description)}
+          </Typography>
+        </Stack>
       </Stack>
       <IconButton
         sx={{ position: "absolute", top: 10, right: 15 }}
-        onClick={() => toast.dismiss()}
+        onClick={() => toast.dismiss(toastId)}
       >
         <CloseIcon sx={{ fontSize: "16px" }} />
       </IconButton>
@@ -145,11 +174,14 @@ const PushNotificationLayout = ({
         darkToast();
       } else if (notification.type === "referral_code") {
         toast.custom(
-          <CustomToast
-            title={notification?.title}
-            description={notification?.body}
-            icon={<CongratulationsIcon />}
-          />,
+          (customToast) => (
+            <CustomToast
+              toastId={customToast.id}
+              title={notification?.title}
+              description={notification?.body}
+              icon={<CongratulationsIcon />}
+            />
+          ),
           {
             position: "top-right",
             duration: 5000,
@@ -157,20 +189,22 @@ const PushNotificationLayout = ({
         );
       } else {
         if (pathName === "profile") {
-          refetchTrackOrder();
+          refetchTrackOrder?.();
         }
-        toast(
-          <>
-            <Stack
-              sx={{ cursor: "pointer" }}
+        toast.custom(
+          (customToast) => (
+            <CustomToast
+              toastId={customToast.id}
+              title={notification?.title}
+              description={notification?.body}
+              icon={<NotificationsActiveRoundedIcon sx={{ fontSize: 20 }} />}
               onClick={clickHandler}
-              color={theme.palette.primary.main}
-              width="300px"
-            >
-              <Typography>{notification.title}</Typography>
-              <Typography>{notification.body}</Typography>
-            </Stack>
-          </>
+            />
+          ),
+          {
+            position: "top-center",
+            duration: 5000,
+          }
         );
       }
     }

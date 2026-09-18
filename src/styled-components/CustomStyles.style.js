@@ -580,6 +580,16 @@ export const UserInfoGrid = styled(Grid)(({ theme, page, userToken }) => ({
 	},
 }));
 export const UserProfileTabs = styled(Tabs)(({ theme, isActive }) => ({
+	position: "relative",
+	"&::after": {
+		content: '""',
+		position: "absolute",
+		left: 0,
+		right: 0,
+		bottom: 0,
+		height: "1px",
+		backgroundColor: theme.palette.divider,
+	},
 	"& .MuiTabs-scroller": {
 		"& .MuiTabs-flexContainer": {
 			flexWrap: "nowrap",
@@ -587,6 +597,7 @@ export const UserProfileTabs = styled(Tabs)(({ theme, isActive }) => ({
 	},
 	"& .MuiButtonBase-root": {
 		minHeight: "42px",
+		height: "100%",
 		color: theme.palette.neutral[600],
 		textTransform: "capitalize",
 		[theme.breakpoints.down("sm")]: {
@@ -597,14 +608,24 @@ export const UserProfileTabs = styled(Tabs)(({ theme, isActive }) => ({
 
 export const UserProfileTab = styled(Button)(
 	({ theme, page, item, marginright, fontSize, borderRadius }) => ({
-		background:
-			item?.name === page && alpha(theme.palette.primary.main, 0.1),
+		position: "relative",
+		background: "transparent",
 		paddingInlineEnd: "15px",
 		paddingInlineStart: "15px",
 		marginInlineEnd: marginright ? marginright : "25px",
 		paddingBlockEnd: "0px",
 		paddingBlockStart: "0px",
-		borderRadius: borderRadius ? borderRadius : "10px",
+		borderRadius: 0,
+		"&::after": {
+			content: '""',
+			position: "absolute",
+			left: 0,
+			right: 0,
+			bottom: 0,
+			height: "3px",
+			backgroundColor:
+				item?.name === page ? theme.palette.primary.main : "transparent",
+		},
 		[theme.breakpoints.down("sm")]: {
 			marginInlineEnd: "10px",
 			paddingInlineEnd: "7px",

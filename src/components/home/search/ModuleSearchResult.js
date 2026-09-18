@@ -167,8 +167,15 @@ const ModuleSearchResult = ({
       ? t("Items")
       : moduleType === "pharmacy"
       ? t("Medicines")
+      : moduleType === "service"
+      ? t("Services")
       : t("Groceries");
-  const storesLabel = moduleType === "food" ? t("Restaurants") : t("Stores");
+  const storesLabel =
+    moduleType === "food"
+      ? t("Restaurants")
+      : moduleType === "service"
+      ? t("Providers")
+      : t("Stores");
 
   const totalCount =
     activeTab === TAB_FOODS
@@ -234,19 +241,21 @@ const ModuleSearchResult = ({
         }}
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography
-            sx={{
-              fontSize: { xs: "12px", md: "18px" },
-              fontWeight: 400,
-              color: "#757575",
-              letterSpacing: "-0.36px",
-              lineHeight: 1.3,
-            }}
-          >
-            {searchValue
-              ? `${totalCount} ${t("Result For")} “${searchValue}”`
-              : `${totalCount} ${t("Results Found")}`}
-          </Typography>
+          {totalCount > 0 && (
+            <Typography
+              sx={{
+                fontSize: { xs: "12px", md: "18px" },
+                fontWeight: 400,
+                color: "#757575",
+                letterSpacing: "-0.36px",
+                lineHeight: 1.3,
+              }}
+            >
+              {searchValue
+                ? `${totalCount} ${t("Result For")} “${searchValue}”`
+                : `${totalCount} ${t("Results Found")}`}
+            </Typography>
+          )}
         </Box>
         <Stack
           direction="row"

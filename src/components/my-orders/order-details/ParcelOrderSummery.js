@@ -1,5 +1,6 @@
 import CloseIcon from "@mui/icons-material/Close";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import LoadingButton from "@mui/lab/LoadingButton";
 import {
   alpha,
   Grid,
@@ -11,27 +12,26 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
+import Button from "@mui/material/Button";
 import { Box } from "@mui/system";
+import { useGetOrderCancelReason } from "api-manage/hooks/react-query/order/useGetAutomatedMessage";
+import ChatWithAdmin from "components/my-orders/order-details/other-order/ChatWithAdmin";
+import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
+import { getToken } from "helper-functions/getToken";
 import { t } from "i18next";
-import React, { useState } from "react";
+import { useState } from "react";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
+import adminImage from "../../../../public/static/profile/fi_4460756 (1).png";
 import CustomImageContainer from "../../CustomImageContainer";
 import CustomModal from "../../modal";
 import nodata from "../assets/test.png";
 import OfflineOrderDenied from "./offline-order/OfflineOrderDenied";
 import OfflineOrderDetails from "./offline-order/OfflineOrderDetails";
 import OfflinePaymentEdit from "./offline-order/OfflinePaymentEdit";
+import OrderActionActions from "./other-order/OrderActionActions";
 import SenderOrReceiverDetails from "./parcel-order/SenderOrReceiverDetails";
 import { SummeryShimmer } from "./parcel-order/Shimmers";
-import { useGetOrderCancelReason } from "api-manage/hooks/react-query/order/useGetAutomatedMessage";
-import ChatWithAdmin from "components/my-orders/order-details/other-order/ChatWithAdmin";
-import { getToken } from "helper-functions/getToken";
-import adminImage from "../../../../public/static/profile/fi_4460756 (1).png";
-import InstructionBox from "./other-order/InstructionBox";
-import Button from "@mui/material/Button";
-import LoadingButton from "@mui/lab/LoadingButton";
-import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
 
 export const ParcelOrderSummaryBox = styled(CustomStackFullWidth)(
   ({ theme }) => ({
@@ -55,6 +55,9 @@ const ParcelOrderSummery = ({
   repayOrderLoading,
   setOpenPaymentMethod,
   handlePayment,
+  id,
+  refetchOrderDetails,
+  setOpenModal,
 }) => {
   const theme = useTheme();
   const [openAdmin, setOpenAdmin] = useState(false);
@@ -466,6 +469,27 @@ const ParcelOrderSummery = ({
                 textTransform="capitalize"
               >
                 {trackOrderData?.delivery_instruction}
+              </Typography>
+            </Stack>
+          </Stack>
+        )}
+        {trackOrderData?.order_note && (
+          <Stack spacing={1} pt={{ xs: "10px", md: "20px" }}>
+            <Typography fontSize={{ xs: "14px", md: "16px" }} fontWeight="500">
+              {t("Order Note")}
+            </Typography>
+            <Stack
+              padding={{ xs: "10px", sm: "15px", md: "20px" }}
+              borderRadius="10px"
+              backgroundColor={theme.palette.background.default}
+            >
+              <Typography
+                fontSize={{ xs: "12px", md: "14px" }}
+                fontWeight="400"
+                color={theme.palette.neutral[500]}
+                lineHeight="25px"
+              >
+                {trackOrderData?.order_note}
               </Typography>
             </Stack>
           </Stack>
@@ -926,6 +950,17 @@ const ParcelOrderSummery = ({
                 ) : null}
               </Stack>
             </ParcelOrderSummaryBox>
+            <Box mt="12px">
+              <OrderActionActions
+                trackData={trackOrderData}
+                data={data}
+                configData={configData}
+                id={id}
+                refetchOrderDetails={refetchOrderDetails}
+                refetchTrackData={refetchTrackOrder}
+                setOpenModal={setOpenModal}
+              />
+            </Box>
           </>
         ) : (
           <SummeryShimmer />

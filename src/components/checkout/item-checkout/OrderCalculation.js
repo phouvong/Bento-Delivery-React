@@ -25,6 +25,7 @@ import {
   getCalculatedTotal,
   getCouponDiscount,
   getDeliveryFees,
+  getInfoFromZoneData,
   getProductDiscount,
   getSubTotalPrice,
   getTaxableTotalPrice,
@@ -82,6 +83,7 @@ const OrderCalculation = (props) => {
     taxAmount,
     scheduleAt,
     selectedDeliveryOption,
+    currentZoneInfo
   } = props;
 
   // Express / slightly_delay surcharge from the DeliverySpeedOptions row.
@@ -191,6 +193,18 @@ const OrderCalculation = (props) => {
       )
     ) || 0;
 
+  // A slightly-delay discount can never push the delivery fee below the
+  // current module's minimum_shipping_charge (zone pivot) — cap the discount
+  // at (fee − minimum) so the surcharge row and the total never credit more
+  // than the fee can actually shrink.
+  const zonePivot = getInfoFromZoneData(zoneData)?.pivot;
+  // Fixed-charge modules leave minimum_shipping_charge null and carry the
+  // floor in minimum_delivery_charge instead (e.g. grocery: fee 200, floor 12
+  // → max discount 188, matching the backend's billing).
+  const minimumShippingCharge =
+    Number(zonePivot?.minimum_shipping_charge) ||
+    Number(zonePivot?.minimum_delivery_charge) ||
+    0;
   const proDeliveryBenefitActive =
     proDeliveryConditionsMet && rawDeliveryFee > 0;
   // Full waiver — kept under the old name so the rest of the file's references
@@ -213,6 +227,20 @@ const OrderCalculation = (props) => {
     }
     return 0;
   };
+
+  // Headroom for the slightly-delay discount: the fee minus what the Pro
+  // benefit already takes off, floored at the module's minimum shipping
+  // charge — the two discounts together can never push the billed fee
+  // below that minimum.
+  const proDeliveryDiscountAmount = computeProDeliveryDiscount(rawDeliveryFee);
+  const maxDeliveryDiscount = Math.max(
+    0,
+    rawDeliveryFee - proDeliveryDiscountAmount - minimumShippingCharge
+  );
+  const cappedDeliveryOptionSurcharge =
+    deliveryOptionSurcharge < 0
+      ? -Math.min(Math.abs(deliveryOptionSurcharge), maxDeliveryDiscount)
+      : deliveryOptionSurcharge;
 
   // Pro "discount" benefit (percentage off the order subtotal, capped at
   // max_amount, gated on the same min-order threshold). Computed against the
@@ -442,7 +470,7 @@ const OrderCalculation = (props) => {
       taxAmount?.tax_amount,
       surgePrice
     );
-    totalAmount = Number(totalAmount) + deliveryOptionSurcharge;
+    totalAmount = Number(totalAmount) + cappedDeliveryOptionSurcharge;
 
     // Pro member with an active delivery_fee benefit → waive the fee
     // (offer_type "free") or apply the percentage discount (offer_type
@@ -869,7 +897,7 @@ const OrderCalculation = (props) => {
           selectedDeliveryOption.deliveryType !== "standard" &&
           orderType === "delivery" &&
           couponDiscount?.coupon_type !== "free_delivery" &&
-          deliveryOptionSurcharge !== 0 && (
+          cappedDeliveryOptionSurcharge !== 0 && (
             <>
               <Grid item md={8} xs={8} sx={{ textTransform: "capitalize" }}>
                 {selectedDeliveryOption.deliveryType === "express"
@@ -884,10 +912,10 @@ const OrderCalculation = (props) => {
                   spacing={0.5}
                 >
                   <Typography>
-                    {deliveryOptionSurcharge > 0 ? "(+)" : "(-)"}
+                    {cappedDeliveryOptionSurcharge > 0 ? "(+)" : "(-)"}
                   </Typography>
                   <Typography>
-                    {getAmountWithSign(Math.abs(deliveryOptionSurcharge))}
+                    {getAmountWithSign(Math.abs(cappedDeliveryOptionSurcharge))}
                   </Typography>
                 </Stack>
               </Grid>

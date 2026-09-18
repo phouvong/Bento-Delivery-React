@@ -1,10 +1,11 @@
 import React, { useState } from "react";
-import {Grid, Typography, useMediaQuery} from "@mui/material";
+import { Grid, Typography, useMediaQuery } from "@mui/material";
 import { useSelector } from "react-redux";
 import CustomEmptyResult from "../custom-empty-result";
 import noData from "../../../public/static/newnoitem.png";
 import StoreShimmer from "../Shimmer/StoreShimmer";
 import StoreCard from "../cards/StoreCard";
+import NewStoreCard from "components/cards/newCard/NewStoreCard";
 
 const ItemSection = ({ campaignsDetails, isLoading, isRefetching }) => {
   const [page_limit, setPageLimit] = useState(10);
@@ -25,7 +26,8 @@ const ItemSection = ({ campaignsDetails, isLoading, isRefetching }) => {
                 sm={4}
                 xs={matchesXs ? 12 : 3}
               >
-                <StoreCard
+                <NewStoreCard
+                  variant="normal"
                   item={store}
                   imageUrl={store?.cover_photo_full_url}
                 />

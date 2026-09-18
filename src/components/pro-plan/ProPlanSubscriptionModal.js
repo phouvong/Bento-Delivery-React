@@ -43,7 +43,7 @@ const ProPlanSubscriptionModal = ({
           width: { xs: "100%", sm: "569px" },
           maxWidth: { xs: "100%", sm: "569px" },
           m: { xs: 0, sm: 2 },
-          maxHeight: { xs: "92vh", sm: "90vh" },
+          maxHeight: { xs: "85vh", sm: "90vh" },
           borderRadius: {
             xs: "16px 16px 0 0",
             sm: "16px",

@@ -16,6 +16,7 @@ import ModuleHomeSidebarLayout from "components/home/sidebar-layout/ModuleHomeSi
 import CategoryPageContent from "components/home/category-page/CategoryPageContent";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
+import { getServiceSections } from "components/home/module-wise-components/service/serviceSectionsConfig";
 
 const CategoryPage = ({ configData, metaData }) => {
   const router = useRouter();
@@ -41,6 +42,7 @@ const CategoryPage = ({ configData, metaData }) => {
     moduleType === ModuleTypes.GROCERY ? getGrocerySections() :
     moduleType === ModuleTypes.PHARMACY ? getPharmacySections() :
     moduleType === ModuleTypes.ECOMMERCE ? getEcommerceSections() :
+    moduleType === ModuleTypes.SERVICE ? getServiceSections() :
     [];
 
   return (

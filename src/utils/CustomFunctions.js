@@ -41,8 +41,6 @@ export const handleTotalAmountWithAddons = (
   mainTotalAmount,
   selectedAddOns
 ) => {
-  console.log({mainTotalAmount, selectedAddOns});
-  
   if (selectedAddOns?.length > 0) {
     let selectedAddonsTotalPrice = 0;
     selectedAddOns?.forEach(
@@ -59,8 +57,6 @@ export const newHandleTotalAmountWithAddons = (
   mainTotalAmount,
   selectedAddOns
 ) => {
-  console.log({mainTotalAmount, selectedAddOns});
-  
   if (selectedAddOns?.length > 0) {
     let selectedAddonsTotalPrice = 0;
     selectedAddOns?.forEach(
@@ -155,7 +151,23 @@ const handleVariationValuesSum = (productVariations) => {
 const handleValuesSum = (productVariations) => {
   let sum = 0;
   if (productVariations.length > 0) {
-    productVariations?.forEach((pVal) => (sum += Number.parseInt(pVal.price)));
+    productVariations?.forEach((pVal) => {
+      // Service module cart items store `selectedOption[0]` as an ARRAY of
+      // `{variation, quantity}` picks (multi-variation selection), not a
+      // single flat variation object with its own `.price` like every other
+      // module — sum each pick's own price * quantity instead of reading a
+      // non-existent `.price` off the array itself (parsed to NaN, which
+      // made `getCouponDiscount` silently return 0 for service bookings).
+      if (Array.isArray(pVal)) {
+        pVal.forEach((selection) => {
+          sum +=
+            (Number(selection?.variation?.price) || 0) *
+            (Number(selection?.quantity) || 1);
+        });
+      } else {
+        sum += Number.parseInt(pVal.price);
+      }
+    });
   }
   return sum;
 };
@@ -254,11 +266,16 @@ export const getCouponDiscount = (couponDiscount, storeData, cartList) => {
               let percentageWiseDis =
                 (purchasedAmount - getProductDiscount(cartList, storeData)) *
                 (couponDiscount.discount / 100);
-              if (couponDiscount.max_discount === 0) {
+              // Backend can send max_discount as a numeric string ("0"), so
+              // a strict `=== 0` never matches and every percent coupon fell
+              // into the cap branch below with an always-true string/number
+              // `>=` comparison, silently capping the discount at "0".
+              const maxDiscount = Number(couponDiscount.max_discount) || 0;
+              if (maxDiscount === 0) {
                 return percentageWiseDis;
               } else {
-                if (percentageWiseDis >= couponDiscount.max_discount) {
-                  return couponDiscount.max_discount;
+                if (percentageWiseDis >= maxDiscount) {
+                  return maxDiscount;
                 } else {
                   return percentageWiseDis;
                 }
@@ -280,11 +297,12 @@ export const getCouponDiscount = (couponDiscount, storeData, cartList) => {
               let percentageWiseDis =
                 (purchasedAmount - getProductDiscount(cartList, storeData)) *
                 (couponDiscount.discount / 100);
-              if (couponDiscount.max_discount === 0) {
+              const maxDiscount = Number(couponDiscount.max_discount) || 0;
+              if (maxDiscount === 0) {
                 return percentageWiseDis;
               } else {
-                if (percentageWiseDis >= couponDiscount.max_discount) {
-                  return couponDiscount.max_discount;
+                if (percentageWiseDis >= maxDiscount) {
+                  return maxDiscount;
                 } else {
                   return percentageWiseDis;
                 }
@@ -313,11 +331,12 @@ export const getCouponDiscount = (couponDiscount, storeData, cartList) => {
             let percentageWiseDis =
               (purchasedAmount - getProductDiscount(cartList, storeData)) *
               (couponDiscount.discount / 100);
-            if (couponDiscount.max_discount === 0) {
+            const maxDiscount = Number(couponDiscount.max_discount) || 0;
+            if (maxDiscount === 0) {
               return percentageWiseDis;
             } else {
-              if (percentageWiseDis >= couponDiscount.max_discount) {
-                return couponDiscount.max_discount;
+              if (percentageWiseDis >= maxDiscount) {
+                return maxDiscount;
               } else {
                 return percentageWiseDis;
               }
@@ -684,8 +703,6 @@ export const handleDistance = (distance, origin, destination) => {
 };
 
 export const cartItemsTotalAmount = (cartList) => {
-  console.log({cartList});
-  
   let totalAmount = 0;
   if (cartList?.length > 0) {
     cartList?.forEach((item) => {
@@ -701,13 +718,9 @@ export const cartItemsTotalAmount = (cartList) => {
       );
     });
   }
-  console.log({totalAmount});
-  
   return totalAmount;
 };
 export const newCartItemsTotalAmount = (cartList) => {
-  console.log({cartList});
-  
   let totalAmount = 0;
   if (cartList?.length > 0) {
     cartList?.forEach((item) => {
@@ -723,8 +736,6 @@ export const newCartItemsTotalAmount = (cartList) => {
       );
     });
   }
-  console.log({totalAmount});
-  
   return totalAmount;
 };
 

@@ -14,11 +14,10 @@ const Index = ({ configData, metaData }) => {
   const { t } = useTranslation();
   const { data, refetch, isFetching } = useGetPolicyPage("/api/v1/about-us");
   const metadata = processMetadata(metaData, {
-        title: `About us - ${configData?.business_name}`,
-        description: '',
-        image:  configData?.logo_full_url,
-       
-    })
+    title: `About us - ${configData?.business_name}`,
+    description: "",
+    image: configData?.logo_full_url,
+  });
 
   useEffect(() => {
     if (refetch) refetch();
@@ -27,8 +26,6 @@ const Index = ({ configData, metaData }) => {
   if (!configData) {
     return <div>{t("Configuration data is not available")}</div>;
   }
-  console.log({metadata,configData});
-  
 
   return (
     <>
@@ -39,7 +36,7 @@ const Index = ({ configData, metaData }) => {
         image={metadata?.image}
         robotsMeta={metadata.robotsMeta}
       />
-      <MainLayout configData={configData} >
+      <MainLayout configData={configData}>
         <SimpleMobileHeader title="About Us" />
         <PolicyPage data={data} title={t("About us")} isFetching={isFetching} />
       </MainLayout>
@@ -50,6 +47,5 @@ const Index = ({ configData, metaData }) => {
 export default Index;
 
 export const getServerSideProps = async (context) => {
-  return await getCommonServerSideProps(context, 'about_us_page')
-}
-
+  return await getCommonServerSideProps(context, "about_us_page");
+};

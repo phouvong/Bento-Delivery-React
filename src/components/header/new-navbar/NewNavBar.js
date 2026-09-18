@@ -47,7 +47,9 @@ import useGetGroupedCart from "../../../api-manage/hooks/react-query/add-cart/us
 import useGetGuest from "../../../api-manage/hooks/react-query/guest/useGetGuest";
 import AllCartDrawer from "./AllCartDrawer";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { ModuleTypes } from "helper-functions/moduleTypes";
 import { getModuleIdentifier, saveModuleParam } from "utils/moduleParamManager";
+import { useQueryClient } from "react-query";
 
 const AuthModal = dynamic(() => import("components/auth/AuthModal"));
 
@@ -57,6 +59,11 @@ const ModuleTab = styled(Box)(({ theme, active }) => ({
   padding: "10px 24px",
   cursor: "pointer",
   whiteSpace: "nowrap",
+  // Never let a tab shrink below its nowrap label — a long module name would
+  // otherwise overflow its own background and overlap the neighboring tabs.
+  // The row scrolls horizontally instead (same approach as MobileNavBar).
+  flexShrink: 0,
+  minWidth: "max-content",
   userSelect: "none",
   transition: "color 0.2s, background-color 0.2s",
   color: active ? theme.palette.neutral[1000] : theme.palette.neutral[500],
@@ -234,6 +241,7 @@ const NewNavBar = ({ configData }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const router = useRouter();
+  const queryClient = useQueryClient();
   const isSmall = useMediaQuery("(max-width:1180px)");
   const _scrollTrigger = useScrollTrigger({
     disableHysteresis: true,
@@ -251,6 +259,7 @@ const NewNavBar = ({ configData }) => {
   // ModuleSearchBanner is still visible; elsewhere it follows scroll only.
   const isSearchAwarePage =
     router.pathname === "/home" || router.pathname === "/search";
+  const isProfilePage = router.pathname === "/profile";
 
   // ── Redux ──
   const { cartList } = useSelector((state) => state.cart);
@@ -268,6 +277,7 @@ const NewNavBar = ({ configData }) => {
   const showNavSearch =
     scrollTrigger &&
     !isSearchlessModule &&
+    !isProfilePage &&
     (!isSearchAwarePage || !searchBannerInView);
 
   // ── Local state ──
@@ -374,8 +384,10 @@ const NewNavBar = ({ configData }) => {
   }, [selectedModule]);
 
   const totalWishList =
-    moduleType === "rental"
+    moduleType === ModuleTypes.RENTAL
       ? (wishLists?.vehicles?.length || 0) + (wishLists?.providers?.length || 0)
+      : moduleType === ModuleTypes.SERVICE
+      ? (wishLists?.service?.length || 0) + (wishLists?.store?.length || 0)
       : (wishLists?.item?.length || 0) + (wishLists?.store?.length || 0);
 
   const handleWishlistClick = (page) =>
@@ -432,135 +444,142 @@ const NewNavBar = ({ configData }) => {
 
       {token ? (
         <Stack direction="row" alignItems="center" spacing="12px">
-        <AccountLanguageButton />
-        <Box
-          ref={anchorRef}
-          onClick={() => setOpenPopover(true)}
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            pl: "4px",
-            pr: "12px",
-            height: "36px",
-            borderRadius: "8px",
-            backgroundColor: "primary.main",
-            cursor: "pointer",
-            flexShrink: 0,
-            overflow: "hidden",
-            "&:hover": { opacity: 0.9 },
-          }}
-        >
-          {/* Avatar or fallback icon */}
+          <AccountLanguageButton />
           <Box
+            ref={anchorRef}
+            onClick={() => setOpenPopover(true)}
             sx={{
-              width: 28,
-              height: 28,
-              borderRadius: "50%",
-              overflow: "hidden",
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
-              justifyContent: "center",
+              pl: "4px",
+              pr: "12px",
+              height: "36px",
+              borderRadius: "8px",
+              backgroundColor: "primary.main",
+              cursor: "pointer",
               flexShrink: 0,
-              mr: "5px",
-              ...(profileInfo?.image_full_url && { p: "3px" }),
-            }}
-          >
-            {profileInfo?.image_full_url ? (
-              <Avatar
-                alt={profileInfo?.f_name}
-                src={profileInfo?.image_full_url}
-                sx={{ width: "100%", height: "100%", borderRadius: "50%" }}
-              />
-            ) : (
-              <Box
-                sx={{
-                  width: 28,
-                  height: 28,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <i
-                  className="fi fi-rr-circle-user"
-                  style={{ fontSize: "16px", display: "flex", lineHeight: 1, color: "#fff" }}
-                />
-              </Box>
-            )}
-          </Box>
-          {/* First name */}
-          <Typography
-            sx={{
-              fontSize: "15px",
-              fontWeight: 700,
-              color: "#fff",
-              lineHeight: 1.1,
-              letterSpacing: "-0.4px",
-              whiteSpace: "nowrap",
               overflow: "hidden",
-              textOverflow: "ellipsis",
-              maxWidth: "100px",
+              "&:hover": { opacity: 0.9 },
             }}
           >
-            {profileInfo?.f_name ?? profileInfo?.name?.split(" ")[0] ?? t("User")}
-          </Typography>
-        </Box>
+            {/* Avatar or fallback icon */}
+            <Box
+              sx={{
+                width: 28,
+                height: 28,
+                borderRadius: "50%",
+                overflow: "hidden",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                mr: "5px",
+                ...(profileInfo?.image_full_url && { p: "3px" }),
+              }}
+            >
+              {profileInfo?.image_full_url ? (
+                <Avatar
+                  alt={profileInfo?.f_name}
+                  src={profileInfo?.image_full_url}
+                  sx={{ width: "100%", height: "100%", borderRadius: "50%" }}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    width: 28,
+                    height: 28,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <i
+                    className="fi fi-rr-circle-user"
+                    style={{
+                      fontSize: "16px",
+                      display: "flex",
+                      lineHeight: 1,
+                      color: "#fff",
+                    }}
+                  />
+                </Box>
+              )}
+            </Box>
+            {/* First name */}
+            <Typography
+              sx={{
+                fontSize: "15px",
+                fontWeight: 700,
+                color: "#fff",
+                lineHeight: 1.1,
+                letterSpacing: "-0.4px",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "100px",
+              }}
+            >
+              {profileInfo?.f_name ??
+                profileInfo?.name?.split(" ")[0] ??
+                t("User")}
+            </Typography>
+          </Box>
         </Stack>
       ) : (
         <Stack direction="row" alignItems="center" spacing="12px">
-        <AccountLanguageButton />
-        <Box
-          ref={anchorRef}
-          onClick={() => setOpenPopover(true)}
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            pl: "4px",
-            pr: "12px",
-            height: "36px",
-            borderRadius: "8px",
-            backgroundColor: "primary.main",
-            cursor: "pointer",
-            flexShrink: 0,
-            overflow: "hidden",
-            "&:hover": { opacity: 0.9 },
-          }}
-        >
+          <AccountLanguageButton />
           <Box
+            ref={anchorRef}
+            onClick={() => setOpenPopover(true)}
             sx={{
-              width: 36,
-              height: 36,
-              display: "flex",
+              display: "inline-flex",
               alignItems: "center",
-              justifyContent: "center",
+              pl: "4px",
+              pr: "12px",
+              height: "36px",
+              borderRadius: "8px",
+              backgroundColor: "primary.main",
+              cursor: "pointer",
               flexShrink: 0,
-              p: "8px",
+              overflow: "hidden",
+              "&:hover": { opacity: 0.9 },
             }}
           >
-            <i
-              className="fi fi-rr-circle-user"
-              style={{
-                fontSize: "16px",
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
                 display: "flex",
-                lineHeight: 1,
-                color: "#fff",
+                alignItems: "center",
+                justifyContent: "center",
+                flexShrink: 0,
+                p: "8px",
               }}
-            />
+            >
+              <i
+                className="fi fi-rr-circle-user"
+                style={{
+                  fontSize: "16px",
+                  display: "flex",
+                  lineHeight: 1,
+                  color: "#fff",
+                }}
+              />
+            </Box>
+            <Typography
+              sx={{
+                fontSize: "16px",
+                fontWeight: 700,
+                color: "#fff",
+                lineHeight: 1.1,
+                letterSpacing: "-0.48px",
+                textTransform: "capitalize",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {t("Login")}
+            </Typography>
           </Box>
-          <Typography
-            sx={{
-              fontSize: "16px",
-              fontWeight: 700,
-              color: "#fff",
-              lineHeight: 1.1,
-              letterSpacing: "-0.48px",
-              textTransform: "capitalize",
-              whiteSpace: "nowrap",
-            }}
-          >
-            {t("Login")}
-          </Typography>
-        </Box>
         </Stack>
       )}
     </Stack>
@@ -648,6 +667,11 @@ const NewNavBar = ({ configData }) => {
     dispatch(setSelectedModule(mod));
     const moduleIdentifier = getModuleIdentifier(mod);
     saveModuleParam(mod?.id, mod?.slug);
+    // Two modules can share a module_type (e.g. two "food" modules) — queries
+    // keyed only by type would keep serving the previous module's cache.
+    // Keys now include getModuleId(), and this invalidation refreshes any
+    // remaining cache so every section refetches under the new module.
+    queryClient.invalidateQueries();
     router.push({ pathname: "/home", query: { module: moduleIdentifier } });
   };
 

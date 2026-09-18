@@ -118,7 +118,12 @@ const TopOfferNotifyBanner = ({ title, subtitle, onClick, icon, bannerSx }) => {
       >
         <i
           className="fi fi-rs-arrow-small-right"
-          style={{ fontSize: "20px", lineHeight: 1, display: "flex" }}
+          style={{
+            fontSize: "20px",
+            lineHeight: 1,
+            display: "flex",
+            transform: theme.direction === "rtl" ? "scaleX(-1)" : "none",
+          }}
         />
       </IconButton>
     </Box>

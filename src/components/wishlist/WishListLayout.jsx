@@ -445,7 +445,9 @@ const WishListLayout = ({ configData }) => {
     !!token,
   );
 
-  const allItems = wishlistData?.item || [];
+  const allItems = wishlistData?.item?.length
+    ? wishlistData.item
+    : wishlistData?.service || [];
   const allStores = wishlistData?.store || [];
 
   // Sync API wishlist data into Redux so cards (NewStoreCard, NewProductCard)
@@ -495,6 +497,8 @@ const WishListLayout = ({ configData }) => {
       ? "Search Saved Medicine"
       : moduleType === "ecommerce"
       ? "Search Saved Products"
+      : moduleType === "service"
+      ? "Search Saved Services"
       : "Search Saved Grocery";
 
   const itemsLabel = t(getItemsOrFoods()).replace(/\b\w/g, (c) =>

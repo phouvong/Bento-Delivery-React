@@ -63,7 +63,6 @@ const LandingPage = ({ configData, landingPageData }) => {
   if (typeof window !== "undefined") {
     zoneid = localStorage.getItem("zoneid");
   }
-  console.log({ landingPageData });
   const riderAppDownloadSection = landingPageData?.rider_app_download_section;
   const hasRiderAppDownloadSection =
     riderAppDownloadSection &&

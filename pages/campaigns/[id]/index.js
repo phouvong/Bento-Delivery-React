@@ -6,7 +6,6 @@ import { useRouter } from "next/router";
 import useGetBasicCampaignsDetails from "../../../src/api-manage/hooks/react-query/useGetBasicCampaignsDetails";
 import SEO from "../../../src/components/seo";
 import { getServerSideProps } from "../../index";
-import CustomContainer from "../../../src/components/container";
 import { getImageUrl } from "utils/CustomFunctions";
 
 const Index = ({ configData, landingPageData }) => {
@@ -18,9 +17,6 @@ const Index = ({ configData, landingPageData }) => {
     refetch();
   }, [id]);
 
-
-
-
   return (
     <>
       <CssBaseline />
@@ -29,19 +25,17 @@ const Index = ({ configData, landingPageData }) => {
         image={`${getImageUrl(
           { value: configData?.logo_storage },
           "business_logo_url",
-          configData
+          configData,
         )}/${configData?.fav_icon}`}
         businessName={configData?.business_name}
       />
       <MainLayout configData={configData} landingPageData={landingPageData}>
-        <CustomContainer>
-          <CampaignsDetails
-            campaignsDetails={data}
-            configData={configData}
-            isLoading={isLoading}
-            isRefetching={isRefetching}
-          />
-        </CustomContainer>
+        <CampaignsDetails
+          campaignsDetails={data}
+          configData={configData}
+          isLoading={isLoading}
+          isRefetching={isRefetching}
+        />
       </MainLayout>
     </>
   );

@@ -12,10 +12,13 @@ const StoreAndDeliveryManCommon = ({
   image,
   fromDelivery,
   configData,
+  isServiceman,
 }) => {
   const theme = useTheme();
 
-  const totalOrderText = t("Delivery Completed");
+  const totalOrderText = isServiceman
+    ? t("Service Completed")
+    : t("Delivery Completed");
   const avgRating = Number(data?.avg_rating || 0);
   const ratingCount = Number(data?.rating_count || 0);
   const shouldShowRatings = avgRating > 0 && ratingCount > 0;
@@ -82,9 +85,18 @@ const StoreAndDeliveryManCommon = ({
             {t("Address")} : {data && data?.address}
           </Typography>
         ) : (
-          <Typography fontSize={{ xs: "10px", md: "13.4px" }}>
-            {`${data?.order_count} ${totalOrderText}`}{" "}
-          </Typography>
+          <>
+            {(!isServiceman || Number(data?.order_count || 0) > 0) && (
+              <Typography fontSize={{ xs: "10px", md: "13.4px" }}>
+                {`${Number(data?.order_count || 0)} ${totalOrderText}`}{" "}
+              </Typography>
+            )}
+            {isServiceman && data?.phone && (
+              <Typography fontSize={{ xs: "10px", md: "13.4px" }}>
+                {data.phone}
+              </Typography>
+            )}
+          </>
         )}
       </Stack>
       </Stack>

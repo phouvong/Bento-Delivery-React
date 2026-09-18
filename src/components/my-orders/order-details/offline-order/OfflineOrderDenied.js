@@ -14,7 +14,7 @@ const OfflineOrderDenied = ({ trackOrderData }) => {
                 marginTop: "20px",
                 padding: "15px ",
                 borderRadius: "5px",
-                maxWidth: "335px",
+                // maxWidth: "335px",
                 gap: "1px",
                 backgroundColor: alpha(theme.palette.error.light, 0.2),
             }}

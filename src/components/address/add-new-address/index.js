@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import { Box, Stack } from "@mui/system";
 import AddIcon from "@mui/icons-material/Add";
 import {
@@ -66,7 +66,7 @@ const AddNewAddress = (props) => {
   const token = localStorage.getItem("token");
   const reduxDispatch = useDispatch();
   const [addressType, setAddressType] = useState(
-    guestUserInfo ? guestUserInfo?.address_type : ""
+    guestUserInfo ? guestUserInfo?.address_type : "",
   );
   const personName = `${profileInfo?.f_name} ${profileInfo?.l_name}`;
 
@@ -86,15 +86,16 @@ const AddNewAddress = (props) => {
   }, [state?.location]);
 
   useEffect(() => {
-    dispatch({
-      type: ACTIONS.setLocation,
-      payload: configData?.default_location,
-    });
+    const initialLocation =
+      editAddress?.latitude && editAddress?.longitude
+        ? { lat: editAddress.latitude, lng: editAddress.longitude }
+        : configData?.default_location;
+    dispatch({ type: ACTIONS.setLocation, payload: initialLocation });
   }, []);
 
   const { data: places, isLoading } = useGetAutocompletePlace(
     state.searchKey,
-    state.enabled
+    state.enabled,
   );
   useEffect(() => {
     if (places) {
@@ -107,7 +108,7 @@ const AddNewAddress = (props) => {
   }, [places]);
   const { data: geoCodeResults, isFetching: isFetchingGeoCode } = useGetGeoCode(
     state.location,
-    state.geoLocationEnable
+    state.geoLocationEnable,
   );
   useEffect(() => {
     if (geoCodeResults?.results) {
@@ -128,7 +129,7 @@ const AddNewAddress = (props) => {
   // //********************Pick Location */
   const { isLoading: isLoading2, data: placeDetails } = useGetPlaceDetails(
     state.placeId,
-    state.placeDetailsEnabled
+    state.placeDetailsEnabled,
   );
   //
   useEffect(() => {
@@ -166,6 +167,19 @@ const AddNewAddress = (props) => {
   };
 
   const [zoomToLocationToken, setZoomToLocationToken] = useState(0);
+
+  // Submit without an address type → scroll the selector into view and blink
+  // it so the user sees what's missing (AddressForm calls this via prop).
+  const addressTypeRef = useRef(null);
+  const [addressTypeWarn, setAddressTypeWarn] = useState(false);
+  const handleAddressTypeMissing = () => {
+    addressTypeRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+    setAddressTypeWarn(true);
+    setTimeout(() => setAddressTypeWarn(false), 2400);
+  };
   const getCurrentLocation = () => {
     const locObj = { lat: coords?.latitude, lng: coords?.longitude };
     dispatch({
@@ -246,13 +260,13 @@ const AddNewAddress = (props) => {
                   backgroundColor: alpha(
                     theme.palette.neutral?.[400] ||
                       theme.palette.text.secondary,
-                    0.06
+                    0.06,
                   ),
                   "&:hover": {
                     backgroundColor: alpha(
                       theme.palette.neutral?.[400] ||
                         theme.palette.text.secondary,
-                      0.14
+                      0.14,
                     ),
                   },
                 }}
@@ -291,7 +305,7 @@ const AddNewAddress = (props) => {
                         backgroundColor: alpha(
                           theme.palette.neutral?.[200] ||
                             theme.palette.background.default,
-                          0.6
+                          0.6,
                         ),
                         minHeight: "44px",
                       }}
@@ -381,15 +395,44 @@ const AddNewAddress = (props) => {
                     </IconButton>
                   </Stack>
 
-                  <Stack spacing={1} mt={{ xs: 2, md: 2.5 }}>
+                  <Stack
+                    ref={addressTypeRef}
+                    spacing={1}
+                    mt={{ xs: 2, md: 2.5 }}
+                    sx={{
+                      borderRadius: "10px",
+                      ...(addressTypeWarn && {
+                        "@keyframes addressTypeBlink": {
+                          "0%": { backgroundColor: "transparent" },
+                          "25%": {
+                            backgroundColor: alpha(
+                              theme.palette.error.main,
+                              0.12,
+                            ),
+                          },
+                          "50%": { backgroundColor: "transparent" },
+                          "75%": {
+                            backgroundColor: alpha(
+                              theme.palette.error.main,
+                              0.12,
+                            ),
+                          },
+                          "100%": { backgroundColor: "transparent" },
+                        },
+                        animation: "addressTypeBlink 1.6s ease 2",
+                      }),
+                    }}
+                  >
                     <Typography
                       sx={{
                         fontWeight: 600,
                         fontSize: { xs: "13px", md: "14px" },
-                        color: theme.palette.text.primary,
+                        color: addressTypeWarn
+                          ? theme.palette.error.main
+                          : theme.palette.text.primary,
                       }}
                     >
-                      {t("Label As")}
+                      {t("Address type")}
                     </Typography>
                     <Stack direction="row" spacing={1.5}>
                       <AddressTypeStack
@@ -481,6 +524,7 @@ const AddNewAddress = (props) => {
                   checkoutLocationOnly={checkoutLocationOnly}
                   contactInfoOnly={contactInfoOnly}
                   address={address}
+                  onAddressTypeMissing={handleAddressTypeMissing}
                 />
               </Box>
             </Box>

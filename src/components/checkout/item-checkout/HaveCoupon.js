@@ -30,17 +30,103 @@ import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { setCouponInfo, setCouponType } from "redux/slices/profileInfo";
 import { coupon_minimum } from "utils/toasterMessages";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
+import VerifiedStoreBadge from "components/cards/VerifiedStoreBadge";
 
 const TICKET_BG = "#FEE9E7";
 const TICKET_ACCENT = "#E04A3C";
 const TICKET_DARK = "#183057";
 
-const formatRange = (start, end) => {
-  const fmt = (d) => (d ? moment(d).format("MMM D, YYYY") : "");
-  if (!start && !end) return "";
-  if (start && end) return `${fmt(start)} - ${fmt(end)}`;
-  return fmt(start || end);
-};
+// Mirrors NewCouponCard's description logic (profile "Available Coupons" tab)
+// so both places read the same coupon summary text.
+const couponDescription = (coupon, t) => (
+  <>
+    {coupon?.coupon_type === "store_wise" && (
+      <>
+        {t("On")} {coupon?.data}
+        {coupon?.store && (
+          <VerifiedStoreBadge
+            verified={coupon?.store?.verified_seller}
+            fontSize="10px"
+          />
+        )}
+      </>
+    )}
+    {coupon?.coupon_type === "zone_wise" && (
+      <>
+        {t("Only for some specific zones")}
+        {coupon?.store && (
+          <>
+            {" "}
+            <VerifiedStoreBadge
+              verified={coupon?.store?.verified_seller}
+              fontSize="10px"
+            />
+          </>
+        )}
+      </>
+    )}
+    {coupon?.coupon_type === "free_delivery" && (
+      <>
+        {t("Free delivery")}
+        {coupon?.store && (
+          <>
+            {" "}
+            {coupon?.store?.name}
+            <VerifiedStoreBadge
+              verified={coupon?.store?.verified_seller}
+              fontSize="10px"
+            />
+          </>
+        )}
+      </>
+    )}
+    {coupon?.coupon_type === "first_order" && (
+      <>
+        {t("Only for First Order")}
+        {coupon?.store && (
+          <>
+            {" "}
+            {coupon?.store?.name}
+            <VerifiedStoreBadge
+              verified={coupon?.store?.verified_seller}
+              fontSize="10px"
+            />
+          </>
+        )}
+      </>
+    )}
+    {coupon?.coupon_type === "pro_customer" && (
+      <>
+        {t("Only for Pro members")}
+        {coupon?.store && (
+          <>
+            {" "}
+            {coupon?.store?.name}
+            <VerifiedStoreBadge
+              verified={coupon?.store?.verified_seller}
+              fontSize="10px"
+            />
+          </>
+        )}
+      </>
+    )}
+    {coupon?.coupon_type === "default" && <>{t("Default")}</>}
+    {coupon?.min_purchase > 0 && (
+      <>
+        {". "}
+        {t("Minimum order")} {getAmountWithSign(coupon?.min_purchase)}
+      </>
+    )}
+    {(moment(coupon?.start_date).isValid() ||
+      moment(coupon?.end_date).isValid()) && (
+      <>
+        {". "}
+        {t("Validity")}: {moment(coupon?.start_date).format("DD MMM, YYYY")}{" "}
+        {t("to")} {moment(coupon?.end_date).format("DD MMM, YYYY")}
+      </>
+    )}
+  </>
+);
 
 const discountLabel = (coupon, t) => {
   if (!coupon) return "";
@@ -80,199 +166,265 @@ const TicketCard = ({
   theme,
   isPro,
   isFirstOrder,
-}) => (
-  <Box
-    sx={{
-      position: "relative",
-      borderRadius: "12px",
-      overflow: "hidden",
-      backgroundColor: TICKET_BG,
-    }}
-  >
-    {isPro && (
-      <Box
-        sx={{
-          position: "absolute",
-          top: 6,
-          right: 6,
-          zIndex: 2,
-          display: "inline-flex",
-          alignItems: "center",
-          gap: "4px",
-          height: "22px",
-          px: "8px",
-          borderRadius: "999px",
-          backgroundColor: theme.palette.primary.main,
-          color: "#fff",
-          fontSize: "11px",
-          fontWeight: 700,
-          letterSpacing: "0.3px",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
-        }}
-      >
-        <i
-          className="fi fi-sr-crown"
-          style={{
-            fontSize: "12px",
-            lineHeight: 1,
-            display: "inline-flex",
-            color: "#fff",
-          }}
-        />
-      
-      </Box>
-    )}
-    <Stack
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      px={{ xs: 1.5, md: 2 }}
-      py={{ xs: 1.25, md: 1.5 }}
-      gap={1}
-    >
-      <Stack direction="row" alignItems="center" gap={1.25} minWidth={0}>
-        <LocalActivityRoundedIcon
-          sx={{
-            fontSize: 28,
-            color: TICKET_ACCENT,
-            transform: "rotate(-15deg)",
-            flexShrink: 0,
-          }}
-        />
-        <Stack direction="row" alignItems="center" gap={0.75} minWidth={0}>
-          <Typography
-            sx={{
-              fontWeight: 600,
-              fontSize: { xs: "13px", md: "14px" },
-              color: TICKET_DARK,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {title}
-          </Typography>
-          {isFirstOrder && (
-            <Box
-              component="span"
-              sx={{
-                flexShrink: 0,
-                fontSize: "10px",
-                fontWeight: 700,
-                px: 0.75,
-                py: "1px",
-                borderRadius: "999px",
-                backgroundColor: alpha(
-                  theme.palette.warning?.main || "#F59E0B",
-                  0.16
-                ),
-                color: theme.palette.warning?.dark || "#B45309",
-                border: `1px solid ${alpha(
-                  theme.palette.warning?.main || "#F59E0B",
-                  0.35
-                )}`,
-                textTransform: "uppercase",
-                letterSpacing: "0.3px",
-                lineHeight: 1.4,
-              }}
-            >
-              First Order
-            </Box>
-          )}
-        </Stack>
-      </Stack>
-      <Typography
-        sx={{
-          fontWeight: 700,
-          fontSize: { xs: "13px", md: "14px" },
-          color: TICKET_DARK,
-          whiteSpace: "nowrap",
-          flexShrink: 0,
-          pr: isPro ? 5 : 0,
-        }}
-      >
-        {badge}
-      </Typography>
-    </Stack>
+}) => {
+  // Palette matches NewCouponCard (profile "Available Coupons" tab).
+  const isDark = theme.palette.mode === "dark";
+  const ticketBg = isDark ? "#423737" : TICKET_BG;
+  const ticketAccent = isDark ? theme.palette.error.light : TICKET_ACCENT;
+  const ticketAccentHover = isDark ? theme.palette.error.main : "#C13D31";
+  const ticketText = isDark ? theme.palette.neutral[1050] : TICKET_DARK;
+  const discountColor = isDark ? "#90CAF9" : TICKET_DARK;
+  const onAccentText = theme.palette.common.white;
+  const cutoutBg = theme.palette.background.paper;
+  const dashedColor = isDark
+    ? alpha(theme.palette.common.white, 0.15)
+    : theme.palette.common.white;
 
+  return (
     <Box
       sx={{
         position: "relative",
-        height: "0px",
-        borderTop: `1px dashed ${alpha(TICKET_ACCENT, 0.4)}`,
-        mx: { xs: 1.5, md: 2 },
-        "&::before, &::after": {
-          content: '""',
-          position: "absolute",
-          top: "-10px",
-          width: "20px",
-          height: "20px",
-          borderRadius: "50%",
-          backgroundColor: theme.palette.background.paper,
-        },
-        "&::before": { left: "-26px" },
-        "&::after": { right: "-26px" },
+        borderRadius: "12px",
+        overflow: "hidden",
+        backgroundColor: ticketBg,
       }}
-    />
-
-    <Stack
-      direction="row"
-      alignItems="center"
-      justifyContent="space-between"
-      px={{ xs: 1.5, md: 2 }}
-      py={{ xs: 1, md: 1.25 }}
-      gap={1}
     >
-      <Typography
-        sx={{
-          fontSize: { xs: "11px", md: "12px" },
-          color: alpha(TICKET_DARK, 0.7),
-          minWidth: 0,
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-      >
-        {description}
-      </Typography>
-      {actionLabel && (
-        <Button
-          onClick={onAction}
-          variant="contained"
-          disableElevation
-          disabled={loading}
+      {isPro && (
+        <Box
           sx={{
-            flexShrink: 0,
-            px: { xs: 2, md: 2.5 },
-            py: { xs: 0.5, md: 0.75 },
-            borderRadius: "8px",
-            textTransform: "none",
-            fontWeight: 600,
-            fontSize: { xs: "12px", md: "13px" },
-            backgroundColor:
-              actionVariant === "primary"
-                ? theme.palette.primary.main
-                : TICKET_ACCENT,
-            color: "#fff",
-            boxShadow: "none",
-            "&:hover": {
-              backgroundColor:
-                actionVariant === "primary"
-                  ? theme.palette.primary.dark
-                  : "#C13D31",
-              boxShadow: "none",
-            },
+            position: "absolute",
+            top: 6,
+            right: 6,
+            zIndex: 2,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "4px",
+            height: "22px",
+            px: "8px",
+            borderRadius: "999px",
+            backgroundColor: theme.palette.primary.main,
+            color: onAccentText,
+            fontSize: "11px",
+            fontWeight: 700,
+            letterSpacing: "0.3px",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.15)",
           }}
         >
-          {loading ? (
-            <CircularProgress size={14} color="inherit" />
-          ) : (
-            actionLabel
-          )}
-        </Button>
+          <i
+            className="fi fi-sr-crown"
+            style={{
+              fontSize: "12px",
+              lineHeight: 1,
+              display: "inline-flex",
+              color: onAccentText,
+            }}
+          />
+        </Box>
       )}
-    </Stack>
-  </Box>
-);
+
+      {/* Top: icon + title + discount */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="center"
+        gap="10px"
+        sx={{ px: { xs: 1.5, md: 2 }, pt: { xs: 1.25, md: 1.5 }, pb: "4px" }}
+      >
+        <Stack
+          direction="row"
+          alignItems="center"
+          gap="8px"
+          sx={{ flex: 1, minWidth: 0 }}
+        >
+          <LocalActivityRoundedIcon
+            sx={{
+              fontSize: 22,
+              color: ticketAccent,
+              transform: "rotate(-15deg)",
+              flexShrink: 0,
+            }}
+          />
+          <Stack direction="row" alignItems="center" gap={0.75} minWidth={0}>
+            <Typography
+              noWrap
+              sx={{
+                fontWeight: 600,
+                fontSize: { xs: "13px", md: "14px" },
+                color: ticketText,
+              }}
+            >
+              {title}
+            </Typography>
+            {isFirstOrder && (
+              <Box
+                component="span"
+                sx={{
+                  flexShrink: 0,
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  px: 0.75,
+                  py: "1px",
+                  borderRadius: "999px",
+                  backgroundColor: alpha(
+                    theme.palette.warning?.main || "#F59E0B",
+                    0.16
+                  ),
+                  color: theme.palette.warning?.dark || "#B45309",
+                  border: `1px solid ${alpha(
+                    theme.palette.warning?.main || "#F59E0B",
+                    0.35
+                  )}`,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.3px",
+                  lineHeight: 1.4,
+                }}
+              >
+                First Order
+              </Box>
+            )}
+          </Stack>
+        </Stack>
+        <Typography
+          sx={{
+            fontWeight: 700,
+            fontSize: { xs: "14px", md: "15px" },
+            color: discountColor,
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            pr: isPro ? 4 : 0,
+          }}
+        >
+          {badge}
+        </Typography>
+      </Stack>
+
+      {/* Dashed divider with cutout circles — matches NewCouponCard's ticket look */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        <Box
+          sx={{
+            width: "10px",
+            height: "20px",
+            overflow: "hidden",
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+          }}
+        >
+          <Box
+            sx={{
+              width: "20px",
+              height: "20px",
+              borderRadius: "50%",
+              backgroundColor: cutoutBg,
+              flexShrink: 0,
+            }}
+          />
+        </Box>
+        <Box
+          sx={{ flex: 1, minWidth: 0, position: "relative", height: "2px" }}
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              inset: "-1px 0",
+              borderTop: `2px dashed ${dashedColor}`,
+            }}
+          />
+        </Box>
+        <Box
+          sx={{
+            width: "10px",
+            height: "20px",
+            overflow: "hidden",
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-start",
+          }}
+        >
+          <Box
+            sx={{
+              width: "20px",
+              height: "20px",
+              borderRadius: "50%",
+              backgroundColor: cutoutBg,
+              flexShrink: 0,
+            }}
+          />
+        </Box>
+      </Box>
+
+      {/* Bottom: description + apply/cancel action */}
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        gap={1}
+        sx={{
+          px: { xs: 1.5, md: 2 },
+          pt: { xs: 1, md: 1.25 },
+          pb: { xs: 1.25, md: 1.5 },
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: { xs: "11px", md: "12px" },
+            color: alpha(ticketText, 0.7),
+            minWidth: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {description}
+        </Typography>
+        {actionLabel && (
+          <Button
+            onClick={onAction}
+            variant="contained"
+            disableElevation
+            disabled={loading}
+            sx={{
+              flexShrink: 0,
+              px: { xs: 2, md: 2.5 },
+              py: { xs: 0.5, md: 0.75 },
+              borderRadius: "8px",
+              textTransform: "none",
+              fontWeight: 600,
+              fontSize: { xs: "12px", md: "13px" },
+              backgroundColor:
+                actionVariant === "primary"
+                  ? theme.palette.primary.main
+                  : ticketAccent,
+              color: onAccentText,
+              boxShadow: "none",
+              "&:hover": {
+                backgroundColor:
+                  actionVariant === "primary"
+                    ? theme.palette.primary.dark
+                    : ticketAccentHover,
+                boxShadow: "none",
+              },
+            }}
+          >
+            {loading ? (
+              <CircularProgress size={14} color="inherit" />
+            ) : (
+              actionLabel
+            )}
+          </Button>
+        )}
+      </Stack>
+    </Box>
+  );
+};
 
 const HaveCoupon = (props) => {
   const {
@@ -487,14 +639,7 @@ const HaveCoupon = (props) => {
               badge={discountLabel(coupon, t)}
               isPro={isProCoupon(coupon)}
               isFirstOrder={coupon?.coupon_type === "first_order"}
-              description={
-                coupon.start_date || coupon.end_date
-                  ? `${t("Valid from")} ${formatRange(
-                      coupon.start_date,
-                      coupon.end_date
-                    )}.`
-                  : t("Tap apply to redeem.")
-              }
+              description={couponDescription(coupon, t)}
               actionLabel={t("Apply")}
               actionVariant="primary"
               onAction={() => handleApply(coupon.code)}
@@ -581,14 +726,7 @@ const HaveCoupon = (props) => {
               badge={discountLabel(couponInfo, t)}
               isPro={isProCoupon(couponInfo)}
               isFirstOrder={couponInfo?.coupon_type === "first_order"}
-              description={
-                couponInfo.start_date || couponInfo.end_date
-                  ? `${t("Valid from")} ${formatRange(
-                      couponInfo.start_date,
-                      couponInfo.end_date
-                    )}.`
-                  : t("Coupon applied to your order.")
-              }
+              description={couponDescription(couponInfo, t)}
               actionLabel={t("Cancel")}
               actionVariant="danger"
               onAction={removeCoupon}
@@ -602,6 +740,7 @@ const HaveCoupon = (props) => {
           anchor="bottom"
           open={open}
           onClose={handleClose}
+          sx={{ zIndex: (theme) => theme.zIndex.modal + 60 }}
           PaperProps={{
             sx: {
               borderRadius: "16px 16px 0 0",
@@ -620,6 +759,7 @@ const HaveCoupon = (props) => {
             alignItems: "center",
             justifyContent: "center",
             p: 2,
+            zIndex: (theme) => theme.zIndex.modal + 60,
           }}
         >
           <Box sx={{ width: "100%", maxWidth: 600, outline: "none" }}>

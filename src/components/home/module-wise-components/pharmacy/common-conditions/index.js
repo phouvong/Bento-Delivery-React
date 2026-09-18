@@ -92,8 +92,11 @@ const CommonConditions = ({ title }) => {
   const updateTabBoundary = () => {
     const el = getActiveTabsEl();
     if (!el) return;
-    setTabAtStart(el.scrollLeft <= 0);
-    setTabAtEnd(el.scrollLeft + el.clientWidth >= el.scrollWidth - 1);
+    // scrollLeft runs 0 → negative in RTL; absolute distance keeps the
+    // start/end detection direction-agnostic.
+    const scrolled = Math.abs(el.scrollLeft);
+    setTabAtStart(scrolled <= 0);
+    setTabAtEnd(scrolled + el.clientWidth >= el.scrollWidth - 1);
   };
 
   useEffect(() => {
@@ -105,7 +108,9 @@ const CommonConditions = ({ title }) => {
   const scrollTabs = (dir) => {
     const el = getActiveTabsEl();
     if (!el) return;
-    el.scrollBy({ left: dir * 200, behavior: "smooth" });
+    // Forward (dir=1) means scrollLeft decreasing in RTL — invert the delta.
+    const rtl = theme.direction === "rtl";
+    el.scrollBy({ left: (rtl ? -dir : dir) * 200, behavior: "smooth" });
     setTimeout(updateTabBoundary, 350);
   };
 
@@ -226,13 +231,13 @@ const CommonConditions = ({ title }) => {
           <Box onClick={() => scrollTabs(-1)} sx={arrowSx(!tabAtStart)}>
             <i
               className="fi fi-rs-angle-small-left"
-              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050] }}
+              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050], transform: theme.direction === "rtl" ? "scaleX(-1)" : "none" }}
             />
           </Box>
           <Box onClick={() => scrollTabs(1)} sx={arrowSx(!tabAtEnd)}>
             <i
               className="fi fi-rs-angle-small-right"
-              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050] }}
+              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050], transform: theme.direction === "rtl" ? "scaleX(-1)" : "none" }}
             />
           </Box>
         </Stack>
@@ -290,7 +295,7 @@ const CommonConditions = ({ title }) => {
           <Box onClick={() => scrollTabs(-1)} sx={{ ...arrowSx(!tabAtStart), mt: "-4px" }}>
             <i
               className="fi fi-rs-angle-small-left"
-              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050] }}
+              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050], transform: theme.direction === "rtl" ? "scaleX(-1)" : "none" }}
             />
           </Box>
 
@@ -315,7 +320,7 @@ const CommonConditions = ({ title }) => {
           <Box onClick={() => scrollTabs(1)} sx={{ ...arrowSx(!tabAtEnd), mt: "-4px" }}>
             <i
               className="fi fi-rs-angle-small-right"
-              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050] }}
+              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050], transform: theme.direction === "rtl" ? "scaleX(-1)" : "none" }}
             />
           </Box>
         </Stack>

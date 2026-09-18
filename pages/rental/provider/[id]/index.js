@@ -39,7 +39,6 @@ const Index = ({ providerMetaData, configData }) => {
       dispatch(setConfigData(dataConfig));
     }
   }, [dataConfig, dispatch]);
-  console.log({ providerMetaData });
   return (
     <>
       <CssBaseline />
@@ -96,7 +95,7 @@ export const getServerSideProps = async (context) => {
           "X-server": "server",
           origin: process.env.NEXT_CLIENT_HOST_URL,
         },
-      }
+      },
     );
 
     if (!configRes.ok) {
@@ -111,7 +110,7 @@ export const getServerSideProps = async (context) => {
         {
           method: "GET",
           headers,
-        }
+        },
       );
 
       if (providerDetailsRes.ok) {

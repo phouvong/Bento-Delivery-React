@@ -48,3 +48,23 @@ export const orderDetailsMenuDataForParcel = [
     name: "track-order",
   },
 ];
+
+export const orderDetailsMenuDataForBooking= [
+  {
+    id: 1,
+    name: "booking-summary",
+  },
+
+  {
+    id: 2,
+    name: "provider",
+  },
+  {
+    id: 3,
+    name: "serviceman",
+  },
+  {
+    id: 4,
+    name: "service-log",
+  },
+];

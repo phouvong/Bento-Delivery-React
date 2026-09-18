@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Box,
   Button,
@@ -56,7 +56,6 @@ import {
 import {
   setCartPrefs,
   setClearCart,
-  setDecrementToCartItem,
   setIncrementToCartItem,
   setRemoveItemFromCart,
 } from "../../redux/slices/cart";
@@ -154,9 +153,38 @@ const CartItemRow = ({ cartItem }) => {
 
   const { mutate: deleteMutate, isLoading: removeIsLoading } =
     useDeleteCartItem();
-  const { mutate: updateMutate, isLoading } = useCartItemUpdate();
+  const { mutate: updateMutate } = useCartItemUpdate();
 
-  const onIncrementSuccess = (res) => {
+  // ── Optimistic quantity (Facebook-like instant feedback) ──
+  // The stepper reflects the click immediately via `pendingQty`; the server
+  // update is fired in the background (debounced so rapid taps collapse into a
+  // single request). `pendingQty` is reconciled to the server value once Redux
+  // catches up, and reverted on error.
+  const serverQuantity = Number(cartItem?.quantity) || 1;
+  const [pendingQty, setPendingQty] = useState(null);
+  const displayQuantity = pendingQty != null ? pendingQty : serverQuantity;
+  const qtyDebounceRef = useRef(null);
+  const pendingSyncRef = useRef(null);
+
+  useEffect(() => {
+    if (pendingQty != null && serverQuantity === pendingQty) {
+      setPendingQty(null);
+    }
+  }, [serverQuantity, pendingQty]);
+
+  // On unmount, FLUSH (not cancel) any pending quantity sync so closing the
+  // cart within the debounce window doesn't silently drop the change.
+  useEffect(
+    () => () => {
+      if (qtyDebounceRef.current) {
+        clearTimeout(qtyDebounceRef.current);
+        pendingSyncRef.current?.();
+      }
+    },
+    []
+  );
+
+  const onQuantitySuccess = (res) => {
     if (res) {
       res?.forEach((item) => {
         if (cartItem?.cartItemId === item?.id) {
@@ -176,91 +204,72 @@ const CartItemRow = ({ cartItem }) => {
     }
   };
 
-  const onDecrementSuccess = (res) => {
-    if (res) {
-      res?.forEach((item) => {
-        if (cartItem?.cartItemId === item?.id) {
-          const product = {
-            ...item?.item,
-            cartItemId: item?.id,
-            totalPrice: item?.price,
-            quantity: item?.quantity,
-            food_variations: item?.item?.food_variations,
-            selectedAddons: item?.item?.addons,
-            itemBasePrice: item?.item?.price,
-            selectedOption: item?.variation,
-          };
-          dispatch(setDecrementToCartItem(product));
-        }
-      });
-    }
-  };
-
-  const handleIncrement = () => {
-    const updateQuantity = cartItem?.quantity + 1;
+  // Builds the payload for a target quantity and fires the (debounced) update.
+  const syncQuantityToServer = (targetQty) => {
     const price =
       cartItem?.price + getTotalVariationsPrice(cartItem?.food_variations);
-    const productPrice = price * updateQuantity;
+    const productPrice = price * targetQty;
     const mainPrice =
       getCurrentModuleType() === "food"
         ? productPrice
         : (cartItem?.selectedOption?.length > 0
             ? cartItem?.selectedOption?.[0]?.price
-            : cartItem?.price) * updateQuantity;
+            : cartItem?.price) * targetQty;
     const itemObject = getItemDataForAddToCart(
       cartItem,
-      updateQuantity,
+      targetQty,
       mainPrice,
       guestId
     );
+    const fire = () => {
+      qtyDebounceRef.current = null;
+      pendingSyncRef.current = null;
+      updateMutate(itemObject, {
+        onSuccess: onQuantitySuccess,
+        onError: (err) => {
+          setPendingQty(null); // revert optimistic value on failure
+          onErrorResponse(err);
+        },
+      });
+    };
+    pendingSyncRef.current = fire;
+    clearTimeout(qtyDebounceRef.current);
+    qtyDebounceRef.current = setTimeout(fire, 350);
+  };
 
+  const handleIncrement = () => {
+    // Validate against the displayed (optimistic) quantity so rapid taps use
+    // the up-to-date value rather than the lagging server value.
     if (getCurrentModuleType() !== "food") {
-      if (cartItem?.stock <= cartItem?.quantity) {
+      if (cartItem?.stock <= displayQuantity) {
         toast.error(t(out_of_stock));
         return;
       }
       if (
         cartItem?.maximum_cart_quantity &&
-        cartItem?.maximum_cart_quantity <= cartItem?.quantity
+        cartItem?.maximum_cart_quantity <= displayQuantity
       ) {
         toast.error(t(out_of_limits), { id: "out-of-limits" });
         return;
       }
     } else if (
       cartItem?.maximum_cart_quantity &&
-      cartItem?.maximum_cart_quantity <= cartItem?.quantity
+      cartItem?.maximum_cart_quantity <= displayQuantity
     ) {
       toast.error(t(out_of_limits));
       return;
     }
 
-    updateMutate(itemObject, {
-      onSuccess: onIncrementSuccess,
-      onError: onErrorResponse,
-    });
+    const targetQty = displayQuantity + 1;
+    setPendingQty(targetQty); // instant UI
+    syncQuantityToServer(targetQty);
   };
 
   const handleDecrement = () => {
-    const updateQuantity = cartItem?.quantity - 1;
-    const price =
-      cartItem?.price + getTotalVariationsPrice(cartItem?.food_variations);
-    const productPrice = price * updateQuantity;
-    const mainPrice =
-      getCurrentModuleType() === "food"
-        ? productPrice
-        : (cartItem?.selectedOption?.length > 0
-            ? cartItem?.selectedOption?.[0]?.price
-            : cartItem?.price) * updateQuantity;
-    const itemObject = getItemDataForAddToCart(
-      cartItem,
-      updateQuantity,
-      mainPrice,
-      guestId
-    );
-    updateMutate(itemObject, {
-      onSuccess: onDecrementSuccess,
-      onError: onErrorResponse,
-    });
+    const targetQty = displayQuantity - 1;
+    if (targetQty < 1) return; // qty 1 uses the trash button (handleRemove)
+    setPendingQty(targetQty); // instant UI
+    syncQuantityToServer(targetQty);
   };
 
   const handleRemove = () => {
@@ -279,7 +288,9 @@ const CartItemRow = ({ cartItem }) => {
   };
   console.log({ cartItem });
 
-  const quantity = Number(cartItem?.quantity) || 1;
+  // Optimistic quantity drives the stepper AND the line-item totals so both
+  // update instantly on tap.
+  const quantity = displayQuantity;
   const isFood = cartItem?.module_type === ModuleTypes.FOOD;
 
   const optionsTotal = (cartItem?.selectedOption ?? []).reduce(
@@ -395,7 +406,7 @@ const CartItemRow = ({ cartItem }) => {
               overflow: "hidden",
             }}
           >
-            {cartItem?.quantity === 1 ? (
+            {quantity === 1 ? (
               <QtyButton
                 onClick={handleRemove}
                 disabled={removeIsLoading}
@@ -411,7 +422,7 @@ const CartItemRow = ({ cartItem }) => {
                 />
               </QtyButton>
             ) : (
-              <QtyButton onClick={handleDecrement} disabled={isLoading}>
+              <QtyButton onClick={handleDecrement}>
                 <RemoveIcon sx={{ fontSize: 20 }} />
               </QtyButton>
             )}
@@ -427,9 +438,9 @@ const CartItemRow = ({ cartItem }) => {
                 flexShrink: 0,
               }}
             >
-              {cartItem?.quantity}
+              {quantity}
             </Typography>
-            <QtyButton onClick={handleIncrement} disabled={isLoading}>
+            <QtyButton onClick={handleIncrement}>
               <AddIcon sx={{ fontSize: 20 }} />
             </QtyButton>
           </Stack>
@@ -466,6 +477,68 @@ const CartItemRow = ({ cartItem }) => {
         />
       ) : null}
     </>
+  );
+};
+
+// Min-order / free-delivery hint — shown in the empty state AND below the
+// item list. Renders nothing unless the config threshold is set (> 0).
+const FreeDeliveryHint = ({ configData, sx }) => {
+  const theme = useTheme();
+  const { t } = useTranslation();
+
+  // Config shape: admin_free_delivery: { status, type, free_delivery_over }.
+  // Only show for an active order-amount-based free delivery offer.
+  const adminFreeDelivery = configData?.admin_free_delivery;
+  const freeDeliveryThreshold =
+    Number(adminFreeDelivery?.free_delivery_over) || 0;
+  const isOfferActive =
+    adminFreeDelivery?.status === true &&
+    adminFreeDelivery?.type === "free_delivery_by_order_amount" &&
+    freeDeliveryThreshold > 0;
+
+  if (!isOfferActive) return null;
+
+  return (
+    <Stack
+      direction="row"
+      alignItems="center"
+      spacing={1}
+      justifyContent="center"
+      sx={{ alignSelf: "stretch", px: 1.5, py: 1, ...sx }}
+    >
+      <Box
+        sx={{
+          width: 16,
+          height: 16,
+          borderRadius: "50%",
+          backgroundColor: theme.palette.warning.main,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        <LocalShippingOutlinedIcon
+          sx={{ fontSize: 11, color: theme.palette.whiteContainer.main }}
+        />
+      </Box>
+      <Typography
+        sx={{
+          fontSize: "11.5px",
+          color: theme.palette.text.primary,
+          lineHeight: 1.3,
+        }}
+      >
+        {t("Order min")}{" "}
+        <Box
+          component="span"
+          sx={{ fontWeight: 700, color: theme.palette.warning.dark }}
+        >
+          {getAmountWithSign(freeDeliveryThreshold)}
+        </Box>{" "}
+        {t("to get free delivery")}
+      </Typography>
+    </Stack>
   );
 };
 
@@ -980,6 +1053,7 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
       onError: onErrorResponse,
     });
   };
+console.log("ddd",configData);
 
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -1270,54 +1344,7 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
               </Stack>
 
               {/* Free-delivery banner */}
-              <Stack
-                direction="row"
-                alignItems="center"
-                spacing={1}
-                justifyContent="center"
-                sx={{
-                  mt: 1,
-                  alignSelf: "stretch",
-                  px: 1.5,
-                  py: 1,
-                }}
-              >
-                <Box
-                  sx={{
-                    width: 16,
-                    height: 16,
-                    borderRadius: "50%",
-                    backgroundColor: theme.palette.warning?.main || "#F97316",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <LocalShippingOutlinedIcon
-                    sx={{ fontSize: 11, color: "#fff" }}
-                  />
-                </Box>
-                <Typography
-                  sx={{
-                    fontSize: "11.5px",
-                    color: theme.palette.text.primary,
-                    lineHeight: 1.3,
-                  }}
-                >
-                  {t("Order min")}{" "}
-                  <Box
-                    component="span"
-                    sx={{
-                      fontWeight: 700,
-                      color: theme.palette.warning?.dark || "#C2410C",
-                    }}
-                  >
-                    {getAmountWithSign(configData?.free_delivery_over ?? 500)}
-                  </Box>{" "}
-                  {t("to get free delivery")}
-                </Typography>
-              </Stack>
+              <FreeDeliveryHint configData={configData} sx={{ mt: 1 }} />
             </Stack>
           ) : (
             <SimpleBar
@@ -1354,6 +1381,8 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
                     ))}
                   </Stack>
                 </Stack>
+
+                <FreeDeliveryHint configData={configData} sx={{ mt: 1 }} />
 
                 {/* Add To Monthly Order — grocery & pharmacy only, hidden when any cart item is a flash sale */}
                 {[ModuleTypes.GROCERY, ModuleTypes.PHARMACY].includes(
@@ -1645,7 +1674,7 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
                           color: theme.palette.text.primary,
                         }}
                       >
-                        {t("Also Brought Together")}
+                        {t("Frequently Bought Together")}
                       </Typography>
                       <Slider {...sliderSettings}>
                         {broughtItems.map((rel) => {

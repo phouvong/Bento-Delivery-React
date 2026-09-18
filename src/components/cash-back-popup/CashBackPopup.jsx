@@ -71,7 +71,13 @@ const CashBackPopup = () => {
               padding={"16px"}
               paddingTop={"0"}
               sx={{
-                background: alpha(theme.palette.neutral[1000], 0.2),
+                // neutral[1000] flips to white in dark mode, so the original
+                // alpha overlay painted a light haze over the dark popup. Use a
+                // dark scrim in dark mode and keep the subtle tint in light.
+                background:
+                  theme.palette.mode === "dark"
+                    ? alpha(theme.palette.common.black, 0.55)
+                    : alpha(theme.palette.neutral[1000], 0.2),
                 borderRadius: "8px",
               }}
             >

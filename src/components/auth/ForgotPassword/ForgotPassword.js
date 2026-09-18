@@ -6,7 +6,8 @@ import { auth } from "firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { useState } from "react";
 import {
-  CustomPaper, CustomStackFullWidth,
+  CustomPaper,
+  CustomStackFullWidth,
   FlexContainerCenter,
 } from "styled-components/CustomStyles.style";
 import ForgotPasswordNumberForm from "./ForgotPasswordNumberForm";
@@ -16,21 +17,21 @@ import LogoSide from "components/logo/LogoSide";
 import { t } from "i18next";
 import { useDispatch } from "react-redux";
 import CustomImageContainer from "components/CustomImageContainer";
-import fImage from "../../../../public/static/Layer3.png"
-import {useFireBaseResetPass} from "api-manage/hooks/react-query/forgot-password/useFireBaseResetPass";
+import fImage from "../../../../public/static/Layer3.png";
+import { useFireBaseResetPass } from "api-manage/hooks/react-query/forgot-password/useFireBaseResetPass";
 import toast from "react-hot-toast";
 const ForgotPassword = ({ configData }) => {
   const [page, setPage] = useState(0);
   const [hasVerificationMethod, setHasVerificationMethod] = useState(false);
-  const [phoneOrEmail, setPhoneOrEmail] = useState('')
+  const [phoneOrEmail, setPhoneOrEmail] = useState("");
   const { mutate: fireBaseOtpMutation } = useFireBaseResetPass();
   const [data, setData] = useState({
     phone: "",
-    email:"",
+    email: "",
     otp: "",
   });
   const [verificationId, setVerificationId] = useState(null);
-  const dispatch=useDispatch()
+  const dispatch = useDispatch();
   const goNext = () => {
     setPage((currPage) => currPage + 1);
   };
@@ -41,16 +42,18 @@ const ForgotPassword = ({ configData }) => {
   const handleFirstForm = (values) => {
     setData({
       phone: values.phone,
-      email:values?.email,
+      email: values?.email,
       reset_token: values.reset_token,
-      verification_method:values?.verification_method
+      verification_method: values?.verification_method,
     });
   };
 
   const setUpRecaptcha = () => {
     // Check if reCAPTCHA is already initialized
     if (!window.recaptchaVerifier) {
+      // Firebase v9+ modular signature: (auth, containerOrId, parameters).
       window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
         "recaptcha-container",
         {
           size: "invisible",
@@ -60,8 +63,7 @@ const ForgotPassword = ({ configData }) => {
           "expired-callback": () => {
             window.recaptchaVerifier?.reset();
           },
-        },
-        auth
+        }
       );
     } else {
       // Only reset without re-initializing
@@ -81,19 +83,18 @@ const ForgotPassword = ({ configData }) => {
         goNext();
       })
       .catch((error) => {
-        toast.error(error.message)
+        toast.error(error.message);
         // console.log({error})
       });
   };
-  const handleSubmitOtp= (values,onSuccessHandler,mutate) => {
+  const handleSubmitOtp = (values, onSuccessHandler, mutate) => {
     handleFirstForm(values);
     if (configData?.firebase_otp_verification === 1) {
       sendOTP(values?.phone);
     } else {
       mutate(values, { onSuccess: onSuccessHandler, onError: onErrorResponse });
     }
-  }
-
+  };
 
   const pageShow = () => {
     if (page === 0) {
@@ -151,7 +152,6 @@ const ForgotPassword = ({ configData }) => {
         sessionInfo: verificationId,
         code: values?.reset_token,
         is_reset_token: 1,
-
       };
       fireBaseOtpMutation(tempValues, {
         onSuccess: onSuccessHandler,
@@ -165,22 +165,40 @@ const ForgotPassword = ({ configData }) => {
     }
   };
   return (
-    <Box minHeight="50vh" sx={{ display: "flex", minWidth: { xs: "300px", sm: "450px" } }}>
-      <FlexContainerCenter >
-        <CustomStackFullWidth sx={{paddingX:"2rem",paddingY:"2rem", alignItems:"center",justifyContent:"center"}}>
+    <Box
+      minHeight="50vh"
+      sx={{ display: "flex", minWidth: { xs: "300px", sm: "450px" } }}
+    >
+      <FlexContainerCenter>
+        <CustomStackFullWidth
+          sx={{
+            paddingX: "2rem",
+            paddingY: "2rem",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Stack justifyContent="center" alignItems="center">
-            { hasVerificationMethod && (page!==1 ) && <LogoSide configData={configData}/>}
-            {page===1 && <CustomImageContainer
-              src={fImage?.src}
-              alt="logo"
-              width="100px"
-              height="100px"
-              sx={{ borderRadius: "50%", marginBottom: "1rem" }}
-            />}
-            {(page===0  && hasVerificationMethod )&& <Typography variant="h6" mt="1rem" mb="1rem" fontWeight="bold">{t("Forgot your password")}</Typography>}
-          {pageShow()}
+            {hasVerificationMethod && page !== 1 && (
+              <LogoSide configData={configData} />
+            )}
+            {page === 1 && (
+              <CustomImageContainer
+                src={fImage?.src}
+                alt="logo"
+                width="100px"
+                height="100px"
+                sx={{ borderRadius: "50%", marginBottom: "1rem" }}
+              />
+            )}
+            {page === 0 && hasVerificationMethod && (
+              <Typography variant="h6" mt="1rem" mb="1rem" fontWeight="bold">
+                {t("Forgot your password")}
+              </Typography>
+            )}
+            {pageShow()}
           </Stack>
-          </CustomStackFullWidth>
+        </CustomStackFullWidth>
       </FlexContainerCenter>
     </Box>
   );

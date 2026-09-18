@@ -20,7 +20,7 @@ const Home = ({ metaData, configData }) => {
   const { data: dataLanding, refetch: refetchLanding } = useGetLandingPage();
   const router = useRouter();
   const selectedModule = useSelector(
-    (state) => state.utilsData?.selectedModule
+    (state) => state.utilsData?.selectedModule,
   );
   const queryModuleType =
     typeof router.query.module === "string" ? router.query.module : null;
@@ -30,6 +30,7 @@ const Home = ({ metaData, configData }) => {
     queryModuleType ??
     null;
   const isRideModule = currentModuleType === ModuleTypes.RIDE;
+  const isServiceModule = currentModuleType === ModuleTypes.SERVICE;
 
   const metadata = processMetadata(metaData, {
     title: `Home - ${configData?.business_name}`,
@@ -52,7 +53,6 @@ const Home = ({ metaData, configData }) => {
       dispatch(setConfigData(configData));
     }
   }, [configData]);
-  console.log({ metaData, configData });
 
   return (
     <>

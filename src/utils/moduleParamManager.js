@@ -8,7 +8,7 @@
  * @returns {string} - The module slug or id
  */
 export const getModuleIdentifier = (moduleItem) => {
-  return moduleItem?.slug || moduleItem?.id;
+  return moduleItem?.slug || moduleItem?.module_type || moduleItem?.id;
 };
 
 /**
@@ -19,13 +19,14 @@ export const getModuleIdentifier = (moduleItem) => {
 export const saveModuleParam = (moduleId, moduleSlug = null) => {
   if (typeof window !== "undefined") {
     const identifier = moduleSlug || moduleId;
-    
+
     // Save to localStorage
     localStorage.setItem("selectedModuleId", String(moduleId));
     localStorage.setItem("selectedModuleIdentifier", String(identifier));
-    
+
     // Save to cookie (accessible by middleware)
     document.cookie = `selectedModule=${identifier}; path=/; max-age=31536000; samesite=lax`;
+    document.cookie = `selectedModuleId=${moduleId}; path=/; max-age=31536000; samesite=lax`;
   }
 };
 
@@ -64,7 +65,7 @@ export const getCurrentModuleParam = (router) => {
     saveModuleParam(urlModule);
     return String(urlModule);
   }
-  
+
   // Fall back to saved value
   return getSavedModuleIdentifier() || getSavedModuleParam();
 };
@@ -75,12 +76,14 @@ export const getCurrentModuleParam = (router) => {
  */
 export const ensureModuleParamInUrl = (router) => {
   if (typeof window === "undefined") return;
-  
+
   const currentModule = getCurrentModuleParam(router);
-  
+
   if (currentModule && !router.query.module) {
     // Add module to current URL without full page reload
     const query = { ...router.query, module: currentModule };
-    router.replace({ pathname: router.pathname, query }, undefined, { shallow: true });
+    router.replace({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+    });
   }
 };

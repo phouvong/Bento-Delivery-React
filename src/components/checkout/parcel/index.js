@@ -428,6 +428,7 @@ const ParcelCheckout = () => {
     parcel_category_id: parcelCategories?.id,
     charge_payer: paidBy,
     dm_tips: deliveryTip,
+    order_note: customNote,
     guest_id: getGuestId(),
     contact_person_name: parcelInfo?.senderName,
     contact_person_number: `${formatPhoneNumber(parcelInfo?.senderPhone)}`,
@@ -755,6 +756,8 @@ const ParcelCheckout = () => {
                   deliveryInstruction={deliveryInstruction}
                   customerInstruction={customerInstruction}
                   setCustomerInstruction={setCustomerInstruction}
+                  customNote={customNote}
+                  setCustomNote={setCustomNote}
                   check={check}
                   setCheck={setCheck}
                   formik={formik}

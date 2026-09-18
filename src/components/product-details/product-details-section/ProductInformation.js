@@ -848,6 +848,43 @@ const ProductInformation = ({
             {state.modalData[0].description}
           </Typography>
         ) : null}
+
+        {/* Brand tag — shown after the description when the item has a brand */}
+        {(state.modalData[0]?.brand_name ||
+          state.modalData[0]?.brand?.name) && (
+          <Stack
+            direction="row"
+            alignItems="center"
+            gap={0.75}
+            sx={{ mt: 0.5 }}
+          >
+            <Typography
+              sx={{
+                fontSize: { xs: "13px", md: "14px" },
+                color: theme.palette.text.secondary,
+              }}
+            >
+              {t("Brand")} :
+            </Typography>
+            <Box
+              component="span"
+              sx={{
+                fontSize: { xs: "12px", md: "13px" },
+                fontWeight: 600,
+                px: 1,
+                py: "2px",
+                borderRadius: "999px",
+                color: theme.palette.primary.main,
+                backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                whiteSpace: "nowrap",
+              }}
+            >
+              {state.modalData[0]?.brand_name ||
+                state.modalData[0]?.brand?.name}
+            </Box>
+          </Stack>
+        )}
+
         {state?.modalData[0]?.nutritions_name?.length > 0 && (
           <>
             <Typography fontSize="14px" fontWeight="500" mt="5px">

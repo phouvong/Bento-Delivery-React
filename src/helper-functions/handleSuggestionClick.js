@@ -1,4 +1,4 @@
-import { handleProductRedirect } from "./handleProductRedirect";
+import { handleProductRedirect, handleServiceRedirect } from "./handleProductRedirect";
 import { handleStoreRedirect } from "./handleStoreRedirect";
 import { openSearchProductModal } from "redux/slices/searchProductModal";
 import { getCurrentModuleType } from "./getCurrentModuleType";
@@ -12,6 +12,10 @@ export const handleSuggestionItemClick = (
   closeSuggestion?.();
 
   const moduleType = item?.module_type ?? getCurrentModuleType();
+  if (moduleType === "service") {
+    handleServiceRedirect(item, router);
+    return;
+  }
   if (moduleType === "ecommerce") {
     handleProductRedirect(item, router);
     return;

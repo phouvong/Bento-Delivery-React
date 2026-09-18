@@ -1,22 +1,18 @@
 import CloseIcon from "@mui/icons-material/Close";
 import {
-  Button,
+  Drawer,
   IconButton,
   Skeleton,
   Typography,
   alpha,
   useMediaQuery,
   useTheme,
-  Drawer,
 } from "@mui/material";
-import InfoIcon from "@mui/icons-material/Info";
 import { Box, Stack } from "@mui/system";
 import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { GoogleApi } from "api-manage/hooks/react-query/googleApi";
-import { useGetOrderCancelReason } from "api-manage/hooks/react-query/order/useGetOrderCancelReason";
-import { hasChatAndReview } from "components/my-orders/order-details/other-order/StoreDetails";
 import StatusBadge from "components/common/StatusBadge";
-import { getGuestId, getToken } from "helper-functions/getToken";
+import CustomFormatedTime from "components/date/CustomFormatedTime";
 import moment from "moment";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -29,18 +25,11 @@ import {
   setOrderDetailsModal,
 } from "redux/slices/offlinePaymentData";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import usePostOrderCancel from "../../../api-manage/hooks/react-query/order/usePostOrderCancel";
 import CustomModal from "../../modal";
 import TrackSvg from "../assets/TrackSvg";
-import { OrderStatusButton } from "../myorders.style";
-import CancelOrder from "./CenacelOrder";
 import DigitalPaymentManage from "./DigitalPaymentManage";
 import OfflineOrderDetailsModal from "./offline-order/OfflineOrderDetailsModal";
 import PaymentUpdate from "./other-order/PaymentUpdate";
-import RateAndReview from "../../review/RateAndReview";
-import { getAmountWithSign } from "helper-functions/CardHelpers";
-import usePostParcelReturn from "api-manage/hooks/react-query/order/usePostParcelReturn";
-import LoadingButton from "@mui/lab/LoadingButton";
 import AddPaymentMethod from "components/checkout/item-checkout/AddPaymentMethod";
 import PaymentMethod from "components/checkout/PaymentMethod";
 import useGetOfflinePaymentOptions from "api-manage/hooks/react-query/offlinePayment/useGetOfflinePaymentOptions";
@@ -53,6 +42,8 @@ import { useUpdatePaymentByWallet } from "api-manage/hooks/react-query/useUpdate
 import { baseUrl } from "api-manage/MainApi";
 import Router, { useRouter } from "next/router";
 import { useGetFailedPayment } from "api-manage/hooks/react-query/useGetFailedPayment";
+import useServiceBusinessConfig from "components/home/module-wise-components/service/service-api-manage/hooks/custom-hooks/useServiceBusinessConfig";
+import RateAndReview from "components/review/RateAndReview";
 import CustomDivider from "components/CustomDivider";
 
 const TopDetails = (props) => {
@@ -75,6 +66,7 @@ const TopDetails = (props) => {
     paymentMethodUpdateMutation,
     paymentFailedData,
     setPaymentFailedData,
+    isBooking,
   } = props;
   const { t } = useTranslation();
   const theme = useTheme();
@@ -86,78 +78,30 @@ const TopDetails = (props) => {
   const { profileInfo } = useSelector((state) => state.profileInfo);
   console.log({ profileInfo });
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-  const [cancelOpenModal, setCancelOpenModal] = useState(false);
+  const isServiceBooking =
+    isBooking === true || trackData?.module_type === "service";
+  const parentBookingId = router.query?.parentBookingId;
+  const isSubBooking = isServiceBooking && !!parentBookingId;
+  const { otpForCompleteServiceEnabled } = useServiceBusinessConfig(
+    configData,
+    null
+  );
+  const hasServiceOtp = Boolean(data?.otp);
+  const isBookingOtpEligibleStatus = ["confirmed", "ongoing"].includes(
+    data?.booking_status
+  );
   const [openModalForPayment, setModalOpenForPayment] = useState();
   const [cancelReason, setCancelReason] = useState(null);
   const [additionalInfo, setAdditionalInfo] = useState(null);
   const [returnFareOpenModal, setReturnFareOpenModal] = useState(false);
-  const [openModalOffline, setOpenModelOffline] = useState(orderDetailsModal);
+  const [openModalOffline, setOpenModelOffline] = useState(false);
   const [parcelReceiveModal, setParcelReceiveModal] = useState(false);
   const [openReviewModal, setOpenReviewModal] = useState(false);
 
   const [paymentMethod, setPaymentMethod] = useState("");
   const dispatch = useDispatch();
-  const {
-    mutate: postParcelReturnMutation,
-    isLoading: postParcelReturnLoading,
-  } = usePostParcelReturn();
 
   console.log({ paymentFailedData });
-  const handlePostParcelReturn = () => {
-    const formData = {
-      guest_id: getGuestId(),
-      order_id: id,
-      order_status: "returned",
-      return_otp: trackData?.parcel_cancellation?.return_otp,
-    };
-    postParcelReturnMutation(formData, {
-      onSuccess: (res) => {
-        toast.success(res?.message);
-        setParcelReceiveModal(false);
-        refetchOrderDetails();
-        refetchTrackData();
-      },
-      onError: onErrorResponse,
-    });
-  };
-
-  const buttonBackgroundColor = () => {
-    if (trackData?.order_status === "pending") {
-      return theme.palette.info.main;
-    }
-    if (trackData?.order_status === "confirmed") {
-      return theme.palette.footer.inputButtonHover;
-    }
-    if (
-      trackData?.order_status === "processing" ||
-      trackData?.order_status === "handover" ||
-      trackData?.order_status === "picked_up" ||
-      trackData?.order_status === "accepted"
-    ) {
-      return theme.palette.warning.dark;
-    }
-    if (trackData?.order_status === "delivered") {
-      return theme.palette.primary.main;
-    }
-    if (trackData?.order_status === "canceled") {
-      return theme.palette.error.main;
-    }
-    if (
-      trackData?.order_status === "refund_requested" ||
-      trackData?.order_status === "refund_request_canceled"
-    ) {
-      return theme.palette.error.main;
-    }
-    if (trackData?.order_status === "refunded") {
-      return theme.palette.primary.main;
-    }
-    if (trackData?.order_status === "failed") {
-      return theme.palette.error.main;
-    }
-    if (trackData?.order_status === "returned") {
-      return theme.palette.primary.main;
-    }
-  };
 
   const currentLatLng = JSON.parse(
     window.localStorage.getItem("currentLatLng")
@@ -169,37 +113,6 @@ const TopDetails = (props) => {
       retry: 1,
     }
   );
-
-  const { data: cancelReasonsData, refetch } = useGetOrderCancelReason(
-    trackData?.module_type,
-    trackData?.order_status
-  );
-  useEffect(() => {
-    refetch().then();
-  }, [trackData?.order_status]);
-
-  const { mutate: orderCancelMutation, isLoading: orderLoading } =
-    usePostOrderCancel();
-  const handleOnSuccess = () => {
-    const handleSuccess = (response) => {
-      refetchOrderDetails();
-      refetchTrackData();
-      setCancelOpenModal(false);
-      setReturnFareOpenModal(false);
-      toast.success(response.message);
-    };
-    const formData = {
-      guest_id: getGuestId(),
-      order_id: id,
-      reason: cancelReason,
-      note: additionalInfo,
-      _method: "put",
-    };
-    orderCancelMutation(formData, {
-      onSuccess: handleSuccess,
-      onError: onErrorResponse,
-    });
-  };
 
   const today = moment(new Date());
   const differenceInMinutes = () => {
@@ -243,30 +156,30 @@ const TopDetails = (props) => {
     setOpenModelOffline(false);
   };
 
-  // The "just placed an order" modal flag lives in Redux and would
-  // otherwise re-open the modal on every future visit to this page if
-  // the user navigated away without closing it. Reset the persisted
-  // flag once on mount — the modal itself is driven from local state,
-  // so this only clears the *next* visit, not the current one.
+  // Open the "order placed successfully" modal reactively from the live Redux
+  // flag (set during checkout, just before navigating here). Driving it off the
+  // flag — rather than a mount-time `useState(orderDetailsModal)` snapshot —
+  // makes it survive the loading skeleton and the route/`key` remounts that
+  // happen while the order id resolves. A throwaway first mount used to consume
+  // the flag before the real one rendered, so the modal never showed. The flag
+  // is cleared on close (handleOfflineClose), so it won't reopen on later visits.
+  // Gate on resolved order data: the page remounts while the order id
+  // resolves, and opening on a throwaway skeleton mount made the modal
+  // flash (open → unmount → reopen = "shows 2 times, 1 blink").
   useEffect(() => {
-    if (orderDetailsModal) {
-      dispatch(setOrderDetailsModal(false));
+    const hasOrderData = Boolean(
+      trackData?.id ?? data?.id ?? data?.[0]?.order_id
+    );
+    if (orderDetailsModal && hasOrderData) {
+      setOpenModelOffline(true);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [orderDetailsModal, trackData?.id, data?.id]);
   const capitalizeText = (text) => {
     if (!text) return "";
     return text
       .toLowerCase()
       .replace(/_/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
-  };
-  const getReturnFee = () => {
-    const totalFee = trackData?.order_amount - trackData?.dm_tips;
-    const returnFeePercent = Number(
-      configData?.parcel_cancellation_basic_setup?.return_fee || 0
-    );
-    return (totalFee * returnFeePercent) / 100;
   };
   const {
     data: offlinePaymentOptions,
@@ -303,8 +216,27 @@ const TopDetails = (props) => {
       onError: onErrorResponse,
     });
   };
+  console.log({ data });
 
+  // Scoped to this page (order-details / booking-details under
+  // profile?page=my-orders) only — checkout and service/checkout never call
+  // failedOrderPlace, so they're unaffected.
   const failedOrderPlace = () => {
+    // trackData (trackOrderData) is order-only and comes back empty for a
+    // booking — the booking's real payload (incl. payment_method) is `data`.
+    const currentPaymentMethod = data?.payment_method ?? trackData?.payment_method;
+    const isSameCashMethod =
+      (paymentMethod === "cash_on_delivery" ||
+        paymentMethod === "cash_after_service") &&
+      (currentPaymentMethod === "cash_on_delivery" ||
+        currentPaymentMethod === "cash_after_service");
+    if (
+      currentPaymentMethod &&
+      (paymentMethod === currentPaymentMethod || isSameCashMethod)
+    ) {
+      toast.error(t("This is already your selected payment method"));
+      return;
+    }
     handleFailedOrderPlace({
       paymentMethod,
       paymentFailedData,
@@ -324,9 +256,9 @@ const TopDetails = (props) => {
       justifyContent="space-between"
       direction="row"
       padding={{
-        xs: "0px 0px 5px 0px",
-        sm: "30px 20px 20px 25px",
-        md: "30px 20px 20px 25px",
+        xs: "0px 0px 12px 0px",
+        sm: "30px 20px 0 25px",
+        md: "30px 20px 0 25px",
       }}
       rowGap="10px"
       flexWrap="wrap"
@@ -339,24 +271,32 @@ const TopDetails = (props) => {
         onClick={() =>
           router.push({
             pathname: "/profile",
-            query: {
-              page: "my-orders",
-              // Restore the module tab the user was browsing before opening
-              // these details.
-              ...(router.query.orderTabModule
-                ? { orderTabModule: router.query.orderTabModule }
-                : {}),
-            },
+            query: isSubBooking
+              ? {
+                  page: "my-orders",
+                  orderId: parentBookingId,
+                  ...(router.query.orderTabModule
+                    ? { orderTabModule: router.query.orderTabModule }
+                    : {}),
+                }
+              : {
+                  page: "my-orders",
+                  ...(router.query.orderTabModule
+                    ? { orderTabModule: router.query.orderTabModule }
+                    : {}),
+                },
           })
         }
         sx={{
           cursor: "pointer",
           width: "100%",
-          mb: { xs: "4px", md: "8px" },
           display: { xs: "none", md: "flex" },
         }}
       >
-        <IconButton size="small" sx={{ p: "2px", color: "text.primary" }}>
+        <IconButton
+          size="small"
+          sx={{ p: "2px", color: theme.palette.text.link }}
+        >
           <i
             className="fi fi-rr-arrow-small-left"
             style={{ fontSize: "18px", lineHeight: 1, display: "flex" }}
@@ -364,37 +304,73 @@ const TopDetails = (props) => {
         </IconButton>
         <Typography
           sx={{
-            fontSize: { xs: "13px", md: "14px" },
+            fontSize: { xs: "14px", md: "16px" },
             fontWeight: 600,
-            color: "neutral.500",
+            color: theme.palette.text.link,
             lineHeight: 1.2,
           }}
         >
-          {t("Back to Orders")}
+          {isSubBooking ? t("Back To Main Booking") : t("Back to Main Orders")}
         </Typography>
       </Stack>
 
       <Stack
-        spacing={{ xs: 1, md: 1 }}
-        flexGrow="1"
-        sx={{ minWidth: 0, "@media (max-width: 385px)": { width: "100%" } }}
+        direction={isSmall ? "column" : "row"}
+        justifyContent="space-between"
+        alignItems={isSmall ? "flex-start" : "center"}
+        gap="8px"
+        flexWrap="wrap"
+        width="100%"
       >
-        {dataIsLoading ? (
-          <Skeleton variant="text" width="150px" />
-        ) : (
+        <Stack
+          spacing={{ xs: 1, md: 1 }}
+          flexGrow="1"
+          sx={{ minWidth: 0, "@media (max-width: 385px)": { width: "100%" } }}
+        >
+          {/* <Typography
+            fontSize={{ xs: "11px", md: "12px" }}
+            fontWeight="500"
+            color={theme.palette.neutral[500]}
+          >
+            {t("Order Date:")}
+            <Typography
+              component="span"
+              fontSize={{ xs: "11px", md: "12px" }}
+              fontWeight="600"
+              marginLeft="5px"
+              color={theme.palette.neutral[700]}
+            >
+              {moment(trackData?.created_at)?.format("DD MMM, YYYY h:mm A")}
+            </Typography>
+          </Typography> */}
+
           <Stack direction="row" alignItems="center" flexWrap="wrap" gap="8px">
-            <Typography fontSize={{ xs: "12px", md: "16px" }} fontWeight="600">
-              {t("Order ID:")}
+            <Typography fontSize={{ xs: "16px", md: "20px" }} fontWeight="700">
+              {isSubBooking
+                ? t("Sub Booking ID:")
+                : isServiceBooking
+                ? t("Booking ID:")
+                : t("Order ID:")}
               <Typography
                 component="span"
-                fontSize={{ xs: "12px", md: "16px" }}
-                fontWeight="600"
+                fontSize={{ xs: "16px", md: "20px" }}
+                fontWeight="700"
                 marginLeft="5px"
               >
-                {data?.[0]?.order_id ? data?.[0]?.order_id : data?.id}
+                {data?.display_id ??
+                  data?.[0]?.order_id ??
+                  data?.booking_id ??
+                  data?.id}
               </Typography>
             </Typography>
-            {trackData?.order_status === "failed" ? (
+            {isServiceBooking ? (
+              <StatusBadge
+                status={data?.booking_status}
+                label={
+                  data?.status_label ?? t(capitalizeText(data?.booking_status))
+                }
+              />
+            ) : trackData?.order_status === "failed" ? (
               <StatusBadge status="failed" label={t("Payment Failed")} />
             ) : (
               <StatusBadge
@@ -414,234 +390,132 @@ const TopDetails = (props) => {
                 )}
               />
             )}
+            {isServiceBooking &&
+              otpForCompleteServiceEnabled &&
+              hasServiceOtp &&
+              isBookingOtpEligibleStatus && (
+                <Typography
+                  fontSize={{ xs: "14px", md: "16px" }}
+                  fontWeight="700"
+                  color={theme.palette.text.primary}
+                >
+                  {t("OTP")} :{" "}
+                  <Typography
+                    component="span"
+                    fontSize={{ xs: "14px", md: "16px" }}
+                    fontWeight="700"
+                    color={theme.palette.primary.main}
+                  >
+                    {data?.otp}
+                  </Typography>
+                </Typography>
+              )}
           </Stack>
-        )}
-        <Stack
-          direction={{ xs: "column", md: "row" }}
-          alignItems={{ xs: "flex-start", md: "center" }}
-          spacing={0.5}
-        >
-          <Typography
-            fontSize={{ xs: "11px", md: "12px" }}
-            fontWeight="500"
-            color={theme.palette.neutral[500]}
+        </Stack>
+        <Stack>
+          <Stack
+            direction="column"
+            alignItems={isSmall ? "flex-start" : "flex-end"}
+            spacing={0.5}
           >
-            {t("Order date:")}
             <Typography
-              component="span"
               fontSize={{ xs: "11px", md: "12px" }}
-              fontWeight="600"
-              marginLeft="5px"
-              color={theme.palette.neutral[700]}
+              fontWeight="500"
+              color={theme.palette.neutral[500]}
             >
-              {moment(trackData?.created_at)?.format("DD MMM, YYYY")}
-            </Typography>
-          </Typography>
-
-          {trackData?.module_type === "food" && (
-            <Stack
-              direction="row"
-              alignItems="center"
-              spacing={1}
-              sx={{
-                borderLeft: !isSmall
-                  ? (t) => `1.5px solid ${alpha(t.palette.neutral[400], 0.5)}`
-                  : "none",
-                pl: !isSmall ? "12px" : 0,
-                ml: !isSmall ? "4px" : 0,
-                height: !isSmall ? "16px" : "auto",
-              }}
-            >
-              <TrackSvg />
+              {isServiceBooking ? t("Booking Date:") : t("Order Date:")}
               <Typography
-                color={theme.palette.primary.main}
+                component="span"
                 fontSize={{ xs: "11px", md: "12px" }}
-                fontWeight="500"
-                lineHeight={1}
+                fontWeight="600"
+                marginLeft="5px"
+                color={theme.palette.neutral[700]}
               >
-                {t("Estimated delivery:")}{" "}
+                {moment(
+                  isServiceBooking
+                    ? data?.created_at ?? trackData?.created_at
+                    : trackData?.created_at
+                )?.format("DD MMM, YYYY")}
+              </Typography>
+            </Typography>
+
+            {isServiceBooking && data?.schedule_at && (
+              <Stack spacing={1}>
                 <Typography
                   fontSize={{ xs: "11px", md: "12px" }}
-                  fontWeight="600"
-                  component="span"
-                  color={theme.palette.primary.main}
+                  fontWeight="500"
+                  color={theme.palette.neutral[500]}
                 >
-                  {handleTime()} {t("min")}
+                  {t("Service Date:")}
+                  <Typography
+                    component="span"
+                    fontSize={{ xs: "11px", md: "12px" }}
+                    fontWeight="600"
+                    marginLeft="5px"
+                    color={theme.palette.neutral[700]}
+                  >
+                    <CustomFormatedTime date={data.schedule_at} />
+                    {", "}
+                    {moment(data.schedule_at).format("DD MMM YYYY")}
+                  </Typography>
                 </Typography>
-              </Typography>
-            </Stack>
-          )}
-        </Stack>
-        {configData?.order_delivery_verification ? (
-          <Typography
-            fontSize={{ xs: "10px", md: "14px" }}
-            fontWeight="600"
-            color={theme.palette.primary.main}
-          >
+              </Stack>
+            )}
+
+            {trackData?.module_type === "food" && (
+              <Stack
+                direction="row"
+                alignItems="center"
+                spacing={1}
+                sx={{
+                  borderLeft: !isSmall
+                    ? (t) => `1.5px solid ${alpha(t.palette.neutral[400], 0.5)}`
+                    : "none",
+                  pl: !isSmall ? "12px" : 0,
+                  ml: !isSmall ? "4px" : 0,
+                  height: !isSmall ? "16px" : "auto",
+                }}
+              >
+                <TrackSvg />
+                <Typography
+                  color={theme.palette.primary.main}
+                  fontSize={{ xs: "11px", md: "12px" }}
+                  fontWeight="500"
+                  lineHeight={1}
+                >
+                  {t("Estimated delivery:")}{" "}
+                  <Typography
+                    fontSize={{ xs: "11px", md: "12px" }}
+                    fontWeight="600"
+                    component="span"
+                    color={theme.palette.primary.main}
+                  >
+                    {handleTime()} {t("min")}
+                  </Typography>
+                </Typography>
+              </Stack>
+            )}
+          </Stack>
+          {configData?.order_delivery_verification ? (
             <Typography
               fontSize={{ xs: "10px", md: "14px" }}
               fontWeight="600"
-              color={theme.palette.neutral[500]}
-              component="span"
+              color={theme.palette.primary.main}
             >
-              {t("Order OTP")}:{" "}
+              <Typography
+                fontSize={{ xs: "10px", md: "14px" }}
+                fontWeight="600"
+                color={theme.palette.neutral[500]}
+                component="span"
+              >
+                {t("Order OTP")}:{" "}
+              </Typography>
+              {trackData?.otp}
             </Typography>
-            {trackData?.otp}
-          </Typography>
-        ) : null}
+          ) : null}
+        </Stack>
       </Stack>
 
-      {trackData?.order_status === "refund_requested" && trackData?.refund && (
-        <Stack>
-          <OrderStatusButton
-            background={
-              trackData?.refund?.refund_status === "pending"
-                ? theme.palette.info.main
-                : theme.palette.error.main
-            }
-
-            // color={theme.palette.whiteContainer}
-          >
-            {`Refund ${trackData?.refund?.refund_status}`}
-          </OrderStatusButton>
-        </Stack>
-      )}
-      {trackData?.order_status === "refund_requested" &&
-        trackData?.refund_cancellation_note && (
-          <Stack>
-            <OrderStatusButton
-              background={alpha(theme.palette.error.light, 0.3)}
-              onClick={() => setOpenModal(true)}
-              // color={theme.palette.whiteContainer}
-            >
-              {trackData?.refund_cancellation_note}
-            </OrderStatusButton>
-          </Stack>
-        )}
-
-      {data &&
-        !data?.[0]?.item_campaign_id &&
-        trackData &&
-        (trackData?.order_status === "delivered" ||
-          trackData?.order_status === "returned") &&
-        getToken() &&
-        data?.length > 0 &&
-        hasChatAndReview(trackData?.store)?.isReview === 1 && (
-          <Stack direction="row" spacing={0.5}>
-            <Button
-              variant="outlined"
-              background={theme.palette.error.light}
-              // color={theme.palette.whiteContainer}
-              sx={{
-                [theme.breakpoints.down("md")]: {
-                  padding: "5px 5px",
-                  fontSize: "10px",
-                },
-              }}
-              onClick={() => setOpenReviewModal(true)}
-            >
-              {" "}
-              {isSmall ? t("Review") : t("Give a review")}
-              {/*{t("Give a review")}*/}
-            </Button>
-
-            {configData?.refund_active_status && getToken() && (
-              <OrderStatusButton
-                background={theme.palette.error.light}
-                onClick={() => setOpenModal(true)}
-                // color={theme.palette.whiteContainer}
-              >
-                {isSmall ? t("Refund") : t("Refund Request")}
-              </OrderStatusButton>
-            )}
-          </Stack>
-        )}
-      {trackData &&
-      trackData?.payment_method === "digital_payment" &&
-      trackData?.payment_status === "unpaid" &&
-      zoneData?.data?.zone_data?.[0]?.cash_on_delivery ? null : (
-        <Box sx={{ "@media (max-width: 385px)": { mt: "4px" } }}>
-          {trackData && trackData?.order_status === "failed" && !getToken() ? (
-            <OrderStatusButton
-              background={theme.palette.error.deepLight}
-              onClick={() => setCancelOpenModal(true)}
-            >
-              {trackData?.module_type === "parcel" ||
-              trackData?.module?.module_type === "parcel"
-                ? t("Cancel Parcel")
-                : t("Cancel Order")}
-            </OrderStatusButton>
-          ) : (
-            <>
-              {trackData?.module_type === "parcel" &&
-              (trackData.order_status === "canceled" ||
-                trackData.order_status === "failed") ? (
-                <>
-                  {trackData?.order_status === "canceled" &&
-                  trackData?.charge_payer === "sender" &&
-                  trackData?.parcel_cancellation?.before_pickup === 0 ? (
-                    <Stack
-                      direction="row"
-                      alignItems="center"
-                      gap={4}
-                      padding="10px 10px"
-                      backgroundColor={theme.palette.neutral[300]}
-                      borderRadius="10px"
-                    >
-                      <Stack direction="row" alignItems="center" gap={2}>
-                        <Typography>{t("Parcel Returned OTP")}</Typography>
-                        <Typography fontSize="20px" fontWeight="700">
-                          {trackData?.parcel_cancellation?.return_otp}
-                        </Typography>
-                      </Stack>
-                      <Button
-                        sx={{ padding: "8px 10px", fontSize: "12px" }}
-                        variant="contained"
-                        onClick={() => setParcelReceiveModal(true)}
-                      >
-                        {"Parcel Received"}
-                      </Button>
-                    </Stack>
-                  ) : (
-                    <>
-                      {configData?.parcel_cancellation_status === 1 &&
-                        trackData?.order_status !== "canceled" &&
-                        trackData?.order_status !== "delivered" && (
-                          <OrderStatusButton
-                            background={theme.palette.error.deepLight}
-                            onClick={() => setCancelOpenModal(true)}
-                          >
-                            {trackData?.module_type === "parcel" ||
-                            trackData?.module?.module_type === "parcel"
-                              ? t("Cancel Parcel")
-                              : t("Cancel Order")}
-                          </OrderStatusButton>
-                        )}
-                    </>
-                  )}
-                </>
-              ) : (
-                (trackData?.module_type === "parcel"
-                  ? ["pending", "confirmed", "picked_up"].includes(
-                      trackData?.order_status
-                    )
-                  : trackData?.order_status === "pending" ||
-                    trackData?.order_status === "failed") && (
-                  <OrderStatusButton
-                    background={theme.palette.error.deepLight}
-                    onClick={() => setCancelOpenModal(true)}
-                  >
-                    {trackData?.module_type === "parcel" ||
-                    trackData?.module?.module_type === "parcel"
-                      ? t("Cancel Parcel")
-                      : t("Cancel Order")}
-                  </OrderStatusButton>
-                )
-              )}
-            </>
-          )}
-        </Box>
-      )}
       <CustomModal
         openModal={openModalOffline}
         handleClose={() => handleOfflineClose()}
@@ -683,28 +557,6 @@ const TopDetails = (props) => {
       </CustomModal>
 
       <CustomModal
-        openModal={cancelOpenModal}
-        setModalOpen={setCancelOpenModal}
-        handleClose={() => setCancelOpenModal(false)}
-      >
-        <CancelOrder
-          cancelReason={cancelReason}
-          setCancelReason={setCancelReason}
-          cancelReasonsData={cancelReasonsData}
-          setModalOpen={setCancelOpenModal}
-          handleOnSuccess={handleOnSuccess}
-          orderLoading={orderLoading}
-          additionalInfo={additionalInfo}
-          setAdditionalInfo={setAdditionalInfo}
-          isParcel={trackData?.module_type === "parcel"}
-          orderStatus={trackData?.order_status}
-          setReturnFareOpenModal={setReturnFareOpenModal}
-          configData={configData}
-          loading={orderLoading}
-        />
-      </CustomModal>
-
-      <CustomModal
         openModal={openModalForPayment}
         setModalOpen={setModalOpenForPayment}
         handleClose={() => setModalOpenForPayment(false)}
@@ -718,137 +570,36 @@ const TopDetails = (props) => {
           moduleType={trackData?.module_type || trackData?.module?.module_type}
         />
       </CustomModal>
+
       <CustomModal
-        openModal={returnFareOpenModal}
-        setModalOpen={setReturnFareOpenModal}
-        handleClose={() => setReturnFareOpenModal(false)}
+        openModal={openPaymentMethod}
+        handleClose={() => setOpenPaymentMethod(false)}
       >
-        <Stack
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          gap={2}
-          p={4}
-          maxWidth="400px"
-          width="100%"
-          backgroundColor={theme.palette.neutral[100]}
-        >
-          {trackData?.charge_payer === "sender" ? (
-            <>
-              <Typography fontSize="12px" align="center">
-                {t(
-                  "If you cancel, your parcel will be back to you when rider will be available. You will have to pay a return fee to your delivery man."
-                )}
-              </Typography>
-              <Stack alignItems="center">
-                <Typography fontSize="32px" fontWeight={"bold"}>
-                  {getAmountWithSign(getReturnFee())}
-                </Typography>
-                <Typography fontSize="12px">{t("Return Fare")}</Typography>
-              </Stack>
-              <Button
-                loading={orderLoading}
-                variant="contained"
-                onClick={handleOnSuccess}
-              >
-                {t("Yes,Cancel")}
-              </Button>
-              <Typography
-                onClick={() => setReturnFareOpenModal(false)}
-                fontWeight="600"
-                sx={{
-                  textDecoration: "underline",
-                  cursor: "pointer",
-                  color: "#000",
-                }}
-                variant="body2"
-              >
-                {t("Continue Delivery")}
-              </Typography>
-            </>
-          ) : (
-            <>
-              <Typography fontSize="12px" align="center">
-                {t(
-                  "If you cancel, your parcel will be back to you when rider will be available. You will have to pay a return fee to your delivery man."
-                )}
-              </Typography>
-              <Stack alignItems="center">
-                <Typography fontSize="32px" fontWeight={"bold"}>
-                  {getAmountWithSign(
-                    Number(getReturnFee()) + Number(data?.order_amount)
-                  )}
-                </Typography>
-                <Typography fontSize="12px">
-                  {t("Parcel Delivery Charge + Return Fare")}
-                </Typography>
-              </Stack>
-              <LoadingButton
-                loading={orderLoading}
-                variant="contained"
-                onClick={handleOnSuccess}
-              >
-                {t("Yes,Cancel")}
-              </LoadingButton>
-              <Typography
-                onClick={() => setReturnFareOpenModal(false)}
-                fontWeight="600"
-                sx={{
-                  textDecoration: "underline",
-                  cursor: "pointer",
-                  color: "#000",
-                }}
-                variant="body2"
-              >
-                {t("Continue Delivery")}
-              </Typography>
-            </>
-          )}
-        </Stack>
+        <PaymentMethod
+          setPaymentMethod={setPaymentMethod}
+          paymentMethod={paymentMethod}
+          zoneData={zoneData}
+          configData={configData}
+          orderType={trackData?.order_type}
+          usePartialPayment={false}
+          setOpenModel={setOpenPaymentMethod}
+          forprescription={trackData?.prescription_order}
+          offlinePaymentOptions={offlinePaymentOptions}
+          paymentMethodImage={null}
+          setPaymentMethodImage={null}
+          setSwitchToWallet={null}
+          isZoneDigital={isZoneDigital}
+          handlePartialPayment={() => setPaymentMethod("wallet")}
+          walletBalance={profileInfo?.wallet_balance}
+          removePartialPayment={null}
+          switchToWallet={null}
+          customerData={{ data: profileInfo }}
+          failed
+          payableAmount={trackData?.order_amount}
+          failedOrderPlace={failedOrderPlace}
+        />
       </CustomModal>
-      <CustomModal
-        openModal={parcelReceiveModal}
-        setModalOpen={setParcelReceiveModal}
-        handleClose={() => setParcelReceiveModal(false)}
-      >
-        <Stack
-          direction="column"
-          alignItems="center"
-          justifyContent="center"
-          gap={2}
-          p={4}
-          maxWidth="400px"
-          width="100%"
-          backgroundColor={theme.palette.neutral[100]}
-        >
-          <InfoIcon
-            sx={{
-              fontSize: "3rem",
-            }}
-            color="error"
-          />
-          <Typography fontSize="1rem" fontWeight="700">
-            {t("Have you received your parcel?")}
-          </Typography>
-          <Typography align="center">
-            {t(
-              "Please confirm only if the parcel has arrived and everything is in order"
-            )}
-          </Typography>
-          <Stack direction="row" spacing={2}>
-            <Button variant="contained" onClick={handlePostParcelReturn}>
-              {t("Yes,Received")}
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              onClick={() => setParcelReceiveModal(false)}
-            >
-              {t("No,Cancel")}
-            </Button>
-          </Stack>
-        </Stack>
-      </CustomModal>
+
       <Drawer
         anchor="right"
         open={openReviewModal}
@@ -857,7 +608,7 @@ const TopDetails = (props) => {
         sx={{
           zIndex: 1300,
           "& .MuiDrawer-paper": {
-            width: { xs: "300px", sm: "400px", md: "450px" }, // Responsive width
+            width: { xs: "300px", sm: "400px", md: "450px" },
             padding: "20px",
             boxSizing: "border-box",
           },
@@ -889,37 +640,17 @@ const TopDetails = (props) => {
         <CustomDivider border="1px" />
         <RateAndReview
           trackData={trackData}
-          onAllItemsReviewed={() => setOpenReviewModal(false)}
+          onAllItemsReviewed={() => {
+            setOpenReviewModal(false);
+            // Refresh order + track data so `is_reviewed` reflects the new
+            // review and review CTAs update immediately.
+            refetchTrackData?.();
+            refetchOrderDetails?.();
+          }}
+          data={data}
+          isServiceBooking={isServiceBooking}
         />
       </Drawer>
-      <CustomModal
-        openModal={openPaymentMethod}
-        handleClose={() => setOpenPaymentMethod(false)}
-      >
-        <PaymentMethod
-          setPaymentMethod={setPaymentMethod}
-          paymentMethod={paymentMethod}
-          zoneData={zoneData}
-          configData={configData}
-          orderType={trackData?.order_type}
-          usePartialPayment={false}
-          setOpenModel={setOpenPaymentMethod}
-          forprescription={trackData?.prescription_order}
-          offlinePaymentOptions={offlinePaymentOptions}
-          paymentMethodImage={null}
-          setPaymentMethodImage={null}
-          setSwitchToWallet={null}
-          isZoneDigital={isZoneDigital}
-          handlePartialPayment={() => setPaymentMethod("wallet")}
-          walletBalance={profileInfo?.wallet_balance}
-          removePartialPayment={null}
-          switchToWallet={null}
-          customerData={{ data: profileInfo }}
-          failed
-          payableAmount={trackData?.order_amount}
-          failedOrderPlace={failedOrderPlace}
-        />
-      </CustomModal>
     </CustomStackFullWidth>
     // </HeadingBox>
   );

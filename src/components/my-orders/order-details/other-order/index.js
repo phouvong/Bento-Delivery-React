@@ -1,16 +1,26 @@
 import { useTheme } from "@emotion/react";
 import { Box, Skeleton, Stack, Typography, useMediaQuery } from "@mui/material";
+import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
+import { useUpdatePaymentMethod } from "api-manage/hooks/react-query/payment-method/useUpdatePaymentMethod";
+import { useStoreRefundRequest } from "api-manage/hooks/react-query/refund-request/useStoreRefundRequest";
+import { useGetFailedPayment } from "api-manage/hooks/react-query/useGetFailedPayment";
+import { getGuestId, getToken } from "helper-functions/getToken";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
-import useGetTrackOrderData from "../../../../api-manage/hooks/react-query/order/useGetTrackOrderData";
-import { useStoreRefundRequest } from "api-manage/hooks/react-query/refund-request/useStoreRefundRequest";
+import { useSelector } from "react-redux";
 import {
   CustomPaperBigCard,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
+import { cod_exceeds_message } from "utils/toasterMessages";
+import useGetServiceBookingLog from "components/home/module-wise-components/service/service-api-manage/hooks/react-query/booking/useGetServiceBookingLog";
+import ServiceLog from "components/home/module-wise-components/service/components/my-bookings/booking-details/repeat-booking/ServiceLog";
+import ServiceManInfo from "components/home/module-wise-components/service/components/my-bookings/booking-details/ServiceManInfo";
+import useBookingRelation from "api-manage/hooks/custom-hooks/useBookingRelation";
+import useGetTrackOrderData from "../../../../api-manage/hooks/react-query/order/useGetTrackOrderData";
+import useGetStoreDetails from "../../../../api-manage/hooks/react-query/store/useGetStoreDetails";
 import CustomDivider from "../../../CustomDivider";
 import NoDeliveryManImage from "../../../NoDeliveryManImage";
 import TrackParcelOrderDrawer from "../../../home/module-wise-components/parcel/TrackParcelOrderDrawer";
@@ -19,6 +29,7 @@ import ProfileTab from "../../../user-information/ProfileTab";
 import TopDetails from "../TopDetails";
 import {
   orderDetailsMenuData,
+  orderDetailsMenuDataForBooking,
   orderDetailsMenuDataForParcel,
   orderDetailsMenuDataTakeAway,
 } from "../orderDetailsMenuData";
@@ -26,17 +37,16 @@ import DeliveryManInfo from "./DeliveryManInfo";
 import OrderSummery from "./OrderSummery";
 import RefundModal from "./RefundModal";
 import StoreDetails from "./StoreDetails";
-import { useSelector } from "react-redux";
-import { getGuestId, getToken } from "helper-functions/getToken";
-import { useUpdatePaymentMethod } from "api-manage/hooks/react-query/payment-method/useUpdatePaymentMethod";
-import { useGetFailedPayment } from "api-manage/hooks/react-query/useGetFailedPayment";
-import { cod_exceeds_message } from "utils/toasterMessages";
 
 
 const OtherOrder = (props) => {
-  const { configData, data, refetch, id, dataIsLoading, page } = props;
+  const { configData, data, refetch, id, dataIsLoading, page, isBooking } = props;
   const [openModal, setOpenModal] = useState(false);
-  const [currentTab, setCurrentTab] = useState(orderDetailsMenuData[0]?.name);
+  const [currentTab, setCurrentTab] = useState(
+    isBooking
+      ? orderDetailsMenuDataForBooking[0]?.name
+      : orderDetailsMenuData[0]?.name
+  );
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
   const [openPaymentMethod, setOpenPaymentMethod] = useState(false);
   const router = useRouter();
@@ -56,6 +66,18 @@ const OtherOrder = (props) => {
     isLoading: trackDataIsLoading,
     isFetching: trackDataIsFetching,
   } = useGetTrackOrderData(id, phone, guestId);
+  const { data: serviceBookingLog } = useGetServiceBookingLog(
+    { id },
+    isBooking
+  );
+  const { data: providerStoreDetails, refetch: refetchProviderDetails } =
+    useGetStoreDetails(data?.provider?.id);
+  const { isParentRepeatBooking } = useBookingRelation({ isBooking, data });
+  useEffect(() => {
+    if (isBooking && data?.provider?.id) {
+      refetchProviderDetails();
+    }
+  }, [isBooking, data?.provider?.id, refetchProviderDetails]);
   const { refetch: refetchFailedPayment, data: failPayment } = useGetFailedPayment(
     trackOrderData?.id,
     (res) => {
@@ -70,17 +92,21 @@ const OtherOrder = (props) => {
     }
   }, [trackOrderData?.id]);
   useEffect(() => {
-    if (!id) return;
+    if (!id || isBooking) return;
 
     if (getToken() || phone) {
       refetchTrackOrder();
     }
-  }, [id, phone, guestId, refetchTrackOrder]);
+  }, [id, phone, guestId, isBooking, refetchTrackOrder]);
 
   useEffect(() => {
     let interval;
 
-    if (trackOrderData?.delivery_man && currentTab === "track-order") {
+    if (
+      !isBooking &&
+      trackOrderData?.delivery_man &&
+      currentTab === "track-order"
+    ) {
       refetchTrackOrder(); // run immediately once
       interval = setInterval(() => {
         refetchTrackOrder();
@@ -88,14 +114,18 @@ const OtherOrder = (props) => {
     }
 
     return () => clearInterval(interval); // cleanup on unmount or dependency change
-  }, [trackOrderData, currentTab]);
+  }, [trackOrderData, currentTab, isBooking]);
 
   const { mutate, isLoading: refundIsLoading } = useStoreRefundRequest();
   const formSubmitHandler = (values) => {
     const tempValue = { ...values, id };
     const onSuccessHandler = async (resData) => {
       if (resData) {
-        await refetchTrackOrder();
+        if (isBooking) {
+          await refetch();
+        } else {
+          await refetchTrackOrder();
+        }
         toast.success(resData.message);
         setOpenModal(false);
       }
@@ -126,7 +156,9 @@ const OtherOrder = (props) => {
   const handlePayment = () => {
     const handleSuccess = (response) => {
       toast.success(response.message);
-      refetchTrackOrder();
+      if (!isBooking) {
+        refetchTrackOrder();
+      }
       refetch();
       //setOpenPaymentMethod(false);
     };
@@ -160,6 +192,30 @@ const OtherOrder = (props) => {
             setOpenPaymentMethod={setOpenPaymentMethod}
             handlePayment={handlePayment}
             repayOrderLoading={repayOrderLoading}
+            id={id}
+            refetchOrderDetails={refetch}
+            setOpenModal={setOpenModal}
+          />
+        );
+        break;
+      case "booking-summary":
+        return (
+          <OrderSummery
+            trackOrderData={trackOrderData}
+            refetchTrackOrder={isBooking ? refetch : refetchTrackOrder}
+            configData={configData}
+            t={t}
+            data={data}
+            isLoading={trackDataIsLoading}
+            dataIsLoading={dataIsLoading}
+            openPaymentMethod={openPaymentMethod}
+            setOpenPaymentMethod={setOpenPaymentMethod}
+            handlePayment={handlePayment}
+            repayOrderLoading={repayOrderLoading}
+            id={id}
+            refetchOrderDetails={refetch}
+            setOpenModal={setOpenModal}
+            isBooking={isBooking}
           />
         );
         break;
@@ -174,6 +230,47 @@ const OtherOrder = (props) => {
               />
             )}
           </>
+        );
+        break;
+      case "provider":
+        return (
+          <>
+            {data?.provider && (
+              <StoreDetails
+                storeData={providerStoreDetails ?? data.provider}
+                configData={configData}
+                t={t}
+                isBooking={isBooking}
+              />
+            )}
+          </>
+        );
+        break;
+      case "serviceman":
+        return (
+          <Box
+            sx={{
+              width: "100%",
+              padding: { xs: 0, sm: "0 20px 0 25px", md: "0 20px 0 25px" },
+            }}
+          >
+            {data?.servicemen?.length > 0 ? (
+              <ServiceManInfo
+                servicemenData={data?.servicemen}
+                configData={configData}
+                storeData={providerStoreDetails ?? data?.provider}
+              />
+            ) : (
+              <CustomStackFullWidth
+                minHeight="20vh"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <NoDeliveryManImage />
+                <Typography>{t("No service man assigned")} </Typography>
+              </CustomStackFullWidth>
+            )}
+          </Box>
         );
         break;
       case "delivery-man-info":
@@ -205,6 +302,19 @@ const OtherOrder = (props) => {
             trackOrderData={trackOrderData}
             configData={configData}
             t={t}
+          />
+        );
+        break;
+      case "service-log":
+        return isParentRepeatBooking ? (
+          <ServiceLog data={serviceBookingLog} parentBookingId={data?.id} t={t} />
+        ) : (
+          <TrackOrder
+            configData={configData}
+            t={t}
+            isBooking={isBooking}
+            serviceBookingLog={serviceBookingLog}
+            serviceBookingDetails={data}
           />
         );
         break;
@@ -348,26 +458,36 @@ const OtherOrder = (props) => {
         paymentMethodUpdateMutation={paymentMethodUpdateMutation}
         paymentFailedData={paymentFailedData}
         setPaymentFailedData={setPaymentFailedData}
+        isBooking={isBooking}
       />
       <CustomDivider border={isSmall ? "1px" : undefined} />
-      {!trackDataIsLoading && (
+      {!(isBooking ? dataIsLoading : trackDataIsLoading) && (
         <ProfileTab
           menuData={
-            data && data.module_type === "parcel"
-              ? orderDetailsMenuDataForParcel
-              : trackOrderData?.order_type === "take_away"
-                ? orderDetailsMenuDataTakeAway
-                : orderDetailsMenuData
+            isBooking
+              ? // The parent/main booking of a repeat series has no serviceman
+                // of its own — that's only assigned per sub-booking — so hide
+                // the tab there instead of showing an always-empty panel.
+                isParentRepeatBooking
+                ? orderDetailsMenuDataForBooking.filter(
+                    (item) => item.name !== "serviceman",
+                  )
+                : orderDetailsMenuDataForBooking
+              : data && data.module_type === "parcel"
+                ? orderDetailsMenuDataForParcel
+                : trackOrderData?.order_type === "take_away"
+                  ? orderDetailsMenuDataTakeAway
+                  : orderDetailsMenuData
           }
           marginright="20px"
-          fontSize="14px"
+          fontSize="18px"
           padding="15px 15px 15px 25px"
           borderRadius="5px"
           page={currentTab}
           handlePage={handleTab}
         />
       )}
-      {trackOrderData && activeTabPanel()}
+      {(isBooking ? data : trackOrderData) && activeTabPanel()}
     </>
   );
 
@@ -384,6 +504,7 @@ const OtherOrder = (props) => {
         // reasons={reasonsData?.refund_reasons}
         formSubmit={formSubmitHandler}
         refundIsLoading={refundIsLoading}
+        isBooking={isBooking}
       />
       {sideDrawerOpen && trackOrderData && (
         <TrackParcelOrderDrawer

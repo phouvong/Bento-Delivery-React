@@ -24,13 +24,18 @@ const SECTION_CONFIG = {
   "top-rated": { title: "Top Rated", quickAction: "top_rated" },
   nearby: { title: "Nearby", quickAction: "nearby" },
   "verified-seller": {
-    title: "Verified Seller",
+    title: "Verified Only",
     quickAction: "verified_seller",
     storesOnly: true,
   },
+  "available-now": {
+    title: "Available Now",
+    quickAction: "available",
+    hideAllTab: true,
+  },
 };
 
-const TabbedSectionPage = ({ sectionType }) => {
+const TabbedSectionPage = ({ sectionType, defaultTab }) => {
   const { t } = useTranslation();
   const router = useRouter();
   const moduleType = getCurrentModuleType();
@@ -39,11 +44,13 @@ const TabbedSectionPage = ({ sectionType }) => {
   const sectionTitle = config?.title ?? "";
   const sectionQuickAction = config?.quickAction;
   const storesOnly = config?.storesOnly ?? false;
+  const hideAllTab = config?.hideAllTab ?? false;
 
   const q = typeof router.query.q === "string" ? router.query.q.trim() : "";
   const moduleParam =
     typeof router.query.module === "string" ? router.query.module : undefined;
-  const activeTab = router.query.tab || TAB_ALL;
+  const fallbackTab = defaultTab ?? (hideAllTab ? TAB_ITEMS : TAB_ALL);
+  const activeTab = router.query.tab || fallbackTab;
 
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
   const [appliedFilterCount, setAppliedFilterCount] = useState(0);
@@ -168,8 +175,10 @@ const TabbedSectionPage = ({ sectionType }) => {
       ? t("Medicines")
       : moduleType === "ecommerce"
       ? t("Items")
+      : moduleType === "service"
+      ? t("Services")
       : t("Groceries");
-  const storesLabel = moduleType === "food" ? t("Restaurants") : t("Stores");
+  const storesLabel = moduleType === "food" ? t("Restaurants") : moduleType === "service" ? t("Providers") : t("Stores");
 
   const searchPlaceholder = t("Search Here...");
 
@@ -188,6 +197,12 @@ const TabbedSectionPage = ({ sectionType }) => {
       "free-delivery": "Find Free Delivery Products",
       "top-rated": "Search Top Rated Shops",
       "verified-seller": "Search Verified Seller Shops",
+      nearby: "Search Nearby Shops",
+    },
+    service: {
+      "available-now": "Search Available Service Providers Now",
+      "top-rated": "Search Top Rated Shops",
+      "verified-seller": "Search Verified Service Providers",
       nearby: "Search Nearby Shops",
     },
     grocery: {
@@ -250,6 +265,7 @@ const TabbedSectionPage = ({ sectionType }) => {
           fetchMoreStores={fetchMoreStores}
           appliedFilterCount={appliedFilterCount}
           storesOnly={storesOnly}
+          hideAllTab={hideAllTab}
           onFilterOpen={(e) =>
             setFilterAnchorEl(e?.currentTarget ?? document.body)
           }

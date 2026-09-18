@@ -2,7 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { Box, ListItemIcon, MenuItem, Modal, Typography } from "@mui/material";
 import cookie from "js-cookie";
 import i18n, { t } from "i18next";
+import { useRouter } from "next/router";
 import { toast } from "react-hot-toast";
+import { useQueryClient } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useSettings } from "../../../../contexts/use-settings";
 import {
@@ -28,6 +30,8 @@ const AccountLanguageButton = () => {
   const dispatch = useDispatch();
   const { language } = useSelector((state) => state.configData);
   const { settings, saveSettings } = useSettings();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState(null);
@@ -74,12 +78,21 @@ const AccountLanguageButton = () => {
     cookie.set("languageSetting", lan?.languageCode);
     localStorage.setItem("language-setting", JSON.stringify(lan?.languageCode));
     localStorage.setItem("country", JSON.stringify(lan?.countryCode));
-    toast.success(t("Language has been changed"), { id: "lan" });
     saveSettings({
       ...settings,
       direction: isRTLLanguage(lan?.languageCode) ? "rtl" : "ltr",
     });
-    window.location.reload();
+
+    // Switch UI strings in place, then refetch data instead of reloading the page.
+    // MainApi reads localStorage["language-setting"] fresh on every request, so
+    // invalidated React Query calls re-fire with the new X-localization header.
+    i18n.changeLanguage(lan?.languageCode);
+    queryClient.invalidateQueries();
+    // Re-run getServerSideProps for the current route (reads the languageSetting
+    // cookie) via a soft navigation — no full-page reload.
+    router.replace(router.asPath, undefined, { scroll: false });
+
+    toast.success(t("Language has been changed"), { id: "lan" });
     setAnchorEl(null);
   };
 

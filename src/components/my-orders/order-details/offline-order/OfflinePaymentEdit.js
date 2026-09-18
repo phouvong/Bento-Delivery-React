@@ -9,23 +9,27 @@ import OfflinePaymentImage from "../../assets/offlinePayments.svg";
 import { Button, Grid, Stack, TextField, Typography, useTheme } from '@mui/material';
 import { t } from 'i18next';
 import { useOfflinePaymentUpdate } from '../../../../api-manage/hooks/react-query/offlinePayment/useOfflinePaymentUpdate';
+import useServiceBookingPayment from 'components/home/module-wise-components/service/service-api-manage/hooks/react-query/booking/useServiceBookingPayment';
 import { LoadingButton } from '@mui/lab';
 import { edit_offline_payment_info } from '../../../../utils/toasterMessages';
 import toast from 'react-hot-toast';
-import { getGuestId } from '../../../../helper-functions/getToken';
+import { getGuestId, getToken } from '../../../../helper-functions/getToken';
 
 const OfflinePaymentEdit = (
     {
         data,
         trackOrderData,
         setOpenOfflineModal,
-        refetchTrackOrder
+        refetchTrackOrder,
+        isBooking
     }) => {
 
     const theme = useTheme();
 	const guest_id = getGuestId();
+    const token = getToken();
     const borderColor = theme.palette.neutral[400];
     const { mutate: offlineMutate, isLoading: offlinePaymentLoading } = useOfflinePaymentUpdate();
+    const { mutate: bookingPaymentMutate, isLoading: isBookingPaymentLoading } = useServiceBookingPayment();
     const [customerNote, setCustomerNote] = useState(trackOrderData?.offline_payment?.data?.customer_note)
 
     const initialValues = { "customer_note": customerNote };
@@ -59,6 +63,19 @@ const OfflinePaymentEdit = (
         initialValues,
         validationSchema,
         onSubmit: (values) => {
+            if (isBooking) {
+                bookingPaymentMutate(
+                    {
+                        ...values,
+                        booking_id: trackOrderData?.id,
+                        method_id: trackOrderData?.offline_payment?.data?.method_id,
+                        payment_method: "offline_payment",
+                        ...(!token && guest_id ? { guest_id } : {}),
+                    },
+                    { onSuccess: handleSuccess }
+                );
+                return;
+            }
             const newData = {
                 ...values,
                 method_id: trackOrderData?.offline_payment?.data?.method_id,
@@ -139,7 +156,7 @@ const OfflinePaymentEdit = (
                     <LoadingButton
                         type="submit"
                         variant="contained"
-                        loading={offlinePaymentLoading}
+                        loading={isBooking ? isBookingPaymentLoading : offlinePaymentLoading}
                     >
                         {t("Update")}
                     </LoadingButton>

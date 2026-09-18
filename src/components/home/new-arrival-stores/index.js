@@ -229,7 +229,7 @@ const NewArrivalStores = () => {
                               height={93}
                               width={93}
                               objectFit="cover"
-                              style={{ width: "100%", height: "100%" }}
+                              style={{ width: "100%", height: "100%", objectFit: "cover" }}
                             />
                             <ClosedNow
                               active={item?.active}

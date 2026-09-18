@@ -35,7 +35,7 @@ export const hasChatAndReview = (storeData) => {
   return { isReview, isChat };
 };
 const StoreDetails = (props) => {
-  const { storeData, configData, t } = props;
+  const { storeData, configData, t, isBooking } = props;
   const router = useRouter();
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
@@ -90,18 +90,25 @@ const StoreDetails = (props) => {
               direction="row"
               gap={{ xs: "15px", sm: "50px", md: "50px" }}
             >
-              <StoreFeature
-                count={`${storeData?.positive_rating?.toFixed(2)}% `}
-                title="Positive Review"
-              />
-              {storeData?.total_items && (
-                <StoreFeature count={storeData?.total_items} title="Products" />
+              {storeData?.positive_rating != null && (
+                <StoreFeature
+                  count={`${storeData?.positive_rating?.toFixed(2)}% `}
+                  title="Positive Review"
+                />
+              )}
+              {storeData?.total_items > 0 && (
+                <StoreFeature
+                  count={storeData?.total_items}
+                  title={isBooking ? "Services" : "Products"}
+                />
               )}
 
-              <StoreFeature
-                count={storeData?.delivery_time}
-                title="Delivery Time"
-              />
+              {storeData?.delivery_time && (
+                <StoreFeature
+                  count={storeData?.delivery_time}
+                  title={isBooking ? "Est. Service Time" : "Delivery Time"}
+                />
+              )}
             </CustomStackFullWidth>
           </Grid>
         </Grid>

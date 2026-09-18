@@ -42,10 +42,10 @@ import ProPlanBanner from "components/pro-plan/ProPlanBanner";
 import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
 
 const ProPlanSubscriptionModal = dynamic(() =>
-  import("components/pro-plan/ProPlanSubscriptionModal")
+  import("components/pro-plan/ProPlanSubscriptionModal"),
 );
 const ProPlanPaymentModal = dynamic(() =>
-  import("components/pro-plan/ProPlanPaymentModal")
+  import("components/pro-plan/ProPlanPaymentModal"),
 );
 import useGetAllCartList from "api-manage/hooks/react-query/add-cart/useGetAllCartList";
 import dynamic from "next/dynamic";
@@ -133,7 +133,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
         return hasMin
           ? t(
               "{{percent}}% off on delivery fee as a Pro member on orders above {{amount}}",
-              { percent: pct, amount: minAmount }
+              { percent: pct, amount: minAmount },
             )
           : t("{{percent}}% off on delivery fee as a Pro member", {
               percent: pct,
@@ -156,7 +156,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
         if (hasCap && hasMin) {
           return t(
             "{{percent}}% off as a Pro member (up to {{cap}}) on orders above {{amount}}",
-            { percent: pct, cap: capAmount, amount: minAmount }
+            { percent: pct, cap: capAmount, amount: minAmount },
           );
         }
         if (hasCap) {
@@ -171,7 +171,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
             {
               percent: pct,
               amount: minAmount,
-            }
+            },
           );
         }
         return t("{{percent}}% off as a Pro member", { percent: pct });
@@ -225,10 +225,10 @@ const StoreDetails = ({ storeDetails, configData }) => {
           },
           onError: (err) => {
             toast.error(
-              err?.response?.data?.message || t("Subscription failed")
+              err?.response?.data?.message || t("Subscription failed"),
             );
           },
-        }
+        },
       );
       return;
     }
@@ -289,8 +289,8 @@ const StoreDetails = ({ storeDetails, configData }) => {
 
   const cartListSuccessHandler = (res) => {
     if (res) {
-      console.log({res});
-      
+      console.log({ res });
+
       const thisStoreId = storeDetails?.id;
       const tempCartLists = res?.map((item) => ({
         ...item?.item,
@@ -300,8 +300,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
         store_id: item?.item?.store_id ?? thisStoreId,
         // Same for module_type so getCartListModuleWise doesn't drop rows.
         module_type: item?.item?.module_type ?? moduleType,
-        totalPrice:
-         item?.price,
+        totalPrice: item?.price,
         selectedAddons: item?.item?.addons,
         quantity: item?.quantity,
         food_variations: item?.item?.food_variations,
@@ -311,8 +310,8 @@ const StoreDetails = ({ storeDetails, configData }) => {
             ? item?.variation
             : getSelectedVariations(item?.item?.food_variations),
       }));
-      console.log({tempCartLists});
-      
+      console.log({ tempCartLists });
+
       // Store-scoped slot (read by StoreCartSidebar).
       dispatch(setStoreCartList(tempCartLists));
       // Also merge into the global cartList: drop existing rows for THIS
@@ -320,7 +319,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
       // the multi-store cart drawer stays accurate, and modal in-cart
       // detection (which reads cartList) sees up-to-date data.
       const otherStoresItems = (cartList || [])?.filter(
-        (i) => String(i?.store_id) !== String(thisStoreId)
+        (i) => String(i?.store_id) !== String(thisStoreId),
       );
       dispatch(setCartList([...otherStoresItems, ...tempCartLists]));
     }
@@ -339,6 +338,30 @@ const StoreDetails = ({ storeDetails, configData }) => {
     refetch();
     cartListRefetch();
   }, [refetchModule, refetch]);
+
+  // Reset the store-scoped cart whenever the visited store changes. The
+  // sidebar reads this Redux slot synchronously, so without the reset it keeps
+  // showing the PREVIOUS store's items until the new store's cart fetch
+  // resolves — and when react-query serves a cached response, onSuccess
+  // doesn't fire right away, leaving the stale list on screen. Clearing here
+  // lets the sidebar show its loading skeleton, then the fresh list.
+  useEffect(() => {
+    dispatch(setStoreCartList([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeDetails?.id]);
+
+  // Sync Redux from the query DATA (not just onSuccess): when returning to a
+  // previously visited store, react-query delivers the cached response
+  // without a refetch — onSuccess never fires, which left the sidebar empty
+  // after the reset above. `cartData` is delivered on every store change
+  // (cached or fresh), so this keeps the slot populated in all cases.
+  // Declared after the reset so the populate wins within the same render pass.
+  useEffect(() => {
+    if (Array.isArray(cartData)) {
+      cartListSuccessHandler(cartData);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartData, storeDetails?.id]);
 
   useEffect(() => {
     if (moduleDataFromApi) {
@@ -469,7 +492,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
           </Box>
         ))}
 
-      {configData?.repeat_order_option && getToken() ? (
+      {storeDetails?.id && getToken() ? (
         <Box sx={{ pt: 2, pb: 2 }}>
           <LastOrdersSection store_id={storeDetails?.id} />
         </Box>
@@ -499,7 +522,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
     <CustomStackFullWidth spacing={0}>
       {topSection}
       {proFeatureEnabled && hasToken && proOfferResolved && (
-        <Box sx={{ px: 2, pt: {xs: 1, md: 4}, pb: {xs: 1.5, md: 4} }}>
+        <Box sx={{ px: 2, pt: { xs: 1, md: 4 }, pb: { xs: 1.5, md: 4 } }}>
           {!isProActive && !activeOfferLoading ? (
             <ProPlanBanner onSubscribe={handleProSubscribeClick} />
           ) : (
@@ -517,7 +540,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
         </Box>
       )}
 
-      {configData?.repeat_order_option && getToken() ? (
+      {storeDetails?.id && getToken() ? (
         <LastOrdersSection store_id={storeDetails?.id} />
       ) : null}
       <Box sx={{ mt: { xs: "0px", md: 0 } }}>
@@ -657,7 +680,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
             maxWidth="420px"
           >
             {t(
-              "Please select another delivery location so we can check whether the store delivers to your area."
+              "Please select another delivery location so we can check whether the store delivers to your area.",
             )}
           </Typography>
           <Button

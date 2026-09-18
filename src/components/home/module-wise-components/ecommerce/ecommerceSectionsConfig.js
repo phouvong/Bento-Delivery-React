@@ -1,10 +1,12 @@
 import { Box } from "@mui/system";
 import OffersSectionPage from "components/home/section-page/OffersSectionPage";
 import TabbedSectionPage from "components/home/section-page/TabbedSectionPage";
+import isVerifiedStoreEnabled from "helper-functions/isVerifiedStoreEnabled";
 
 export const SECTION_GAP = 3;
 
-export const getEcommerceSections = () => [
+export const getEcommerceSections = (configData) =>
+  [
   {
     id: "offers",
     label: "Offers",
@@ -75,4 +77,7 @@ export const getEcommerceSections = () => [
     content: <TabbedSectionPage sectionType="nearby" />,
     mobileContent: <TabbedSectionPage sectionType="nearby" />,
   },
-];
+  ].filter(
+    (section) =>
+      section.id !== "verified-seller" || isVerifiedStoreEnabled(configData),
+  );

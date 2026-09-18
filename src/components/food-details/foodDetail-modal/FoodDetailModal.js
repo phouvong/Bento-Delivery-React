@@ -289,12 +289,34 @@ const FoodDetailModal = ({
     }
   };
 
-  const variationSigOf = (opts) =>
-    (opts ?? [])
-      .filter((o) => o?.isSelected)
-      .map((o) => String(o?.label ?? ""))
-      .sort()
-      .join("|");
+  // Builds a comparable signature of selected variation labels. Cart rows
+  // store `selectedOption` in different shapes depending on which flow wrote
+  // them — flat `[{label, isSelected}]`, the API's
+  // `[{name, values: {label: [...]}}]`, or raw food_variations
+  // `[{name, values: [{label, isSelected}]}]` — so normalize all of them.
+  const variationSigOf = (opts) => {
+    const labels = [];
+    (opts ?? []).forEach((o) => {
+      if (!o) return;
+      // Flat selected-option shape: { label, isSelected }
+      if (o?.label != null && !Array.isArray(o?.values)) {
+        if (o?.isSelected !== false) labels.push(String(o.label));
+        return;
+      }
+      // API variation shape: { name, values: { label: [..] } }
+      if (Array.isArray(o?.values?.label)) {
+        o.values.label.forEach((l) => labels.push(String(l)));
+        return;
+      }
+      // Raw food_variations shape: { name, values: [{ label, isSelected }] }
+      if (Array.isArray(o?.values)) {
+        o.values.forEach((val) => {
+          if (val?.isSelected) labels.push(String(val?.label ?? ""));
+        });
+      }
+    });
+    return labels.sort().join("|");
+  };
 
   const addOrUpdateToCartByDispatch = () => {
     // We should hit the update API whenever the item is already in the

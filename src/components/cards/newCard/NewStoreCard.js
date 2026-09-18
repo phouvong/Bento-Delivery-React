@@ -506,21 +506,30 @@ const NewStoreCard = ({
                           width: 28,
                           height: 28,
                           borderRadius: "50%",
-                          border: "2px solid",
-                          borderColor: "background.paper",
+                          // Visible separation ring between the overlapping
+                          // avatars — near-white borders vanished against the
+                          // white card and white product photos.
+                          border: `2px solid ${theme.palette.background.paper}`,
+                          outline: `1px solid ${theme.palette.divider}`,
                           overflow: "hidden",
                           ml: i === 0 ? 0 : "-6px",
                           zIndex: images.length - i,
                           flexShrink: 0,
                           backgroundColor: "background.secondary",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
                         }}
                       >
+                        {/* 24px = 28px box minus the 2px border each side —
+                            a 28px image overflowed and clipped off-center. */}
                         <NextImage
                           src={src}
                           alt=""
-                          width="28"
-                          height="28"
+                          width="24"
+                          height="24"
                           objectFit="cover"
+                          borderRadius="50%"
                         />
                       </Box>
                     ))}
@@ -557,6 +566,9 @@ const NewStoreCard = ({
                 letterSpacing: "-0.42px",
                 textTransform: "none",
                 flexShrink: 0,
+                // Pin to the row's end even when the rating/avatar blocks
+                // before it are absent.
+                ml: "auto",
                 backgroundColor: "primary.main",
                 "&:hover": { backgroundColor: "primary.dark" },
               }}
@@ -854,6 +866,7 @@ const NewStoreCard = ({
                 }}
               />
               <Typography
+                dir="ltr"
                 sx={{
                   fontSize: "12px",
                   fontWeight: 600,
@@ -861,6 +874,7 @@ const NewStoreCard = ({
                   lineHeight: 1.3,
                   whiteSpace: "nowrap",
                   fontVariantNumeric: "tabular-nums",
+                  unicodeBidi: "isolate",
                 }}
               >
                 {item.delivery_time}
@@ -892,6 +906,7 @@ const NewStoreCard = ({
                 }}
               />
               <Typography
+                dir={item.minimum_delivery_fee === 0 ? undefined : "ltr"}
                 sx={{
                   fontSize: "12px",
                   fontWeight: 600,
@@ -899,6 +914,7 @@ const NewStoreCard = ({
                   lineHeight: 1.3,
                   whiteSpace: "nowrap",
                   fontVariantNumeric: "tabular-nums",
+                  unicodeBidi: "isolate",
                 }}
               >
                 {item.minimum_delivery_fee === 0

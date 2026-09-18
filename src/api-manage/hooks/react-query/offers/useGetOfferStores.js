@@ -1,10 +1,11 @@
 import { useInfiniteQuery } from "react-query";
+import { getModuleId } from "../../../../helper-functions/getModuleId";
 import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { offers_stores_api } from "api-manage/ApiRoutes";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 
-const getData = async (params = {}) => {
+const getData = async (params = {}, moduleType) => {
   const {
     search = "",
     limit = 10,
@@ -43,8 +44,10 @@ const getData = async (params = {}) => {
 };
 
 const useGetOfferStores = (params = {}, enabled = true) => {
+  const moduleType = getCurrentModuleType();
+
   return useInfiniteQuery(
-    ["offer-stores", getCurrentModuleType(), params],
+    ["offer-stores", getModuleId(), moduleType, params],
     ({ pageParam = 1 }) => getData({ ...params, pageParam }),
     {
       getNextPageParam: (lastPage, allPages) => {

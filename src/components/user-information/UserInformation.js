@@ -40,6 +40,8 @@ const PAGE_TITLES = {
   "monthly-cart-list": "Monthly Cart List",
   "subscription-plan": "Subscription Plan",
   "track-order": "Track Orders",
+  "custom-service": "Custom Service",
+  "service-request": "Requested Services",
 };
 
 // ── Page key → menu item key mapping ─────────────────────────────────────────
@@ -57,6 +59,8 @@ const PAGE_TO_MENU_KEY = {
   "monthly-cart-list": "monthly-cart-list",
   "subscription-plan": "subscription-plan",
   "track-order": "track-orders",
+  "custom-service": "custom-service",
+  "service-request": "service-request",
 };
 
 const UserInformation = ({ page, configData, orderId }) => {
@@ -98,6 +102,10 @@ const UserInformation = ({ page, configData, orderId }) => {
   const activePage = page ?? "profile-settings";
   const activeMenuKey = PAGE_TO_MENU_KEY[activePage] ?? null;
   const isOrderDetails = activePage === "my-orders" && Boolean(orderId);
+
+  // Skip the outer wrapper on these pages so the page's own instance is the
+  // only one registered.
+  const hasOwnPushNotificationLayout = activePage === "inbox" || isOrderDetails;
 
   // Mobile: derive from URL — if on a sub-page, show content; else show sidebar
   const mobileView =
@@ -159,115 +167,114 @@ const UserInformation = ({ page, configData, orderId }) => {
     </Box>
   );
 
-  return (
-    <PushNotificationLayout>
-      <CustomStackFullWidth>
-        {/* ── Mobile simple top bar ── */}
-        {isMobile && (
-          <Box
+  const pageContent = (
+    <CustomStackFullWidth>
+      {/* ── Mobile simple top bar ── */}
+      {isMobile && (
+        <Box
+          sx={{
+            position: "sticky",
+            top: 0,
+            zIndex: 1251,
+            backgroundColor: "background.paper",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            px: "8px",
+            pt: "12px",
+            pb: "8px",
+            boxShadow: "0px 1px 2px rgba(0,0,0,0.05)",
+            borderRadius: "0 0 16px 16px",
+          }}
+        >
+          <IconButton
+            onClick={() => {
+              if (isOrderDetails) {
+                router.push({
+                  pathname: "/profile",
+                  query: {
+                    page: "my-orders",
+                    // Restore the previously selected module tab.
+                    ...(router.query.orderTabModule
+                      ? { orderTabModule: router.query.orderTabModule }
+                      : {}),
+                  },
+                });
+              } else if (mobileView === "content") {
+                setMobileView(null);
+              } else {
+                router.push("/home");
+              }
+            }}
+            sx={{ p: "8px", color: "text.primary" }}
+          >
+            <i
+              className="fi fi-rr-arrow-small-left"
+              style={{ fontSize: "20px", lineHeight: 1, display: "flex" }}
+            />
+          </IconButton>
+          <Typography
             sx={{
-              position: "sticky",
-              top: 0,
-              zIndex: 1251,
-              backgroundColor: "background.paper",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              px: "8px",
-              pt: "12px",
-              pb: "8px",
-              boxShadow: "0px 1px 2px rgba(0,0,0,0.05)",
-              borderRadius: "0 0 16px 16px",
+              fontSize: "18px",
+              fontWeight: 700,
+              color: "neutral.1050",
+              lineHeight: 1.1,
+              letterSpacing: "-0.54px",
             }}
           >
-            <IconButton
-              onClick={() => {
-                if (isOrderDetails) {
-                  router.push({
-                    pathname: "/profile",
-                    query: {
-                      page: "my-orders",
-                      // Restore the previously selected module tab.
-                      ...(router.query.orderTabModule
-                        ? { orderTabModule: router.query.orderTabModule }
-                        : {}),
-                    },
-                  });
-                } else if (mobileView === "content") {
-                  setMobileView(null);
-                } else {
-                  router.push("/home");
-                }
-              }}
-              sx={{ p: "8px", color: "text.primary" }}
-            >
-              <i
-                className="fi fi-rr-arrow-small-left"
-                style={{ fontSize: "20px", lineHeight: 1, display: "flex" }}
-              />
-            </IconButton>
-            <Typography
-              sx={{
-                fontSize: "18px",
-                fontWeight: 700,
-                color: "neutral.1050",
-                lineHeight: 1.1,
-                letterSpacing: "-0.54px",
-              }}
-            >
-              {t(
-                isOrderDetails
-                  ? "Order Details"
-                  : mobileView === "content"
-                  ? PAGE_TITLES[activePage] ?? "Profile"
-                  : "Profile",
-              )}
-            </Typography>
-          </Box>
-        )}
-        {/* ── Profile intro ── */}
-        {userToken && !mobileView && (
-          <CustomContainer noMobilePadding>
-            <Box sx={{ pt: "32px", pb: "0px", px: { xs: "16px", md: "0px" } }}>
-              <ProfileIntro
-                data={data}
-                page={activePage}
-                refetch={refetch}
-                configData={configData}
-                addAddress={addAddress}
-                setAddAddress={setAddAddress}
-                editAddress={editAddress}
-                setEditAddress={setEditAddress}
-              />
-            </Box>
-          </CustomContainer>
-        )}
-        {/* ── Sidebar + Content layout ── */}
-        <CustomContainer noMobilePadding={true}>
-          <Box
-            sx={{
-              pt: { xs: mobileView === "content" ? "0px" : "32px", md: "32px" },
-              pb: "40px",
-            }}
-          >
-            {isMobile ? (
-              /* Mobile: show sidebar OR content */
-              mobileView === "content" ? (
-                <Box>{content}</Box>
-              ) : (
-                sidebar
-              )
-            ) : (
-              /* Desktop: 2-column */
-              <Stack direction="row" gap="32px" alignItems="flex-start">
-                {sidebar}
-                {content}
-              </Stack>
+            {t(
+              isOrderDetails
+                ? "Order Details"
+                : mobileView === "content"
+                ? PAGE_TITLES[activePage] ?? "Profile"
+                : "Profile",
             )}
+          </Typography>
+        </Box>
+      )}
+      {/* ── Profile intro ── */}
+      {userToken && !mobileView && (
+        <CustomContainer noMobilePadding>
+          <Box sx={{ pt: "32px", pb: "0px", px: { xs: "16px", md: "0px" } }}>
+            <ProfileIntro
+              data={data}
+              page={activePage}
+              refetch={refetch}
+              configData={configData}
+              addAddress={addAddress}
+              setAddAddress={setAddAddress}
+              editAddress={editAddress}
+              setEditAddress={setEditAddress}
+            />
           </Box>
         </CustomContainer>
-        {/* keep old ui for testing... */}
-        {/* <Grid container gap="10px">
+      )}
+      {/* ── Sidebar + Content layout ── */}
+      <CustomContainer noMobilePadding={true}>
+        <Box
+          sx={{
+            pt: { xs: mobileView === "content" ? "0px" : "32px", md: "32px" },
+            pb: "40px",
+          }}
+        >
+          {isMobile ? (
+            /* Mobile: show sidebar OR content */
+            mobileView === "content" ? (
+              <Box>{content}</Box>
+            ) : (
+              sidebar
+            )
+          ) : (
+            /* Desktop: 2-column */
+            <Stack direction="row" gap="32px" alignItems="flex-start">
+              {sidebar}
+              {content}
+            </Stack>
+          )}
+        </Box>
+      </CustomContainer>
+      {/* keep old ui for testing... */}
+      {/* <Grid container gap="10px">
           <Grid item xs={12} sm={12} md={12}>
             <CustomContainer>
               <BodySection
@@ -283,8 +290,13 @@ const UserInformation = ({ page, configData, orderId }) => {
             </CustomContainer>
           </Grid>
         </Grid> */}
-      </CustomStackFullWidth>
-    </PushNotificationLayout>
+    </CustomStackFullWidth>
+  );
+
+  return hasOwnPushNotificationLayout ? (
+    <>{pageContent}</>
+  ) : (
+    <PushNotificationLayout>{pageContent}</PushNotificationLayout>
   );
 };
 
