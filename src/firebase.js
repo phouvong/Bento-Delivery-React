@@ -8,12 +8,12 @@ import {
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBV4ueEuzRBy0Yehx-OvUi68pHznhGnT0E",
-  authDomain: "bento-delivery-service.firebaseapp.com",
-  projectId: "bento-delivery-service",
-  storageBucket: "bento-delivery-service.firebasestorage.app",
-  messagingSenderId: "787586896333",
-  appId: "1:787586896333:web:f6fead1c4225e3e0c6b484",
+  apiKey: "AIzaSyD0Z911mOoWCVkeGdjhIKwWFPRgvd6ZyAw",
+  authDomain: "stackmart-500c7.firebaseapp.com",
+  projectId: "stackmart-500c7",
+  storageBucket: "stackmart-500c7.appspot.com",
+  messagingSenderId: "491987943015",
+  appId: "1:491987943015:web:d8bc7ab8dbc9991c8f1ec2",
 };
 
 const firebaseApp = !getApps().length
@@ -43,7 +43,8 @@ export const fetchToken = async (setTokenFound, setFcmToken) => {
     if (!messaging) return;
 
     const currentToken = await getToken(messaging, {
-      vapidKey: "",
+      vapidKey:
+        "BIYqKZ2ZlXRJYZX_iU7oYymqHZ1B0d8MVsYMoEPX_eFtezlxZ_V4JooCxS8ks857ylCVLewTtgHFxc6I8iBi7h4",
     });
 
     if (currentToken) {
