@@ -4,10 +4,11 @@ import MainApi from "../../MainApi";
 import { onSingleErrorResponse } from "../../api-error-response/ErrorResponses";
 import { top_offer_api } from "api-manage/ApiRoutes";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { getApiContent } from "../../getApiContent";
 
 const getData = async () => {
   const { data } = await MainApi.get(top_offer_api);
-  return data;
+  return getApiContent(data);
 };
 
 const useGetTopOffer = () => {

@@ -22,6 +22,7 @@ const CustomTextFieldWithFormik = (props) => {
 		placeholder,
 		height,
 		startIcon,
+		showStartIcon = false,
 		autoFocus,
 		fontSize,
 		maxLength,
@@ -63,10 +64,12 @@ const CustomTextFieldWithFormik = (props) => {
 						onChange={onChangeHandlerForField}
 						onBlur={onBlurHandler}
 						type={showPassword ? "text" : type}
-
+						InputLabelProps={{
+							shrink: true,
+						}}
 						sx={{
 							"& .MuiFormLabel-asterisk": {
-								color: "red",
+								color: theme.palette.error.danger,
 							},
 							"& .MuiFormHelperText-root": {
 								position: "static",
@@ -83,7 +86,7 @@ const CustomTextFieldWithFormik = (props) => {
 							style: {
 								height: "45px",
 							},
-							startAdornment: startIcon,
+							startAdornment: showStartIcon ? startIcon : undefined,
 							endAdornment: (
 								<InputAdornment position="end">
 									<IconButton
@@ -148,7 +151,7 @@ const CustomTextFieldWithFormik = (props) => {
 						type={type}
 						height={height}
 						InputProps={{
-							startAdornment: startIcon,
+							startAdornment: showStartIcon ? startIcon : undefined,
 							inputProps: { min: 0, id: id },
 							style: {
 								height: height || "45px",
@@ -159,7 +162,7 @@ const CustomTextFieldWithFormik = (props) => {
 						}}
 						sx={{
 							"& .MuiFormLabel-asterisk": {
-								color: "red",
+								color: theme.palette.error.danger,
 							},
 							"& .MuiFormHelperText-root": {
 								position: "static",

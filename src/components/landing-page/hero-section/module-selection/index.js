@@ -24,7 +24,7 @@ import {
 import CustomImageContainer from "../../../CustomImageContainer";
 import CustomAlert from "../../../alert/CustomAlert";
 import CustomModal from "../../../modal";
-import { zoneWiseModule } from "../../../module-select/ModuleSelect";
+import { zoneWiseModule, getCurrentZoneIds } from "../../../module-select/ModuleSelect";
 import CloseIcon from "@mui/icons-material/Close";
 import ErrorIcon from "@mui/icons-material/Error";
 import { setSelectedModule } from "redux/slices/utils";
@@ -225,18 +225,7 @@ export const ModuleSelection = ({
     closeModal?.(); // close parent modal (MapModal) — removes the backdrop overlay
     pushHomeWithModule(data);
   };
-  let currentZoneIds = undefined;
-  if (typeof window !== "undefined") {
-    const rawZoneIds = localStorage.getItem("zoneid");
-    if (rawZoneIds) {
-      try {
-        const parsed = JSON.parse(rawZoneIds);
-        currentZoneIds = Array.isArray(parsed) ? parsed : undefined;
-      } catch {
-        currentZoneIds = undefined;
-      }
-    }
-  }
+  const currentZoneIds = getCurrentZoneIds();
   const modulesToShow = currentZoneIds ? zoneWiseModule(data) : data;
   useEffect(() => {
     if (!autoSelect || !data?.length) return;

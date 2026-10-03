@@ -123,7 +123,7 @@ const MapForRestaurantJoin = ({
     if (showZoneWarning) {
       restaurantAddressHandler?.(null);
     } else if (polygonPaths?.length > 0) {
-      restaurantAddressHandler(geoCodeResults?.results[0]?.formatted_address);
+      restaurantAddressHandler(geoCodeResults?.results?.[0]?.formatted_address);
     }
 
     handleLocation(location);

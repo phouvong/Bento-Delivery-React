@@ -223,7 +223,7 @@ const RecentAddresses = ({
           handleSelect(e, {
             latitude: coords?.latitude,
             longitude: coords?.longitude,
-            address: geoCodeData.results[0]?.formatted_address,
+            address: geoCodeData?.results?.[0]?.formatted_address,
             isCurrent: "current",
           });
         }}

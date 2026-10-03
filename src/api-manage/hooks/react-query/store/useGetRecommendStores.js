@@ -4,13 +4,14 @@ import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { recommended_provider } from "api-manage/ApiRoutes";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { getApiCollection } from "../../../getApiContent";
 
 export const getData = async (pageParams) => {
   const { limit = 10, offset = 1 } = pageParams || {};
   const { data } = await MainApi.get(
     `${recommended_provider}` + `?limit=${limit}&offset=${offset}`,
   );
-  return data;
+  return getApiCollection(data, "stores");
 };
 
 export const useGetRecommendStores = (pageParams) => {

@@ -102,7 +102,7 @@ const GetLocationForm = ({
 
   useEffect(() => {
     if (geoCodeResults?.results && showCurrentLocation) {
-      setCurrentLocation(geoCodeResults?.results[0]?.formatted_address);
+      setCurrentLocation(geoCodeResults?.results?.[0]?.formatted_address);
     }
   }, [geoCodeResults, location]);
   const { data: zoneData } = useGetZoneId(location, zoneIdEnabled);

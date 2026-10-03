@@ -126,6 +126,25 @@ const ReorderBtn = styled(IconButton)(({ theme }) => ({
 
 // ─── Avatar group ──────────────────────────────────────────────────────────
 
+const toAvatarImages = (row) => {
+  if (Array.isArray(row?.bundle_details?.items) && row.bundle_details.items.length) {
+    return row.bundle_details.items.map((it) => ({
+      name: it?.name,
+      image_full_url: it?.image_full_url,
+    }));
+  }
+  if (row?.bogo_details) {
+    const buyItems = row.bogo_details.buy_items ?? [];
+    const freeItems = row.bogo_details.free_items ?? [];
+    const merged = [...buyItems, ...freeItems].map((it) => ({
+      name: it?.item?.name,
+      image_full_url: it?.item?.image_full_url,
+    }));
+    if (merged.length) return merged;
+  }
+  return [row];
+};
+
 const ItemAvatars = ({
   items,
   size,
@@ -133,8 +152,9 @@ const ItemAvatars = ({
   gap = "-6px",
   borderColor = "background.paper",
 }) => {
-  const visible = items.slice(0, max);
-  const overflow = items.length - visible.length;
+  const avatarImages = items.flatMap(toAvatarImages);
+  const visible = avatarImages.slice(0, max);
+  const overflow = avatarImages.length - visible.length;
   return (
     <Stack
       direction="row"

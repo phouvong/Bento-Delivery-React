@@ -2,13 +2,14 @@ import MainApi from "../../../MainApi";
 import { top_rated_stores } from "../../../ApiRoutes";
 import { useInfiniteQuery } from "react-query";
 import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (pageParams) => {
   const { offset, limit, type, pageParam } = pageParams;
   const { data } = await MainApi.get(
     `${top_rated_stores}?offset=${pageParam}&limit=${limit}&type=${type}`,
   );
-  return data;
+  return getApiCollection(data, "stores");
 };
 
 export default function useGetTopRatedStores({ pageParams, enabled = false }) {

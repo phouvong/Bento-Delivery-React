@@ -13,13 +13,14 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import CategoryTabs from "./CategoryTabs";
+import CategoryTabs, { BUNDLE_TAB_ID } from "./CategoryTabs";
 import {
   CustomBoxFullWidth,
   CustomStackFullWidth,
 } from "styled-components/CustomStyles.style";
 import MenuOpenIcon from "@mui/icons-material/MenuOpen";
 import useGetStoreCategoriesItems from "../../../api-manage/hooks/react-query/stores-categories/useGetStoreCategoriesItems";
+import useGetStorePopularItems from "../../../api-manage/hooks/react-query/stores-categories/useGetStorePopularItems";
 import ProductCard, { CardWrapper } from "../../cards/ProductCard";
 import NewProductCard from "../../cards/newCard/NewProductCard";
 import ProductCardSimmer from "components/Shimmer/ProductCardSimmer";
@@ -47,6 +48,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import StoreFilter from "components/store-details/middle-section/StoreFilter";
 import { filterTypeItems } from "components/search/filterTypes";
 import SliderSectionHeader from "components/common/SliderSectionHeader";
+import BundleProductCard from "components/cards/newCard/BundleProductCard";
+import useGetStoreBundles from "api-manage/hooks/react-query/bundle/useGetStoreBundles";
 
 export const handleShimmerProducts = () => {
   return (
@@ -154,12 +157,13 @@ export const normalizeItemsResponse = (res) => {
           ...new Set([...(existing.category_ids || []), String(catId)]),
         ];
       } else {
+        const ownIds = item?.category_ids?.length
+          ? item.category_ids.map((c) => String(c?.id ?? c))
+          : [];
         byId.set(item?.id, {
           ...item,
           category_id: item?.category_id ?? catId,
-          category_ids: item?.category_ids?.length
-            ? item.category_ids.map((c) => String(c?.id ?? c))
-            : [String(catId)],
+          category_ids: [...new Set([...ownIds, String(catId)])],
         });
       }
     });
@@ -193,6 +197,13 @@ const MiddleSection = (props) => {
   const router = useRouter();
   const { id } = router.query;
   const storeId = storeDetails?.id;
+
+  const { data: storeBundlesData } = useGetStoreBundles({
+    store_id: storeId,
+    limit: 10,
+    offset: 1,
+  });
+  const storeBundles = storeBundlesData?.bundles ?? [];
 
   // Categories now come from the combined /store-categories/items endpoint.
   // Tabs use first-page `categories`; respect `ownCategories` whitelist if
@@ -500,6 +511,25 @@ const MiddleSection = (props) => {
     isLoading: isLoadingStoresCategories,
     isFetchingNextPage,
   } = useGetStoreCategoriesItems(pageParams);
+
+  // "Most Popular" is its own backend-ranked list (order_count DESC by
+  // default) from /stores/popular-items/{id} — not a slice of the main
+  // category-wise query. It's sent the exact same filter/sort payload as
+  // /store-categories/items (type, price range, rating, sort_by) so both
+  // requests stay in sync whenever the filter bar is applied, but the
+  // response itself is rendered as-is — no client-side re-sort/reformat.
+  const { data: popularData } = useGetStorePopularItems({
+    storeId: storeId,
+    offset: 1,
+    limit: 20,
+    type: state.type,
+    minMax: state.minMax,
+    filterData: filterData,
+    ratingCount: ratingCount,
+    sortBy: state.sortBy,
+    ...storeShare,
+  });
+  const popularItems = popularData?.pages?.[0]?.data ?? [];
 
   // categoriesLoading kept for the CategoryTabs skeleton; mirrors the items
   // loading state since both come from the same request now.
@@ -938,6 +968,7 @@ const MiddleSection = (props) => {
                     selectedId={selectedCategoryTabId}
                     onSelect={handleSelectCategoryTab}
                     isLoading={categoriesLoading && categoryList.length === 0}
+                    showBundleTab={storeBundles.length > 0}
                   />
                 </Box>
                 <Stack
@@ -1089,28 +1120,17 @@ const MiddleSection = (props) => {
                     });
                   });
 
-                  // Sort the popular section client-side using the same
-                  // discounted-price helpers used elsewhere. The backend
-                  // sort_by is honored for the API call (and for the
-                  // category sections, which keep backend order), but the
-                  // popular slider is sorted again here to guarantee the
-                  // visual order matches the user's selection regardless
-                  // of whether the endpoint actually honored sort_by.
-                  // Copy the array before sorting — getHighToLow/Low
-                  // mutate in place.
-                  const popularSource = allProducts.slice(0, 10);
-                  let popularItems = popularSource;
-                  if (state.sortBy === "high") {
-                    popularItems = getHighToLow([...popularSource]);
-                  } else if (state.sortBy === "low") {
-                    popularItems = getLowToHigh([...popularSource]);
-                  }
-
                   const sections = [
                     {
                       key: "popular",
                       title: t("Most Popular"),
                       items: popularItems,
+                    },
+                    {
+                      key: BUNDLE_TAB_ID,
+                      title: t("Bundle Items"),
+                      items: storeBundles,
+                      isBundle: true,
                     },
                     ...categoryList.map((cat) => ({
                       key: String(cat?.id),
@@ -1199,6 +1219,7 @@ const MiddleSection = (props) => {
                     <Stack spacing={{ xs: 2, md: 4 }}>
                       {sections.map((section) => {
                         const isPopular = section.key === "popular";
+                        const isBundle = !!section.isBundle;
                         return (
                           <Stack
                             key={section.key}
@@ -1274,6 +1295,45 @@ const MiddleSection = (props) => {
                                       </Box>
                                     ))}
                                   </Slider>
+                                </Box>
+                              </>
+                            ) : isBundle ? (
+                              <>
+                                <Typography
+                                  sx={{
+                                    fontSize: { xs: "16px", md: "18px" },
+                                    fontWeight: 700,
+                                    lineHeight: 1.2,
+                                    color: theme.palette.text.primary,
+                                    mb: 2,
+                                  }}
+                                >
+                                  {section.title}
+                                </Typography>
+                                <Box
+                                  sx={{
+                                    display: "grid",
+                                    gap: 2,
+                                    gridTemplateColumns: {
+                                      xs: "1fr",
+                                      sm: "repeat(2, 1fr)",
+                                    },
+                                  }}
+                                >
+                                  {section.items.map((item) => (
+                                    <BundleProductCard
+                                      key={`${section.key}-${item?.id}`}
+                                      item={item}
+                                      images={
+                                        item?.items?.map(
+                                          (i) => i?.image_full_url,
+                                        ) ?? []
+                                      }
+                                      variant="horizontal"
+                                      isStore
+                                      max_width="100%"
+                                    />
+                                  ))}
                                 </Box>
                               </>
                             ) : (

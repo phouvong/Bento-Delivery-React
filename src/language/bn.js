@@ -144,7 +144,7 @@ export const bengali = {
   "Additional Note": "مذكرة إضافية",
   "Additional Note": "مذكرة إضافية",
   "Additional Notes": "অতিরিক্ত নোট",
-  Addon: "اضافه",
+  Addon: "অ্যাডঅন",
   Addons: "অ্যাড অনস",
   "Addons Price": "سعر الإضافات",
   Address: " تبوك ",
@@ -295,6 +295,7 @@ export const bengali = {
   "Bring Change Instruction": "চেঞ্জ আনার নির্দেশনা",
   "Browse thousands of products and get them delivered today.":
     "হাজার হাজার পণ্য ব্রাউজ করুন এবং আজই পেয়ে যান।",
+  "Bundle Items": "বান্ডেল আইটেম",
   "Business Address": "ব্যবসায়িক ঠিকানা",
   "Business Cover": "ব্যবসায়িক কভার",
   "Business Information": " معلومات العمل ",
@@ -309,6 +310,8 @@ export const bengali = {
   "Business name": "ব্যবসার নাম",
   "Buy 1 Get 1 Free": "১টি কিনলে ১টি ফ্রি",
   "Buy Now": "اشتري الآن",
+  "Buy more and enjoy exclusive free items.":
+    "আরও কিনুন এবং উপভোগ করুন এক্সক্লুসিভ ফ্রি আইটেম।",
   "By continuing, you agree to our":
     "চালিয়ে যাওয়ার মাধ্যমে, আপনি আমাদের সম্মত",
   "By placing the booking you are agreed to the":
@@ -608,6 +611,7 @@ export const bengali = {
   "Discover professionals solving real problems":
     "প্রকৃত সমস্যা সমাধানকারী পেশাদারদের আবিষ্কার করুন",
   Distance: "مسافة",
+  "Distance": "দূরত্ব",
   "Distance Wise": "দূরত্ব অনুযায়ী",
   "Do you want to change trip duration":
     "আপনি কি ট্রিপের সময়কাল পরিবর্তন করতে চান",
@@ -852,7 +856,10 @@ export const bengali = {
   "General Information": " معلومات عامة ",
   "General Information": " معلومات عامة ",
   "Generic Name": "জেনেরিক নাম",
-  Get: "حصل على",
+  Get: "পান",
+  "OFF!": "ছাড়!",
+  "OFF this order!": "ছাড় এই অর্ডারে!",
+  "more to get": "আরও পেতে",
   "Get 10% off on all orders": "Get 10% off on all orders",
   "Get Groceries Up to {{discount}} Off?":
     "{{discount}} পর্যন্ত ছাড়ে মুদিখানা পান!",
@@ -899,13 +906,16 @@ export const bengali = {
   "Google Play": "গুগল প্লে",
   "Got It": "বুঝেছি",
   "Got it": "বুঝেছি",
+  "Grab best price for your order.": "আপনার অর্ডারের জন্য সেরা দাম পান।",
   "Grab The Offer Before End The Time.": "সময় শেষ হওয়ার আগে অফার গ্রহণ করুন।",
+  "Grab These Offers": "এই অফারগুলো গ্রহণ করুন",
   "Grand Total Amount": "মোট পরিমাণ",
   "Grid view": "গ্রিড ভিউ",
   Groceries: "গ্রোসারি",
   Grocery: "গ্রোসারি",
   Guest: "অতিথি",
   Halal: "হালাল",
+  "Happy Hour": "সুখের সময়",
   "Has  paid by your wallet.": "আপনার ওয়ালেট দ্বারা পরিশোধিত হয়েছে।",
   "Have a Coupon?": "هل لديك قسيمة؟",
   "Have a Coupon?": "هل لديك قسيمة؟",
@@ -942,6 +952,7 @@ export const bengali = {
   "How you it works?": "এটি কীভাবে কাজ করে?",
   "However, the maximum cashback amount is":
     "তবে, সর্বোচ্চ ক্যাশব্যাক পরিমাণ হল",
+  "Hurry Up! BOGO Offer Is Live": "তাড়াতাড়ি করুন! বাই ওয়ান গেট ওয়ান অফার চলছে",
   "I agree that placing the order places me under":
     "أوافق على أن وضع الطلب يضعني تحت",
   "I agree that placing the order places me under Terms and Conditions & Privacy Policies":
@@ -1303,6 +1314,7 @@ export const bengali = {
   "No saved addresses found.": "কোনো সংরক্ষিত ঠিকানা পাওয়া যায়নি।",
   "No saved addresses yet": "এখনো কোনো সংরক্ষিত ঠিকানা নেই",
   "No seller info provided.": "No seller info provided.",
+  "No stores are running this offer right now.": "এই মুহূর্তে কোনো স্টোরে এই অফার চলছে না।",
   "No stores found": "No stores found",
   "No terms available.": "কোনো শর্ত উপলব্ধ নেই।",
   "No title given": "لم يتم إعطاء عنوان",
@@ -1595,6 +1607,10 @@ export const bengali = {
   "Please search some keywords.": "الرجاء البحث عن بعض الكلمات الرئيسية.",
   "Please select a delivery destination!":
     "একটি ডেলিভারি গন্তব্য নির্বাচন করুন!",
+  "Could not calculate the route distance, please try again":
+    "রুটের দূরত্ব হিসাব করা যায়নি, আবার চেষ্টা করুন",
+  "Parcel service is not available in your zone":
+    "আপনার জোনে পার্সেল সার্ভিস উপলব্ধ নেই",
   "Please select a payment method": "একটি পেমেন্ট পদ্ধতি নির্বাচন করুন",
   "Please select a paymrnt method": "একটি পেমেন্ট পদ্ধতি নির্বাচন করুন",
   "Please select a pick up zone": "একটি পিকআপ জোন নির্বাচন করুন",
@@ -2095,6 +2111,7 @@ export const bengali = {
   "Something went wrong": "Something went wrong",
   "Something went wrong.": "هناك خطأ ما.",
   "Sorry !": "দুঃখিত !",
+  "Sorry, we are not available in this area yet.": "দুঃখিত, এই এলাকায় আমাদের সার্ভিস এখনো উপলব্ধ নয়।",
   "Sorry no data found related to your search":
     "عذرا ، لم يتم العثور على بيانات متعلقة ببحثك",
   "Sorry you can’t delete your account !":
@@ -2279,7 +2296,7 @@ export const bengali = {
   "Top Restaurants": "শীর্ষ রেস্টুরেন্ট",
   "Top Store": "শীর্ষ স্টোর",
   "Top offers near me": "আমার কাছাকাছি শীর্ষ অফার",
-  Total: "المجموع",
+  Total: "মোট",
   "Total Amount": "المبلغ الإجمالي",
   "Total Balance": "মোট ব্যালেন্স",
   "Total Bill": "মোট বিল",
@@ -2582,6 +2599,7 @@ export const bengali = {
     "প্রেসক্রিপশন হারানোর ভয় থেকে আপনি মুক্ত, Lifetime Cure-এর সাথে আপনার ডিজিটাল প্রেসক্রিপশন খুঁজুন।",
   Your: "আপনার",
   "Your Address": "عنوانك",
+  "Your Cart is Empty!": "আপনার কার্ট খালি!",
   "Your Cart is Waiting!": "আপনার কার্ট অপেক্ষা করছে!",
   "Your Email": "আপনার ইমেইল",
   "Your Email Address": "عنوان بريدك  الإلكتروني",
@@ -2765,7 +2783,10 @@ export const bengali = {
   map: "মানচিত্র",
   "map-image": "মানচিত্র-ছবি",
   max: "সর্বোচ্চ",
-  min: "دقيقة",
+  min: "মি",
+  day: "দিন",
+  hr: "ঘ",
+  sec: "সে",
   "min Order of": "এর সর্বনিম্ন অর্ডার",
   mins: "মিনিট",
   "more for free delivery": "ফ্রি ডেলিভারির জন্য আরও",
@@ -3131,7 +3152,9 @@ export const bengali = {
   "Top Providers": "Top Providers",
   "Track Your Booking": "Track Your Booking",
   Upcoming: "Upcoming",
-  "Update Cart": "Update Cart",
+  "Update Cart": "কার্ট আপডেট করুন",
+  "Best Value Bundle": "সেরা মূল্যের বান্ডেল",
+  "No items to show": "দেখানোর মতো কোনো আইটেম নেই",
   "Update Custom Service": "Update Custom Service",
   "Update Request": "Update Request",
   "Update Variation": "Update Variation",
@@ -3181,7 +3204,11 @@ export const bengali = {
   Cancelled: "Cancelled",
   "Per booking": "Per booking",
   "Total for": "Total for",
-  Validity: "Validity",
+  Validity: "মেয়াদ",
+  "BOGO Offer List": "BOGO অফার তালিকা",
+  "No BOGO offers available": "কোনো BOGO অফার পাওয়া যায়নি",
+  "Buy {{count}} Item": "{{count}}টি আইটেম কিনুন",
+  "Get {{count}} FREE": "{{count}}টি ফ্রি পান",
   "View single booking": "View single booking",
   "View total": "View total",
   bookings: "bookings",
@@ -3241,6 +3268,16 @@ export const bengali = {
 	"No category found": "No category found",
 	"No options found": "No options found",
 	"Search category...": "Search category...",
-	"Search sub category...": "Search sub category..."
-
+	"Search sub category...": "Search sub category...",
+	"Bundle": "বান্ডেল",
+	"Bundle Discount": "বান্ডেল ছাড়",
+	"QTY": "পরিমাণ",
+	"per bundle": "প্রতি বান্ডেল",
+	"Variation": "ভ্যারিয়েশন",
+	"Addon": "অ্যাড-অন",
+	"BOGO": "BOGO",
+	"Free": "বিনামূল্যে",
+	"Buying Item": "ক্রয়যোগ্য আইটেম",
+	"Free Item": "ফ্রি আইটেম",
+	"per bogo": "প্রতি BOGO"
 };

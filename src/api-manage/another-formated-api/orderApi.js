@@ -1,9 +1,30 @@
 import MainApi from "../MainApi";
 import { getToken } from "helper-functions/getToken";
+import { getApiContent } from "../getApiContent";
+
+// Callers read payload fields straight off the axios response — e.g.
+// `response.data.order_id` after placing an order — and some also read
+// `response.data.message` for the success toast. v4.2 moved the payload into
+// `content` while leaving `message` on the envelope, so expose both: the
+// envelope message first, then the payload spread over it so real fields win.
+// Only success responses pass through here; axios rejects on failure, so
+// `error.response.data.message` in the error handlers is unaffected.
+const unwrap = (request) =>
+  request.then((response) => {
+    const content = getApiContent(response?.data);
+    const isObject =
+      !!content && typeof content === "object" && !Array.isArray(content);
+    return {
+      ...response,
+      data: isObject
+        ? { message: response?.data?.message, ...content }
+        : content,
+    };
+  });
 
 export const OrderApi = {
   placeOrder: (formData) => {
-    return MainApi.post("/api/v1/customer/order/place", formData);
+    return unwrap(MainApi.post("/api/v1/customer/order/place", formData));
   },
   prescriptionPlaceOrder: (orderData) => {
     const {
@@ -54,26 +75,26 @@ export const OrderApi = {
     formData.append("dm_tips", dm_tips);
     formData.append("order_type", order_type);
     formData.append("payment_method", payment_method);
-    return MainApi.post("/api/v1/customer/order/prescription/place", formData);
+    return unwrap(MainApi.post("/api/v1/customer/order/prescription/place", formData));
   },
   orderHistory: (orderType, limit, offset) => {
-    return MainApi.get(
+    return unwrap(MainApi.get(
       `/api/v1/customer/order/${orderType}?limit=${limit}&offset=${offset}`,
-    );
+    ));
   },
   orderDetails: (order_id) => {
-    return MainApi.get(`/api/v1/customer/order/details?order_id=${order_id}`);
+    return unwrap(MainApi.get(`/api/v1/customer/order/details?order_id=${order_id}`));
   },
   orderTracking: (order_id) => {
-    return MainApi.get(`/api/v1/customer/order/track?order_id=${order_id}`);
+    return unwrap(MainApi.get(`/api/v1/customer/order/track?order_id=${order_id}`));
   },
   CancelOrder: (formData) => {
-    return MainApi.post("/api/v1/customer/order/cancel", formData);
+    return unwrap(MainApi.post("/api/v1/customer/order/cancel", formData));
   },
   FailedPaymentMethodUpdate: (formData) => {
-    return MainApi.post("/api/v1/customer/order/payment-method", formData);
+    return unwrap(MainApi.post("/api/v1/customer/order/payment-method", formData));
   },
   FailedPaymentMethodCancel: (formData) => {
-    return MainApi.post("/api/v1/customer/order/cancel", formData);
+    return unwrap(MainApi.post("/api/v1/customer/order/cancel", formData));
   },
 };

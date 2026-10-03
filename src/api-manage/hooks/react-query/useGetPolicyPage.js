@@ -5,10 +5,11 @@ import {
   refund_policy_api,
   wallet_transactions_list_api,
 } from "../../ApiRoutes";
+import { getApiContent } from "../../getApiContent";
 
 const getData = async (apiLink) => {
   const { data } = await MainApi.get(apiLink);
-  return data;
+  return getApiContent(data);
 };
 export default function useGetPolicyPage(apiLink) {
   return useQuery("refund-policy", () => getData(apiLink), {

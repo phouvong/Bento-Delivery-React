@@ -11,10 +11,7 @@ export const MainLayoutRoot = styled(Stack)(({ theme }) => ({
 }));
 
 export const LandingLayout = ({ children, configData, landingPageData }) => {
-  const { data, refetch } = useGetLandingPage();
-  useEffect(() => {
-    refetch();
-  }, [refetch]);
+  const { data } = useGetLandingPage();
 
   return (
     <MainLayoutRoot justifyContent="space-between">

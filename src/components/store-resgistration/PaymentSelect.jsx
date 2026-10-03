@@ -8,11 +8,11 @@ import StoreRegPaymentCard from "components/store-resgistration/StoreRegPaymentC
 import { useSelector } from "react-redux";
 import { ResetButton } from "components/profile/basic-information/BasicInformationForm";
 import { SaveButton } from "components/profile/basic-information/Profile.style";
-import {useRouter} from "next/router";
+import { useRouter } from "next/router";
 
 const PaymentSelect = ({ submitBusiness, resData, isLoading }) => {
   const router = useRouter();
-   const {plan, package: packageId} = router.query
+  const { plan, package: packageId } = router.query;
   const [selectType, setSelectType] = useState("pay_now");
   const [selectedMethod, setSelectedMethod] = useState(null);
   const { configData } = useSelector((state) => state.configData);
@@ -23,37 +23,44 @@ const PaymentSelect = ({ submitBusiness, resData, isLoading }) => {
   let storeIdd;
   let packageIdd;
 
+  const readStored = (key) => {
+    const raw = localStorage.getItem(key);
+    return raw == null || raw === "null" || raw === "undefined"
+      ? undefined
+      : raw;
+  };
+
   if (typeof window !== "undefined") {
-    bPlan = localStorage.getItem("business_plan");
-    storeIdd = localStorage.getItem("store_id");
-    packageIdd = localStorage.getItem("package_id");
+    bPlan = readStored("business_plan");
+    storeIdd = readStored("store_id");
+    packageIdd = readStored("package_id");
   }
 
   const submitPayment = () => {
+    const businessPlan = resData?.type ?? allData?.res?.type ?? bPlan;
+    const storeId = resData?.store_id ?? allData?.res?.store_id ?? storeIdd;
+    const packageId =
+      resData?.package_id ?? allData?.res?.package_id ?? packageIdd;
 
-      // Save values to localStorage
-      const businessPlan = resData?.type ?? allData?.values?.business_plan ?? bPlan;
-      const storeId = resData?.store_id ?? allData?.values?.store_id ?? storeIdd;
-      const packageId = resData?.package_id ?? allData?.values?.package_id ?? packageIdd;
+    if (businessPlan != null)
+      localStorage.setItem("business_plan", businessPlan);
+    if (storeId != null) localStorage.setItem("store_id", storeId);
+    if (packageId != null) localStorage.setItem("package_id", packageId);
 
-      localStorage.setItem('business_plan', businessPlan);
-      localStorage.setItem('store_id', storeId);
-      localStorage.setItem('package_id', packageId);
-
-      submitBusiness({
-        business_plan: businessPlan,
-        store_id: storeId,
-        package_id: packageId,
-        payment: selectedMethod ?? selectType,
-        payment_gateway: selectedMethod ?? selectType,
-        callback:
-          selectType === "free_trial"
-            ? null
-            : `${window.location.origin}/store-registration`,
-        payment_platform: "web",
-        type: "new_join",
-      });
-    };
+    submitBusiness({
+      business_plan: businessPlan,
+      store_id: storeId,
+      package_id: packageId,
+      payment: selectedMethod ?? selectType,
+      payment_gateway: selectedMethod ?? selectType,
+      callback:
+        selectType === "free_trial"
+          ? null
+          : `${window.location.origin}/store-registration`,
+      payment_platform: "web",
+      type: "new_join",
+    });
+  };
 
   return (
     <CustomStackFullWidth
@@ -171,7 +178,7 @@ const PaymentSelect = ({ submitBusiness, resData, isLoading }) => {
           </Stack>
           <Typography fontSize="13px" color={theme.palette.neutral[400]}>
             {t(
-              `Enjoy ${configData?.subscription_free_trial_days} Days free trial and pay your subscription fee within these trial period.`
+              `Enjoy ${configData?.subscription_free_trial_days} Days free trial and pay your subscription fee within these trial period.`,
             )}
           </Typography>
         </Stack>

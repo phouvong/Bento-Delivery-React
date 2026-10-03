@@ -1,10 +1,11 @@
 import { useQuery } from "react-query";
 import MainApi from "api-manage/MainApi";
 import { wishlist_api } from "api-manage/ApiRoutes";
+import { getApiContent } from "../../../getApiContent";
 
 export const WishList = async () => {
   const { data } = await MainApi.get(`${wishlist_api}`);
-  return data;
+  return getApiContent(data);
 };
 
 export const useGetWishList = (onSuccessHandler) => {

@@ -1,11 +1,13 @@
 import { Box } from "@mui/system";
+import BogoListPage from "components/bogo-list";
 import OffersSectionPage from "components/home/section-page/OffersSectionPage";
 import TabbedSectionPage from "components/home/section-page/TabbedSectionPage";
 import isVerifiedStoreEnabled from "helper-functions/isVerifiedStoreEnabled";
+import { navigateToBogoList } from "helper-functions/navigateToBogoList";
 
 export const SECTION_GAP = 3;
 
-export const getEcommerceSections = (configData) =>
+export const getEcommerceSections = (configData, isBogoLive) =>
   [
   {
     id: "offers",
@@ -20,6 +22,21 @@ export const getEcommerceSections = (configData) =>
     ),
     content: <OffersSectionPage />,
     mobileContent: <OffersSectionPage />,
+  },
+  {
+    id: "bogo",
+    label: "BOGO",
+    icon: (
+      <Box sx={{ color: "info.main", display: "flex" }}>
+        <i
+          className="fi fi-rr-gift"
+          style={{ fontSize: "16px", lineHeight: 1, display: "flex" }}
+        />
+      </Box>
+    ),
+    content: <BogoListPage />,
+    mobileContent: <BogoListPage />,
+    onClick: navigateToBogoList,
   },
   {
     id: "free-delivery",
@@ -79,5 +96,6 @@ export const getEcommerceSections = (configData) =>
   },
   ].filter(
     (section) =>
-      section.id !== "verified-seller" || isVerifiedStoreEnabled(configData),
+      (section.id !== "verified-seller" || isVerifiedStoreEnabled(configData)) &&
+      (section.id !== "bogo" || isBogoLive),
   );

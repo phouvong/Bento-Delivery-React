@@ -13,20 +13,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { setParcelData } from "redux/slices/parcelDeliveryInfo";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import GuestCheckoutModal from "../../cards/GuestCheckoutModal";
-import H1 from "../../typographies/H1";
 import ParcelInfo from "./ParcelInfo";
+import ParcelInformationModal from "../parcel-information/ParcelInformationModal";
 import ReceiverInfoFrom from "./ReceiverInfoFrom";
 import SenderInfoForm from "./SenderInfoForm";
 import ValidationSchema from "./ValidationSchema";
 import dynamic from "next/dynamic";
 import { formatPhoneNumber } from "utils/CustomFunctions";
 import useGetZoneId from "api-manage/hooks/react-query/google-api/useGetZone";
+import { getZoneIdWithModule } from "helper-functions/getZoneIdWithModule";
 import SaveAddress from "../../SaveAddress";
 import CustomModal from "components/modal";
 import CloseIcon from "@mui/icons-material/Close";
 import MapModal from "components/Map/MapModal";
 import ProPlanBanner from "components/pro-plan/ProPlanBanner";
-import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
 import useGetProActiveOffer from "api-manage/hooks/react-query/pro-plans/useGetProActiveOffer";
 import useSubscribeProPlan from "api-manage/hooks/react-query/pro-plans/useSubscribeProPlan";
 
@@ -37,6 +37,21 @@ const ProPlanSubscriptionModal = dynamic(() =>
 const ProPlanPaymentModal = dynamic(() =>
   import("components/pro-plan/ProPlanPaymentModal")
 );
+const normalizeZoneIdScalar = (raw) => {
+  if (raw == null) return undefined;
+  let scalar = raw;
+  if (Array.isArray(scalar)) scalar = scalar[0];
+  else if (typeof scalar === "string" && scalar.trim().startsWith("[")) {
+    try {
+      const parsed = JSON.parse(scalar);
+      scalar = Array.isArray(parsed) ? parsed[0] : parsed;
+    } catch {
+      scalar = scalar.replace(/^\[|\]$/g, "").split(",")[0];
+    }
+  }
+  return scalar != null ? Number(scalar) : undefined;
+};
+
 const PercelDelivery = ({ configData }) => {
   const router = useRouter();
 
@@ -69,13 +84,29 @@ const PercelDelivery = ({ configData }) => {
   );
   useEffect(() => {
     if (receiverZoneData?.zone_id == null) return;
-    // The zone-id API returns `zone_id` as an array (e.g. [6]). Reduce it
-    // to a single scalar so downstream order payloads send `zone_id: 6`
-    // instead of the JSON-stringified array `"[6]"`.
-    const raw = receiverZoneData.zone_id;
-    const scalar = Array.isArray(raw) ? raw[0] : raw;
+    const scalar = normalizeZoneIdScalar(receiverZoneData.zone_id);
     setReceiverZoneId(scalar != null ? scalar : null);
   }, [receiverZoneData?.zone_id]);
+
+  const { parcelInfoZoneId } = useSelector((state) => state.parcelCategories);
+  const effectiveSenderLocationForZone =
+    senderLocation?.lat && senderLocation?.lng
+      ? senderLocation
+      : parcelInfo?.senderLocations;
+  const senderHasLatLng =
+    !!effectiveSenderLocationForZone?.lat &&
+    !!effectiveSenderLocationForZone?.lng;
+  const { data: senderZoneData } = useGetZoneId(
+    effectiveSenderLocationForZone,
+    senderHasLatLng
+  );
+  const zonesById = useSelector((state) => state.zoneData?.zonesById);
+  const senderZoneId = getZoneIdWithModule(
+    senderZoneData?.zone_id,
+    zonesById,
+    "parcel"
+  );
+  const [reopenParcelInfo, setReopenParcelInfo] = useState(false);
   const [open, setOpen] = useState(false);
   const [sideDrawerOpen, setSideDrawerOpen] = useState(false);
   let token = getToken();
@@ -200,7 +231,6 @@ const PercelDelivery = ({ configData }) => {
       userDecisionTimeout: 5000,
       isGeolocationEnabled: true,
     });
-  console.log("proOfferResolved", proOfferResolved);
   const addAddressFormik = useFormik({
     initialValues: {
       senderName: token
@@ -239,7 +269,6 @@ const PercelDelivery = ({ configData }) => {
       await formSubmitHandler(values);
     },
   });
-  console.log({ parcelInfo });
   useEffect(() => {
     const currentLocationLatLng = JSON.parse(
       localStorage.getItem("currentLatLng")
@@ -347,8 +376,6 @@ const PercelDelivery = ({ configData }) => {
     setSenderFormattedAddress(currentLocation);
   };
   const handleReceiverLocation = (location, currentLocation) => {
-    console.log({ location, currentLocation });
-
     setReceiverLocation(location);
     setReceiverFormattedAddress(currentLocation);
   };
@@ -366,9 +393,6 @@ const PercelDelivery = ({ configData }) => {
     zoneid = localStorage.getItem("zoneid");
     currentLocation = JSON.parse(localStorage.getItem("currentLatLng"));
   }
-  console.log({ parcelCategories });
-  console.log({ receiverLocation });
-
   const formSubmitHandler = (values) => {
     if (!parcelCategories?.id) {
       toast.error(t("Please select parcel category to proceed"));
@@ -407,6 +431,20 @@ const PercelDelivery = ({ configData }) => {
       return;
     }
 
+    if (senderZoneData && senderZoneId === undefined) {
+      toast.error(t("Parcel service is not available in your zone"));
+      return;
+    }
+
+    if (
+      senderZoneId != null &&
+      parcelInfoZoneId != null &&
+      String(senderZoneId) !== String(parcelInfoZoneId)
+    ) {
+      setReopenParcelInfo(true);
+      return;
+    }
+
     const tempValue = {
       ...values,
       senderLocations: effectiveSenderLocation,
@@ -441,18 +479,24 @@ const PercelDelivery = ({ configData }) => {
       paddingBottom={{ xs: "20px", sm: "20px", md: "80px" }}
       pt="2.5rem"
     >
-      <Stack paddingBottom="30px">
-        <H1
-          text="Parcel Delivery Information"
-          textAlign="left"
-          fontWeight="600"
-          component="h1"
-        />
-      </Stack>
       <form noValidate onSubmit={addAddressFormik.handleSubmit}>
         <Grid container spacing={{ xs: 2, md: 3 }}>
           <Grid item xs={12}>
-            <ParcelInfo parcelCategories={parcelCategories} />
+            <ParcelInfo
+              parcelCategories={parcelCategories}
+              showProSavingsBanner={
+                proFeatureEnabled &&
+                hasToken &&
+                proOfferResolved &&
+                isProActive &&
+                proBenefit?.type === "delivery_fee"
+              }
+              proSavingsAmount={
+                activeOffer?.total_saved ??
+                activeOffer?.plan_details?.total_saved
+              }
+              proSavingsMessage={proSavingsMessage}
+            />
           </Grid>
           {proFeatureEnabled &&
             proOfferResolved &&
@@ -484,45 +528,14 @@ const PercelDelivery = ({ configData }) => {
                 </Card>
               </Grid>
             )}
-          {proFeatureEnabled &&
-            hasToken &&
-            proOfferResolved &&
-            isProActive &&
-            proBenefit?.type === "delivery_fee" && (
-              <Grid item xs={12}>
-                <Card
-                  sx={{
-                    padding: { xs: "12px", md: "20px" },
-                    backgroundColor: (theme) => theme.palette.background.paper,
-                    border: (theme) =>
-                      `1px solid ${
-                        theme.palette.neutral?.[200] || "rgba(0,0,0,0.06)"
-                      }`,
-                    borderRadius: "16px",
-                    boxShadow: "none",
-                  }}
-                >
-                  <ProSavingsBanner
-                    amount={
-                      activeOffer?.total_saved ??
-                      activeOffer?.plan_details?.total_saved
-                    }
-                    message={proSavingsMessage}
-                  />
-                </Card>
-              </Grid>
-            )}
           <Grid item xs={12}>
             <Card
               sx={{
                 padding: { xs: "12px", md: "20px" },
                 backgroundColor: (theme) => theme.palette.background.paper,
-                border: (theme) =>
-                  `1px solid ${
-                    theme.palette.neutral?.[200] || "rgba(0,0,0,0.06)"
-                  }`,
                 borderRadius: "16px",
                 boxShadow: "none",
+                overflow: "visible",
               }}
             >
               <Grid container spacing={{ xs: 2, md: 3 }}>
@@ -563,32 +576,32 @@ const PercelDelivery = ({ configData }) => {
                   />
                 </Grid>
               </Grid>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: { xs: "stretch", md: "flex-end" },
+                  mt: { xs: 2, md: 3 },
+                }}
+              >
+                <CustomButtonPrimary
+                  type="submit"
+                  sx={{
+                    width: { xs: "100%", md: "auto" },
+                    maxWidth: { xs: "100%", md: "none" },
+                    minWidth: { md: "220px" },
+                    px: { md: 4 },
+                    height: "44px",
+                    borderRadius: "12px",
+                    fontWeight: 700,
+                  }}
+                >
+                  {t("Proceed To Checkout")}
+                </CustomButtonPrimary>
+              </Box>
             </Card>
           </Grid>
         </Grid>
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: { xs: "stretch", md: "flex-end" },
-            mt: { xs: 2, md: 3 },
-          }}
-        >
-          <CustomButtonPrimary
-            type="submit"
-            sx={{
-              width: { xs: "100%", md: "auto" },
-              maxWidth: { xs: "100%", md: "none" },
-              minWidth: { md: "220px" },
-              px: { md: 4 },
-              height: "48px",
-              borderRadius: "10px",
-              fontWeight: 700,
-            }}
-          >
-            {t("Proceed To Checkout")}
-          </CustomButtonPrimary>
-        </Box>
       </form>
       {open && (
         <GuestCheckoutModal
@@ -673,6 +686,13 @@ const PercelDelivery = ({ configData }) => {
           plan={proSelectedPlan}
         />
       )}
+      <ParcelInformationModal
+        open={reopenParcelInfo}
+        onClose={() => setReopenParcelInfo(false)}
+        initialCategoryId={parcelCategories?.id}
+        zoneId={senderZoneId}
+        onConfirm={() => setReopenParcelInfo(false)}
+      />
     </CustomStackFullWidth>
   );
 };

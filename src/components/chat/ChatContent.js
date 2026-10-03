@@ -30,7 +30,7 @@ const ChatContent = ({
     channelList && channelList?.find((item) => item.receiver_type === "admin");
 
   const handleChatWithAdmin = () => {
-    if (channelList.length === 0 || !isAdmin) {
+    if (!channelList?.length || !isAdmin) {
       return (
         <ChatWithAdmin
           configData={configData}

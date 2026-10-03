@@ -3,10 +3,11 @@ import { useMutation, useQuery } from 'react-query'
 import MainApi from '../../../MainApi'
 import { onErrorResponse } from '../../../api-error-response/ErrorResponses';
 import { offline_payment_options } from '../../../ApiRoutes';
+import { getApiList } from "../../../getApiContent";
 
 const getOfflinePaymentOptions = async () => {
     const { data } = await MainApi.get(offline_payment_options);
-    return data;
+    return getApiList(data);
 }
 export default function useGetOfflinePaymentOptions() {
     return useQuery("offline-payments", getOfflinePaymentOptions, {

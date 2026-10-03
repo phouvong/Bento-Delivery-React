@@ -20,6 +20,97 @@ import CustomImageContainer from "../CustomImageContainer";
 import ServiceReviewForm from "./ServiceReviewForm";
 import ServicemanReviewForm from "./ServicemanReviewForm";
 
+const parseJson = (raw) => {
+  if (!raw) return null;
+  if (typeof raw === "object") return raw;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+};
+
+// Expands bogo/bundle rows into their nested items, deduped by item_id, and
+// skips any item_id that already has an entry in the order's `reviews` array
+// (the order-details endpoint doesn't know per-item review state itself).
+const extractReviewableItems = (rows = [], reviewedItemIds = new Set()) => {
+  const seenItemIds = new Set();
+  const result = [];
+
+  const addLine = (line, orderId) => {
+    const itemId = line?.item_id;
+    if (
+      itemId == null ||
+      seenItemIds.has(itemId) ||
+      reviewedItemIds.has(itemId)
+    )
+      return;
+    seenItemIds.add(itemId);
+    const itemDetails = parseJson(line?.item_details);
+    result.push({
+      id: line?.id,
+      item_id: itemId,
+      order_id: orderId ?? line?.order_id,
+      quantity: line?.quantity,
+      item_details: itemDetails,
+      image_full_url: itemDetails?.image_full_url ?? line?.image_full_url,
+    });
+  };
+
+  rows.forEach((row) => {
+    if (row?.bogo_details) {
+      [...(row.bogo_details.buy_items ?? []), ...(row.bogo_details.free_items ?? [])].forEach(
+        (line) => addLine(line, row?.order_id),
+      );
+      return;
+    }
+    if (row?.bundle_details) {
+      (row.bundle_details.items ?? []).forEach((line) => addLine(line, row?.order_id));
+      return;
+    }
+    addLine(row, row?.order_id);
+  });
+
+  return result;
+};
+
+const extractReviewableServiceItems = (details = []) => {
+  const idByName = new Map();
+  details.forEach((row) => {
+    if (row?.service_id != null && row?.service_name) {
+      idByName.set(row.service_name, row.service_id);
+    }
+  });
+
+  const seenIds = new Set();
+  const result = [];
+  const addService = (serviceId, serviceName, imageFullUrl) => {
+    if (serviceId == null || seenIds.has(serviceId)) return;
+    seenIds.add(serviceId);
+    result.push({
+      service_id: serviceId,
+      service_name: serviceName,
+      image_full_url: imageFullUrl,
+    });
+  };
+
+  details.forEach((row) => {
+    if (row?.bundle_details?.items?.length) {
+      row.bundle_details.items.forEach((item) => {
+        addService(
+          item?.id ?? item?.service_id ?? idByName.get(item?.name),
+          item?.name,
+          item?.image_full_url ?? item?.image,
+        );
+      });
+      return;
+    }
+    addService(row?.service_id, row?.service_name, row?.image_full_url);
+  });
+
+  return result;
+};
+
 const RateAndReview = ({
   onAllItemsReviewed,
   trackData,
@@ -34,32 +125,42 @@ const RateAndReview = ({
   const router = useRouter();
   const { orderId } = router.query;
   const { refetch, data, isRefetching } = useGetOrderDetails(orderId);
-  const { refetch: refetchTrackOrder, data: trackOrderData } =
-    useGetTrackOrderData(orderId);
+  const { refetch: refetchTrackOrder } = useGetTrackOrderData(orderId);
 
   // ── Service booking review ──
   // Driven entirely by the booking payload (provider + details[]), not the
   // order-details endpoint. Each service in details[] gets its own rating form.
   const isService = isServiceBooking || !!serviceData?.provider;
 
-  // Load items when data arrives for a new order, but preserve local state during refetches
+  // Load items when data arrives for a new order, but preserve local state during refetches.
+  // Reviewed item_ids come from the `trackData` PROP, not the internal
+  // `trackOrderData` query above — that query is `enabled: false` and only
+  // resolves after `refetchTrackOrder()` fires in a later effect, so it's
+  // very often still empty the first (and, per the `loadedOrderId` guard,
+  // only) time this effect runs. `trackData` is fetched by the parent and is
+  // already populated by the time this drawer can even open.
   useEffect(() => {
     if (data && data.length > 0) {
       // Check if this is a new order or the first load
       if (loadedOrderId.current !== orderId) {
-        const unReviewedItems = data.filter((item) => item.isReview === false);
-        setItems(data);
+        const reviewedItemIds = new Set(
+          (trackData?.reviews ?? []).map((review) => review?.item_id),
+        );
+        setItems(extractReviewableItems(data, reviewedItemIds));
         loadedOrderId.current = orderId;
       }
       // If it's the same order (just a refetch), keep the local items state
     }
-  }, [data, orderId]);
+  }, [data, orderId, trackData?.reviews]);
 
   useEffect(() => {
     if (!orderId || isService) return;
     refetch();
     refetchTrackOrder();
   }, [orderId, isService, refetch, refetchTrackOrder]);
+
+  const hasPendingDeliverymanReview =
+    !!trackData?.delivery_man && !trackData?.is_reviewed;
 
   const handleItemReviewed = (itemId) => {
     if (itemId) {
@@ -68,20 +169,26 @@ const RateAndReview = ({
           return item.id !== itemId;
         });
         if (filtered.length === 0) {
-          onAllItemsReviewed?.();
+          if (hasPendingDeliverymanReview) {
+            setType("delivery_man");
+          } else {
+            onAllItemsReviewed?.();
+          }
         }
         return filtered;
       });
     }
   };
-  console.log({ trackOrderData,serviceData });
 
   const [serviceItems, setServiceItems] = useState([]);
   const [servicemen, setServicemen] = useState([]);
   const [serviceReviewType, setServiceReviewType] = useState("services");
   useEffect(() => {
     if (isService && Array.isArray(serviceData?.details)) {
-      setServiceItems(serviceData.details);
+      console.log("[RateAndReview] serviceData.details", serviceData.details);
+      const extracted = extractReviewableServiceItems(serviceData.details);
+      console.log("[RateAndReview] extracted serviceItems", extracted);
+      setServiceItems(extracted);
     }
     // Service module bookings never require a serviceman — reviewing one
     // isn't part of the business flow here, so servicemen stays empty and
@@ -106,7 +213,6 @@ const RateAndReview = ({
       return filtered;
     });
   };
-console.log({serviceData});
 
   if (isService) {
     const provider = serviceData?.provider;
@@ -161,7 +267,7 @@ console.log({serviceData});
                 </CustomPaperBigCard>
               ))
             ) : (
-              <CustomEmptyResult label="No servicemen to review" />
+              <CustomEmptyResult image={nodata} label="No servicemen to review" />
             )
           ) : serviceItems?.length > 0 ? (
             serviceItems.map((service) => (
@@ -178,6 +284,7 @@ console.log({serviceData});
             ))
           ) : (
             <CustomEmptyResult
+              image={nodata}
               label={
                 serviceData?.is_reviewed
                   ? "You have already reviewed this booking"
@@ -236,11 +343,13 @@ console.log({serviceData});
                 );
               })
             ) : (
-              !isRefetching && <CustomEmptyResult label="No items to review" />
+              !isRefetching && (
+                <CustomEmptyResult image={nodata} label="No items to review" />
+              )
             )
           ) : (
             <CustomPaperBigCard sx={{ padding: { xs: ".5rem", md: "1rem" } }}>
-              {trackData?.delivery_man ? (
+              {trackData?.delivery_man && !trackData?.is_reviewed ? (
                 <DeliverymanForm
                   data={trackData?.delivery_man}
                   orderId={orderId}
@@ -259,7 +368,11 @@ console.log({serviceData});
                     height="100%"
                   >
                     <CustomEmptyResult
-                      label="No delivery man assigned for the delivery."
+                      label={
+                        trackData?.delivery_man
+                          ? "You have already reviewed the delivery man"
+                          : "No delivery man assigned for the delivery."
+                      }
                       image={nodata}
                     />
                   </Stack>

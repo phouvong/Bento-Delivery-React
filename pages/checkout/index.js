@@ -15,12 +15,11 @@ import CustomContainer from "../../src/components/container";
 import MainLayout from "../../src/components/layout/MainLayout";
 import AuthGuard from "../../src/components/route-guard/AuthGuard";
 import SEO from "../../src/components/seo";
-import { getServerSideProps } from "../index";
 import { getImageUrl } from "utils/CustomFunctions";
 import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 import { setConfigData } from "redux/slices/configData";
 import { useGetConfigData } from "../../src/api-manage/hooks/useGetConfigData";
-import useGetLandingPage from "../../src/api-manage/hooks/react-query/useGetLandingPage";
+import useGetDistance from "../../src/api-manage/hooks/react-query/google-api/useGetDistance";
 
 const CheckoutMobileHeader = () => {
   const router = useRouter();
@@ -99,6 +98,30 @@ const CheckOutPage = () => {
       })
     : moduleCartList;
   const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
+
+  // Parcel pricing hangs off sender->receiver distance, and everything after it
+  // (vehicle extra charge, then tax) queues behind it. Starting it here rather
+  // than inside ParcelCheckout buys a full render+effect cycle: the checkout
+  // body sits behind <NoSsr>, so its effects only run once NoSsr has mounted.
+  const { parcelInfo } = useSelector((state) => state.parcelInfoData);
+  const senderLocations = parcelInfo?.senderLocations;
+  const receiverLocations = parcelInfo?.receiverLocations;
+  const { data: distanceData, refetch: distanceRefetch } = useGetDistance(
+    senderLocations,
+    receiverLocations
+  );
+  useEffect(() => {
+    if (page !== "parcel") return;
+    if (!senderLocations?.lat || !receiverLocations?.lat) return;
+    distanceRefetch();
+  }, [
+    page,
+    senderLocations?.lat,
+    senderLocations?.lng,
+    receiverLocations?.lat,
+    receiverLocations?.lng,
+    distanceRefetch,
+  ]);
   useEffect(() => {
     if (!configData) {
       configRefetch();
@@ -127,7 +150,12 @@ const CheckOutPage = () => {
         <CheckoutMobileHeader />
         <CustomContainer>
           <NoSsr>
-            {page === "parcel" && <ParcelCheckout configData={configData} />}
+            {page === "parcel" && (
+              <ParcelCheckout
+                configData={configData}
+                distanceData={distanceData}
+              />
+            )}
             {page === "prescription" && (
               <PrescriptionCheckout
                 storeId={store_id}
@@ -165,14 +193,14 @@ const CheckOutPage = () => {
                 totalAmount={totalAmount}
               />
             )}
-            {!incomplete_payment && (
+            {/* {!incomplete_payment && (
               <RedirectWhenCartEmpty
                 page={page}
                 cartList={aliasCartList}
                 campaignItemList={campaignItemList}
                 buyNowItemList={buyNowItemList}
               />
-            )}
+            )} */}
           </NoSsr>
         </CustomContainer>
       </MainLayout>

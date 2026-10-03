@@ -14,6 +14,11 @@ import NewStoreCard from "components/cards/newCard/NewStoreCard";
 import { useGetRecommendStores } from "api-manage/hooks/react-query/store/useGetRecommendStores";
 
 const SliderWrapper = styled(CustomBoxFullWidth)(({ theme }) => ({
+  "& .slick-list": {
+    overflowX: "hidden",
+    overflowY: "visible",
+    padding: "8px 0",
+  },
   "& .slick-track": {
     marginLeft: 0,
     marginRight: "auto",
@@ -42,22 +47,37 @@ const RecommendedStore = ({ title }) => {
     dots: false,
     infinite: false,
     speed: 500,
-    slidesToShow: 4,
+    slidesToShow: 3.5,
     slidesToScroll: 1,
     swipeToSlide: true,
     arrows: false,
     responsive: [
       {
         breakpoint: 1450,
-        settings: { slidesToShow: 4, slidesToScroll: 1, infinite: false , swipeToSlide: true},
+        settings: {
+          slidesToShow: 3.5,
+          slidesToScroll: 1,
+          infinite: false,
+          swipeToSlide: true,
+        },
       },
       {
         breakpoint: 1024,
-        settings: { slidesToShow: 4, slidesToScroll: 1, infinite: false , swipeToSlide: true},
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+          infinite: false,
+          swipeToSlide: true,
+        },
       },
       {
         breakpoint: 760,
-        settings: { slidesToShow: 3, slidesToScroll: 2, infinite: false , swipeToSlide: true},
+        settings: {
+          slidesToShow: 2.8,
+          slidesToScroll: 2,
+          infinite: false,
+          swipeToSlide: true,
+        },
       },
       {
         breakpoint: 695,
@@ -112,7 +132,7 @@ const RecommendedStore = ({ title }) => {
         sliderRef={slider}
         currentSlide={currentSlide}
         totalSlides={stores.length}
-        slidesToShow={4}
+        slidesToShow={3.5}
         sx={{ mb: "1rem" }}
         heading={
           popularIsLoading ? (

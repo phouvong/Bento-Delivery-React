@@ -48,7 +48,7 @@ const WaveDecoration = () => (
 // - `message` provided → render it verbatim.
 // - `amount` provided  → "You saved $X.XX as a Pro member."
 // - Neither            → fallback CTA copy that matches the design.
-const ProSavingsBanner = ({ amount, message }) => {
+const ProSavingsBanner = ({ amount, message, compact = false }) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const isDark = theme.palette.mode === "dark";
@@ -77,7 +77,7 @@ const ProSavingsBanner = ({ amount, message }) => {
         position: "relative",
         width: "100%",
         px: 1.75,
-        py: 1.5,
+        py: compact ? 1 : 1.5,
         borderRadius: "12px",
         backgroundColor: isDark ? "#241B3D" : "#F1ECFC",
         display: "flex",
@@ -89,8 +89,8 @@ const ProSavingsBanner = ({ amount, message }) => {
       {/* Crown badge */}
       <Box
         sx={{
-          width: { xs: 28, md: 36 },
-          height: { xs: 28, md: 36 },
+          width: compact ? { xs: 22, md: 26 } : { xs: 28, md: 36 },
+          height: compact ? { xs: 22, md: 26 } : { xs: 28, md: 36 },
           borderRadius: "50%",
           backgroundColor: "#F5C842",
           display: "flex",
@@ -105,7 +105,7 @@ const ProSavingsBanner = ({ amount, message }) => {
         <i
           className="fi fi-sr-crown"
           style={{
-            fontSize: isMobile ? 14 : 18,
+            fontSize: compact ? 12 : isMobile ? 14 : 18,
             lineHeight: 1,
             display: "flex",
             color: "#FFFFFF",

@@ -5,6 +5,7 @@ import { useInfiniteQuery } from "react-query";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
+import { getApiContent } from "../../../getApiContent";
 
 const getSearch = async (pageParams) => {
   const {
@@ -39,7 +40,7 @@ const getSearch = async (pageParams) => {
     };
   }
 
-  return data;
+  return getApiContent(data);
 };
 
 export default function useGetSearch(pageParams) {

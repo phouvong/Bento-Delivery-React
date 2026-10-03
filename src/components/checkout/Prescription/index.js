@@ -16,6 +16,7 @@ import {
 import { t } from "i18next";
 import OrderCalculationShimmer from "../item-checkout/OrderCalculationShimmer";
 import PrescriptionOrderCalculation from "../../Prescription/PrescriptionOrderCalculation";
+import useAreaZipSelection from "api-manage/hooks/react-query/checkout/useAreaZipSelection";
 import MultiPrescriptionRoot from "./MultiPrescriptionRoot";
 import {
   getDigitalMethodFromZone,
@@ -43,6 +44,7 @@ const PrescriptionCheckout = ({ storeId, page }) => {
   const matches = useMediaQuery("(max-width:1180px)");
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const [orderType, setOrderType] = useState("delivery");
+  const [quoteUnavailable, setQuoteUnavailable] = useState(false);
   const [address, setAddress] = useState(undefined);
   const [prescriptionImages, setPrescriptionImages] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState("");
@@ -55,6 +57,10 @@ const PrescriptionCheckout = ({ storeId, page }) => {
   const [deliveryFee, setDeliveryFee] = useState(0);
   const { configData } = useSelector((state) => state.configData);
   const { data: storeData, refetch } = useGetStoreDetails(storeId);
+  const areaZip = useAreaZipSelection({
+    orderType,
+    selfDelivery: Number(storeData?.self_delivery_system) === 1,
+  });
   const { guestUserInfo } = useSelector((state) => state.guestUserInfo);
   const guestId = getGuestId();
   const [payableAmount, setPayableAmount] = useState(0);
@@ -192,6 +198,17 @@ const PrescriptionCheckout = ({ storeId, page }) => {
     });
   };
   const placeOrder = () => {
+    // The server refused to quote this delivery (e.g. an area/zip the zone no
+    // longer covers). The fee reads 0 out of the empty payload, so placing here
+    // would bill a price the server never agreed — stop instead.
+    if (quoteUnavailable) {
+      toast.error(t("Delivery charge is unavailable for this address"));
+      return;
+    }
+    if (!areaZip.validate()) {
+      toast.error(t("Please select an area/zip code to continue"));
+      return;
+    }
     if (paymentMethod && paymentMethod === "cash_on_delivery") {
       if (prescriptionImages.length > 0) {
         handlePlaceOrder();
@@ -251,6 +268,7 @@ const PrescriptionCheckout = ({ storeId, page }) => {
             setPrescriptionImages={setPrescriptionImages}
           />
           <DeliveryDetails
+            areaZip={areaZip}
             storeData={storeData}
             setOrderType={setOrderType}
             orderType={orderType}
@@ -315,6 +333,8 @@ const PrescriptionCheckout = ({ storeId, page }) => {
             </>
             {distanceData && storeData ? (
               <PrescriptionOrderCalculation
+                areaZipParams={areaZip.summaryParams}
+                setQuoteUnavailable={setQuoteUnavailable}
                 taxAmount={data}
                 storeData={storeData}
                 distanceData={distanceData}

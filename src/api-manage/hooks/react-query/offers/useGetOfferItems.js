@@ -6,6 +6,7 @@ import { offers_items_api } from "api-manage/ApiRoutes";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { service_offers_items_api } from "components/home/module-wise-components/service/service-api-manage/ApiRoutes";
 import { ModuleTypes } from "helper-functions/moduleTypes";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (params = {}, moduleType) => {
   const {
@@ -44,7 +45,7 @@ const getData = async (params = {}, moduleType) => {
       : offers_items_api;
 
   const { data } = await MainApi.get(`${dynamicApiURL}?${query.toString()}`);
-  return data;
+  return getApiCollection(data, ["products", "items"]);
 };
 
 const useGetOfferItems = (params = {}, enabled = true) => {

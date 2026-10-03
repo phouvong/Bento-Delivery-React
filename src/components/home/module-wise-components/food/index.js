@@ -4,7 +4,10 @@ import useGetNewArrivalStores from "api-manage/hooks/react-query/store/useGetNew
 import MobileAppBanner from "components/home/MobileAppBanner";
 import PaidAds from "components/home/paid-ads";
 import FoodSearchBanner from "./FoodSearchBanner";
-import TopOfferNotifyBanner from "./TopOfferNotifyBanner";
+import TopOfferNHappyHourSection from "../shared/TopOfferNHappyHourSection";
+import BogoBanner from "components/bogo/BogoBanner";
+import useGetBogoHome from "api-manage/hooks/react-query/bogo/useGetBogoHome";
+import BundleItemsSection from "../shared/BundleItemsSection";
 import RecommendedStore from "components/home/recommended-store";
 import ModuleHomeSidebarLayout from "components/home/sidebar-layout/ModuleHomeSidebarLayout";
 import TopOffersNearMe from "components/home/top-offers-nearme";
@@ -102,7 +105,7 @@ const FoodModule = (props) => {
       <S>
         <CustomContainer>
           {/* 🔥 new feature TimeBasedServiceBanner */}
-          <TopOfferNotifyBanner />
+          <TopOfferNHappyHourSection />
         </CustomContainer>
       </S>
 
@@ -122,6 +125,11 @@ const FoodModule = (props) => {
             title={t("Trending Bites")}
             subtitle={t("What everyone's watching and ordering")}
           />
+        </CustomContainer>
+      </S>
+      <S>
+        <CustomContainer>
+          <BogoBanner />
         </CustomContainer>
       </S>
       <S>
@@ -162,6 +170,12 @@ const FoodModule = (props) => {
           }}
         >
           <TopPicksSection />
+        </CustomContainer>
+      </S>
+
+      <S>
+        <CustomContainer>
+          <BundleItemsSection />
         </CustomContainer>
       </S>
 
@@ -226,11 +240,11 @@ const FoodModule = (props) => {
         </CustomContainer>
       </S>
 
-      <S>
+      {/* <S>
         <CustomContainer>
           <PromotionalBanner bannerData={data} />
         </CustomContainer>
-      </S>
+      </S> */}
 
       <S>
         <CustomContainer
@@ -242,7 +256,7 @@ const FoodModule = (props) => {
           <NewArrivalStores />
         </CustomContainer>
       </S>
-<S>
+      <S>
         <CustomContainer noMobilePadding>
           <SinglePoster bannerData={data} />
         </CustomContainer>
@@ -260,7 +274,8 @@ const FoodModule = (props) => {
     </Stack>
   );
 
-  const foodSections = getFoodSections();
+  const { data: bogoHome } = useGetBogoHome();
+  const foodSections = getFoodSections(!!bogoHome?.is_live);
   return (
     <ModuleHomeSidebarLayout
       overviewContent={overviewContent}

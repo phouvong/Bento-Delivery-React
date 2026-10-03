@@ -36,11 +36,9 @@ const PaymentMethodCard = (props) => {
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const handleChange = () => {
     setPaymentMethod?.(type);
-    if (!parcel) {
-      setPaymentMethodImage?.(
-        digitalPaymentMethodActive ? `${image}` : image.src
-      );
-    }
+    setPaymentMethodImage?.(
+      digitalPaymentMethodActive ? `${image}` : image.src
+    );
     dispatch(setOfflineMethod(""));
     setIsCheckedOffline?.(false);
     dispatch(setOfflineInfoStep(0));

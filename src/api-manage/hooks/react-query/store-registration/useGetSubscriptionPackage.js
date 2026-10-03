@@ -3,13 +3,14 @@ import { store_details_api, subscription_package } from "../../../ApiRoutes";
 import { useQuery } from "react-query";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { getModuleId } from "helper-functions/getModuleId";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (selectedPlan) => {
   if (selectedPlan === "subscription") {
     const { data } = await MainApi.get(
       `${subscription_package}?module_id=${getModuleId()}`
     );
-    return data;
+    return getApiCollection(data, "packages");
   }
 };
 

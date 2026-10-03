@@ -2,12 +2,13 @@ import { cancel_last_item_review } from "../../../ApiRoutes";
 import { useQuery } from "react-query";
 import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
 import MainApi from "../../../MainApi";
+import { getApiContent } from "../../../getApiContent";
 
 const getData = async (orderId) => {
   const { data } = await MainApi.get(
     `${cancel_last_item_review}?order_id=${orderId}`
   );
-  return data;
+  return getApiContent(data);
 };
 
 export default function useReviewReminderCancel(reviewReminderCancel, orderId) {

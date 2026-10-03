@@ -7,6 +7,7 @@ import { getGuestId } from "helper-functions/getToken";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import { service_search_suggestion_api } from "components/home/module-wise-components/service/service-api-manage/ApiRoutes";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (key) => {
   if (key !== "") {
@@ -30,7 +31,7 @@ const getData = async (key) => {
       };
     }
 
-    return data;
+    return getApiCollection(data, ["items", "stores"]);
   }
 };
 

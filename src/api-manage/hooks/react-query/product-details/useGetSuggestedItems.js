@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 import { suggested_items_api } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiCollection } from "../../../getApiContent";
 
 const fetchSuggestedItems = async ({
   storeId,
@@ -19,7 +20,7 @@ const fetchSuggestedItems = async ({
   const { data } = await MainApi.get(
     `${suggested_items_api}?${params.toString()}`
   );
-  return data;
+  return getApiCollection(data, ["products", "items"]);
 };
 
 export default function useGetSuggestedItems({

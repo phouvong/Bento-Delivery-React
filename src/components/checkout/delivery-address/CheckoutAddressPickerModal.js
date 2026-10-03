@@ -60,7 +60,7 @@ const CheckoutAddressPickerModal = ({
   // When reverse-geocode returns, propagate to checkout and close.
   useEffect(() => {
     if (!geoCodeResults?.results || !geoLocation) return;
-    const formattedAddress = geoCodeResults.results[0]?.formatted_address;
+    const formattedAddress = geoCodeResults?.results?.[0]?.formatted_address;
     handleLatLng({
       latitude: geoLocation.lat,
       longitude: geoLocation.lng,

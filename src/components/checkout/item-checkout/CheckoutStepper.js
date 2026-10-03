@@ -83,7 +83,7 @@ const CheckoutStepper = ({
           display: { xs: "none", md: "block" },
           fontWeight: 700,
           fontSize: { xs: "1.5rem", md: "2rem" },
-          color: theme.palette.text.primary,
+          color: theme.palette.neutral[1000],
         }}
       >
         {currentLabel}

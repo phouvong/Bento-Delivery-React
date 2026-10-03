@@ -4,6 +4,7 @@ import { getGuestId } from "../../../../helper-functions/getToken";
 import MainApi from "../../../MainApi";
 import { ai_chat_messages_api } from "../../../ApiRoutes";
 import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiContent } from "../../../getApiContent";
 
 const fetchAiChatMessages = async ({ conversationId, offset, limit }) => {
   const { data } = await MainApi.get(ai_chat_messages_api, {
@@ -14,7 +15,7 @@ const fetchAiChatMessages = async ({ conversationId, offset, limit }) => {
       guest_id: getGuestId(),
     },
   });
-  return data;
+  return getApiContent(data);
 };
 
 const useGetAiChatMessages = ({

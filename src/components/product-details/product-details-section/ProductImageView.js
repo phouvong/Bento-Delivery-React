@@ -1,6 +1,7 @@
 import {
   IconButton,
   NoSsr,
+  Typography,
   styled,
   useMediaQuery,
   useTheme,
@@ -12,6 +13,8 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick-theme.css";
 import "slick-carousel/slick/slick.css";
 import { SliderCustom } from "../../../styled-components/CustomStyles.style";
+import { getAmountWithSign } from "helper-functions/CardHelpers";
+import { useTranslation } from "react-i18next";
 import CustomImageContainer from "../../CustomImageContainer";
 import ImageMagnifier from "./ImageMagnifier";
 import { ProductsThumbnailsSettings } from "./ProductsThumbnailsSettings";
@@ -167,7 +170,10 @@ const ProductImageView = ({
     }
   }, [isVideoSelected, videoMeta?.inlineUrl]);
   const theme = useTheme();
+  const { t } = useTranslation();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const showDiscount = productDetailsData?.discount > 0;
+  const showFreeDelivery = !!productDetailsData?.store_details?.free_delivery;
   const tempProduct = productImage;
   useEffect(() => {
     setPreViewImage(tempProduct);
@@ -195,11 +201,85 @@ const ProductImageView = ({
   const goPrev = () => goToSlide(imageIndex - 1);
   const goNext = () => goToSlide(imageIndex + 1);
 
-  const borderColor = theme.palette.primary.main;
   return (
     <Stack justifyContent="flex-start" spacing={2} width="100%" sx={{}}>
       <NoSsr>
         <Stack sx={{ position: "relative" }}>
+          {(showDiscount || showFreeDelivery) && (
+            <Stack
+              direction="row"
+              alignItems="center"
+              gap="4px"
+              position="absolute"
+              left={{ xs: "12px", md: "10px" }}
+              top={{ xs: "12px", md: "10px" }}
+              zIndex="99"
+            >
+              {showDiscount && (
+                <Box
+                  sx={{
+                    backgroundColor: "error.danger",
+                    borderRadius: "24px",
+                    px: "8px",
+                    py: "4px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    flexShrink: 0,
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: "#fff",
+                      lineHeight: 1.2,
+                      whiteSpace: "nowrap",
+                      fontVariantNumeric: "tabular-nums",
+                    }}
+                  >
+                    {productDetailsData?.discount_type === "percent"
+                      ? `-${productDetailsData?.discount}%`
+                      : `-${getAmountWithSign(productDetailsData?.discount)}`}
+                  </Typography>
+                </Box>
+              )}
+              {showFreeDelivery && (
+                <Box
+                  sx={{
+                    backgroundColor: "error.dangerLight",
+                    borderRadius: "24px",
+                    px: "8px",
+                    py: "4px",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "4px",
+                    flexShrink: 0,
+                  }}
+                >
+                  <i
+                    className="fi fi-rs-biking-mountain"
+                    style={{
+                      fontSize: "12px",
+                      lineHeight: 1,
+                      display: "flex",
+                      color: theme.palette.error.dangerText,
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      fontWeight: 700,
+                      color: "error.dangerText",
+                      lineHeight: 1.2,
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {t("Free")}
+                  </Typography>
+                </Box>
+              )}
+            </Stack>
+          )}
           <Stack
             position="absolute"
             right={{ xs: "12px", md: "10px" }}
@@ -215,12 +295,10 @@ const ProductImageView = ({
               sx={{
                 width: 36,
                 height: 36,
-                borderRadius: { xs: "50%", md: "8px" },
-                backgroundColor: theme.palette.background.paper,
-                boxShadow: "0 2px 6px rgba(0,0,0,0.10)",
+                borderRadius: "8px",
+                backgroundColor: theme.palette.background.default,
                 "&:hover": {
-                  backgroundColor: theme.palette.background.paper,
-                  boxShadow: "0 3px 8px rgba(0,0,0,0.16)",
+                  backgroundColor: theme.palette.background.default,
                 },
               }}
             >
@@ -230,7 +308,9 @@ const ProductImageView = ({
                   fontSize: "16px",
                   display: "flex",
                   lineHeight: 1,
-                  color: borderColor,
+                  color: isWishlisted
+                    ? theme.palette.error.main
+                    : theme.palette.text.primary,
                 }}
               />
             </IconButton>
@@ -428,6 +508,7 @@ const ProductImageView = ({
                     sx={{
                       width: 30,
                       height: 30,
+                      borderRadius: "50%",
                       backgroundColor: theme.palette.background.paper,
                       boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
                       "&.Mui-disabled": {
@@ -456,6 +537,7 @@ const ProductImageView = ({
                     sx={{
                       width: 30,
                       height: 30,
+                      borderRadius: "50%",
                       backgroundColor: theme.palette.background.paper,
                       boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
                       "&.Mui-disabled": {

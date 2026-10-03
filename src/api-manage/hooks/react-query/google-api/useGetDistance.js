@@ -5,6 +5,7 @@ import {
   onSingleErrorResponse,
 } from "../../../api-error-response/ErrorResponses";
 import MainApi from "../../../MainApi";
+import { getApiContent } from "../../../getApiContent";
 const getDistance = async (origin, destination, mode) => {
   if ((origin, destination)) {
     const { data } = await MainApi.get(
@@ -16,7 +17,7 @@ const getDistance = async (origin, destination, mode) => {
         destination.lng ? destination.lng : destination?.longitude
       }&mode=${mode || "WALK"}`
     );
-    return data;
+    return getApiContent(data);
   }
 };
 

@@ -4,6 +4,7 @@ import { getToken } from "helper-functions/getToken";
 import MainApi from "api-manage/MainApi";
 import { onSingleErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { comfirm_booking_list } from "api-manage/ApiRoutes";
+import { getApiContent } from "../../getApiContent";
 
 const getData = async (guestId) => {
   try {
@@ -11,7 +12,7 @@ const getData = async (guestId) => {
     const params = !userToken ? `?guest_id=${guestId}` : "";
     const { data } = await MainApi.get(`${comfirm_booking_list}${params}`);
 
-    return data;
+    return getApiContent(data);
   } catch (error) {
     throw error; // Rethrow the error to be caught by React Query
   }

@@ -6,8 +6,7 @@ import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import { getGuestId } from "helper-functions/getToken";
 import { get_service_search_page_data } from "components/home/module-wise-components/service/service-api-manage/ApiRoutes";
-
-const SERVICE_SEARCH_API = "/api/v1/service/search";
+import { getApiCollection, getApiContent } from "../../../getApiContent";
 
 const getSearch = async (pageParams) => {
   const {
@@ -73,17 +72,23 @@ const getSearch = async (pageParams) => {
     const { data } = await MainApi.get(
       `${get_service_search_page_data}?${serviceQuery.toString()}`,
     );
+    // Responses are wrapped in the v4.2 envelope (`{ content: {...} }`) —
+    // unwrap before reading products/stores, same as the non-service path
+    // below via getApiCollection.
+    const content = getApiContent(data) ?? {};
     if (currentTab === 0) {
       return {
-        ...data,
-        products: data?.products ?? [],
-        total_count_item: data?.total_count_item ?? data?.products?.length ?? 0,
+        ...content,
+        products: content?.products ?? [],
+        total_count_item:
+          content?.total_count_item ?? content?.products?.length ?? 0,
       };
     }
     return {
-      ...data,
-      stores: data?.stores ?? [],
-      total_count_store: data?.total_count_store ?? data?.stores?.length ?? 0,
+      ...content,
+      stores: content?.stores ?? [],
+      total_count_store:
+        content?.total_count_store ?? content?.stores?.length ?? 0,
     };
   }
 
@@ -93,7 +98,7 @@ const getSearch = async (pageParams) => {
       headers: guestId ? { guestId: guestId } : {},
     },
   );
-  return data;
+  return getApiCollection(data, ["products", "stores"]);
 };
 
 export default function useGetSearchPageData(

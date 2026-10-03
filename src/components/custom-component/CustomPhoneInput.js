@@ -1,11 +1,11 @@
 import React from "react";
 
-import { styled } from "@mui/material/styles";
+import { styled, useTheme } from "@mui/material/styles";
 import { useTranslation } from "react-i18next";
 
 import { CustomTypography } from "../landing-page/hero-section/HeroSection.style";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import { alpha, NoSsr } from "@mui/material";
+import { Box, NoSsr } from "@mui/material";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { useSelector } from "react-redux";
@@ -13,24 +13,30 @@ import { useSelector } from "react-redux";
 const CustomPhoneNumberInputStyled = styled(PhoneInput)(
   ({ theme, languageDirection, borderRadius, background }) => ({
     "&.react-tel-input .special-label": {
-      fontSize: "12px !important",
-      fontWeight: "500 !important",
-      color: alpha(theme.palette.neutral[1000], .7),
-      left: languageDirection === "rtl" ? "80%" : "10px",
-      backgroundColor: background || theme.palette.background.paper,
-      zIndex: "999",
-      display: "inline-block",
+      display: "none",
     },
     "&.react-tel-input .flag-dropdown": {
-      backgroundColor: theme.palette.background.custom2,
-      border: `1px solid ${theme.palette.neutral[200]}`,
-      borderRadius: borderRadius,
+      backgroundColor: theme.palette.background.paper + " !important",
+      border: `1px solid ${theme.palette.customColor.tagBg}`,
+      borderRight: "none",
+      borderRadius: borderRadius ? borderRadius : "8px 0 0 8px",
+      "&.invalid-number": {
+        borderColor: theme.palette.error.main,
+      },
     },
+    "&.react-tel-input .flag-dropdown.open": {
+      borderRadius: "8px 0 0 8px",
+      zIndex: theme.zIndex.modal,
+    },
+    "&.react-tel-input:has(.form-control:focus) .flag-dropdown:not(.invalid-number)":
+      {
+        borderColor: theme.palette.primary.main,
+      },
     "&.react-tel-input .selected-flag .flag": {
       right: languageDirection === "rtl" && "11px",
     },
     "&.react-tel-input .flag-dropdown.open .selected-flag": {
-      backgroundColor: theme.palette.neutral[100],
+      backgroundColor: theme.palette.background.paper + " !important",
     },
     "&.react-tel-input .country-list .search-box": {
       backgroundColor: theme.palette.background.custom2,
@@ -46,10 +52,10 @@ const CustomPhoneNumberInputStyled = styled(PhoneInput)(
       display: "none",
     },
     "&.react-tel-input .selected-flag": {
-      backgroundColor: theme.palette.neutral[100],
+      backgroundColor: theme.palette.background.paper + " !important",
       borderRadius: "10px 0px 0px 10px !important",
-      "&:hover": {
-        backgroundColor: theme.palette.background.custom2,
+      "&:hover, &:focus": {
+        backgroundColor: theme.palette.background.paper + " !important",
       },
     },
     "&.react-tel-input .country-list .country": {
@@ -65,6 +71,7 @@ const CustomPhoneNumberInputStyled = styled(PhoneInput)(
     "&.react-tel-input .country-list": {
       backgroundColor: theme.palette.background.custom2,
       width: "300px",
+      zIndex: theme.zIndex.modal,
 
       [theme.breakpoints.down("sm")]: {
         width: "300px",
@@ -83,9 +90,28 @@ const CustomPhoneNumberInputStyled = styled(PhoneInput)(
       right: languageDirection === "rtl" ? "-20px" : "25px",
     },
     "&.react-tel-input .form-control": {
-      border: `1px solid ${theme.palette.neutral[200]}`,
+      border: `1px solid ${theme.palette.customColor.tagBg}`,
+      borderRadius: "8px",
       backgroundColor: theme.palette.background.paper,
-      color: theme.palette.neutral[1000],
+      color: theme.palette.neutral[1050],
+      fontSize: "16px",
+      fontWeight: 400,
+      lineHeight: "130%",
+      "&:focus": {
+        borderColor: theme.palette.primary.main,
+        outline: "none",
+      },
+      "&.invalid-number, &.invalid-number:focus": {
+        border: `1px solid ${theme.palette.error.main}`,
+        backgroundColor: theme.palette.background.paper,
+      },
+      "&::placeholder": {
+        fontSize: "16px",
+        fontWeight: 400,
+        lineHeight: "130%",
+        color: theme.palette.neutral[450],
+        opacity: 1,
+      },
       paddingLeft: languageDirection === "rtl" ? "48px" : "48px",
       ...(languageDirection === "rtl" && {
         textAlign: "left",
@@ -127,6 +153,7 @@ const CustomPhoneInput = ({
   removeLabel,
   required
 }) => {
+  const theme = useTheme();
   const changeHandler = (e) => {
     onHandleChange(e);
   };
@@ -135,7 +162,33 @@ const CustomPhoneInput = ({
   const defaultCountry = initCountry?.toLowerCase();
   return (
     <NoSsr>
-      <CustomStackFullWidth alignItems="flex-start" spacing={0.8}>
+      <CustomStackFullWidth alignItems="flex-start">
+        {!removeLabel && (
+          <Box
+            sx={{
+              fontWeight: 400,
+              fontSize: "16px",
+              lineHeight: "110%",
+              letterSpacing: "-0.03em",
+              textTransform: "capitalize",
+              color: theme.palette.customColor.textNeutral,
+              marginBottom: "6px",
+            }}
+          >
+            {t("Phone")}
+            {required && (
+              <span
+                style={{
+                  color: theme.palette.error.danger,
+                  fontWeight: 700,
+                  marginLeft: "2px",
+                }}
+              >
+                *
+              </span>
+            )}
+          </Box>
+        )}
         {lanDirection && (
           <CustomPhoneNumberInputStyled
             background={background}
@@ -150,25 +203,16 @@ const CustomPhoneInput = ({
               required: true,
               autoFocus: false,
             }}
-            specialLabel={
-              required ? (
-                <span>
-                  {t("Phone")}
-                  <span style={{ color: "#d32f2f", marginLeft: "2px" }}>*</span>
-                </span>
-              ) : (
-                t("Phone")
-              )
-            }
+            isValid={!(touched && errors)}
+            specialLabel=""
             country={defaultCountry}
             searchStyle={{ margin: "0", width: "95%", height: "50px" }}
             inputStyle={{
               width: "100%",
-              height: height ? height : "56px",
-              borderRadius: borderRadius ? borderRadius : "5px",
+              height: height ? height : "44px",
+              borderRadius: borderRadius ? borderRadius : "8px",
             }}
             languageDirection={lanDirection}
-            buttonClass={{ "background-color": "red" }}
             {...(configData?.country_picker_status !== 1 && {
               disableDropdown: true,
             })}
@@ -178,9 +222,14 @@ const CustomPhoneInput = ({
           <CustomTypography
             variant="caption"
             sx={{
-              ml: "10px",
+              marginLeft: "0px",
+              marginTop: "5px",
+              lineHeight: 1.3,
               fontWeight: "inherit",
               color: (theme) => theme.palette.error.main,
+              [theme.breakpoints.down("sm")]: {
+                fontSize: "10px",
+              },
             }}
           >
             {errors}

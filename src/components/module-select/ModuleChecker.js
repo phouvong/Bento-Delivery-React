@@ -3,10 +3,25 @@ import { useRouter } from "next/router";
 import { useDispatch } from "react-redux";
 import { setSelectedModule } from "redux/slices/utils";
 import useGetModule from "api-manage/hooks/react-query/useGetModule";
-import { getCurrentModuleId } from "helper-functions/getCurrentModuleType";
 import toast from "react-hot-toast";
 import { setModules } from "redux/slices/configData";
 import { getSavedModuleIdentifier, saveModuleParam } from "../../utils/moduleParamManager";
+
+// Whether the module currently in localStorage IS the one the URL asks for
+// (matched loosely by slug/module_type/id, same as the resolver below).
+// Used to decide whether a sync is even needed, instead of only checking
+// "is storage empty" — on a fast switch between modules, storage already
+// holds the PREVIOUS module, so an empty-only check never notices the
+// mismatch and every downstream query keeps reading the stale module.
+const storedModuleMatchesUrl = (identifier, storedModule) => {
+  if (!storedModule) return false;
+  const idStr = String(identifier);
+  return (
+    String(storedModule?.slug) === idStr ||
+    String(storedModule?.module_type) === idStr ||
+    String(storedModule?.id) === idStr
+  );
+};
 
 const ModuleChecker = () => {
   const router = useRouter();
@@ -51,18 +66,20 @@ const ModuleChecker = () => {
   // Sync URL -> Storage
   useEffect(() => {
     const moduleIdFromUrl = router.query.module || router.query.module_id;
-    const moduleIdFromStorage = getCurrentModuleId();
+    if (!moduleIdFromUrl) return;
 
-    if (moduleIdFromUrl && !moduleIdFromStorage) {
+    const storedModule = JSON.parse(localStorage.getItem("module") || "null");
+    if (!storedModuleMatchesUrl(moduleIdFromUrl, storedModule)) {
       refetch();
     }
   }, [router.query.module, router.query.module_id, refetch]);
 
   useEffect(() => {
     const moduleIdFromUrl = router.query.module || router.query.module_id;
-    const moduleIdFromStorage = getCurrentModuleId();
-   
-    if (data && moduleIdFromUrl && !moduleIdFromStorage) {
+    const storedModule = JSON.parse(localStorage.getItem("module") || "null");
+    const alreadyMatches = storedModuleMatchesUrl(moduleIdFromUrl, storedModule);
+
+    if (data && moduleIdFromUrl && !alreadyMatches) {
       const moduleIdStr = String(moduleIdFromUrl);
       const selectedModule = data.find(
         (item) =>

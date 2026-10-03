@@ -125,7 +125,7 @@ const ContactLists = ({
 					</List>
 				</SimpleBar>
 			)}
-			{channelList.length === 0 && (
+			{!channelList?.length && (
 				<Stack width="100%" justifyContent="center" alignItems="center">
 					<CustomTypography>
 						{t("You have no channels.")}

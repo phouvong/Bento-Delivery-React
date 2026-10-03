@@ -1,11 +1,10 @@
-import { useMediaQuery, useTheme } from "@mui/material";
-import useGetLandingPage from "api-manage/hooks/react-query/useGetLandingPage";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import useScrollDirection from "hooks/useScrollDirection";
 import { useRouter } from "next/router";
 import PropTypes from "prop-types";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import useGetModule from "../../api-manage/hooks/react-query/useGetModule";
 import { setModules } from "../../redux/slices/configData";
@@ -21,6 +20,19 @@ import { MainLayoutRoot } from "./LandingLayout";
 import SearchProductModal from "../home/search/SearchProductModal";
 // import { MainLayoutRoot } from "./LandingLayout";
 import FloatingCartButton from "../header/new-navbar/FloatingCartButton";
+import HappyHourBanner from "../happy-hour/HappyHourBanner";
+
+const HAPPY_HOUR_FLOATING_ROUTES = new Set(["/home"]);
+const HAPPY_HOUR_BANNER_BOTTOM = 65;
+
+const RENTAL_COMPACT_DESKTOP_HEADER_ROUTES = new Set([
+  "/rental/checkout",
+  "/rental/cart",
+  "/rental/trip-status/[id]",
+  "/rental/vehicle/[id]",
+  "/rental/provider/[id]",
+  "/rental/vehicle-search",
+]);
 
 // Routes that own their own sticky/in-flow header on mobile (no extra mt needed).
 // Adding a route here removes the default mobile navbar offset on that page.
@@ -61,7 +73,7 @@ const FULL_BLEED_MOBILE_ROUTES = new Set([
   "/service/checkout/custom-service",
   "/service/custom-service/create",
   "/service/custom-service/details/[id]",
-  "/service/all-providers"
+  "/service/all-providers",
 ]);
 
 // Constant per route/module — sized for the EXPANDED header. The scroll-away
@@ -69,6 +81,13 @@ const FULL_BLEED_MOBILE_ROUTES = new Set([
 // never changes layout, so the content offset must not react to it either.
 const getMobileMarginTop = ({ pathname, currentModuleType }) => {
   if (FULL_BLEED_MOBILE_ROUTES.has(pathname)) return "0px";
+  // BOGO list & details render only the compact address + cart header on
+  // mobile (no module tabs, search bar or section chips), so they need a much
+  // smaller offset than the home header's default 11.9rem — otherwise a large
+  // empty gap appears above the content.
+  if (pathname === "/bogo-list" || pathname === "/bogo-list/[id]") {
+    return "3.25rem";
+  }
   if (currentModuleType === ModuleTypes.RIDE) return "4.9rem";
   if (currentModuleType === ModuleTypes.RENTAL) {
     return pathname?.startsWith("/rental") ? "3rem" : "6.3rem";
@@ -77,7 +96,7 @@ const getMobileMarginTop = ({ pathname, currentModuleType }) => {
   return "11.9rem";
 };
 
-const MainLayout = ({ children, configData }) => {
+const MainLayout = ({ children, configData, onHappyHourActiveChange }) => {
   const [rerenderUi, setRerenderUi] = useState(false);
   const { data, refetch } = useGetModule();
   const theme = useTheme();
@@ -85,8 +104,27 @@ const MainLayout = ({ children, configData }) => {
   const router = useRouter();
   const { page } = router.query;
   const dispatch = useDispatch();
+  const [happyHourActive, setHappyHourActive] = useState(false);
+  const isHappyHourRoute = HAPPY_HOUR_FLOATING_ROUTES.has(router.pathname);
+  const handleHappyHourActiveChange = useCallback(
+    (active) => {
+      setHappyHourActive(active);
+      onHappyHourActiveChange?.(active);
+    },
+    [onHappyHourActiveChange],
+  );
   useEffect(() => {
-    if (router.pathname === "/home") {
+    // `configData.modules` is redux-persist-blacklisted, so a hard reload of
+    // any of these routes starts with an empty module list — and since it's
+    // only ever dispatched from the query below, the navbar's module tab bar
+    // stays hidden (`renderModuleBar` bails on `!modules?.length`) unless we
+    // explicitly refetch here too, not just on /home.
+    if (
+      router.pathname === "/home" ||
+      router.pathname === "/bogo-list" ||
+      router.pathname === "/bogo-list/[id]" ||
+      router.pathname === "/search"
+    ) {
       refetch();
     }
   }, []);
@@ -126,9 +164,8 @@ const MainLayout = ({ children, configData }) => {
   // 		}
   // 	}
   // }
-  const { landingPageData } = useSelector((state) => state.configData);
   const selectedModule = useSelector(
-    (state) => state.utilsData?.selectedModule
+    (state) => state.utilsData?.selectedModule,
   );
   const queryModuleType =
     typeof router.query.module === "string" ? router.query.module : null;
@@ -137,13 +174,6 @@ const MainLayout = ({ children, configData }) => {
     getCurrentModuleType() ??
     queryModuleType ??
     null;
-  const { data: landing, refetch: landingRefetch } = useGetLandingPage();
-  useEffect(() => {
-    if (!landingPageData) {
-      landingRefetch();
-    }
-  }, []);
-
   // ── Cross-tab module sync ──
   // The active module is shared across the whole browser (localStorage "module").
   // When another tab switches modules the `storage` event fires here, so this tab
@@ -172,13 +202,19 @@ const MainLayout = ({ children, configData }) => {
             query: { ...router.query, module: identifier },
           },
           undefined,
-          { shallow: true }
+          { shallow: true },
         );
       }
     };
     window.addEventListener("storage", handleModuleStorage);
     return () => window.removeEventListener("storage", handleModuleStorage);
   }, [router, dispatch]);
+
+  // Mirrors NewNavBar's renderModuleBar condition.
+  const hasDesktopModuleBar =
+    router.pathname === "/home" ||
+    router.pathname?.startsWith("/home/") ||
+    router.pathname?.startsWith("/search");
 
   return (
     <MainLayoutRoot justifyContent="space-between" key={rerenderUi}>
@@ -192,16 +228,20 @@ const MainLayout = ({ children, configData }) => {
               pathname: router.pathname,
               currentModuleType,
             }),
-            md: router.pathname?.startsWith("/rental")
+            md: RENTAL_COMPACT_DESKTOP_HEADER_ROUTES.has(router.pathname)
+              ? "5.4rem"
+              : router.pathname?.startsWith("/rental")
               ? "10rem"
-              : ["/profile", "/checkout"].includes(router.pathname)
-              ? "4.4rem"
-              : "5.4rem",
-            lg: router.pathname?.startsWith("/rental")
+              : hasDesktopModuleBar
+              ? "5.4rem"
+              : "4rem",
+            lg: RENTAL_COMPACT_DESKTOP_HEADER_ROUTES.has(router.pathname)
+              ? "5.4rem"
+              : router.pathname?.startsWith("/rental")
               ? "10rem"
-              : ["/profile", "/checkout"].includes(router.pathname)
-              ? "4.4rem"
-              : "6.4rem",
+              : hasDesktopModuleBar
+              ? "6.4rem"
+              : "4rem",
           },
         }}
       >
@@ -213,11 +253,26 @@ const MainLayout = ({ children, configData }) => {
         </CustomStackFullWidth>
       </CustomStackFullWidth>
       <footer>
-        <FooterComponent
-          configData={configData}
-          landingPageData={landingPageData ?? landing}
-        />
+        <FooterComponent configData={configData} />
       </footer>
+      {isHappyHourRoute && (
+        <Box
+          sx={{
+            display: happyHourActive ? { xs: "block", md: "none" } : "none",
+            position: "fixed",
+            bottom: `${HAPPY_HOUR_BANNER_BOTTOM}px`,
+            left: 0,
+            right: 0,
+            width: "100%",
+            zIndex: 1081,
+          }}
+        >
+          <HappyHourBanner
+            compact
+            onActiveChange={handleHappyHourActiveChange}
+          />
+        </Box>
+      )}
       {isSmall &&
         page !== "parcel" &&
         router.pathname !== "/store/[id]" &&
@@ -232,6 +287,7 @@ const MainLayout = ({ children, configData }) => {
 
 MainLayout.propTypes = {
   children: PropTypes.node,
+  onHappyHourActiveChange: PropTypes.func,
 };
 
 export default React.memo(MainLayout);

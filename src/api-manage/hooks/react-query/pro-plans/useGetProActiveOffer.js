@@ -3,12 +3,13 @@ import { getCurrentModuleType } from "../../../../helper-functions/getCurrentMod
 import { pro_active_offer } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
 import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiContent } from "../../../getApiContent";
 
 const getProActiveOffer = async (moduleType) => {
   const { data } = await MainApi.get(pro_active_offer, {
     params: moduleType ? { module_type: moduleType } : undefined,
   });
-  return data;
+  return getApiContent(data);
 };
 
 export const useGetProActiveOffer = ({ enabled = true } = {}) => {

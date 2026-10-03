@@ -11,7 +11,6 @@ import {
 import { Stack } from "@mui/system";
 import { useTranslation } from "react-i18next";
 import CustomTextFieldWithFormik from "../../form-fields/CustomTextFieldWithFormik";
-import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import CustomPhoneInput from "../../custom-component/CustomPhoneInput";
 import { getLanguage } from "helper-functions/getLanguage";
 import dynamic from "next/dynamic";
@@ -42,29 +41,33 @@ const SenderInfoForm = ({
     <CustomStackFullWidth height="100%">
       <Card
         sx={{
-          padding: { xs: "1rem", md: "1.5rem" },
+          padding: { xs: "16px", md: "20px" },
           height: "100%",
           backgroundColor: (theme) =>
             theme.palette.mode === "dark"
               ? theme.palette.background.default
               : "#F7F7F7",
-          border: `1px solid ${
-            theme.palette.neutral?.[200] || "rgba(0, 0, 0, 0.06)"
-          }`,
-          borderRadius: "12px",
+          borderRadius: "16px",
           boxShadow: "none",
+          overflow: "visible",
         }}
       >
-        <CustomStackFullWidth gap={1.5}>
-          <Typography fontWeight={700} fontSize={{ xs: "16px", md: "18px" }}>
+        <CustomStackFullWidth gap={{ xs: 1.5, md: 2.5 }}>
+          <Typography
+            fontWeight={700}
+            fontSize={{ xs: "16px", md: "20px" }}
+            letterSpacing="-0.6px"
+            color="neutral.1050"
+          >
             {t("Sender Details")}
           </Typography>
 
-          <CustomStackFullWidth gap={{ xs: 1.25, sm: 1.75 }}>
+          <CustomStackFullWidth gap={{ xs: 1.5, md: 3 }}>
             <CustomTextFieldWithFormik
               required="true"
               type="text"
               label={t("Sender Name")}
+              placeholder={t("Enter sender name")}
               touched={addAddressFormik.touched.senderName}
               errors={addAddressFormik.errors.senderName}
               fieldProps={addAddressFormik.getFieldProps("senderName")}
@@ -75,6 +78,7 @@ const SenderInfoForm = ({
             <CustomTextFieldWithFormik
               required
               label={t("Email")}
+              placeholder={t("Enter email")}
               touched={addAddressFormik.touched.senderEmail}
               errors={addAddressFormik.errors.senderEmail}
               fieldProps={addAddressFormik.getFieldProps("senderEmail")}
@@ -97,10 +101,11 @@ const SenderInfoForm = ({
 
             <Box>
               <Typography
-                fontWeight={500}
-                fontSize="13px"
+                fontWeight={400}
+                fontSize="16px"
+                letterSpacing="-0.48px"
                 mb={0.75}
-                color={theme.palette.text.primary}
+                color="neutral.700"
               >
                 {t("Pickup Address")}
               </Typography>
@@ -109,13 +114,10 @@ const SenderInfoForm = ({
                 sx={{
                   cursor: "pointer",
                   backgroundColor: theme.palette.background.paper,
-                  border: `1px solid ${
-                    theme.palette.neutral?.[200] || "rgba(0,0,0,0.06)"
-                  }`,
-                  borderRadius: "12px",
-                  padding: "12px 14px",
+                  borderRadius: "8px",
+                  padding: "12px",
                   display: "flex",
-                  alignItems: "flex-start",
+                  alignItems: "center",
                   justifyContent: "space-between",
                   gap: 1.5,
                   transition: "background-color 0.2s",
@@ -124,42 +126,74 @@ const SenderInfoForm = ({
                   },
                 }}
               >
-                <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography
-                    color={theme.palette.primary.main}
-                    fontWeight={700}
-                    fontSize="13px"
-                    lineHeight={1.2}
-                  >
-                    {t("Current Location")}
-                  </Typography>
-                  <Typography
-                    fontSize="12px"
-                    color={
-                      theme.palette.neutral?.[500] ||
-                      theme.palette.text.secondary
-                    }
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  gap="12px"
+                  sx={{ flex: 1, minWidth: 0 }}
+                >
+                  <Box
                     sx={{
-                      mt: 0.5,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
+                      width: 32,
+                      height: 32,
+                      borderRadius: "50%",
+                      backgroundColor: "background.secondary",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexShrink: 0,
                     }}
                   >
-                    {hasLocation
-                      ? senderFormattedAddress
-                      : t("A location where you want to pick up the parcel")}
-                  </Typography>
-                </Box>
+                    <i
+                      className="fi fi-rr-marker"
+                      style={{
+                        fontSize: "14px",
+                        lineHeight: 1,
+                        display: "flex",
+                        color: theme.palette.neutral[700],
+                      }}
+                    />
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography
+                      color="neutral.1050"
+                      fontWeight={700}
+                      fontSize="14px"
+                      lineHeight={1.1}
+                    >
+                      {t("Current Location")}
+                    </Typography>
+                    <Typography
+                      fontSize="14px"
+                      color="neutral.500"
+                      sx={{
+                        mt: 0.5,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {hasLocation
+                        ? senderFormattedAddress
+                        : t("A location where you want to pick up the parcel")}
+                    </Typography>
+                  </Box>
+                </Stack>
                 <IconButton
                   size="small"
                   sx={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "8px",
                     color: theme.palette.primary.main,
                     flexShrink: 0,
                   }}
                 >
-                  <EditOutlinedIcon sx={{ fontSize: "18px" }} />
+                  <i
+                    className={hasLocation ? "fi fi-rr-pencil" : "fi fi-rr-add"}
+                    style={{ fontSize: "16px", lineHeight: 1, display: "flex" }}
+                  />
                 </IconButton>
               </Box>
             </Box>

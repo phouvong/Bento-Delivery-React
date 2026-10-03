@@ -23,7 +23,7 @@ import { useAddToWishlist } from "api-manage/hooks/react-query/wish-list/useAddW
 import { useWishListDelete } from "api-manage/hooks/react-query/wish-list/useWishListDelete";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
-import { getLanguage } from "helper-functions/getLanguage";
+import { haveRtlLanguages } from "components/header/top-navbar/language/rtlLanguageList";
 import { getGuestId } from "helper-functions/getToken";
 import {
   handleProductRedirect,
@@ -58,6 +58,7 @@ import {
   out_of_stock,
 } from "utils/toasterMessages";
 import CartClearModal from "../../product-details/product-details-section/CartClearModal";
+import NewProductCardBogo from "./NewProductCardBogo";
 import CustomModal from "../../modal";
 import GetLocationAlert from "../../GetLocationAlert";
 import CustomDialogConfirm from "../../custom-dialog/confirm/CustomDialogConfirm";
@@ -93,7 +94,7 @@ const BUTTON_SHADOW =
 
 // ─── Styled ────────────────────────────────────────────────────────────────
 
-const ImageContainer = styled(Box)(({ theme, variant }) => ({
+export const ImageContainer = styled(Box)(({ theme, variant }) => ({
   position: "relative",
   backgroundColor: theme.palette.background.secondary,
   border: `1px solid ${theme.palette.neutral[200]}`,
@@ -170,7 +171,7 @@ const IncDecBtn = styled(Box)(({ theme }) => ({
   "&:hover": { backgroundColor: theme.palette.action.hover },
 }));
 
-const DiscountBadge = styled(Box)(({ theme }) => ({
+export const DiscountBadge = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.error.danger,
   borderRadius: 24,
   padding: "2px 6px",
@@ -308,7 +309,7 @@ const StoreBadge = ({
   return null;
 };
 
-const StoreRow = ({
+export const StoreRow = ({
   storeName,
   storeLogoUrl,
   rating,
@@ -317,11 +318,12 @@ const StoreRow = ({
   storeRedirectData,
   isHorizontal,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const theme = useTheme();
   const router = useRouter();
   const verifiedStoreEnabled = useIsVerifiedStoreEnabled();
   const isStoreVerified = !!verifiedSeller && verifiedStoreEnabled;
+  const isRtl = haveRtlLanguages.includes(i18n.language);
 
   const moduleType = getCurrentModuleType();
   const verifiedLabel =
@@ -342,20 +344,24 @@ const StoreRow = ({
 
   return (
     <Stack
-      direction="row"
       alignItems="center"
       justifyContent={isHorizontal ? "flex-start" : "space-between"}
-      sx={{ overflow: "hidden", minWidth: 0 }}
+      sx={{
+        overflow: "hidden",
+        minWidth: 0,
+        width: "100%",
+        flexDirection: isRtl ? "row-reverse" : "row",
+      }}
     >
       {!isStore && (
         <Stack
-          direction="row"
           alignItems="center"
           gap="4px"
           sx={{
             minWidth: 0,
             overflow: "hidden",
             flex: isHorizontal ? "0 1 auto" : 1,
+            flexDirection: isRtl ? "row-reverse" : "row",
           }}
         >
           <StoreBadge
@@ -367,6 +373,7 @@ const StoreRow = ({
           />
           <Typography
             onClick={canRedirect ? handleStoreClick : undefined}
+            dir="auto"
             sx={{
               fontSize: "12px",
               color: "neutral.500",
@@ -374,6 +381,7 @@ const StoreRow = ({
               overflow: "hidden",
               textOverflow: "ellipsis",
               whiteSpace: "nowrap",
+              unicodeBidi: "plaintext",
               minWidth: 0,
               cursor: canRedirect ? "pointer" : "inherit",
               "&:hover": canRedirect ? { opacity: 0.7 } : undefined,
@@ -386,12 +394,14 @@ const StoreRow = ({
 
       {rating > 0 && (
         <Stack
-          direction="row"
           alignItems="center"
           gap="2px"
           sx={{
             flexShrink: 0,
-            ml: isHorizontal ? "6px" : "4px",
+            flexDirection: isRtl ? "row-reverse" : "row",
+            ...(isRtl
+              ? { mr: isHorizontal ? "6px" : "4px" }
+              : { ml: isHorizontal ? "6px" : "4px" }),
           }}
         >
           <StarIcon sx={{ fontSize: "12px", color: "customColor.starAmber" }} />
@@ -414,7 +424,7 @@ const StoreRow = ({
 
 // ─── CartControls — shared Add/IncDec UI (extracted to prevent re-creation) ──
 
-const CartControls = ({
+export const CartControls = ({
   isHorizontal,
   isProductExist,
   count,
@@ -424,6 +434,7 @@ const CartControls = ({
   onIncrement,
   onAdd,
   onContainerClick,
+  sx,
 }) => {
   const theme = useTheme();
   const [expanded, setExpanded] = useState(false);
@@ -447,7 +458,7 @@ const CartControls = ({
 
   if (!isProductExist) {
     return (
-      <AddBtn onClick={onAdd}>
+      <AddBtn onClick={onAdd} sx={sx}>
         {isLoading ? (
           <CircularProgress size={14} />
         ) : (
@@ -478,7 +489,7 @@ const CartControls = ({
           setExpanded(true);
         }
       }}
-      sx={isHorizontal ? { bottom: 7, right: 7 } : {}}
+      sx={{ ...(isHorizontal ? { bottom: 7, right: 7 } : {}), ...sx }}
     >
       <Box sx={sideSx}>
         <IncDecBtn onClick={onDecrement}>
@@ -719,7 +730,7 @@ const PharmacyImageOverlay = ({
 
 // ─── InfoSection — non-pharmacy info block ────────────────────────────────────
 
-const InfoSection = ({
+export const InfoSection = ({
   isHorizontal,
   item,
   isStore,
@@ -728,11 +739,13 @@ const InfoSection = ({
   discountText,
   t,
 }) => {
-  const lanDirection = getLanguage() || "ltr";
+  const { i18n } = useTranslation();
+  const lanDirection = haveRtlLanguages.includes(i18n.language) ? "rtl" : "ltr";
   const { ref: nameRef, isEllipsed } = useTextEllipsis(item?.name);
   const nameTypography = (
     <Typography
       ref={nameRef}
+      dir="auto"
       sx={{
         fontSize: { xs: "14px", md: "16px" },
         fontWeight: 400,
@@ -744,6 +757,7 @@ const InfoSection = ({
         display: "-webkit-box",
         WebkitLineClamp: 2,
         WebkitBoxOrient: "vertical",
+        unicodeBidi: "plaintext",
         textTransform: "capitalize",
         textAlign: lanDirection === "rtl" ? "end" : "start",
       }}
@@ -798,11 +812,16 @@ const InfoSection = ({
           nameTypography
         )}
         <Stack
-          direction="row"
           alignItems="baseline"
           gap="4px"
           flexWrap="nowrap"
-          sx={{ py: "2px", overflow: "hidden", minWidth: 0 }}
+          sx={{
+            py: "2px",
+            overflow: "hidden",
+            minWidth: 0,
+            width: "100%",
+            flexDirection: lanDirection === "rtl" ? "row-reverse" : "row",
+          }}
         >
           <Typography
             sx={{
@@ -837,11 +856,14 @@ const InfoSection = ({
           )}
         </Stack>
         <Stack
-          direction="row"
           alignItems="center"
           gap="4px"
           flexWrap="nowrap"
-          sx={{ overflow: "hidden" }}
+          sx={{
+            overflow: "hidden",
+            width: "100%",
+            flexDirection: lanDirection === "rtl" ? "row-reverse" : "row",
+          }}
         >
           {!!discountText && (
             <DiscountBadge sx={{ flexShrink: 0 }}>
@@ -858,8 +880,13 @@ const InfoSection = ({
               </Typography>
             </DiscountBadge>
           )}
-          {(!!item?.store?.free_delivery || item?.free_delivery  ) && (
-            <DeliveryBadge sx={{ flexShrink: 0 }}>
+          {(!!item?.store?.free_delivery || item?.free_delivery) && (
+            <DeliveryBadge
+              sx={{
+                flexShrink: 0,
+                flexDirection: lanDirection === "rtl" ? "row-reverse" : "row",
+              }}
+            >
               <i
                 className="fi fi-rs-biking-mountain"
                 style={{
@@ -899,11 +926,13 @@ const PharmacyInfoSection = ({
   displayPrice,
   originalPrice,
 }) => {
-  const lanDirection = getLanguage() || "ltr";
+  const { i18n } = useTranslation();
+  const lanDirection = haveRtlLanguages.includes(i18n.language) ? "rtl" : "ltr";
   const { ref: nameRef, isEllipsed } = useTextEllipsis(item?.name);
   const nameTypography = (
     <Typography
       ref={nameRef}
+      dir="auto"
       sx={{
         fontSize: { xs: "14px", md: "16px" },
         fontWeight: 500,
@@ -915,6 +944,7 @@ const PharmacyInfoSection = ({
         display: "-webkit-box",
         WebkitLineClamp: 1,
         WebkitBoxOrient: "vertical",
+        unicodeBidi: "plaintext",
         textTransform: "capitalize",
         textAlign: lanDirection === "rtl" ? "end" : "start",
       }}
@@ -1257,8 +1287,8 @@ export const RentalInfoSection = ({
   displayPrice,
   originalPrice,
 }) => {
-  const { t } = useTranslation();
-  const lanDirection = getLanguage() || "ltr";
+  const { t, i18n } = useTranslation();
+  const lanDirection = haveRtlLanguages.includes(i18n.language) ? "rtl" : "ltr";
   const { ref: nameRef, isEllipsed } = useTextEllipsis(item?.name);
   const features = [];
   if (item?.capacity)
@@ -1309,6 +1339,7 @@ export const RentalInfoSection = ({
           const el = (
             <Typography
               ref={nameRef}
+              dir="auto"
               sx={{
                 fontSize: "16px",
                 fontWeight: 500,
@@ -1320,6 +1351,7 @@ export const RentalInfoSection = ({
                 display: "-webkit-box",
                 WebkitLineClamp: 1,
                 WebkitBoxOrient: "vertical",
+                unicodeBidi: "plaintext",
                 textTransform: "capitalize",
                 textAlign: lanDirection === "rtl" ? "end" : "start",
               }}
@@ -1405,7 +1437,7 @@ export const RentalInfoSection = ({
 
 const NewProductCard = ({
   item,
-  variant = "vertical", // "vertical" | "horizontal"
+  variant = "vertical", // "vertical" | "horizontal" | "bogo"
   onCardClick,
   max_width,
   cardWidth,
@@ -1414,6 +1446,15 @@ const NewProductCard = ({
   isRental = false,
   horizontalStyle,
 }) => {
+  // "bogo" is a read-only row card (no cart controls of its own — the BOGO
+  // item-details modal owns one shared stepper/button for the whole
+  // bundle), so it skips every cart/wishlist/module hook below entirely.
+  // Safe because a given mounted instance's `variant` never changes across
+  // its own re-renders — this branch is always taken, or never.
+  if (variant === "bogo") {
+    return <NewProductCardBogo item={item} />;
+  }
+
   const theme = useTheme();
   const { t } = useTranslation();
   const router = useRouter();
@@ -1449,12 +1490,17 @@ const NewProductCard = ({
       ? wishLists?.service?.find((w) => w.id === item?.id)
       : wishLists?.item?.find((w) => w.id === item?.id));
 
-  const { mutate: addToMutate, mutateAsync: addToMutateAsync, isLoading } =
-    useAddCartItem();
+  const {
+    mutate: addToMutate,
+    mutateAsync: addToMutateAsync,
+    isLoading,
+  } = useAddCartItem();
   const { mutate: updateMutate, isLoading: updateLoading } =
     useCartItemUpdate();
-  const { mutate: cartItemRemoveMutate, mutateAsync: cartItemRemoveMutateAsync } =
-    useDeleteCartItem();
+  const {
+    mutate: cartItemRemoveMutate,
+    mutateAsync: cartItemRemoveMutateAsync,
+  } = useDeleteCartItem();
   const { mutate: addFavoriteMutation } = useAddToWishlist();
   const { mutate: wishlistDeleteMutate } = useWishListDelete();
   const wishlistPending = useRef(false);
@@ -1799,7 +1845,8 @@ const NewProductCard = ({
     }
 
     const itemsToDelete = prevCartItems.filter(
-      (prevItem) => !newVariantMap.has(identifyVariant(prevItem.selectedOption)),
+      (prevItem) =>
+        !newVariantMap.has(identifyVariant(prevItem.selectedOption)),
     );
 
     const hasChangedVariants = newSelected.some(({ variation, quantity }) => {
@@ -1964,7 +2011,6 @@ const NewProductCard = ({
   };
 
   const isFood = getCurrentModuleType() === ModuleTypes.FOOD;
-
   return (
     <>
       {/* Product modal */}

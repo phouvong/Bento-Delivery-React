@@ -2,6 +2,7 @@ import MainApi from "../../../MainApi";
 import { categories_details_Store_api } from "../../../ApiRoutes";
 import { useInfiniteQuery } from "react-query";
 import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (pageParams) => {
   const {
@@ -18,7 +19,7 @@ const getData = async (pageParams) => {
       pageParam ? pageParam : offset
     }&type=${type}&category_ids=${selectedCategoriesId}`
   );
-  return data;
+  return getApiCollection(data, ["products", "items"]);
 };
 
 export default function useGetCategoriesForStore(pageParams) {

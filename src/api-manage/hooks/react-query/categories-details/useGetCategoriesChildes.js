@@ -11,13 +11,14 @@ import {
   onErrorResponse,
   onSingleErrorResponse,
 } from "../../../api-error-response/ErrorResponses";
+import { getApiList } from "../../../getApiContent";
 
 const getData = async (pageParams) => {
   const { category_id } = pageParams;
   const { data } = await MainApi.get(
     `${categories_Childes_api}/${category_id}`
   );
-  return data;
+  return getApiList(data);
 };
 
 export default function useGetCategoriesChildes(pageParams) {

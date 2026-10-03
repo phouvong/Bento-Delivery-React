@@ -1,10 +1,9 @@
 import React from "react";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import { alpha, styled, Typography, useTheme } from "@mui/material";
+import { alpha, styled, Tooltip, Typography, useTheme } from "@mui/material";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
 import { Stack } from "@mui/system";
 import { useSelector } from "react-redux";
-import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
 
 export const OrderSummaryCalculationCard = styled(CustomStackFullWidth)(
   ({ theme }) => ({
@@ -12,12 +11,12 @@ export const OrderSummaryCalculationCard = styled(CustomStackFullWidth)(
     paddingBlock: "25px",
     backgroundColor: theme.palette.background.custom6,
     borderRadius: "10px",
-  })
+  }),
 );
 const getItemsPrice = (items) => {
   const productPrice = items?.reduce(
     (total, product) => product?.price * product?.quantity + total,
-    0
+    0,
   );
   return productPrice;
 };
@@ -27,10 +26,10 @@ const getAddOnsPrice = (items) => {
       (product?.add_ons?.length > 0
         ? product?.add_ons?.reduce(
             (cTotal, cProduct) => cProduct?.price * cProduct?.quantity + cTotal,
-            0
+            0,
           )
         : 0) + total,
-    0
+    0,
   );
   return productAddonsPrice;
 };
@@ -47,37 +46,35 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
   const theme = useTheme();
   const handleExcludedVatTotalAmount = () => {
     return getAmountWithSign(
-      trackOrderData?.order_amount - trackOrderData?.total_tax_amount
+      trackOrderData?.order_amount - trackOrderData?.total_tax_amount,
     );
   };
 
   const due_amount =
     trackOrderData?.order_amount - trackOrderData?.partially_paid_amount;
 
-  const proBenefitType = trackOrderData?.benefit_type;
-  const proCouponSavings = Number(trackOrderData?.coupon_discount_amount) || 0;
-  const proDeliverySavings =
-    Number(trackOrderData?.delivery_fee_reduction_amount) || 0;
   const proOrderSavings = Number(trackOrderData?.pro_discount) || 0;
-  const proSavingsAmount =
-    proBenefitType === "coupon"
-      ? proCouponSavings
-      : proBenefitType === "delivery_fee"
-      ? proDeliverySavings
-      : proBenefitType === "discount"
-      ? proOrderSavings
-      : 0;
-  const proSavingsMessage =
-    proBenefitType === "coupon"
-      ? `${t("You saved")} ${getAmountWithSign(proCouponSavings)} ${t(
-          "with a Pro coupon."
-        )}`
-      : proBenefitType === "delivery_fee"
-      ? `${t("You saved")} ${getAmountWithSign(proDeliverySavings)} ${t(
-          "on delivery fees as a Pro member."
-        )}`
-      : undefined;
-  const showProSavingsBanner = !!proBenefitType && proSavingsAmount > 0;
+  const proDeliveryBenefitActive =
+    trackOrderData?.benefit_type === "delivery_fee" &&
+    Number(trackOrderData?.delivery_fee_reduction_amount) > 0;
+  const originalDeliveryCharge = Number(
+    trackOrderData?.original_delivery_charge,
+  );
+  const hasOriginalDeliveryCharge =
+    proDeliveryBenefitActive &&
+    originalDeliveryCharge > Number(trackOrderData?.delivery_charge);
+
+  const hasHappyHourItem = data?.some((item) => !!item?.is_happy_hour);
+  const hasFlashDiscount =
+    Number(trackOrderData?.flash_store_discount_amount) > 0 ||
+    Number(trackOrderData?.flash_admin_discount_amount) > 0;
+  const hasStoreDiscountItem = data?.some((item) => !!item?.is_store_discount);
+  const discountTooltipText =
+    hasHappyHourItem || hasFlashDiscount
+      ? t("Happy Hour Discount")
+      : Number(trackOrderData?.store_discount_amount) > 0 && hasStoreDiscountItem
+      ? t("Store Discount")
+      : "";
   return (
     <OrderSummaryCalculationCard spacing={1.5}>
       {trackOrderData?.bring_change_amount > 0 &&
@@ -94,8 +91,8 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
           <Typography fontSize="14px">
             {t(
               `Please bring ${getAmountWithSign(
-                trackOrderData?.bring_change_amount
-              )} in change when making the delivery.`
+                trackOrderData?.bring_change_amount,
+              )} in change when making the delivery.`,
             )}
           </Typography>
         </CustomStackFullWidth>
@@ -107,7 +104,9 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
           fontWeight: 700,
           color: theme.palette.text.primary,
         }}
-      >{t("Billing Summary")}</Typography>
+      >
+        {t("Billing Summary")}
+      </Typography>
       <CustomStackFullWidth
         direction="row"
         alignItems="center"
@@ -154,7 +153,22 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
         justifyContent="space-between"
         spacing={2}
       >
-        <Typography fontSize="14px"> {t("Discount")}</Typography>
+        <Stack direction="row" alignItems="center" spacing={0.75}>
+          <Typography fontSize="14px">{t("Discount")}</Typography>
+          {discountTooltipText ? (
+            <Tooltip title={discountTooltipText} placement="top" arrow>
+              <i
+                className="fi fi-br-info"
+                style={{
+                  fontSize: "11px",
+                  display: "flex",
+                  lineHeight: 1,
+                  cursor: "pointer",
+                }}
+              />
+            </Tooltip>
+          ) : null}
+        </Stack>
         <Typography fontSize="14px">
           -
           {trackOrderData &&
@@ -162,7 +176,7 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
             ? getAmountWithSign(
                 trackOrderData?.store_discount_amount +
                   trackOrderData?.flash_admin_discount_amount +
-                  trackOrderData?.flash_store_discount_amount
+                  trackOrderData?.flash_store_discount_amount,
               )
             : 0}
         </Typography>
@@ -300,7 +314,7 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
           </Typography>
         </CustomStackFullWidth>
       )}
-      {configData?.add_fund_status === 1 ? (
+      {configData?.additional_charge_status === 1 ? (
         <CustomStackFullWidth
           direction="row"
           alignItems="center"
@@ -318,7 +332,8 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
             {t(configData?.additional_charge_name)}
           </Typography>
           <Typography fontSize="14px">
-            {trackOrderData && getAmountWithSign(configData?.additional_charge)}
+            {trackOrderData &&
+              getAmountWithSign(trackOrderData?.additional_charge)}
           </Typography>
         </CustomStackFullWidth>
       ) : null}
@@ -329,13 +344,50 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
         justifyContent="space-between"
         spacing={2}
       >
-        <Typography fontSize="14px">{t("Delivery fee")}</Typography>
-        <Typography fontSize="14px">
-          {trackOrderData &&
-            (Number(trackOrderData?.delivery_charge) > 0
-              ? getAmountWithSign(trackOrderData?.delivery_charge)
-              : t("Free"))}
-        </Typography>
+        <Stack direction="row" alignItems="center" spacing={0.75}>
+          <Typography fontSize="14px">{t("Delivery fee")}</Typography>
+          {proDeliveryBenefitActive ? (
+            <Typography
+              component="span"
+              sx={{
+                fontSize: "11px",
+                px: 0.75,
+                py: 0.1,
+                borderRadius: "999px",
+                backgroundColor: alpha(theme.palette.primary.main, 0.12),
+                color: theme.palette.primary.main,
+                fontWeight: 600,
+              }}
+            >
+              {t("Pro")}
+            </Typography>
+          ) : null}
+        </Stack>
+        {hasOriginalDeliveryCharge ? (
+          <Stack direction="row" alignItems="center" spacing={0.5}>
+            <Typography
+              fontSize="13px"
+              sx={{
+                textDecoration: "line-through",
+                color: theme.palette.text.disabled,
+              }}
+            >
+              {getAmountWithSign(originalDeliveryCharge)}
+            </Typography>
+            <Typography fontSize="14px" fontWeight={600} color="primary.main">
+              {Number(trackOrderData?.delivery_charge) > 0
+                ? getAmountWithSign(trackOrderData?.delivery_charge)
+                : t("Free")}
+            </Typography>
+          </Stack>
+        ) : (
+          <Typography fontSize="14px">
+            {trackOrderData &&
+              (Number(trackOrderData?.delivery_charge) > 0
+                ? getAmountWithSign(trackOrderData?.delivery_charge)
+                : t("Free"))}
+          </Typography>
+        )}
       </CustomStackFullWidth>
       {trackOrderData?.delivery_type &&
         Number(trackOrderData?.delivery_type_charge) > 0 && (
@@ -352,14 +404,14 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
                   express: "Express Delivery",
                   slightly_delay: "Slightly Delay Delivery",
                 }[trackOrderData?.delivery_type] ||
-                  trackOrderData?.delivery_type
+                  trackOrderData?.delivery_type,
               )}
             </Typography>
             <Typography fontSize="14px">
               {`${
                 trackOrderData?.delivery_type === "slightly_delay" ? "- " : "+ "
               }${getAmountWithSign(
-                Number(trackOrderData?.delivery_type_charge)
+                Number(trackOrderData?.delivery_type_charge),
               )}`}
             </Typography>
           </CustomStackFullWidth>
@@ -377,7 +429,11 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
         justifyContent="space-between"
         spacing={2}
       >
-        <Typography component="span" fontWeight="bold" color={theme.palette.text.primary}>
+        <Typography
+          component="span"
+          fontWeight="bold"
+          color={theme.palette.text.primary}
+        >
           {t("Total")}
           {trackOrderData?.tax_status === "included" && (
             <Typography
@@ -395,12 +451,6 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
           {getAmountWithSign(trackOrderData?.order_amount)}
         </Typography>
       </CustomStackFullWidth>
-      {showProSavingsBanner ? (
-        <ProSavingsBanner
-          amount={proSavingsAmount}
-          message={proSavingsMessage}
-        />
-      ) : null}
       {trackOrderData?.partially_paid_amount &&
       trackOrderData?.order_status !== "canceled" ? (
         <CustomStackFullWidth
@@ -437,7 +487,7 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
                 {trackOrderData &&
                   t(trackOrderData?.payments[1]?.payment_method).replaceAll(
                     "_",
-                    " "
+                    " ",
                   )}
                 )
               </Typography>
@@ -461,7 +511,7 @@ const OrderCalculation = ({ data, t, trackOrderData }) => {
                 {trackOrderData &&
                   t(trackOrderData?.payments[1]?.payment_method).replaceAll(
                     "_",
-                    " "
+                    " ",
                   )}
                 )
               </Typography>

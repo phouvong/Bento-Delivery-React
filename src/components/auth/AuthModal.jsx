@@ -300,6 +300,9 @@ const AuthModal = ({
       openModal={open}
       drawerHeight="90dvh"
       maxWidth={modalFor === "sign-up" ? "700px" : "500px"}
+      disableContentOverflowClip={
+        modalFor === "sign-in" && internalView === "otp"
+      }
     >
       <div ref={recaptchaWrapperRef}>
         <div id="recaptcha-container"></div>

@@ -3,10 +3,11 @@ import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponse
 import MainApi from "api-manage/MainApi";
 import { top_offer_near_me } from "api-manage/ApiRoutes";
 import { getModuleId } from "helper-functions/getModuleId";
+import { getApiCollection } from "../../../getApiContent";
 
 const getTopOffers = async (sortby,searchKey,type) => {
 	const { data } = await MainApi.get(`${top_offer_near_me}?sort_by=${sortby}&name=${searchKey}&type=${type!=="halal" ? type : ""}&halal=${type==="halal" ? 1 : 0}`);
-	return data;
+	return getApiCollection(data, ["stores", "products"]);
 };
 
 export default function useGetTopOffers(sortby,searchKey,type) {

@@ -18,11 +18,10 @@ import AccountInfo from "components/store-resgistration/AccountInfo";
 import { useQuery } from "react-query";
 import { GoogleApi } from "api-manage/hooks/react-query/googleApi";
 import { useDispatch, useSelector } from "react-redux";
-import { getZoneWiseModule } from "components/store-resgistration/helper";
 import { setAllData, setInZone } from "redux/slices/storeRegistrationData";
 import { SaveButton } from "components/profile/basic-information/Profile.style";
 import { useRouter } from "next/router";
-import useGetModule from "api-manage/hooks/react-query/useGetModule";
+import useGetModuleByZone from "api-manage/hooks/react-query/useGetModuleByZone";
 import { toast } from "react-hot-toast";
 import { formatPhoneNumber } from "utils/CustomFunctions";
 import useGetZoneList from "api-manage/hooks/react-query/zone-list/zone-list";
@@ -79,7 +78,6 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
   const [selectedLanguage, setSelectedLanguage] = React.useState("en");
   const [selectedZone, setSelectedZone] = React.useState(null);
   const { allData, activeStep, inZone } = useSelector((state) => state.storeRegData);
-  const { data, refetch } = useGetModule();
   const initialValues = generateInitialValues(configData?.language, allData);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
@@ -105,7 +103,9 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
       } catch (err) { }
     },
   });
-  console.log({ inZone });
+  const { data, refetch } = useGetModuleByZone(
+    RestaurantJoinFormik?.values?.zoneId
+  );
   let currentLatLng = undefined;
   if (typeof window !== "undefined") {
     currentLatLng = JSON.parse(window.localStorage.getItem("currentLatLng"));
@@ -303,10 +303,10 @@ const StoreRegistrationForm = ({ setActiveStep, setFormValues }) => {
   });
 
   let moduleOption = [];
-  const zoneWiseModules = getZoneWiseModule(
-    data,
-    RestaurantJoinFormik?.values?.zoneId
-  );
+  // `data` already comes back scoped to the selected zone (the API is
+  // called with `?zone_id=`), so no client-side zones[] filtering is needed
+  // or possible — this endpoint's module rows don't carry a `zones` array.
+  const zoneWiseModules = data;
 
   if (zoneWiseModules?.length > 0) {
     zoneWiseModules.forEach((module) => {

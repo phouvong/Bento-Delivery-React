@@ -5,12 +5,13 @@ import {
   onSingleErrorResponse,
 } from "../../../api-error-response/ErrorResponses";
 import MainApi from "../../../MainApi";
+import { getApiContent } from "../../../getApiContent";
 const getAutocompletePlace = async (searchKey) => {
   if (searchKey && searchKey !== "") {
     const { data } = await MainApi.get(
       `${placeApiAutocomplete_api}?search_text=${searchKey}`
     );
-    return data;
+    return getApiContent(data);
   }
 };
 

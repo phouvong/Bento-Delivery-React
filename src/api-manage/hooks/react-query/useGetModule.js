@@ -1,8 +1,9 @@
 import MainApi from "../../MainApi";
 import { useQuery } from "react-query";
 import { moduleList } from "../../ApiRoutes";
+import { getApiList } from "../../getApiContent";
 import { onErrorResponse } from "../../api-error-response/ErrorResponses";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { filterOutRiderShareModules } from "helper-functions/moduleFilter";
 
 const injectServiceModule = (data) => {
@@ -20,7 +21,7 @@ const getModule = async () => {
   const { data } = await MainApi.get(moduleList);
   // return filterOutRiderShareModules(data);
   // return data;
-  return injectServiceModule(data);
+  return injectServiceModule(getApiList(data));
 };
 
 const normalizeZoneIdForKey = (zoneId) => {
@@ -90,8 +91,16 @@ export default function useGetModule() {
   });
   const { refetch } = query;
 
+  // Refresh when the user's zone actually CHANGES — not on mount. Every caller
+  // already decides for itself whether it needs the module list (MainLayout,
+  // for instance, only wants it on /home), and firing here on mount overrode
+  // those gates: `enabled: false` was meaningless because refetch() ignores it,
+  // so the module list was requested on every page that renders the layout.
+  const previousZoneIdsKey = useRef(zoneIdsKey);
   useEffect(() => {
-    if (!zoneIdsKey) return;
+    const changed = previousZoneIdsKey.current !== zoneIdsKey;
+    previousZoneIdsKey.current = zoneIdsKey;
+    if (!changed || !zoneIdsKey) return;
     refetch();
   }, [zoneIdsKey, refetch]);
 

@@ -1,4 +1,5 @@
 import { fetchPageMetadata } from "utils/fetchPageMetaData";
+import { getApiContent } from "api-manage/getApiContent";
 
 // Maintenance mode is only enforced when the admin has explicitly opted
 // the react website into the maintenance window. The legacy check
@@ -21,7 +22,7 @@ export const getCommonServerSideProps = async (
   const language = req.cookies.languageSetting;
 
   const configRes = await fetch(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/config`,
+    `${(process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "")}/api/v1/config`,
     {
       method: "GET",
       headers: {
@@ -32,7 +33,7 @@ export const getCommonServerSideProps = async (
       },
     }
   );
-  const config = await configRes.json();
+  const config = getApiContent(await configRes.json());
 
   if (
     checkMaintenanceMode(config) &&

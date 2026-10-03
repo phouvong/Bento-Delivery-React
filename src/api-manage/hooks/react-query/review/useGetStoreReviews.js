@@ -6,10 +6,11 @@ import {
 import { useQuery } from "react-query";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import MainApi from "../../../MainApi";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (id) => {
   const { data } = await MainApi.get(`${store_review_api}?store_id=${id}`);
-  return data;
+  return getApiCollection(data, "reviews");
 };
 
 export default function useGetStoreReviews(id) {

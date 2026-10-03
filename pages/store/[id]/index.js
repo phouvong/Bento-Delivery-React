@@ -4,6 +4,7 @@ import MainLayout from "../../../src/components/layout/MainLayout";
 import { useDispatch } from "react-redux";
 import dynamic from "next/dynamic";
 import { setConfigData } from "redux/slices/configData";
+import { getApiContent } from "api-manage/getApiContent";
 import { config_api, store_details_api } from "api-manage/ApiRoutes";
 import SEO from "../../../src/components/seo";
 import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
@@ -87,7 +88,7 @@ export const getServerSideProps = async (context) => {
   const { req, res } = context;
   const language = req.cookies.languageSetting || "en";
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
   const origin = process.env.NEXT_CLIENT_HOST_URL;
 
   const headersCommon = {
@@ -124,7 +125,7 @@ export const getServerSideProps = async (context) => {
 
   let configData;
   try {
-    configData = await configRes.json();
+    configData = getApiContent(await configRes.json());
   } catch (error) {
     console.error("config parse error:", error.message);
     return { notFound: true };
@@ -143,7 +144,7 @@ export const getServerSideProps = async (context) => {
       return { notFound: true };
     }
     try {
-      storeDetails = await storeDetailsRes.json();
+      storeDetails = getApiContent(await storeDetailsRes.json());
     } catch (error) {
       console.error("store_details parse error:", error.message);
       return { notFound: true };

@@ -21,7 +21,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "reel_id required" });
   }
 
-  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/$/, "");
+  const baseUrl = ((process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "") || "").replace(/\/$/, "");
   const guestParam = guest_id ? `&guest_id=${guest_id}` : "";
   const upstreamUrl = `${baseUrl}/api/v1/customer/reels/details?reel_id=${reel_id}&stream=1${guestParam}`;
 

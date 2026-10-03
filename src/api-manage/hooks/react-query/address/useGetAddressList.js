@@ -3,10 +3,11 @@ import { address_list_api } from "../../../ApiRoutes";
 import { useQuery } from "react-query";
 import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { getToken } from "helper-functions/getToken";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async () => {
   const { data } = await MainApi.get(address_list_api);
-  return data;
+  return getApiCollection(data, "addresses");
 };
 
 export default function useGetAddressList(handleSuccess) {

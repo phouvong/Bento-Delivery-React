@@ -33,7 +33,7 @@ const HeroTitleSection = ({ landingPageData }) => {
     } else {
       return (
         <CustomStackFullWidth mt="15px" mb={{ xs: ".5rem", md: "1.5rem" }} sx={{ maxWidth: currentLocation ? "100%" : "666px", mx: "auto" }}>
-          <HeroLocationForm />
+          <HeroLocationForm onLocationSaved={setCurrentLocation} />
         </CustomStackFullWidth>
       );
     }

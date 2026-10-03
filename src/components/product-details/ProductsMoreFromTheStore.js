@@ -67,7 +67,7 @@ const ProductsMoreFromTheStore = ({ productDetails }) => {
 
   const handleSuccess = (res) => {
     if (res) {
-      setMoreItem(res);
+      setMoreItem(Array.isArray(res) ? res : res?.data ?? []);
     }
   };
 
@@ -124,7 +124,18 @@ const ProductsMoreFromTheStore = ({ productDetails }) => {
         }
       >
         {items.map((item) => (
-          <NewProductCard key={item?.id} variant="horizontal" item={item} />
+          <NewProductCard
+            key={item?.id}
+            variant="horizontal"
+            item={item}
+            horizontalStyle={{
+              border: "none",
+              borderRadius: 0,
+              p: 0,
+              height: "auto",
+              "&:hover": { boxShadow: "none" },
+            }}
+          />
         ))}
       </Stack>
     </Box>

@@ -5,12 +5,16 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 3006",
     "lint": "next lint",
     "i18n:scan": "node i18n-scan.js",
     "i18n:watch": "node i18n-watch.js",
     "type-check": "tsc --noEmit",
-    "type-check:watch": "tsc --noEmit --watch"
+    "type-check:watch": "tsc --noEmit --watch",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@emotion/cache": "^11.10.5",
@@ -76,6 +80,7 @@
     "yup": "^0.32.11"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/js-cookie": "^3.0.6",
     "@types/node": "^24.10.0",
     "@types/nprogress": "^0.2.3",

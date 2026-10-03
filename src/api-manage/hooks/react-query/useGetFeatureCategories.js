@@ -2,12 +2,13 @@ import MainApi from "../../MainApi";
 import { categories_details_api } from "../../ApiRoutes";
 import { useQuery } from "react-query";
 import { onSingleErrorResponse } from "../../api-error-response/ErrorResponses";
+import { getApiCollection } from "../../getApiContent";
 
 const getData = async ({ categoryId, page_limit, offset, type }) => {
   const { data } = await MainApi.get(
     `${categories_details_api}/${categoryId}?limit=${page_limit}&offset=${offset}&type=${type}`
   );
-  return data;
+  return getApiCollection(data, "products");
 };
 
 export default function useGetFeatureCategoriesProducts(pageParams,handleDataSuccess) {

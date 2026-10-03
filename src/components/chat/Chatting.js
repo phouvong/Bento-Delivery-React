@@ -69,8 +69,14 @@ const Chatting = ({ configData }) => {
 	const handleToggleSidebar = () => {
 		setIsSidebarOpen((prevState) => !prevState);
 	};
+	// The old API wrapped the rows in `conversations`; v4.2 returns them under
+	// `content.data`, which the hook now unwraps to a plain array. Accept either
+	// and never store undefined — ContactLists does `channelList.length`.
+	const toChannelArray = (res) =>
+		Array.isArray(res) ? res : res?.conversations ?? res?.data ?? [];
+
 	const handleChatListOnSuccess = (res) => {
-		setChannelList(res.conversations);
+		setChannelList(toChannelArray(res));
 	};
 	const {
 		refetch: refetchChannelList,
@@ -102,7 +108,7 @@ const Chatting = ({ configData }) => {
 			setChannelId(conversationId);
 			setScrollBottom(true);
 			const tempReceiver =
-				channelList.length !== 0 &&
+				channelList?.length !== 0 &&
 				channelList.filter((item) => item.id == conversationId);
 			setReceiver(tempReceiver[0]);
 		}
@@ -117,7 +123,7 @@ const Chatting = ({ configData }) => {
 	useEffect(() => {
 		if (id && routeName && type) {
 			const tempReceiver =
-				channelList.length !== 0 &&
+				channelList?.length !== 0 &&
 				channelList.filter((item) => {
 					if (type === "vendor") {
 						return item?.receiver?.vendor_id == id;
@@ -215,7 +221,7 @@ const Chatting = ({ configData }) => {
 
 	const handleSearchFetchOnSuccess = (res) => {
 		if (res) {
-			setChannelList(res.conversations);
+			setChannelList(toChannelArray(res));
 		}
 	};
 	const {

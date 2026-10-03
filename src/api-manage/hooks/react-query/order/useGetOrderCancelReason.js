@@ -1,6 +1,7 @@
 import { useQuery } from "react-query";
 import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiCollection } from "../../../getApiContent";
 
 export const getData = async (type,isPickup) => {
 
@@ -10,12 +11,12 @@ export const getData = async (type,isPickup) => {
     const { data } = await MainApi.get(
       `api/v1/get-parcel-cancellation-reasons?offset=1&limit=10&user_type=customer&cancellation_type=${cancellationType}`
     );
-    return data;
+    return getApiCollection(data);
   }else{
     const { data } = await MainApi.get(
       "api/v1/customer/order/cancellation-reasons?offset=1&limit=10&type=customer"
     );
-    return data;
+    return getApiCollection(data);
   }
 };
 export const useGetOrderCancelReason = (type,isPickup) => {

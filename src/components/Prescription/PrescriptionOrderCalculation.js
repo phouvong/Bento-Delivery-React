@@ -1,10 +1,9 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect } from "react";
 import { CalculationGrid, TotalGrid } from "../checkout/CheckOut.style";
 import { Grid, Stack, Tooltip, Typography, useTheme } from "@mui/material";
 import CustomDivider from "../CustomDivider";
 import { t } from "i18next";
 import {
-  getDeliveryFeeByBadWeather,
   getInfoFromZoneData,
   handleDistance,
 } from "utils/CustomFunctions";
@@ -13,12 +12,12 @@ import {
   getReferDiscount,
 } from "helper-functions/CardHelpers";
 import { useDispatch, useSelector } from "react-redux";
-import useGetVehicleCharge from "../../api-manage/hooks/react-query/order-place/useGetVehicleCharge";
-import { useGetSurgePrice } from "api-manage/hooks/react-query/order-place/useGetSurgePrice";
-import { getGuestId, getToken } from "helper-functions/getToken";
-import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
+import { getToken } from "helper-functions/getToken";
 import InfoIcon from "@mui/icons-material/Info";
 import useGetProActiveOffer from "api-manage/hooks/react-query/pro-plans/useGetProActiveOffer";
+import useGetCheckoutSummary, {
+  isQuoteUnavailable,
+} from "api-manage/hooks/react-query/checkout/useGetCheckoutSummary";
 
 const PrescriptionOrderCalculation = ({
   storeData,
@@ -34,154 +33,43 @@ const PrescriptionOrderCalculation = ({
   setPayableAmount,
   selectedDeliveryOption,
   setDeliveryFee,
+  areaZipParams,
+  setQuoteUnavailable,
 }) => {
   const deliveryOptionSurcharge =
     orderType === "delivery"
       ? Number(selectedDeliveryOption?.surcharge) || 0
       : 0;
-  const { data: surgePrice, mutate: surgeMutate } = useGetSurgePrice();
   const theme = useTheme();
   const tempDistance = handleDistance(distanceData?.data, origin, destination);
 
-  const { data: extraCharge, refetch: extraChargeRefetch } =
-    useGetVehicleCharge({ tempDistance });
+  // One server-side quote: delivery, surge and the Pro benefit in the order the
+  // charge is billed. Nothing below recomputes any of it.
+  const checkoutSummaryQuery = useGetCheckoutSummary({
+    orderType: orderType === "take_away" ? "take_away" : "delivery",
+    storeId: storeData?.id,
+    orderAmount: Number(totalOrderAmount) || 0,
+    distance: tempDistance,
+    latitude: destination?.latitude,
+    longitude: destination?.longitude,
+    deliveryType: selectedDeliveryOption?.deliveryType,
+    // area_id / zip_code_id — the zone's rule prices off these.
+    ...(areaZipParams || {}),
+  });
+  const checkoutSummary = checkoutSummaryQuery?.data;
+  const summaryDelivery = checkoutSummary?.delivery;
+  const quoteUnavailable = isQuoteUnavailable(checkoutSummaryQuery);
   useEffect(() => {
-    extraChargeRefetch();
-  }, [distanceData]);
-  useEffect(() => {
-    if (storeData) {
-      const temData = {
-        zone_id: storeData?.zone_id,
-        module_id: storeData?.module_id,
-        date_time: new Date().toISOString(),
-        guest_id: getGuestId(),
-      };
-      surgeMutate(temData, {
-        onError: onErrorResponse,
-      });
-    }
-  }, [storeData]);
-  const getPrescriptionDeliveryFees = (
-    storeData,
-    configData,
-    distance,
-    orderType,
-    zoneData,
-    origin,
-    destination
-  ) => {
-    let convertedDistance = handleDistance(
-      distanceData?.data,
-      origin,
-      destination
-    );
-    console.log({ convertedDistance, storeData });
-
-    const isAdminFreeDeliveryEnabled =
-      configData?.admin_free_delivery?.status === true;
-    const freeDeliveryType = configData?.admin_free_delivery?.type;
-    const freeDeliveryThreshold =
-      configData?.admin_free_delivery?.free_delivery_over;
-    const isFreeDeliveryByAmount =
-      freeDeliveryType === "free_delivery_by_order_amount" &&
-      freeDeliveryThreshold > 0 &&
-      totalOrderAmount >= freeDeliveryThreshold;
-
-    const isFreeDeliveryToAllStores =
-      freeDeliveryType === "free_delivery_to_all_store";
-    const globalFreeDeliveryThreshold = configData?.free_delivery_over;
-    let deliveryFee = convertedDistance * configData?.per_km_shipping_charge;
-    if (Number.parseInt(storeData?.self_delivery_system) === 1) {
-      if (storeData?.free_delivery || isFreeDeliveryToAllStores) {
-        return 0;
-      } else {
-        deliveryFee =
-          convertedDistance * storeData?.per_km_shipping_charge || 0;
-        if (
-          deliveryFee > storeData?.minimum_shipping_charge &&
-          deliveryFee < storeData?.maximum_shipping_charge
-        ) {
-          return deliveryFee;
-        } else {
-          if (deliveryFee < storeData?.minimum_shipping_charge) {
-            return storeData?.minimum_shipping_charge;
-          } else if (
-            storeData?.maximum_shipping_charge !== null &&
-            deliveryFee > storeData?.maximum_shipping_charge
-          ) {
-            return storeData?.maximum_shipping_charge;
-          }
-        }
-      }
-    } else {
-      if (zoneData?.data?.zone_data?.length > 0) {
-        const chargeInfo = getInfoFromZoneData(zoneData?.data);
-        console.log({ chargeInfo, zoneData });
-
-        const perKmCharge = chargeInfo?.pivot?.per_km_shipping_charge || 0;
-        const minCharge = chargeInfo?.pivot?.minimum_shipping_charge;
-        const maxCharge = chargeInfo?.pivot?.maximum_shipping_charge;
-
-        const qualifiesForFreeDelivery =
-          (globalFreeDeliveryThreshold &&
-            globalFreeDeliveryThreshold > 0 &&
-            totalOrderAmount > globalFreeDeliveryThreshold) ||
-          orderType === "take_away" ||
-          isFreeDeliveryToAllStores;
-
-        if (qualifiesForFreeDelivery) {
-          return 0;
-        }
-
-        if (perKmCharge) {
-          let deliveryFee = convertedDistance * perKmCharge;
-
-          if (minCharge !== null && deliveryFee < minCharge) {
-            return getDeliveryFeeByBadWeather(
-              minCharge + extraCharge,
-              surgePrice
-            );
-          }
-
-          if (maxCharge !== null && deliveryFee > maxCharge) {
-            return getDeliveryFeeByBadWeather(
-              maxCharge + extraCharge,
-              surgePrice
-            );
-          }
-
-          return getDeliveryFeeByBadWeather(
-            deliveryFee + extraCharge,
-            surgePrice
-          );
-        }
-      }
-    }
-  };
-  const computedDeliveryFee = useMemo(
-    () =>
-      getPrescriptionDeliveryFees(
-        storeData,
-        configData,
-        distanceData?.data,
-        orderType,
-        zoneData,
-        origin,
-        destination
-      ) ?? 0,
-    [
-      storeData,
-      configData,
-      distanceData,
-      orderType,
-      zoneData,
-      origin,
-      destination,
-      extraCharge,
-      surgePrice,
-      totalOrderAmount,
-    ]
-  );
+    setQuoteUnavailable?.(quoteUnavailable);
+  }, [quoteUnavailable]);
+  // Passed through untouched — the rows below read `price`, `price_type`,
+  // `customer_note` and `customer_note_status` off it.
+  const surgePrice = checkoutSummary?.surge;
+  // The vehicle charge is folded into `base_delivery_charge` server-side, so
+  // there is no separate figure to caption any more.
+  const extraCharge = 0;
+  // The "before" figure — base + surge, ahead of free-delivery and Pro.
+  const computedDeliveryFee = Number(summaryDelivery?.base_delivery_charge) || 0;
 
   // ── Pro member: delivery_fee benefit ───────────────────────────────────
   const proFeatureEnabled = configData?.pro_member_status === 1;
@@ -204,24 +92,11 @@ const PrescriptionOrderCalculation = ({
   const proDeliveryOfferType = proBenefit?.offer_type;
   const proDeliveryDiscountPct =
     Number(proBenefit?.charge_discount_percentage) || 0;
-  const proDeliveryDiscount = (() => {
-    if (!proDeliveryBenefitActive) return 0;
-    const fee = Number(computedDeliveryFee) || 0;
-    if (
-      proDeliveryOfferType === "free" ||
-      proDeliveryOfferType === "full_free"
-    ) {
-      return fee;
-    }
-    if (proDeliveryOfferType === "partial_free" && proDeliveryDiscountPct > 0) {
-      return (fee * proDeliveryDiscountPct) / 100;
-    }
-    return 0;
-  })();
-  const effectiveDeliveryFee = Math.max(
-    0,
-    Number(computedDeliveryFee || 0) - proDeliveryDiscount
-  );
+  // Server-applied: it has already run the free-delivery overrides and the Pro
+  // percentage in billing order.
+  const proDeliveryDiscount =
+    Number(summaryDelivery?.pro_customer_savings) || 0;
+  const effectiveDeliveryFee = Number(summaryDelivery?.delivery_charge) || 0;
 
   useEffect(() => {
     setDeliveryFee?.(effectiveDeliveryFee);

@@ -8,11 +8,7 @@ import { useEffect } from "react";
 
 const FooterComponent = ({ configData }) => {
   const router = useRouter();
-  const { data: landingPageData, refetch } = useGetLandingPage();
-
-  useEffect(() => {
-    if (!landingPageData) refetch();
-  }, [landingPageData]);
+  const { data: landingPageData } = useGetLandingPage();
 
   const isLandingPage = router.pathname === "/";
   const isHomePage = router.pathname === "/home";

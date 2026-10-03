@@ -2,10 +2,11 @@ import MainApi from "../../../MainApi";
 import { useQuery } from "react-query";
 import { parcel_category_api, similar_product_api } from "../../../ApiRoutes";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiList } from "../../../getApiContent";
 
 const getSimilarProduct = async (id) => {
   const { data } = await MainApi.get(`${similar_product_api}/${id}`);
-  return data;
+  return getApiList(data);
 };
 
 export default function useGetSimilarProduct(id) {

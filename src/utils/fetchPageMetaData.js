@@ -4,8 +4,8 @@ export const fetchPageMetadata = async (pageName, id = null, language = 'en') =>
 
     try {
         const url = id
-            ? `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/get-page-meta-data?page_name=${pageName}&id=${id}`
-            : `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/get-page-meta-data?page_name=${pageName}`
+            ? `${(process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "")}/api/v1/get-page-meta-data?page_name=${pageName}&id=${id}`
+            : `${(process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "")}/api/v1/get-page-meta-data?page_name=${pageName}`
         const metaRes = await fetch(url, {
             method: 'GET',
             headers: {

@@ -4,7 +4,6 @@ import {
   IconButton,
   Skeleton,
   Typography,
-  alpha,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
@@ -14,6 +13,7 @@ import { GoogleApi } from "api-manage/hooks/react-query/googleApi";
 import StatusBadge from "components/common/StatusBadge";
 import CustomFormatedTime from "components/date/CustomFormatedTime";
 import moment from "moment";
+import EstimatedArrival from "components/my-orders/order-details/EstimatedArrival";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -113,42 +113,6 @@ const TopDetails = (props) => {
       retry: 1,
     }
   );
-
-  const today = moment(new Date());
-  const differenceInMinutes = () => {
-    const deliveryTime = trackData?.store?.delivery_time;
-    const createdAt = trackData?.created_at;
-    const processingTime = trackData?.processing_time;
-    const scheduleAt = trackData?.schedule_at;
-    let minTime = processingTime != null ? processingTime : 0;
-    if (
-      deliveryTime !== null &&
-      deliveryTime !== "" &&
-      processingTime === null
-    ) {
-      const timeArr = deliveryTime?.split("-");
-      minTime = Number.parseInt(timeArr[0]);
-    }
-    const newDeliveryTime = scheduleAt ? scheduleAt : createdAt;
-    const newDeliveryTimeWithAdditionalMin = moment(newDeliveryTime)
-      .add(minTime, "minutes")
-      .format();
-    const duration = moment.duration(
-      today.diff(newDeliveryTimeWithAdditionalMin)
-    );
-    const minutes = duration?.asMinutes();
-    //here minutes give negative values for positive changes, that's why the condition given below
-    if (minutes <= -1) {
-      return Number.parseInt(Math.abs(minutes));
-    }
-  };
-  const handleTime = () => {
-    if (differenceInMinutes() > 5) {
-      return `${differenceInMinutes() - 5} - ${differenceInMinutes()} `;
-    } else {
-      return `1-5`;
-    }
-  };
 
   const handleOfflineClose = () => {
     dispatch(clearOfflinePaymentInfo());
@@ -317,7 +281,7 @@ const TopDetails = (props) => {
       <Stack
         direction={isSmall ? "column" : "row"}
         justifyContent="space-between"
-        alignItems={isSmall ? "flex-start" : "center"}
+        alignItems="flex-start"
         gap="8px"
         flexWrap="wrap"
         width="100%"
@@ -411,13 +375,8 @@ const TopDetails = (props) => {
                 </Typography>
               )}
           </Stack>
-        </Stack>
-        <Stack>
-          <Stack
-            direction="column"
-            alignItems={isSmall ? "flex-start" : "flex-end"}
-            spacing={0.5}
-          >
+
+          <Stack direction="column" alignItems="flex-start" spacing={0.5} sx={{ mt: 1 }}>
             <Typography
               fontSize={{ xs: "11px", md: "12px" }}
               fontWeight="500"
@@ -461,40 +420,16 @@ const TopDetails = (props) => {
                 </Typography>
               </Stack>
             )}
-
-            {trackData?.module_type === "food" && (
-              <Stack
-                direction="row"
-                alignItems="center"
-                spacing={1}
-                sx={{
-                  borderLeft: !isSmall
-                    ? (t) => `1.5px solid ${alpha(t.palette.neutral[400], 0.5)}`
-                    : "none",
-                  pl: !isSmall ? "12px" : 0,
-                  ml: !isSmall ? "4px" : 0,
-                  height: !isSmall ? "16px" : "auto",
-                }}
-              >
-                <TrackSvg />
-                <Typography
-                  color={theme.palette.primary.main}
-                  fontSize={{ xs: "11px", md: "12px" }}
-                  fontWeight="500"
-                  lineHeight={1}
-                >
-                  {t("Estimated delivery:")}{" "}
-                  <Typography
-                    fontSize={{ xs: "11px", md: "12px" }}
-                    fontWeight="600"
-                    component="span"
-                    color={theme.palette.primary.main}
-                  >
-                    {handleTime()} {t("min")}
-                  </Typography>
-                </Typography>
-              </Stack>
-            )}
+          </Stack>
+        </Stack>
+        <Stack alignItems="flex-end">
+          {/* Estimated Arrival — server-computed, hidden by the server for
+              closed orders, which this renders as their outcome instead. */}
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <EstimatedArrival
+              trackData={trackData}
+              isLoading={trackDataIsLoading || trackDataIsFetching}
+            />
           </Stack>
           {configData?.order_delivery_verification ? (
             <Typography

@@ -24,6 +24,15 @@ const initialState = {
     products: [],
   },
   AllSaveAddress: [],
+  // CMS payload behind the footer. Persisted (this slice is not in the
+  // redux-persist blacklist) so a reload can seed react-query instead of
+  // refetching content that changes maybe once a month. `fetchedAt` lets the
+  // query apply its normal staleTime to the restored copy.
+  landingPage: { data: null, fetchedAt: 0 },
+  // Category names for the navbar's animated search placeholder. Tagged with
+  // the module they came from so switching modules invalidates them without
+  // anyone having to remember to clear this.
+  searchPlaceholderCategories: { moduleId: null, names: [] },
 };
 
 export const storedDataSlice = createSlice({
@@ -82,9 +91,21 @@ export const storedDataSlice = createSlice({
     setAllSaveAddress: (state, action) => {
       state.AllSaveAddress = action.payload;
     },
-    setResetStoredData: (state, action) => {
-      return initialState;
+    setLandingPage: (state, action) => {
+      state.landingPage = action.payload;
     },
+    setSearchPlaceholderCategories: (state, action) => {
+      state.searchPlaceholderCategories = action.payload;
+    },
+    // Clears the module-scoped lists on a module switch. `landingPage` is
+    // global CMS content and `searchPlaceholderCategories` carries its own
+    // module tag, so neither is what this reset is for — dropping them just
+    // forces a needless refetch on the next page load.
+    setResetStoredData: (state) => ({
+      ...initialState,
+      landingPage: state.landingPage,
+      searchPlaceholderCategories: state.searchPlaceholderCategories,
+    }),
   },
 });
 
@@ -103,7 +124,9 @@ export const {
   setBestReviewedItems,
   setYouWillLoveItems,
   setResetStoredData,
+  setLandingPage,
+  setSearchPlaceholderCategories,
   setAllSaveAddress,
-  setRecommendedStores
+  setRecommendedStores,
 } = storedDataSlice.actions;
 export default storedDataSlice.reducer;

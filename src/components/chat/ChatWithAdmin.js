@@ -3,7 +3,6 @@ import { Typography } from "@mui/material";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@mui/material/styles";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import { StyledBadge } from "./InfoCard";
 import { Stack } from "@mui/system";
 import CustomImageContainer from "components/CustomImageContainer";
 
@@ -28,22 +27,16 @@ const ChatWithAdmin = ({ handleChannelOnClick, configData }) => {
         })
       }
     >
-      <StyledBadge
-        overlap="circular"
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        //variant="dot"
-      >
-        <CustomImageContainer
-          src={configData?.logo_full_url}
-          alt={configData?.business_name}
-          width="48px"
-          height="48px"
-          objectfit="contain"
-          borderRadius="50%"
-          padding="6px"
-          bg={theme.palette.neutral[100]}
-        />
-      </StyledBadge>
+      {/* Plain image, not a circular avatar: the business logo is a wide
+          wordmark, so a round crop cut it down to its middle characters. */}
+      <CustomImageContainer
+        src={configData?.logo_full_url}
+        alt={configData?.business_name}
+        width="64px"
+        height="48px"
+        objectfit="contain"
+        sx={{ flexShrink: 0 }}
+      />
       <CustomStackFullWidth>
         <Stack
           direction="row"

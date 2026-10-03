@@ -2,19 +2,25 @@ import MainApi from "../../../MainApi";
 import { useQuery } from "react-query";
 import { all_cart_list } from "../../../ApiRoutes";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
-import { getToken } from "helper-functions/getToken";
+import { getToken, getGuestId } from "helper-functions/getToken";
+import { getApiList } from "../../../getApiContent";
 
 const getData = async (guestId, store_id) => {
   try {
-    const userToken = getToken();
     const query = new URLSearchParams();
-    if (!userToken && guestId) query.set("guest_id", guestId);
+    // `customer_or_guest` endpoint — send guest_id whenever we hold one so a
+    // guest cart stays addressable; the backend prefers the bearer token when
+    // both are present.
+    const effectiveGuestId = guestId ?? getGuestId();
+    if (effectiveGuestId) query.set("guest_id", effectiveGuestId);
     if (store_id) query.set("store_id", store_id);
     const queryString = query.toString();
     const { data } = await MainApi.get(
       queryString ? `${all_cart_list}?${queryString}` : all_cart_list
     );
-    return data;
+    // Callers do `res?.map(...)`, so hand back the rows array — v4.2 nests
+    // them under content.data alongside pagination.
+    return getApiList(data) ?? [];
   } catch (error) {
     throw error;
   }

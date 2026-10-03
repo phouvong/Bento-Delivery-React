@@ -207,24 +207,22 @@ const ProductInformationBottomSection = ({
     height: "44px",
     maxHeight: "44px",
     px: 2,
-    borderRadius: "10px",
+    borderRadius: "8px",
     textTransform: "none",
-    fontWeight: 600,
-    fontSize: { xs: "13px", md: "14px" },
+    fontWeight: 700,
+    fontSize: { xs: "13px", md: "16px" },
     boxShadow: "none",
     backgroundColor: alpha(
       theme.palette.neutral?.[400] || theme.palette.text.secondary,
-      0.12
+      0.18
     ),
     color: theme.palette.text.primary,
-    border: `1px solid ${alpha(theme.palette.text.primary, 0.2)}`,
     "&:hover": {
       boxShadow: "none",
       backgroundColor: alpha(
         theme.palette.neutral?.[400] || theme.palette.text.secondary,
-        0.2
+        0.26
       ),
-      borderColor: alpha(theme.palette.text.primary, 0.28),
     },
   };
 
@@ -234,10 +232,10 @@ const ProductInformationBottomSection = ({
     height: "44px",
     maxHeight: "44px",
     px: 2,
-    borderRadius: "10px",
+    borderRadius: "8px",
     textTransform: "none",
     fontWeight: 700,
-    fontSize: { xs: "13px", md: "14px" },
+    fontSize: { xs: "13px", md: "16px" },
     boxShadow: "none",
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.background.paper,
@@ -248,7 +246,7 @@ const ProductInformationBottomSection = ({
   };
 
   const actionsHandler = () => (
-    <BottomStack direction="row" width="100%" gap={1.5}>
+    <BottomStack direction="row" width="100%" gap={2}>
       {!productDetailsData?.isCampaignItem && (
         <>
           {!isInCart(productDetailsData?.id) &&

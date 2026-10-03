@@ -2,6 +2,7 @@ import MainApi from "../../../MainApi";
 import { latest_items_api, more_from_store } from "../../../ApiRoutes";
 import { useQuery } from "react-query";
 import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (pageParams) => {
   const { productId, offset, limit } =
@@ -9,7 +10,7 @@ const getData = async (pageParams) => {
   const { data } = await MainApi.get(
     `${more_from_store}/${productId}?offset=${offset}&limit=${limit}`
   );
-  return data;
+  return getApiCollection(data, ["products", "items"]);
 };
 
 export default function useGetMoreFromStores(pageParams, handleSuccess) {

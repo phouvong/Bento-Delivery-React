@@ -5,12 +5,13 @@ import {
   onSingleErrorResponse,
 } from "../../../api-error-response/ErrorResponses";
 import MainApi from "../../../MainApi";
+import { getApiContent } from "../../../getApiContent";
 const getPlaceDetails = async (placeId) => {
   if (placeId) {
     const { data } = await MainApi.get(
       `${placedetails_api}?placeid=${placeId}`
     );
-    return data;
+    return getApiContent(data);
   }
 };
 

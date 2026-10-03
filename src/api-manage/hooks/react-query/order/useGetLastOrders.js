@@ -4,6 +4,7 @@ import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponse
 import { last_orders_api, last_trips_api } from "api-manage/ApiRoutes";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
+import { getApiList } from "../../../getApiContent";
 
 const getData = async (store_id) => {
   const currentModule = getCurrentModuleType();
@@ -13,7 +14,7 @@ const getData = async (store_id) => {
       : `${last_orders_api}${store_id ? "?store_id=" + store_id : ""}`;
 
   const { data } = await MainApi.get(dynamicUrl);
-  return data;
+  return getApiList(data);
 };
 
 const useGetLastOrders = ({ store_id } = {}) => {

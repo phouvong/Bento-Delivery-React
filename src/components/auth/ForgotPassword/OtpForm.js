@@ -143,6 +143,7 @@ const OtpForm = ({
                 value={otp}
                 onChange={setOtp}
                 numInputs={6}
+                inputType="tel"
                 renderInput={(props) => (
                   <input
                     {...props}

@@ -10,7 +10,6 @@ import { useGetOrderCancelReason } from "api-manage/hooks/react-query/order/useG
 import { getToken } from "helper-functions/getToken";
 import CustomImageContainer from "components/CustomImageContainer";
 import adminImage from "../../../../../public/static/profile/fi_4460756 (1).png";
-import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
 
 const PrescriptionOrderCalculation = ({
   t,
@@ -250,21 +249,6 @@ const PrescriptionOrderCalculation = ({
             {trackOrderData && getAmountWithSign(trackOrderData?.order_amount)}
           </Typography>
         </CustomStackFullWidth>
-        {hasProDeliveryReduction ? (
-          <ProSavingsBanner
-            amount={proDeliveryReduction}
-            message={`${t("You saved")} ${getAmountWithSign(
-              proDeliveryReduction
-            )} ${t("on delivery fees as a Pro member.")}`}
-          />
-        ) : hasProOrderDiscount ? (
-          <ProSavingsBanner
-            amount={proOrderDiscount}
-            message={`${t("You saved")} ${getAmountWithSign(
-              proOrderDiscount
-            )} ${t("as a Pro member.")}`}
-          />
-        ) : null}
       </Stack>
       {getToken() && (
         <Stack

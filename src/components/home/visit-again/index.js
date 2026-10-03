@@ -156,7 +156,7 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
     dots: false,
     infinite: false,
     speed: 500,
-    slidesToShow: 3.3,
+    slidesToShow: 3.5,
     slidesToScroll: 1,
     swipeToSlide: true,
     arrows: false,
@@ -164,96 +164,68 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
       {
         breakpoint: 1450,
         settings: {
-          slidesToShow: 3.3,
+          slidesToShow: 3.5,
           slidesToScroll: 1,
-          swipeToSlide: true,
           infinite: false,
+          swipeToSlide: true,
         },
       },
       {
-        breakpoint: 1250,
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+          infinite: false,
+          swipeToSlide: true,
+        },
+      },
+      {
+        breakpoint: 760,
         settings: {
           slidesToShow: 2.8,
-          slidesToScroll: 1,
-          swipeToSlide: true,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 1150,
-        settings: {
-          slidesToShow: 3.1,
-          slidesToScroll: 1,
-          swipeToSlide: true,
-          infinite: false,
-        },
-      },
-      {
-        breakpoint: 800,
-        settings: {
-          slidesToShow: 2.2,
           slidesToScroll: 2,
-          swipeToSlide: true,
           infinite: false,
+          swipeToSlide: true,
         },
       },
       {
-        breakpoint: 700,
+        breakpoint: 695,
         settings: {
-          slidesToShow: 2.5,
+          slidesToShow: 2,
           slidesToScroll: 2,
           swipeToSlide: true,
           initialSlide: 2,
+          infinite: false,
         },
       },
       {
         breakpoint: 600,
         settings: {
-          slidesToShow: 2.1,
+          slidesToShow: 2,
           slidesToScroll: 2,
           swipeToSlide: true,
           initialSlide: 2,
+          infinite: false,
         },
       },
       {
         breakpoint: 480,
         settings: {
-          slidesToShow: 2,
-          slidesToScroll: 1,
-          swipeToSlide: true,
-        },
-      },
-      {
-        breakpoint: 479,
-        settings: {
           slidesToShow: 1.4,
           slidesToScroll: 1,
           swipeToSlide: true,
+          initialSlide: 1,
+          infinite: false,
         },
       },
       {
-        breakpoint: 450,
+        breakpoint: 340,
         settings: {
-          slidesToShow: 1.3,
+          slidesToShow: 1.2,
           slidesToScroll: 1,
           swipeToSlide: true,
-        },
-      },
-      {
-        breakpoint: 375,
-        settings: {
-          slidesToShow: 1.15,
-          slidesToScroll: 1,
-          swipeToSlide: true,
-        },
-      },
-
-      {
-        breakpoint: 350,
-        settings: {
-          slidesToShow: 1,
-          slidesToScroll: 1,
-          swipeToSlide: true,
+          initialSlide: 1,
+          infinite: false,
         },
       },
     ],
@@ -271,7 +243,7 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
         sliderRef={sliderRef}
         currentSlide={currentSlide}
         totalSlides={visitedStores?.length ?? 0}
-        slidesToShow={3.2}
+        slidesToShow={3.5}
         heading={
           <Box>
             <H1
@@ -293,8 +265,9 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
         nopadding="true"
         sx={{
           "& .slick-track": { marginLeft: 0 },
-          "& .slick-slide": { paddingRight: "16px" },
+          "& .slick-slide": { paddingRight: { xs: "12px", sm: "20px" } },
           "& .slick-slide:first-child": { paddingLeft: 0 },
+          "& .slick-slide > div > *": { width: "100% !important" },
         }}
       >
         <Slider
@@ -307,13 +280,14 @@ const VisitAgain = ({ configData, visitedStores, isVisited, isLoading }) => {
                 <VisitAgainShimmerCard key={index} />
               ))
             : visitedStores?.map((item, index) => (
-                <ExpressStoreCard
-                  key={index}
-                  store={item}
-                  showProducts={false}
-                  width="100%"
-                  noShadow
-                />
+                <Box key={index} sx={{ width: "100%" }}>
+                  <ExpressStoreCard
+                    store={item}
+                    showProducts={false}
+                    width="100%"
+                    noShadow
+                  />
+                </Box>
               ))}
         </Slider>
       </SliderCustom>

@@ -46,6 +46,9 @@ const BottomNav = () => {
   const router = useRouter();
   const theme = useTheme();
   const { profileInfo } = useSelector((state) => state.profileInfo);
+  const { selectedModule } = useSelector((state) => state.utilsData);
+  const currentModuleType =
+    selectedModule?.module_type ?? getCurrentModuleType();
   const [wishListOpen, setWishListOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
@@ -112,7 +115,10 @@ const BottomNav = () => {
           boxShadow:
             "0px -1px 2px rgba(0,0,0,0.10), 0px -1px 2px rgba(0,0,0,0.05)",
           zIndex: 1082,
-          display: { xs: "flex", md: "none" },
+          display: "flex",
+          "@media (min-width:1180.01px)": {
+            display: "none",
+          },
         }}
       >
         <Stack
@@ -125,7 +131,7 @@ const BottomNav = () => {
           {NAV_ITEMS.filter((item) =>
             item.key === "offers"
               ? !["ride-share", "rental", "parcel"].includes(
-                  getCurrentModuleType()
+                  currentModuleType
                 )
               : true
           ).map((item) => {

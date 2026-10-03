@@ -171,6 +171,7 @@ const OrderSummery = (props) => {
           price: calculatedPrice,
           add_ons: detail?.add_ons ?? [],
           image_full_url: detail?.image_full_url ?? service?.thumbnail_full_url,
+          bundle_details: detail?.bundle_details ?? null,
           item_details: {
             name: detail?.service_name ?? service?.name ?? detail?.name,
             price,

@@ -1,4 +1,11 @@
-import { alpha, Box, IconButton, Stack, Typography, useTheme } from "@mui/material";
+import {
+  alpha,
+  Box,
+  IconButton,
+  Stack,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import { useRouter } from "next/router";
 import { useTranslation } from "react-i18next";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
@@ -51,10 +58,11 @@ const TopOfferNotifyBanner = ({ title, subtitle, onClick, icon, bannerSx }) => {
       onClick={handleClick}
       sx={{
         width: "100%",
-        backgroundColor: theme.palette.mode === "dark"
-          ? alpha(theme.palette.warning.main, 0.15)
-          : theme.palette.warning.light,
-        border: `1px solid ${theme.palette.customColor.tagBg}`,
+        backgroundColor:
+          theme.palette.mode === "dark"
+            ? alpha(theme.palette.warning.main, 0.15)
+            : theme.palette.warning.light,
+        // border: `1px solid ${theme.palette.customColor.tagBg}`,
         borderRadius: { xs: "12px", sm: "16px" },
         padding: { xs: "12px", sm: "16px" },
         display: "flex",

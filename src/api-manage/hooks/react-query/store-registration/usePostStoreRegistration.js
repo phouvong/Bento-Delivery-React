@@ -6,14 +6,30 @@ import {
   store_registration,
 } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
+import { getApiContent } from "../../../getApiContent";
 import dayjs from "dayjs";
+// Untouched languages fall back to the first language's value (backend rejects empty values).
+const withDefaultLocaleValue = (valuesByLocale = {}) => {
+  const entries = Object.entries(valuesByLocale || {});
+  const defaultValue =
+    entries[0]?.[1]?.trim() ||
+    entries.find(([, value]) => value?.trim())?.[1] ||
+    "";
+  return entries.map(([locale, value]) => [
+    locale,
+    value?.trim() ? value : defaultValue,
+  ]);
+};
+
 const postData = async (storeData) => {
   const translationsR = [];
-  for (const [locale, name] of Object.entries(storeData.restaurant_name)) {
+  for (const [locale, name] of withDefaultLocaleValue(
+    storeData.restaurant_name
+  )) {
     translationsR.push({ id: null, locale, key: "name", value: name });
   }
 
-  for (const [locale, address] of Object.entries(
+  for (const [locale, address] of withDefaultLocaleValue(
     storeData.restaurant_address
   )) {
     translationsR.push({ id: null, locale, key: "address", value: address });
@@ -72,7 +88,10 @@ const postData = async (storeData) => {
     `${store_registration}`,
     formData
   );
-  return responseData;
+  // The envelope's `content` carries `store_id`/`type`/`package_id` — callers
+  // read those directly off the resolved value (`res.type`, not
+  // `res.content.type`), so unwrap here rather than at every call site.
+  return getApiContent(responseData);
 };
 
 export const usePostStoreRegistration = () => {

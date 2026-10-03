@@ -9,9 +9,16 @@ import PhoneIcon from "@mui/icons-material/Phone";
 import { formatPhoneNumber } from "utils/CustomFunctions";
 
 const SenderOrReceiverDetails = (props) => {
-  const { address, phone, title, image, name } = props;
+  const { address, phone, title, image, name, fullWidth } = props;
   return (
-    <Stack spacing={2.5} sx={{ flex: 1, minWidth: 0, maxWidth: { xs: "100%", md: "300px" } }}>
+    <Stack
+      spacing={2.5}
+      sx={{
+        flex: 1,
+        minWidth: 0,
+        maxWidth: fullWidth ? "100%" : { xs: "100%", md: "300px" },
+      }}
+    >
       <Typography
         fontSize={{ xs: "12px", md: "16px" }}
         fontWeight="500"

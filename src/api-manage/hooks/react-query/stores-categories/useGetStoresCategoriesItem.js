@@ -4,6 +4,7 @@ import { useInfiniteQuery } from "react-query";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { getCurrentModuleType } from "../../../../helper-functions/getCurrentModuleType";
 import axios from "axios";
+import { getApiContent } from "../../../getApiContent";
 
 const getData = async (pageParams) => {
   const {
@@ -24,17 +25,17 @@ const getData = async (pageParams) => {
       const { data } = await MainApi.get(
         `${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&min_price=${minMax[0]}&max_price=${minMax[1]}&filter=${JSON.stringify(filterData)}&rating_count=${ratingCount}`
       );
-      return data;
+      return getApiContent(data);
     } else {
       const { data } = await MainApi.get(
         `${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&filter=${JSON.stringify(filterData)}&rating_count=${ratingCount}`
       );
-      return data;
+      return getApiContent(data);
     }
   } else {
     if (minMax[0] !== 0 && minMax[1] !== 1) {
       const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&min_price=${minMax[0]}&max_price=${minMax[1]}&filter=${JSON.stringify(filterData)}&rating_count=${ratingCount}`,
+        `${(process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "")}${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&min_price=${minMax[0]}&max_price=${minMax[1]}&filter=${JSON.stringify(filterData)}&rating_count=${ratingCount}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -43,10 +44,10 @@ const getData = async (pageParams) => {
           },
         }
       );
-      return data;
+      return getApiContent(data);
     } else {
       const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_BASE_URL}${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&filter=${JSON.stringify(filterData)}&rating_count=${ratingCount}`,
+        `${(process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "")}${latest_items_api}?store_id=${storeId}&category_id=${categoryId}&offset=${offset}&limit=${limit}&type=${type}&filter=${JSON.stringify(filterData)}&rating_count=${ratingCount}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -55,7 +56,7 @@ const getData = async (pageParams) => {
           },
         }
       );
-      return data;
+      return getApiContent(data);
     }
   }
 };

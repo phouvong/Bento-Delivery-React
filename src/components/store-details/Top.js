@@ -48,6 +48,8 @@ import { useRouter } from "next/router";
 import StoreShare from "components/store-details/StoreShare";
 import CustomModal from "components/modal";
 import CustomPageBreadCrumb from "components/common/CustomPageBreadCrumb";
+import BogoBanner from "components/bogo/BogoBanner";
+import BogoStoreOffersDrawer from "components/store-details/BogoStoreOffersDrawer";
 
 const PageBackground = styled(Box)(() => ({
   width: "100%",
@@ -238,6 +240,7 @@ const Top = (props) => {
   const [state, dispatchLocal] = useReducer(reducer, initialState);
   const theme = useTheme();
   const [openShareModel, setOpenShareModel] = useState(false);
+  const [openBogoDrawer, setOpenBogoDrawer] = useState(false);
   const [announcementExpanded, setAnnouncementExpanded] = useState(false);
   const [openAnnouncementModal, setOpenAnnouncementModal] = useState(false);
   const dispatchRedux = useDispatch();
@@ -575,6 +578,7 @@ const Top = (props) => {
                   <ClosedNowScheduleWise
                     active={storeDetails?.active}
                     schedules={storeDetails?.schedules}
+                    open={storeDetails?.open}
                     borderRadius="12px"
                   />
                 </LogoBox>
@@ -1143,7 +1147,20 @@ const Top = (props) => {
             </Box>
           );
         })()}
+
+        <BogoBanner
+          storeId={storeDetails?.id}
+          onClick={() => setOpenBogoDrawer(true)}
+        />
       </CustomStackFullWidth>
+
+      <BogoStoreOffersDrawer
+        open={openBogoDrawer}
+        onClose={() => setOpenBogoDrawer(false)}
+        onReopen={() => setOpenBogoDrawer(true)}
+        storeId={storeDetails?.id}
+        storeDetails={storeDetails}
+      />
 
       {state.viewMap && (
         <LocationViewOnMap

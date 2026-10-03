@@ -17,7 +17,6 @@ import {
 } from "@mui/material";
 import DeliveryInfo from "../DeliveryInfo";
 import PaymentMethod from "../PaymentMethod";
-import useGetDistance from "../../../api-manage/hooks/react-query/google-api/useGetDistance";
 import { useDispatch, useSelector } from "react-redux";
 import { useOrderPlace } from "api-manage/hooks/react-query/order-place/useOrderPlace";
 import toast from "react-hot-toast";
@@ -25,18 +24,21 @@ import { t } from "i18next";
 import { baseUrl } from "api-manage/MainApi";
 import Router, { useRouter } from "next/router";
 import useGetZoneId from "../../../api-manage/hooks/react-query/google-api/useGetZone";
-import {
-  formatPhoneNumber,
-  getDeliveryFeeByBadWeather,
-  handleDistance,
-} from "utils/CustomFunctions";
-import useGetVehicleCharge from "../../../api-manage/hooks/react-query/order-place/useGetVehicleCharge";
+import { formatPhoneNumber, handleDistance } from "utils/CustomFunctions";
+import { formatDistanceWithUnit } from "../../../helper-functions/formatDistanceWithUnit";
 import CustomModal from "../../modal";
 import CustomImageContainer from "../../CustomImageContainer";
 import { useTheme } from "@emotion/react";
 import { PrimaryButton } from "../../Map/map.style";
 import TrackParcelOrderDrawer from "../../home/module-wise-components/parcel/TrackParcelOrderDrawer";
 import { getGuestId, getToken } from "helper-functions/getToken";
+import { getZoneIdWithModule } from "helper-functions/getZoneIdWithModule";
+import useGetCheckoutSummary, {
+  isQuoteUnavailable,
+} from "api-manage/hooks/react-query/checkout/useGetCheckoutSummary";
+import useAreaZipSelection from "api-manage/hooks/react-query/checkout/useAreaZipSelection";
+import AreaZipCodeSelect from "components/checkout/AreaZipCodeSelect";
+import { getParcelInformationSummary } from "helper-functions/parcelInformationLabel";
 import OfflineForm from "../item-checkout/offline-payment/OfflineForm";
 import useGetOfflinePaymentOptions from "../../../api-manage/hooks/react-query/offlinePayment/useGetOfflinePaymentOptions";
 import {
@@ -59,21 +61,31 @@ import {
 import { setGuestUserOrderId } from "redux/slices/guestUserInfo";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { useGetTax } from "api-manage/hooks/react-query/order-place/useGetTax";
-import deliveryFree from "components/checkout/DeliveryFree";
 import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
-import { useGetSurgePrice } from "api-manage/hooks/react-query/order-place/useGetSurgePrice";
 import useGetProActiveOffer from "api-manage/hooks/react-query/pro-plans/useGetProActiveOffer";
 import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
-import InfoIcon from "@mui/icons-material/Info";
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
-import DeliveryInstruction from "../DeliveryInstruction";
 import BorderColorIcon from "@mui/icons-material/BorderColor";
 import LoadingButton from "@mui/lab/LoadingButton";
 
-const ParcelCheckout = () => {
+const normalizeZoneIdScalar = (raw) => {
+  if (raw == null) return undefined;
+  let scalar = raw;
+  if (Array.isArray(scalar)) scalar = scalar[0];
+  else if (typeof scalar === "string" && scalar.trim().startsWith("[")) {
+    try {
+      const parsed = JSON.parse(scalar);
+      scalar = Array.isArray(parsed) ? parsed[0] : parsed;
+    } catch {
+      scalar = scalar.replace(/^\[|\]$/g, "");
+    }
+  }
+  return scalar != null ? Number(scalar) : undefined;
+};
+
+const ParcelCheckout = ({ distanceData }) => {
   const theme = useTheme();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -82,11 +94,19 @@ const ParcelCheckout = () => {
   const { parcelInfo } = useSelector((state) => state.parcelInfoData);
   const { profileInfo } = useSelector((state) => state.profileInfo);
   const { offlineInfoStep, offlinePaymentInfo } = useSelector(
-    (state) => state.offlinePayment
+    (state) => state.offlinePayment,
   );
   console.log({ profileInfo });
 
-  const { parcelCategories } = useSelector((state) => state.parcelCategories);
+  const { parcelCategories, parcelWeight, parcelDimension } = useSelector(
+    (state) => state.parcelCategories,
+  );
+  // "Small, Light (2-4Kg)" — what the customer chose in the parcel information
+  // modal, echoed in the billing panel next to the parcel type.
+  const parcelInformationSummary = getParcelInformationSummary(
+    parcelWeight,
+    parcelDimension,
+  );
   const [address, setAddress] = useState(undefined);
   const [deliveryTip, setDeliveryTip] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState("cash_on_delivery");
@@ -110,13 +130,8 @@ const ParcelCheckout = () => {
     lng: parcelInfo?.senderLocations?.lng,
   };
   const { data: zoneData } = useGetZoneId(receiverLoacation, zoneIdEnabled);
-  const { data, refetch } = useGetDistance(
-    parcelInfo?.senderLocations,
-    parcelInfo?.receiverLocations
-  );
-  console.log({ parcelInfo });
+  const zonesById = useSelector((state) => state.zoneData?.zonesById);
 
-  const { data: surgePrice, mutate: surgeMutate } = useGetSurgePrice();
   const token = getToken();
   const guest_id = getGuestId();
   const formik = useFormik({
@@ -140,236 +155,13 @@ const ParcelCheckout = () => {
     formik.setFieldValue("confirm_password", value);
   };
   const tempDistance = handleDistance(
-    data,
+    distanceData,
     {
       latitude: parcelInfo?.receiverLocations?.latitude,
       longitude: parcelInfo?.receiverLocations?.longitude,
     },
-    address
+    address,
   );
-  const {
-    data: offlinePaymentOptions,
-    refetch: refetchOfflinePaymentOptions,
-    isLoading: offlineIsLoading,
-  } = useGetOfflinePaymentOptions();
-  useEffect(() => {
-    refetchOfflinePaymentOptions();
-  }, []);
-  const { mutate: offlineMutate, isLoading: offlinePaymentLoading } =
-    useOfflinePayment();
-  const {
-    data: extraCharge,
-    isLoading: extraChargeLoading,
-    refetch: extraChargeRefetch,
-  } = useGetVehicleCharge({ tempDistance });
-  const {
-    data: deliveryInstruction,
-    isLoading: deliveryInstructionIsLoading,
-    refetch: deliveryInstructionRefetch,
-  } = useGetDeliveryInstruction();
-  useEffect(() => {
-    if (data) {
-      extraChargeRefetch();
-    }
-  }, [data]);
-  useEffect(() => {
-    refetch();
-  }, [parcelInfo]);
-  useEffect(() => {
-    deliveryInstructionRefetch();
-  }, []);
-
-  useEffect(() => {
-    const currentLatLng = JSON.parse(localStorage.getItem("currentLatLng"));
-    const location = localStorage.getItem("location");
-    const zoneId = JSON.parse(localStorage.getItem("zoneid"));
-    setCurrentZoneId(zoneId?.[0]);
-    setAddress({
-      ...currentLatLng,
-      latitude: currentLatLng?.lat,
-      longitude: currentLatLng?.lng,
-      address: parcelInfo?.senderAddress,
-      address_type: "Selected Address",
-    });
-  }, []);
-  const handleOffineOrder = async (data) => {
-    const offlinePaymentData = {
-      ...(data || offlinePaymentInfo),
-      order_id: orderId || order_id,
-      guest_id: guest_id,
-    };
-    dispatch(setOfflineInfoStep(3));
-    dispatch(setOrderDetailsModal(true));
-    if (offlinePaymentData) {
-      try {
-        await offlineMutate(offlinePaymentData, {
-          onSuccess: () => {
-            if (!token) {
-              Router.push(
-                {
-                  pathname: "/home",
-                  query: { order_id: orderId || order_id },
-                },
-                undefined,
-                { shallow: true }
-              );
-            } else {
-              Router.push(
-                {
-                  pathname: "/profile",
-                  query: {
-                    orderId: orderId || order_id,
-                    page: "my-orders",
-                    from: "checkout",
-                  },
-                },
-                undefined,
-                { shallow: true }
-              );
-            }
-          },
-          onError: onErrorResponse,
-        });
-        setOrderSuccess(true);
-      } catch (error) {
-        // toast.error(error?.response?.data?.message || t("Failed to process offline payment"));
-      }
-    }
-  };
-  const zoneId = JSON.parse(localStorage.getItem("zoneid"));
-  useEffect(() => {
-    if (parcelCategories && zoneId) {
-      const temData = {
-        zone_id: zoneId?.[0],
-        module_id: parcelCategories?.module_id,
-        date_time: new Date().toISOString(),
-        guest_id: getGuestId(),
-      };
-      surgeMutate(temData, {
-        onError: onErrorResponse,
-      });
-    }
-  }, [parcelCategories]);
-  // useEffect(() => {
-  //   if (offlineCheck) {
-  //     handleOffineOrder();
-  //   }
-  // }, [orderId]);
-  const parcelDeliveryFree = () => {
-    let convertedDistance = handleDistance(
-      data,
-      parcelInfo?.senderLocations,
-      parcelInfo?.receiverLocations
-    );
-    if (
-      parcelCategories?.parcel_per_km_shipping_charge === 0 ||
-      parcelCategories?.parcel_per_km_shipping_charge > 0
-    ) {
-      let deliveryFee =
-        convertedDistance * parcelCategories?.parcel_per_km_shipping_charge;
-      if (deliveryFee > parcelCategories?.parcel_minimum_shipping_charge) {
-        return getDeliveryFeeByBadWeather(
-          deliveryFee + extraCharge,
-          surgePrice
-        );
-      } else {
-        return getDeliveryFeeByBadWeather(
-          parcelCategories?.parcel_minimum_shipping_charge + extraCharge,
-          surgePrice
-        );
-      }
-    } else {
-      let deliveryFee =
-        convertedDistance * configData?.parcel_per_km_shipping_charge;
-      if (deliveryFee > configData?.parcel_minimum_shipping_charge) {
-        return getDeliveryFeeByBadWeather(
-          deliveryFee + extraCharge,
-          surgePrice
-        );
-      } else {
-        return getDeliveryFeeByBadWeather(
-          configData?.parcel_minimum_shipping_charge + extraCharge,
-          surgePrice
-        );
-      }
-    }
-  };
-  const proFeatureEnabled = configData?.pro_member_status === 1;
-  const hasToken = !!token;
-  const { data: activeOfferRaw } = useGetProActiveOffer({
-    enabled: proFeatureEnabled && hasToken,
-  });
-  const activeOffer = activeOfferRaw?.data ?? activeOfferRaw ?? null;
-  const isProActive = activeOffer?.status === true;
-  const proBenefit = activeOffer?.benefit ?? null;
-  const proMinOrderAmount = Number(proBenefit?.min_order_amount) || 0;
-  const proMinSatisfied =
-    proBenefit?.min_order_status !== 1 ||
-    Number(parcelDeliveryFree() || 0) >= proMinOrderAmount;
-  const proDeliveryBenefitActive =
-    isProActive &&
-    proBenefit?.type === "delivery_fee" &&
-    proMinSatisfied &&
-    Number(parcelDeliveryFree() || 0) > 0;
-  const proDeliveryOfferType = proBenefit?.offer_type;
-  const proDeliveryDiscountPct =
-    Number(proBenefit?.charge_discount_percentage) || 0;
-  const computeProDeliveryDiscount = (rawFee) => {
-    if (!proDeliveryBenefitActive) return 0;
-    const fee = Number(rawFee) || 0;
-    if (
-      proDeliveryOfferType === "free" ||
-      proDeliveryOfferType === "full_free"
-    ) {
-      return fee;
-    }
-    if (proDeliveryOfferType === "partial_free" && proDeliveryDiscountPct > 0) {
-      return (fee * proDeliveryDiscountPct) / 100;
-    }
-    return 0;
-  };
-  const rawParcelDeliveryFee = Number(parcelDeliveryFree() || 0);
-  const proDeliveryDiscount = computeProDeliveryDiscount(rawParcelDeliveryFee);
-  const effectiveParcelDeliveryFee = Math.max(
-    0,
-    rawParcelDeliveryFee - proDeliveryDiscount
-  );
-  const proCoversDelivery =
-    proDeliveryBenefitActive &&
-    (proDeliveryOfferType === "free" || proDeliveryOfferType === "full_free") &&
-    proDeliveryDiscount > 0;
-  const proSavingsMessage = (() => {
-    if (!proDeliveryBenefitActive) return undefined;
-    // Parcel is delivery-only — keep the qualifier in delivery terms.
-    const hasMin = proBenefit?.min_order_status === 1 && proMinOrderAmount > 0;
-    const minAmount = hasMin ? getAmountWithSign(proMinOrderAmount) : "";
-    if (proCoversDelivery) {
-      return hasMin
-        ? t("Free delivery as a Pro member on deliveries above {{amount}}", {
-            amount: minAmount,
-          })
-        : t("Free delivery as a Pro member");
-    }
-    if (proDeliveryDiscountPct > 0) {
-      return hasMin
-        ? t(
-            "{{percent}}% off on delivery fee as a Pro member on deliveries above {{amount}}",
-            { percent: proDeliveryDiscountPct, amount: minAmount }
-          )
-        : t("{{percent}}% off on delivery fee as a Pro member", {
-            percent: proDeliveryDiscountPct,
-          });
-    }
-    return hasMin
-      ? t(
-          "Delivery fee benefit as a Pro member on deliveries above {{amount}}",
-          {
-            amount: minAmount,
-          }
-        )
-      : t("Delivery fee benefit as a Pro member");
-  })();
-  console.log({ parcelInfo });
 
   const receiverDetails = JSON.stringify({
     id: null,
@@ -408,6 +200,180 @@ const ParcelCheckout = () => {
     house: parcelInfo?.house,
     floor: parcelInfo?.floor,
   });
+
+  // One server-side quote for the whole parcel price. The fee engine runs
+  // base -> weight -> dimension -> category -> clamp -> surge -> free delivery
+  // -> Pro in a fixed order, so every number below is read back rather than
+  // recomputed: quoting the category's flat charge alone under-quoted a real
+  // parcel by 150 (60 vs 210 once the brackets were attached).
+  // Parcel is always a delivery, so the zone's area/zip rule applies here too.
+  const areaZip = useAreaZipSelection({
+    orderType: "parcel",
+    // "" (not undefined) so the hook skips the call instead of falling back to the stored zone.
+    zoneId: getZoneIdWithModule(zoneData?.zone_id, zonesById, "parcel") ?? "",
+  });
+
+  const checkoutSummaryQueryShim = useGetCheckoutSummary({
+    orderType: "parcel",
+    distance: tempDistance,
+    orderAmount: 0,
+    latitude: address?.latitude,
+    longitude: address?.longitude,
+    parcelCategoryId: parcelCategories?.id,
+    receiverDetails,
+    weightId: parcelWeight?.id ?? null,
+    dimensionId: parcelDimension?.id ?? null,
+    ...(areaZip.summaryParams || {}),
+  });
+  const checkoutSummary = checkoutSummaryQueryShim?.data;
+  const checkoutSummaryLoading = checkoutSummaryQueryShim?.isLoading;
+  const summaryDelivery = checkoutSummary?.delivery;
+  const quoteUnavailable = isQuoteUnavailable(checkoutSummaryQueryShim);
+  const summaryTax = checkoutSummary?.tax;
+  // Passed through untouched — the screens read `price`, `price_type`,
+  // `customer_note` and `customer_note_status` off it.
+  const surgePrice = checkoutSummary?.surge;
+  const {
+    data: offlinePaymentOptions,
+    refetch: refetchOfflinePaymentOptions,
+    isLoading: offlineIsLoading,
+  } = useGetOfflinePaymentOptions();
+  useEffect(() => {
+    refetchOfflinePaymentOptions();
+  }, []);
+  const { mutate: offlineMutate, isLoading: offlinePaymentLoading } =
+    useOfflinePayment();
+  const {
+    data: deliveryInstruction,
+    isLoading: deliveryInstructionIsLoading,
+  } = useGetDeliveryInstruction({ limit: 10, offset: 1 });
+
+  useEffect(() => {
+    setAddress({
+      latitude: parcelInfo?.senderLocations?.lat,
+      longitude: parcelInfo?.senderLocations?.lng,
+      address: parcelInfo?.senderAddress,
+      address_type: "Selected Address",
+    });
+  }, [
+    parcelInfo?.senderAddress,
+    parcelInfo?.senderLocations?.lat,
+    parcelInfo?.senderLocations?.lng,
+  ]);
+
+  useEffect(() => {
+    const scalar = normalizeZoneIdScalar(zoneData?.zone_id);
+    if (scalar != null) setCurrentZoneId(scalar);
+  }, [zoneData?.zone_id]);
+  const handleOffineOrder = async (data) => {
+    const offlinePaymentData = {
+      ...(data || offlinePaymentInfo),
+      order_id: orderId || order_id,
+      guest_id: guest_id,
+    };
+    dispatch(setOfflineInfoStep(3));
+    dispatch(setOrderDetailsModal(true));
+    if (offlinePaymentData) {
+      try {
+        await offlineMutate(offlinePaymentData, {
+          onSuccess: () => {
+            if (!token) {
+              Router.push(
+                {
+                  pathname: "/home",
+                  query: { order_id: orderId || order_id },
+                },
+                undefined,
+                { shallow: true },
+              );
+            } else {
+              Router.push(
+                {
+                  pathname: "/profile",
+                  query: {
+                    orderId: orderId || order_id,
+                    page: "my-orders",
+                    from: "checkout",
+                  },
+                },
+                undefined,
+                { shallow: true },
+              );
+            }
+          },
+          onError: onErrorResponse,
+        });
+        setOrderSuccess(true);
+      } catch (error) {
+        // toast.error(error?.response?.data?.message || t("Failed to process offline payment"));
+      }
+    }
+  };
+  // useEffect(() => {
+  //   if (offlineCheck) {
+  //     handleOffineOrder();
+  //   }
+  // }, [orderId]);
+  // The "before" figure the UI strikes through — base + surge, ahead of the
+  // free-delivery and Pro overrides.
+  const parcelDeliveryFree = () =>
+    Number(summaryDelivery?.base_delivery_charge) || 0;
+  const proFeatureEnabled = configData?.pro_member_status === 1;
+  const hasToken = !!token;
+  const { data: activeOfferRaw } = useGetProActiveOffer({
+    enabled: proFeatureEnabled && hasToken,
+  });
+  const activeOffer = activeOfferRaw?.data ?? activeOfferRaw ?? null;
+  const isProActive = activeOffer?.status === true;
+  const proBenefit = activeOffer?.benefit ?? null;
+  const proMinOrderAmount = Number(proBenefit?.min_order_amount) || 0;
+  const proDeliveryOfferType = proBenefit?.offer_type;
+  const proDeliveryDiscountPct =
+    Number(proBenefit?.charge_discount_percentage) || 0;
+
+  // Amounts come from the server's `delivery` block: it has already applied the
+  // free-delivery overrides and the Pro percentage in the order the charge is
+  // billed in. Only the wording of the savings banner still reads `proBenefit`.
+  const rawParcelDeliveryFee = parcelDeliveryFree();
+  const proDeliveryDiscount =
+    Number(summaryDelivery?.pro_customer_savings) || 0;
+  const effectiveParcelDeliveryFee =
+    Number(summaryDelivery?.delivery_charge) || 0;
+  const proDeliveryBenefitActive = proDeliveryDiscount > 0;
+  const proCoversDelivery =
+    proDeliveryBenefitActive && effectiveParcelDeliveryFee === 0;
+  const proSavingsMessage = (() => {
+    if (!proDeliveryBenefitActive) return undefined;
+    // Parcel is delivery-only — keep the qualifier in delivery terms.
+    const hasMin = proBenefit?.min_order_status === 1 && proMinOrderAmount > 0;
+    const minAmount = hasMin ? getAmountWithSign(proMinOrderAmount) : "";
+    if (proCoversDelivery) {
+      return hasMin
+        ? t("Free delivery as a Pro member on deliveries above {{amount}}", {
+            amount: minAmount,
+          })
+        : t("Free delivery as a Pro member");
+    }
+    if (proDeliveryDiscountPct > 0) {
+      return hasMin
+        ? t(
+            "{{percent}}% off on delivery fee as a Pro member on deliveries above {{amount}}",
+            { percent: proDeliveryDiscountPct, amount: minAmount },
+          )
+        : t("{{percent}}% off on delivery fee as a Pro member", {
+            percent: proDeliveryDiscountPct,
+          });
+    }
+    return hasMin
+      ? t(
+          "Delivery fee benefit as a Pro member on deliveries above {{amount}}",
+          {
+            amount: minAmount,
+          },
+        )
+      : t("Delivery fee benefit as a Pro member");
+  })();
+
   const isDigital =
     paymentMethod !== "cash_on_delivery" &&
     paymentMethod !== "wallet" &&
@@ -426,6 +392,14 @@ const ParcelCheckout = () => {
     tax_amount: 0,
     receiver_details: receiverDetails,
     parcel_category_id: parcelCategories?.id,
+    // Weight/size brackets chosen in the parcel information modal. The server
+    // prices a parcel as base + weight + dimension + category, so these decide
+    // part of the delivery charge — `order/place` and `checkout-summary` take
+    // them as nullable integers under exactly these names (not
+    // `parcel_weight_id` / `parcel_dimension_id`), and reject anything
+    // non-integer. Sent as JSON, so an explicit null stays null.
+    weight_id: parcelWeight?.id ?? null,
+    dimension_id: parcelDimension?.id ?? null,
     charge_payer: paidBy,
     dm_tips: deliveryTip,
     order_note: customNote,
@@ -457,21 +431,23 @@ const ParcelCheckout = () => {
   };
 
   const { data: order, isLoading, mutate: orderMutation } = useOrderPlace();
-  const { data: taxData, mutate } = useGetTax();
-
-  useEffect(() => {
-    if (parcelDeliveryFree()) {
-      const newOrderObject = {
-        ...orderMutationObject,
-        order_amount: effectiveParcelDeliveryFee,
-      };
-      mutate(newOrderObject, {
-        onError: onErrorResponse,
-      });
-    }
-  }, [parcelDeliveryFree()]);
+  // `checkout-summary` returns tax alongside the fee, so the separate get-Tax
+  // round trip (and the effect that re-fired it on every fee change) is gone.
+  const taxData = summaryTax;
+  const isTaxIncluded =
+    taxData?.tax_included != null
+      ? taxData.tax_included === 1
+      : taxData?.tax_status === "included";
 
   const orderPlace = () => {
+    if (quoteUnavailable) {
+      toast.error(t("Delivery charge is unavailable for this address"));
+      return;
+    }
+    if (!areaZip.validate()) {
+      toast.error(t("Please select an area/zip code to continue"));
+      return;
+    }
     if (paidBy === "sender") {
       const handleSuccess = (res) => {
         if (res) {
@@ -483,7 +459,7 @@ const ParcelCheckout = () => {
               setOrderInformation({
                 ...res,
                 phone: formatPhoneNumber(parcelInfo?.senderPhone),
-              })
+              }),
             );
             dispatch(setOrderDetailsModalOpen(true));
           }
@@ -527,7 +503,7 @@ const ParcelCheckout = () => {
                   },
                 },
                 undefined,
-                { shallow: true }
+                { shallow: true },
               );
             }
           } else if (paymentMethod === "offline_payment") {
@@ -536,7 +512,7 @@ const ParcelCheckout = () => {
               setOrderInformation({
                 ...res,
                 phone: formatPhoneNumber(parcelInfo?.senderPhone),
-              })
+              }),
             );
             // setOfflineCheck(true);
             toast.success(res?.message);
@@ -547,7 +523,7 @@ const ParcelCheckout = () => {
                 query: { page: "parcel", method: "offline" },
               },
               undefined,
-              { shallow: true }
+              { shallow: true },
             );
           } else {
             toast.success(res?.message);
@@ -559,7 +535,7 @@ const ParcelCheckout = () => {
                   query: { order_id: res?.order_id },
                 },
                 undefined,
-                { shallow: true }
+                { shallow: true },
               );
             } else {
               Router.push(
@@ -572,7 +548,7 @@ const ParcelCheckout = () => {
                   },
                 },
                 undefined,
-                { shallow: true }
+                { shallow: true },
               );
             }
             setOrderId(res?.order_id);
@@ -587,7 +563,7 @@ const ParcelCheckout = () => {
           error?.response?.data?.errors?.forEach((item) =>
             toast.error(item.message, {
               position: "bottom-right",
-            })
+            }),
           );
         },
       });
@@ -604,7 +580,7 @@ const ParcelCheckout = () => {
                 setOrderInformation({
                   ...res,
                   phone: formatPhoneNumber(parcelInfo?.senderPhone),
-                })
+                }),
               );
               Router.push(
                 {
@@ -612,7 +588,7 @@ const ParcelCheckout = () => {
                   query: { order_id: res?.order_id },
                 },
                 undefined,
-                { shallow: true }
+                { shallow: true },
               );
             } else {
               Router.push(
@@ -625,7 +601,7 @@ const ParcelCheckout = () => {
                   },
                 },
                 undefined,
-                { shallow: true }
+                { shallow: true },
               );
             }
             setOrderId(res?.order_id);
@@ -638,13 +614,13 @@ const ParcelCheckout = () => {
             error?.response?.data?.errors?.forEach((item) =>
               toast.error(item.message, {
                 position: "bottom-right",
-              })
+              }),
             );
           },
         });
       } else {
         toast.error(
-          t("Without any payment method, you can not place the order.")
+          t("Without any payment method, you can not place the order."),
         );
       }
     }
@@ -659,7 +635,7 @@ const ParcelCheckout = () => {
       getReferDiscount(
         effectiveParcelDeliveryFee,
         profileInfo?.discount_amount,
-        profileInfo?.discount_amount_type
+        profileInfo?.discount_amount_type,
       )
     : effectiveParcelDeliveryFee +
       Number(deliveryTip) +
@@ -671,7 +647,7 @@ const ParcelCheckout = () => {
 
     // Filter the items where module_type is "parcel"
     return zoneData.zone_data.filter((item) =>
-      item?.modules?.find((module) => module?.module_type === "parcel")
+      item?.modules?.find((module) => module?.module_type === "parcel"),
     );
   };
   const breadcrumbItems = [
@@ -684,7 +660,12 @@ const ParcelCheckout = () => {
           style={{ fontSize: 12, display: "flex", lineHeight: 1 }}
         />
       ),
-      onRedirect: "/parcel-delivery-info",
+      onRedirect: "/home?module=parcel",
+    },
+    {
+      key: "parcel-delivery",
+      label: t("Parcel Delivery"),
+      onRedirect: "/parcel-delivery-info?module=parcel",
     },
     {
       key: "checkout",
@@ -692,24 +673,29 @@ const ParcelCheckout = () => {
     },
   ];
 
-  const extraText = t("This charge includes extra vehicle charge");
-  const proTooltipText =
-    proDeliveryBenefitActive && proDeliveryDiscount > 0
-      ? ` ${t("Pro discount applied")}: -${getAmountWithSign(
-          proDeliveryDiscount
+  // The vehicle charge is folded into `base_delivery_charge` by the server, so
+  // there is no separate figure to caption any more.
+  const extraCharge = 0;
+  const extraChargeLoading = checkoutSummaryLoading;
+  const deliveryTooltipLines = [
+    Number(summaryDelivery?.surge_amount) > 0
+      ? `${t("Includes a surge charge of")} ${getAmountWithSign(
+          summaryDelivery?.surge_amount,
         )}`
-      : "";
-  const deliveryToolTipsText = `${
-    extraCharge > 0 ? `${extraText} ${getAmountWithSign(extraCharge)}` : ""
-  }${
+      : null,
     surgePrice?.price > 0 && surgePrice?.customer_note_status !== 0
-      ? ` ${surgePrice?.customer_note} ${
+      ? `${t("Surge")}: ${
           surgePrice?.type === "amount"
             ? getAmountWithSign(surgePrice?.price)
             : `${surgePrice?.price}%`
         }`
-      : ""
-  }${proTooltipText}`.trim();
+      : null,
+    proDeliveryBenefitActive && proDeliveryDiscount > 0
+      ? `${t("Pro discount applied")}: -${getAmountWithSign(
+          proDeliveryDiscount,
+        )}`
+      : null,
+  ].filter(Boolean);
 
   return (
     <>
@@ -749,51 +735,68 @@ const ParcelCheckout = () => {
           <CustomStackFullWidth>
             <Grid container spacing={3}>
               <Grid item xs={12} sm={12} md={8}>
-                <DeliveryInfo
-                  configData={configData}
-                  parcelInfo={parcelInfo}
-                  parcelCategories={parcelCategories}
-                  deliveryInstruction={deliveryInstruction}
-                  customerInstruction={customerInstruction}
-                  setCustomerInstruction={setCustomerInstruction}
-                  customNote={customNote}
-                  setCustomNote={setCustomNote}
-                  check={check}
-                  setCheck={setCheck}
-                  formik={formik}
-                  passwordHandler={passwordHandler}
-                  confirmPasswordHandler={confirmPasswordHandler}
-                  data={data}
-                  parcelDeliveryFree={parcelDeliveryFree}
-                  senderLocation={parcelInfo?.senderLocations}
-                  receiverLocation={parcelInfo?.receiverLocations}
-                  extraChargeLoading={extraChargeLoading}
-                  deliveryTip={deliveryTip}
-                  setDeliveryTip={setDeliveryTip}
-                  paidBy={paidBy}
-                  setPaidBy={setPaidBy}
-                  zoneData={zoneData}
-                  setPaymentMethod={setPaymentMethod}
-                  paymentMethod={paymentMethod}
-                  selectedPaymentMethod={selectedPaymentMethod}
-                  setSelectedPaymentMethod={setSelectedPaymentMethod}
-                  isLoading={isLoading}
-                  orderPlace={orderPlace}
-                  // zoneData={{ data: zoneData }}
-                  // configData={configData}
-                  storeZoneId={currentZoneId}
-                  parcel="true"
-                  offlinePaymentOptions={offlinePaymentOptions}
-                  getParcelPayment={getParcelPayment}
-                  walletBalance={profileInfo?.wallet_balance}
-                  payableAmount={
-                    effectiveParcelDeliveryFee +
-                    parseFloat(deliveryTip || 0) +
-                    (configData?.additional_charge || 0)
-                  }
-                />
+                {/* The zone's area/zip rule prices the parcel too, so ask for
+                    it above the delivery information block. Spacing matches
+                    DeliveryInfo's own internal `spacing={3}` between sections. */}
+                <Stack spacing={3}>
+                  <AreaZipCodeSelect areaZip={areaZip} />
+                  <DeliveryInfo
+                    configData={configData}
+                    parcelInfo={parcelInfo}
+                    parcelCategories={parcelCategories}
+                    deliveryInstruction={deliveryInstruction}
+                    customerInstruction={customerInstruction}
+                    setCustomerInstruction={setCustomerInstruction}
+                    customNote={customNote}
+                    setCustomNote={setCustomNote}
+                    check={check}
+                    setCheck={setCheck}
+                    formik={formik}
+                    passwordHandler={passwordHandler}
+                    confirmPasswordHandler={confirmPasswordHandler}
+                    data={distanceData}
+                    parcelDeliveryFree={parcelDeliveryFree}
+                    senderLocation={parcelInfo?.senderLocations}
+                    receiverLocation={parcelInfo?.receiverLocations}
+                    extraChargeLoading={extraChargeLoading}
+                    deliveryTip={deliveryTip}
+                    setDeliveryTip={setDeliveryTip}
+                    paidBy={paidBy}
+                    setPaidBy={setPaidBy}
+                    zoneData={zoneData}
+                    setPaymentMethod={setPaymentMethod}
+                    paymentMethod={paymentMethod}
+                    selectedPaymentMethod={selectedPaymentMethod}
+                    setSelectedPaymentMethod={setSelectedPaymentMethod}
+                    isLoading={isLoading}
+                    orderPlace={orderPlace}
+                    // zoneData={{ data: zoneData }}
+                    // configData={configData}
+                    storeZoneId={currentZoneId}
+                    parcel="true"
+                    offlinePaymentOptions={offlinePaymentOptions}
+                    getParcelPayment={getParcelPayment}
+                    walletBalance={profileInfo?.wallet_balance}
+                    payableAmount={
+                      effectiveParcelDeliveryFee +
+                      parseFloat(deliveryTip || 0) +
+                      (configData?.additional_charge || 0)
+                    }
+                  />
+                </Stack>
               </Grid>
-              <Grid item xs={12} sm={12} md={4}>
+              <Grid
+                item
+                xs={12}
+                sm={12}
+                md={4}
+                sx={{
+                  position: { md: "sticky" },
+                  top: { md: "48px" },
+                  alignSelf: { md: "flex-start" },
+                  maxHeight: { md: "calc(100vh - 32px)" },
+                }}
+              >
                 {currentZoneId && zoneData && (
                   <Card
                     sx={{
@@ -829,13 +832,26 @@ const ParcelCheckout = () => {
                               borderRadius="8px"
                             />
                           )}
-                          <Typography
-                            fontWeight={700}
-                            fontSize="15px"
-                            color="text.primary"
-                          >
-                            {parcelInfo?.name}
-                          </Typography>
+                          <Stack minWidth={0}>
+                            <Typography
+                              fontWeight={700}
+                              fontSize="15px"
+                              color="text.primary"
+                            >
+                              {parcelInfo?.name}
+                            </Typography>
+                            {parcelInformationSummary && (
+                              <Typography
+                                fontSize="14px"
+                                color={
+                                  theme.palette.neutral?.[500] ||
+                                  theme.palette.text.secondary
+                                }
+                              >
+                                {parcelInformationSummary}
+                              </Typography>
+                            )}
+                          </Stack>
                         </Stack>
                       )}
                     </Stack>
@@ -860,6 +876,30 @@ const ParcelCheckout = () => {
                           padding: 0,
                         }}
                       >
+                        {formatDistanceWithUnit(tempDistance, configData) ? (
+                          <Stack
+                            direction="row"
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Typography
+                              fontSize="14px"
+                              color={
+                                theme.palette.neutral?.[500] ||
+                                theme.palette.text.secondary
+                              }
+                            >
+                              {t("Distance")}
+                            </Typography>
+                            <Typography
+                              fontSize="14px"
+                              fontWeight={500}
+                              color="text.primary"
+                            >
+                              {formatDistanceWithUnit(tempDistance, configData)}
+                            </Typography>
+                          </Stack>
+                        ) : null}
                         <Stack
                           direction="row"
                           justifyContent="space-between"
@@ -878,22 +918,40 @@ const ParcelCheckout = () => {
                               }
                             >
                               {t("Delivery Fee")}
-                              {extraCharge > 0 ||
-                              surgePrice?.price > 0 ||
-                              (proDeliveryBenefitActive &&
-                                proDeliveryDiscount > 0) ? (
-                                <Tooltip
-                                  title={deliveryToolTipsText}
-                                  placement="top"
-                                  arrow={true}
-                                >
-                                  <InfoIcon
-                                    sx={{ fontSize: "11px", ml: 0.5 }}
-                                  />
-                                </Tooltip>
-                              ) : null}
                             </Typography>
-                            {/* {proCoversDelivery ? (
+                            {deliveryTooltipLines.length > 0 ? (
+                              <Tooltip
+                                title={
+                                  <Stack spacing={0.5}>
+                                    {deliveryTooltipLines.map(
+                                      (line, index) => (
+                                        <Typography
+                                          key={index}
+                                          sx={{
+                                            fontSize: "12px",
+                                            lineHeight: 1.4,
+                                          }}
+                                        >
+                                          {line}
+                                        </Typography>
+                                      ),
+                                    )}
+                                  </Stack>
+                                }
+                                placement="top"
+                                arrow={true}
+                              >
+                                <i
+                                  className="fi fi-rs-info"
+                                  style={{
+                                    fontSize: "11px",
+                                    display: "flex",
+                                    lineHeight: 1,
+                                  }}
+                                />
+                              </Tooltip>
+                            ) : null}
+                            {proDeliveryBenefitActive ? (
                               <Typography
                                 component="span"
                                 sx={{
@@ -911,7 +969,7 @@ const ParcelCheckout = () => {
                               >
                                 {t("Pro")}
                               </Typography>
-                            ) : null} */}
+                            ) : null}
                           </Stack>
                           {proDeliveryBenefitActive &&
                           proDeliveryDiscount > 0 &&
@@ -934,8 +992,28 @@ const ParcelCheckout = () => {
                                 {effectiveParcelDeliveryFee === 0
                                   ? t("Free")
                                   : getAmountWithSign(
-                                      effectiveParcelDeliveryFee
+                                      effectiveParcelDeliveryFee,
                                     )}
+                              </Typography>
+                            </Stack>
+                          ) : effectiveParcelDeliveryFee === 0 &&
+                            rawParcelDeliveryFee > 0 ? (
+                            <Stack
+                              direction="row"
+                              alignItems="center"
+                              justifyContent="flex-end"
+                              spacing={0.5}
+                            >
+                              <Typography
+                                sx={{
+                                  textDecoration: "line-through",
+                                  opacity: 0.6,
+                                }}
+                              >
+                                {getAmountWithSign(rawParcelDeliveryFee)}
+                              </Typography>
+                              <Typography color="primary" fontWeight={600}>
+                                {t("Free")}
                               </Typography>
                             </Stack>
                           ) : (
@@ -944,7 +1022,7 @@ const ParcelCheckout = () => {
                               fontWeight={500}
                               color="text.primary"
                             >
-                              {getAmountWithSign(rawParcelDeliveryFee)}
+                              {getAmountWithSign(effectiveParcelDeliveryFee)}
                             </Typography>
                           )}
                         </Stack>
@@ -971,8 +1049,7 @@ const ParcelCheckout = () => {
                             {getAmountWithSign(deliveryTip)}
                           </Typography>
                         </Stack>
-                        {taxData?.tax_included !== null &&
-                        taxData?.tax_included === 0 ? (
+                        {!isTaxIncluded && Number(taxData?.tax_amount) > 0 ? (
                           <Stack
                             direction="row"
                             justifyContent="space-between"
@@ -992,7 +1069,7 @@ const ParcelCheckout = () => {
                               fontWeight={500}
                               color="text.primary"
                             >
-                              {taxData?.tax_included === 0 && <>{"(+)"}</>}
+                              {"(+)"}
                               {getAmountWithSign(taxData?.tax_amount)}
                             </Typography>
                           </Stack>
@@ -1051,20 +1128,19 @@ const ParcelCheckout = () => {
                           }
                         >
                           {t("Subtotal")}
-                          {taxData?.tax_included === 1 &&
-                            taxData?.tax_included !== null && (
-                              <Typography
-                                fontSize="11px"
-                                component="span"
-                                sx={{ marginInlineStart: "5px" }}
-                                color={
-                                  theme.palette.neutral?.[500] ||
-                                  theme.palette.text.secondary
-                                }
-                              >
-                                {"(Vat/Tax incl.)"}
-                              </Typography>
-                            )}
+                          {isTaxIncluded && (
+                            <Typography
+                              fontSize="11px"
+                              component="span"
+                              sx={{ marginInlineStart: "5px" }}
+                              color={
+                                theme.palette.neutral?.[500] ||
+                                theme.palette.text.secondary
+                              }
+                            >
+                              {"(Vat/Tax incl.)"}
+                            </Typography>
+                          )}
                         </Typography>
                         <Typography
                           fontSize="18px"
@@ -1077,7 +1153,7 @@ const ParcelCheckout = () => {
                               taxData?.tax_amount +
                               (configData?.additional_charge
                                 ? configData?.additional_charge
-                                : 0)
+                                : 0),
                           )}
                         </Typography>
                       </Stack>
@@ -1131,7 +1207,7 @@ const ParcelCheckout = () => {
                     color={theme.palette.neutral[400]}
                   >
                     {t(
-                      "Your parcel request submitted successfully! to check your parcel status please track order."
+                      "Your parcel request submitted successfully! to check your parcel status please track order.",
                     )}
                   </Typography>
                   <PrimaryButton onClick={handleClick}>

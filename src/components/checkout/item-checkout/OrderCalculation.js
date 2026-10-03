@@ -14,8 +14,8 @@ import {
   getAmountWithSign,
   getReferDiscount,
 } from "helper-functions/CardHelpers";
-import { getGuestId, getToken } from "helper-functions/getToken";
-import React, { useEffect, useState } from "react";
+import { getToken } from "helper-functions/getToken";
+import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { setTotalAmount } from "redux/slices/cart";
@@ -24,23 +24,25 @@ import {
   bad_weather_fees,
   getCalculatedTotal,
   getCouponDiscount,
-  getDeliveryFees,
   getInfoFromZoneData,
   getProductDiscount,
   getSubTotalPrice,
   getTaxableTotalPrice,
+  handleDistance,
   handlePurchasedAmount,
 } from "utils/CustomFunctions";
 import CustomDivider from "../../CustomDivider";
 import { CalculationGrid, TotalGrid } from "../CheckOut.style";
-import { useGetSurgePrice } from "api-manage/hooks/react-query/order-place/useGetSurgePrice";
-import { onErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import useGetProActiveOffer from "api-manage/hooks/react-query/pro-plans/useGetProActiveOffer";
 import useSubscribeProPlan from "api-manage/hooks/react-query/pro-plans/useSubscribeProPlan";
 import ProPlanBanner from "components/pro-plan/ProPlanBanner";
 import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
 import toast from "react-hot-toast";
 import dynamic from "next/dynamic";
+import useGetCheckoutSummary, {
+  isQuoteUnavailable,
+} from "api-manage/hooks/react-query/checkout/useGetCheckoutSummary";
+import useGetCartDiscountEligibility from "api-manage/hooks/react-query/add-cart/useGetCartDiscountEligibility";
 
 const ProOfferType = {
   FREE: "free",
@@ -49,10 +51,10 @@ const ProOfferType = {
 };
 
 const ProPlanSubscriptionModal = dynamic(() =>
-  import("components/pro-plan/ProPlanSubscriptionModal")
+  import("components/pro-plan/ProPlanSubscriptionModal"),
 );
 const ProPlanPaymentModal = dynamic(() =>
-  import("components/pro-plan/ProPlanPaymentModal")
+  import("components/pro-plan/ProPlanPaymentModal"),
 );
 
 const OrderCalculation = (props) => {
@@ -68,6 +70,8 @@ const OrderCalculation = (props) => {
     destination,
     zoneData,
     setDeliveryFee,
+    setDeliveryFeeBeforeProDiscount,
+    setMinDeliveryCharge,
     extraCharge,
     walletBalance,
     setPayableAmount,
@@ -83,7 +87,11 @@ const OrderCalculation = (props) => {
     taxAmount,
     scheduleAt,
     selectedDeliveryOption,
-    currentZoneInfo
+    areaZipParams,
+    setQuoteUnavailable,
+    setSummaryLoading,
+    currentZoneInfo,
+    setDeliveryOptions,
   } = props;
 
   // Express / slightly_delay surcharge from the DeliverySpeedOptions row.
@@ -97,7 +105,6 @@ const OrderCalculation = (props) => {
   const { t } = useTranslation();
   const [freeDelivery, setFreeDelivery] = useState("false");
   const { profileInfo } = useSelector((state) => state.profileInfo);
-  const tempExtraCharge = extraCharge ?? 0;
   const theme = useTheme();
 
   // Pro plan: only fetch the active offer when the feature flag is on AND the
@@ -110,7 +117,47 @@ const OrderCalculation = (props) => {
   const activeOffer = activeOfferRaw?.data ?? activeOfferRaw ?? null;
   const isProActive = activeOffer?.status === true;
   const proBenefit = activeOffer?.benefit ?? null;
-  console.log("[PRO-OFFER]", { activeOffer, isProActive, proBenefit });
+
+  // store-details already cached this query under the same key, and
+  // react-query's default staleTime (0) means mounting it here refreshes it
+
+  const { data: cartDiscountEligibility } = useGetCartDiscountEligibility(
+    storeData?.id,
+    !!storeData?.id,
+  );
+  const isDiscountEligibilityQualified =
+    cartDiscountEligibility?.is_qualified === true &&
+    Number(cartDiscountEligibility?.discount_amount) > 0;
+
+  const itemWiseOnlyDiscount = getProductDiscount(cartList, {
+    ...storeData,
+    discount: null,
+  });
+  const withVendorDiscount = getProductDiscount(cartList, storeData);
+  const legacyVendorStandingDiscount =
+    withVendorDiscount > itemWiseOnlyDiscount ? withVendorDiscount : 0;
+
+  const vendorStandingDiscount =
+    isDiscountEligibilityQualified &&
+    cartDiscountEligibility?.source === "store_discount"
+      ? Number(cartDiscountEligibility?.discount_amount) || 0
+      : legacyVendorStandingDiscount;
+  const happyHourDiscount =
+    isDiscountEligibilityQualified &&
+    cartDiscountEligibility?.source === "happy_hour"
+      ? Number(cartDiscountEligibility?.discount_amount) || 0
+      : 0;
+  const storeWideDiscount = Math.max(vendorStandingDiscount, happyHourDiscount);
+
+  const eligibilityDiscountAmount = itemWiseOnlyDiscount + storeWideDiscount;
+  const eligibilityDiscountSource =
+    happyHourDiscount > 0 && happyHourDiscount >= vendorStandingDiscount
+      ? "happy_hour"
+      : vendorStandingDiscount > 0 ||
+        (isDiscountEligibilityQualified &&
+          cartDiscountEligibility?.source === "store_discount")
+      ? "store_discount"
+      : undefined;
 
   // Backend shape: {type, offer_type ("free" | "partial_free"),
   // charge_discount_percentage, min_order_status, min_order_amount}.
@@ -119,15 +166,26 @@ const OrderCalculation = (props) => {
   const proMinOrderAmount = Number(proBenefit?.min_order_amount) || 0;
   // `free_delivery` coupons don't reduce the cart subtotal — they only
   // waive the delivery fee — so they're skipped from the deduction.
+  // The coupon percentage applies against (Items Price - Discount), so the
+  // authoritative eligibilityDiscountAmount (matches the visible "Discount"
+  // row) is passed through rather than letting getCouponDiscount recompute
+  // its own client-side store discount, which can disagree with it.
   const proCouponDeduction =
     couponDiscount && couponDiscount?.coupon_type !== "free_delivery"
-      ? Number(getCouponDiscount(couponDiscount, storeData, cartList)) || 0
+      ? Number(
+          getCouponDiscount(
+            couponDiscount,
+            storeData,
+            cartList,
+            eligibilityDiscountAmount,
+          ),
+        ) || 0
       : 0;
   const proSubtotalForMinCheck = Math.max(
     0,
     handlePurchasedAmount(cartList) -
       getProductDiscount(cartList, storeData) -
-      proCouponDeduction
+      proCouponDeduction,
   );
   const proMinSatisfied =
     proBenefit?.min_order_status !== 1 ||
@@ -141,7 +199,7 @@ const OrderCalculation = (props) => {
     couponDiscount?.coupon_type === "free_delivery";
 
   // Eligibility conditions that don't depend on the raw fee — the fee-positive
-  // check is folded in below once we've computed it via getDeliveryFees.
+  // check is folded in below once the server has quoted the fee.
   const proDeliveryConditionsMet =
     isProActive &&
     proBenefit?.type === "delivery_fee" &&
@@ -153,111 +211,107 @@ const OrderCalculation = (props) => {
     Number(proBenefit?.charge_discount_percentage) || 0;
 
   let couponType = "coupon";
-  const { data: surgePrice, mutate } = useGetSurgePrice();
+
+  // One server-side quote for this store: delivery, surge, Pro and tax in the
+  // sequence the charge is actually billed in. Recomputing any of it here would
+  // quote a price the customer is not charged, so every figure below is read
+  // back from the response rather than derived.
+  const checkoutSummaryQuery = useGetCheckoutSummary({
+    orderType: orderType === "take_away" ? "take_away" : "delivery",
+    storeId: storeData?.id,
+    orderAmount:
+      getSubTotalPrice(cartList) - getProductDiscount(cartList, storeData),
+    distance: handleDistance(distanceData?.data, origin, destination),
+    latitude: destination?.latitude,
+    longitude: destination?.longitude,
+    deliveryType: selectedDeliveryOption?.deliveryType,
+    scheduleAt: orderType === "schedule_order" ? scheduleAt : undefined,
+    couponCode: couponDiscount?.code,
+    // area_id / zip_code_id — the zone's rule prices off these.
+    ...(areaZipParams || {}),
+  });
+  const checkoutSummary = checkoutSummaryQuery?.data;
+  const summaryDelivery = checkoutSummary?.delivery;
+  const quoteUnavailable = isQuoteUnavailable(checkoutSummaryQuery);
   useEffect(() => {
-    if (storeData) {
-      const temData = {
-        zone_id: storeData?.zone_id,
-        module_id: storeData?.module_id,
-        date_time:
-          orderType === "schedule_order"
-            ? scheduleAt
-            : new Date().toISOString(),
-        guest_id: getGuestId(),
-      };
-      mutate(temData, {
-        onError: onErrorResponse,
-      });
-    }
-  }, [storeData, orderType, scheduleAt]);
+    setQuoteUnavailable?.(quoteUnavailable);
+  }, [quoteUnavailable]);
+  useEffect(() => {
+    setSummaryLoading?.(checkoutSummaryQuery.isFetching);
+  }, [checkoutSummaryQuery.isFetching]);
+  useEffect(() => {
+    setDeliveryOptions?.(checkoutSummary?.delivery_options);
+  }, [checkoutSummary?.delivery_options]);
+  // Passed through untouched — the rows below read `price`, `price_type`,
+  // `customer_note` and `customer_note_status` off it.
+  const surgePrice = checkoutSummary?.surge;
 
   // Resolve the raw delivery fee once. Zero result implies the system is
   // already free-delivering for some other reason (free_delivery_over
   // threshold, zone rule, take-away, etc.), in which case the Pro benefit
   // shouldn't double-discount or surface a misleading savings message.
-  const rawDeliveryFee =
-    Number(
-      getDeliveryFees(
-        storeData,
-        configData,
-        cartList,
-        distanceData?.data,
-        couponDiscount,
-        couponType,
-        orderType,
-        zoneData,
-        origin,
-        destination,
-        tempExtraCharge,
-        surgePrice
-      )
-    ) || 0;
+  // The "before" figure — base + surge, ahead of free-delivery and Pro.
+  const rawDeliveryFee = Number(summaryDelivery?.base_delivery_charge) || 0;
+  // What the customer actually pays for delivery, with those overrides applied.
+  const quotedDeliveryCharge = Number(summaryDelivery?.delivery_charge) || 0;
+  const quotedProDeliverySavings =
+    Number(summaryDelivery?.pro_customer_savings) || 0;
+  const deliveryFeeBeforeProDiscount =
+    Number(summaryDelivery?.delivery_charge_before_pro_discount) ||
+    rawDeliveryFee;
 
   // A slightly-delay discount can never push the delivery fee below the
   // current module's minimum_shipping_charge (zone pivot) — cap the discount
   // at (fee − minimum) so the surcharge row and the total never credit more
   // than the fee can actually shrink.
-  const zonePivot = getInfoFromZoneData(zoneData)?.pivot;
+  const zonePivot = useMemo(
+    () => getInfoFromZoneData(zoneData)?.pivot,
+    [zoneData],
+  );
   // Fixed-charge modules leave minimum_shipping_charge null and carry the
   // floor in minimum_delivery_charge instead (e.g. grocery: fee 200, floor 12
   // → max discount 188, matching the backend's billing).
+  const quotedMinDeliveryCharge =
+    summaryDelivery?.min_delivery_charge != null
+      ? Number(summaryDelivery.min_delivery_charge)
+      : null;
   const minimumShippingCharge =
-    Number(zonePivot?.minimum_shipping_charge) ||
-    Number(zonePivot?.minimum_delivery_charge) ||
-    0;
+    quotedMinDeliveryCharge ??
+    (Number(zonePivot?.minimum_shipping_charge) ||
+      Number(zonePivot?.minimum_delivery_charge) ||
+      0);
+
+  // pro_customer_savings already accounts for admin/vendor free delivery.
   const proDeliveryBenefitActive =
-    proDeliveryConditionsMet && rawDeliveryFee > 0;
+    proDeliveryConditionsMet && quotedProDeliverySavings > 0;
   // Full waiver — kept under the old name so the rest of the file's references
   // (deliveryOptionSurcharge gate, strikethrough Free label) still read clearly.
   const isFullFreeDelivery =
     proDeliveryOfferType === ProOfferType.FREE ||
     proDeliveryOfferType === ProOfferType.FULL_FREE;
-  const proCoversDelivery = proDeliveryBenefitActive && isFullFreeDelivery;
 
-  // Discount amount the Pro benefit applies to a raw delivery fee.
-  const computeProDeliveryDiscount = (rawFee) => {
-    if (!proDeliveryBenefitActive) return 0;
-    const fee = Number(rawFee) || 0;
-    if (isFullFreeDelivery) return fee;
-    if (
-      proDeliveryOfferType === ProOfferType.PARTIAL_FREE &&
-      proDeliveryDiscountPct > 0
-    ) {
-      return (fee * proDeliveryDiscountPct) / 100;
-    }
-    return 0;
-  };
-
-  // Headroom for the slightly-delay discount: the fee minus what the Pro
-  // benefit already takes off, floored at the module's minimum shipping
-  // charge — the two discounts together can never push the billed fee
-  // below that minimum.
-  const proDeliveryDiscountAmount = computeProDeliveryDiscount(rawDeliveryFee);
   const maxDeliveryDiscount = Math.max(
     0,
-    rawDeliveryFee - proDeliveryDiscountAmount - minimumShippingCharge
+    deliveryFeeBeforeProDiscount - minimumShippingCharge,
   );
   const cappedDeliveryOptionSurcharge =
     deliveryOptionSurcharge < 0
       ? -Math.min(Math.abs(deliveryOptionSurcharge), maxDeliveryDiscount)
       : deliveryOptionSurcharge;
 
-  // Pro "discount" benefit (percentage off the order subtotal, capped at
-  // max_amount, gated on the same min-order threshold). Computed against the
-  // post-product-discount subtotal so it stacks with item-level promos but
-  // not with itself.
+  // Pro "discount" benefit — percentage/max_amount below are plan metadata
+  // for display only (the "15% · up to ৳100" chip). The actual amount
+  // deducted is read from checkout-summary's `pro.discount`, the single
+  // source of truth already computed server-side against the real
+  // post-store-discount subtotal (see checkoutSummary.tax.store_discount_amount).
   const proOrderDiscountPct = Number(proBenefit?.percentage) || 0;
   const proOrderDiscountMax = Number(proBenefit?.max_amount) || 0;
+  const proOrderDiscountAmount = Number(checkoutSummary?.pro?.discount) || 0;
   const proOrderDiscountActive =
     isProActive &&
     proBenefit?.type === "discount" &&
-    proMinSatisfied &&
-    proOrderDiscountPct > 0;
-  const proOrderDiscountAmount = (() => {
-    if (!proOrderDiscountActive) return 0;
-    const raw = (proSubtotalForMinCheck * proOrderDiscountPct) / 100;
-    return proOrderDiscountMax > 0 ? Math.min(raw, proOrderDiscountMax) : raw;
-  })();
+    checkoutSummary?.pro?.type === "discount" &&
+    proOrderDiscountAmount > 0;
 
   const proSavingsMessage = (() => {
     if (!proBenefit) return undefined;
@@ -280,7 +334,7 @@ const OrderCalculation = (props) => {
         return hasMin
           ? t(
               "{{percent}}% off on delivery fee as a Pro member on orders above {{amount}}",
-              { percent: proDeliveryDiscountPct, amount: minAmount }
+              { percent: proDeliveryDiscountPct, amount: minAmount },
             )
           : t("{{percent}}% off on delivery fee as a Pro member", {
               percent: proDeliveryDiscountPct,
@@ -300,7 +354,7 @@ const OrderCalculation = (props) => {
       if (hasCap && hasMin) {
         return t(
           "{{percent}}% off as a Pro member (up to {{cap}}) on orders above {{amount}}",
-          { percent: proOrderDiscountPct, cap: capAmount, amount: minAmount }
+          { percent: proOrderDiscountPct, cap: capAmount, amount: minAmount },
         );
       }
       if (hasCap) {
@@ -312,7 +366,7 @@ const OrderCalculation = (props) => {
       if (hasMin) {
         return t(
           "{{percent}}% off as a Pro member on orders above {{amount}}",
-          { percent: proOrderDiscountPct, amount: minAmount }
+          { percent: proOrderDiscountPct, amount: minAmount },
         );
       }
       return t("{{percent}}% off as a Pro member", {
@@ -352,10 +406,10 @@ const OrderCalculation = (props) => {
           },
           onError: (err) => {
             toast.error(
-              err?.response?.data?.message || t("Subscription failed")
+              err?.response?.data?.message || t("Subscription failed"),
             );
           },
-        }
+        },
       );
       return;
     }
@@ -364,27 +418,32 @@ const OrderCalculation = (props) => {
     setProPaymentOpen(true);
   };
 
-  const handleDeliveryFee = () => {
-    let price = getDeliveryFees(
-      storeData,
-      configData,
-      cartList,
-      distanceData?.data,
-      couponDiscount,
-      couponType,
-      orderType,
-      zoneData,
-      origin,
-      destination,
-      tempExtraCharge,
-      surgePrice
+  useEffect(() => {
+    const billedPrice = orderType !== "delivery" ? 0 : quotedDeliveryCharge;
+    setDeliveryFee(billedPrice);
+    setDeliveryFeeBeforeProDiscount?.(
+      orderType !== "delivery" ? 0 : deliveryFeeBeforeProDiscount,
     );
+    setMinDeliveryCharge?.(
+      orderType !== "delivery" ? 0 : minimumShippingCharge,
+    );
+  }, [
+    orderType,
+    quotedDeliveryCharge,
+    deliveryFeeBeforeProDiscount,
+    minimumShippingCharge,
+  ]);
 
-    const proDiscount = computeProDeliveryDiscount(price);
-    const billedPrice = Math.max(0, Number(price) - proDiscount);
-    setDeliveryFee(orderType !== "delivery" ? 0 : billedPrice);
+  const handleDeliveryFee = () => {
+    const priceBeforeProDiscount = deliveryFeeBeforeProDiscount;
+    const proDiscount = quotedProDeliverySavings;
+    const billedPrice = quotedDeliveryCharge;
 
-    if (proDeliveryBenefitActive && proDiscount > 0 && Number(price) > 0) {
+    if (
+      proDeliveryBenefitActive &&
+      proDiscount > 0 &&
+      Number(priceBeforeProDiscount) > 0
+    ) {
       return (
         <Stack
           direction="row"
@@ -394,7 +453,7 @@ const OrderCalculation = (props) => {
           width="100%"
         >
           <Typography sx={{ textDecoration: "line-through", opacity: 0.6 }}>
-            {storeData && getAmountWithSign(price)}
+            {storeData && getAmountWithSign(priceBeforeProDiscount)}
           </Typography>
           <Typography color="primary" fontWeight={600}>
             {billedPrice === 0
@@ -417,7 +476,7 @@ const OrderCalculation = (props) => {
         width="100%"
       >
         <Typography>{"(+)"}</Typography>
-        <Typography>{storeData && getAmountWithSign(price)}</Typography>
+        <Typography>{storeData && getAmountWithSign(billedPrice)}</Typography>
       </Stack>
     );
   };
@@ -426,7 +485,8 @@ const OrderCalculation = (props) => {
     let couponDiscountValue = getCouponDiscount(
       couponDiscount,
       storeData,
-      cartList
+      cartList,
+      eligibilityDiscountAmount,
     );
 
     if (couponDiscount && couponDiscount.coupon_type === "free_delivery") {
@@ -436,20 +496,25 @@ const OrderCalculation = (props) => {
       return getAmountWithSign(couponDiscountValue);
     }
   };
-  console.log("ddd", handleCouponDiscount());
 
   const totalAmountForRefer = couponDiscount
     ? handlePurchasedAmount(cartList) -
       getProductDiscount(cartList, storeData) -
-      getCouponDiscount(couponDiscount, storeData, cartList)
+      getCouponDiscount(
+        couponDiscount,
+        storeData,
+        cartList,
+        eligibilityDiscountAmount,
+      )
     : handlePurchasedAmount(cartList) - getProductDiscount(cartList, storeData);
   const dispatch = useDispatch();
   const referDiscount = getReferDiscount(
     totalAmountForRefer,
     customerData?.data?.discount_amount,
-    customerData?.data?.discount_amount_type
+    customerData?.data?.discount_amount_type,
   );
-  const handleOrderAmount = () => {
+
+  const computeTotalAmount = () => {
     let totalAmount = getCalculatedTotal(
       cartList,
       couponDiscount,
@@ -467,67 +532,76 @@ const OrderCalculation = (props) => {
       additionalCharge,
       packagingCharge,
       referDiscount,
-      taxAmount?.tax_amount,
-      surgePrice
+      checkoutSummary?.tax?.tax_amount,
+      surgePrice,
+      // Already Pro-discounted and free-delivery-adjusted by the server.
+      orderType === "delivery" ? quotedDeliveryCharge : 0,
+      eligibilityDiscountAmount,
     );
     totalAmount = Number(totalAmount) + cappedDeliveryOptionSurcharge;
 
-    // Pro member with an active delivery_fee benefit → waive the fee
-    // (offer_type "free") or apply the percentage discount (offer_type
-    // "partial_free"). getCalculatedTotal already rolled the full fee into
-    // the total, so subtract the benefit's discount portion back out.
-    if (proDeliveryBenefitActive) {
-      const deliveryFeeValue = getDeliveryFees(
-        storeData,
-        configData,
-        cartList,
-        distanceData?.data,
-        couponDiscount,
-        couponType,
-        orderType,
-        zoneData,
-        origin,
-        destination,
-        tempExtraCharge,
-        surgePrice
-      );
-      totalAmount =
-        Number(totalAmount) - computeProDeliveryDiscount(deliveryFeeValue);
-    }
+    // getCalculatedTotal always subtracts the legacy client-side store
+    // discount (getProductDiscount) internally, with no way to override it.
+    // Add that back and subtract checkout-summary's authoritative amount
+    // instead, so Total agrees with the Discount row above.
+    const legacyStoreDiscount = getProductDiscount(cartList, storeData);
+    totalAmount =
+      Number(totalAmount) + legacyStoreDiscount - eligibilityDiscountAmount;
 
-    // Pro "discount" benefit (percentage off the subtotal, capped at
-    // max_amount). getCalculatedTotal doesn't know about it, so subtract
-    // the computed amount from the running total.
     if (proOrderDiscountActive && proOrderDiscountAmount > 0) {
       totalAmount = Number(totalAmount) - proOrderDiscountAmount;
     }
 
-    setPayableAmount(totalAmount);
-    dispatch(setTotalAmount(totalAmount));
     return totalAmount;
   };
+
+  const computedTotalAmount = computeTotalAmount();
+
+  useEffect(() => {
+    setPayableAmount(computedTotalAmount);
+    dispatch(setTotalAmount(computedTotalAmount));
+  }, [computedTotalAmount]);
+
   let diffDiscount = {
     value: 0,
   };
-  const discountedPrice = getProductDiscount(cartList, storeData, diffDiscount);
-  const totalAmountAfterPartial = handleOrderAmount() - walletBalance;
+  // Kept only for its side effect on `diffDiscount` (the "additional
+  // discount" banner below) — the displayed amount comes from
+  // discount-eligibility's `discount_amount` alone (see above), not this
+  // legacy client-side recompute.
+  getProductDiscount(cartList, storeData, diffDiscount);
+  const discountedPrice = eligibilityDiscountAmount;
+
+  // Only a store-wide promotion (store discount / happy hour) gets a
+  // tooltip - a plain item or bundle discount is not a "why is this
+  // discounted" surprise, so it gets none.
+  const discountTooltipText =
+    eligibilityDiscountSource === "happy_hour"
+      ? t("Happy Hour Discount")
+      : eligibilityDiscountSource === "store_discount"
+      ? t("Store Discount")
+      : "";
+  const totalAmountAfterPartial = computedTotalAmount - walletBalance;
   const finalTotalAmount = profileInfo?.is_valid_for_discount
-    ? handleOrderAmount() - referDiscount
-    : handleOrderAmount();
+    ? computedTotalAmount - referDiscount
+    : computedTotalAmount;
 
   const text1 = t("After completing the order, you will receive a");
   const text2 = t(
-    "cashback. The minimum purchase required to avail this offer is"
+    "cashback. The minimum purchase required to avail this offer is",
   );
   const text3 = t("However, the maximum cashback amount is");
   const extraText = t(
-    "This delivery fee includes all the applicable charges on delivery"
+    "This delivery fee includes all the applicable charges on delivery",
   );
   const badText = t("and bad weather charge");
   // Append the Pro delivery-fee benefit message to the tooltip so members
   // see exactly which discount the platform is applying to their fee.
   const proDeliveryTooltipText = (() => {
-    if (!(isProActive && proBenefit?.type === "delivery_fee")) return "";
+    // Mirrors `proDeliveryBenefitActive` — if delivery is already free for a
+    // reason other than the Pro benefit (admin/vendor/coupon), there's no
+    // Pro delivery discount to mention in the tooltip.
+    if (!proDeliveryBenefitActive) return "";
     const minOrderQualifier =
       proBenefit?.min_order_status === 1 && proMinOrderAmount > 0
         ? ` ${t("on orders above")} ${getAmountWithSign(proMinOrderAmount)}`
@@ -540,17 +614,28 @@ const OrderCalculation = (props) => {
     }
     if (proDeliveryDiscountPct > 0) {
       return ` ${proDeliveryDiscountPct}% ${t(
-        "off on delivery fee as a Pro member"
+        "off on delivery fee as a Pro member",
       )}${minOrderQualifier}.`;
     }
     return ` ${t("Delivery fee benefit as a Pro member")}${minOrderQualifier}.`;
   })();
-  const deliveryToolTipsText = `${extraText}${
-    surgePrice?.customer_note_status !== 0
-      ? `. ${surgePrice?.customer_note} `
-      : ""
-  }${proDeliveryTooltipText}`;
-  console.log({ proCoversDelivery });
+  // Surge amount is shown regardless of the note — the note (when the admin
+  // turned it on) is additional context, not a replacement for the figure.
+  const surgeAmountText =
+    Number(surgePrice?.price) > 0
+      ? ` ${t("A surge charge of")} ${
+          surgePrice?.price_type === "percent"
+            ? `${surgePrice.price}%`
+            : getAmountWithSign(surgePrice.price)
+        } ${t("has been applied")}.`
+      : "";
+  const surgeNoteText =
+    Number(surgePrice?.price) > 0 &&
+    surgePrice?.customer_note_status &&
+    surgePrice?.customer_note
+      ? ` ${surgePrice.customer_note}`
+      : "";
+  const deliveryToolTipsText = `${extraText}${surgeAmountText}${surgeNoteText}${proDeliveryTooltipText}`;
 
   return (
     <>
@@ -600,7 +685,7 @@ const OrderCalculation = (props) => {
                 }}
               >
                 {t(
-                  "Apply your Pro coupon above to claim the discount on this order."
+                  "Apply your Pro coupon above to claim the discount on this order.",
                 )}
               </Typography>
             </Stack>
@@ -617,7 +702,22 @@ const OrderCalculation = (props) => {
           </Typography>
         </Grid>
         <Grid item md={8} xs={8}>
-          {t("Discount")}
+          <Stack direction="row" alignItems="center" spacing={0.75}>
+            <Typography component="span">{t("Discount")}</Typography>
+            {discountTooltipText ? (
+              <Tooltip title={discountTooltipText} placement="top" arrow>
+                <i
+                  className="fi fi-br-info"
+                  style={{
+                    fontSize: "11px",
+                    display: "flex",
+                    lineHeight: 1,
+                    cursor: "pointer",
+                  }}
+                />
+              </Tooltip>
+            ) : null}
+          </Stack>
         </Grid>
         <Grid item md={4} xs={4} align="right">
           <Stack
@@ -653,7 +753,7 @@ const OrderCalculation = (props) => {
                         borderRadius: "999px",
                         backgroundColor: alpha(
                           theme.palette.primary.main,
-                          0.12
+                          0.12,
                         ),
                         color: theme.palette.primary.main,
                         fontWeight: 600,
@@ -726,7 +826,7 @@ const OrderCalculation = (props) => {
                   {`${proOrderDiscountPct}%`}
                   {proOrderDiscountMax > 0
                     ? ` · ${t("up to")} ${getAmountWithSign(
-                        proOrderDiscountMax
+                        proOrderDiscountMax,
                       )}`
                     : ""}
                 </Typography>
@@ -748,7 +848,8 @@ const OrderCalculation = (props) => {
             </Grid>
           </>
         ) : null}
-        {taxAmount?.tax_included !== null && taxAmount?.tax_included === 0 ? (
+        {checkoutSummary?.tax?.tax_included !== null &&
+        checkoutSummary?.tax?.tax_included === 0 ? (
           <>
             <Grid item md={8} xs={8}>
               {t("VAT/TAX")}
@@ -761,8 +862,8 @@ const OrderCalculation = (props) => {
                 spacing={0.5}
               >
                 <Typography>
-                  {taxAmount?.tax_included === 0 && <>{"(+)"}</>}
-                  {getAmountWithSign(taxAmount?.tax_amount)}
+                  {checkoutSummary?.tax?.tax_included === 0 && <>{"(+)"}</>}
+                  {getAmountWithSign(checkoutSummary?.tax?.tax_amount)}
                 </Typography>
               </Stack>
             </Grid>
@@ -838,20 +939,30 @@ const OrderCalculation = (props) => {
                       <Stack direction="row" alignItems="center" spacing={0.75}>
                         <Typography component="span" align="center">
                           {t("Delivery fee")}
-                          {Number.parseInt(storeData?.self_delivery_system) !==
-                            1 || proDeliveryBenefitActive ? (
-                            <Typography component="span">
-                              <Tooltip
-                                title={deliveryToolTipsText}
-                                placement="top"
-                                arrow={true}
-                              >
-                                <InfoIcon sx={{ fontSize: "11px" }} />
-                              </Tooltip>
-                            </Typography>
-                          ) : null}
                         </Typography>
-                        {proCoversDelivery &&
+                        {(Number.parseInt(storeData?.self_delivery_system) !==
+                          1 || proDeliveryBenefitActive) &&
+                        !(
+                          couponDiscount?.coupon_type === "free_delivery" ||
+                          quotedDeliveryCharge === 0
+                        ) ? (
+                          <Tooltip
+                            title={deliveryToolTipsText}
+                            placement="top"
+                            arrow={true}
+                          >
+                            <i
+                              className="fi fi-br-info"
+                              style={{
+                                fontSize: "11px",
+                                display: "flex",
+                                lineHeight: 1,
+                                cursor: "pointer",
+                              }}
+                            />
+                          </Tooltip>
+                        ) : null}
+                        {proDeliveryBenefitActive &&
                         rawDeliveryFee > 0 &&
                         freeDelivery !== "true" &&
                         !deliveryAlreadyFreeByCoupon ? (
@@ -864,7 +975,7 @@ const OrderCalculation = (props) => {
                               borderRadius: "999px",
                               backgroundColor: alpha(
                                 theme.palette.primary.main,
-                                0.12
+                                0.12,
                               ),
                               color: theme.palette.primary.main,
                               fontWeight: 600,
@@ -976,7 +1087,8 @@ const OrderCalculation = (props) => {
                     fontWeight="400"
                     color={theme.palette.primary.main}
                   >
-                    {taxAmount?.tax_included === 1 && t("(Vat/Tax incl.)")}
+                    {checkoutSummary?.tax?.tax_included === 1 &&
+                      t("(Vat/Tax incl.)")}
                   </Typography>
                 </Typography>
               </Grid>
@@ -1012,8 +1124,8 @@ const OrderCalculation = (props) => {
           >
             {t(
               `You got ${getAmountWithSign(
-                diffDiscount?.value
-              )} additional discount`
+                diffDiscount?.value,
+              )} additional discount`,
             )}
           </Typography>
         ) : null}
@@ -1033,7 +1145,7 @@ const OrderCalculation = (props) => {
                       ? cashbackAmount?.cashback_amount + "%"
                       : getAmountWithSign(cashbackAmount?.cashback_amount)
                   } ${text2} ${getAmountWithSign(
-                    cashbackAmount?.min_purchase
+                    cashbackAmount?.min_purchase,
                   )}. ${
                     cashbackAmount?.cashback_type === "percentage"
                       ? text3 +

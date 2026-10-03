@@ -146,7 +146,7 @@ export const spain = {
   "Additional Note": "مذكرة إضافية",
   "Additional Note": "مذكرة إضافية",
   "Additional Notes": "Notas adicionales",
-  Addon: "اضافه",
+  Addon: "Complemento",
   Addons: "Complementos",
   "Addons Price": "سعر الإضافات",
   Address: " تبوك ",
@@ -299,6 +299,7 @@ export const spain = {
   "Bring Change Instruction": "Instrucción para traer cambio",
   "Browse thousands of products and get them delivered today.":
     "Explora miles de productos y recíbelos hoy mismo.",
+  "Bundle Items": "Artículos del paquete",
   "Business Address": "Dirección del negocio",
   "Business Cover": "Portada del negocio",
   "Business Information": " معلومات العمل ",
@@ -314,6 +315,7 @@ export const spain = {
   "Buy 1 Get 1 Free": "Compra 1 y llévate 1 gratis",
   "Buy Now": "اشتري الآن",
   "Buy Now": "اشتري الآن",
+  "Buy more and enjoy exclusive free items.": "Compra más y disfruta de artículos gratis exclusivos.",
   "By continuing, you agree to our": "Al continuar, aceptas nuestros",
   "By placing the booking you are agreed to the":
     "Al realizar la reserva aceptas los",
@@ -613,6 +615,7 @@ export const spain = {
   "Discover professionals solving real problems":
     "Descubre profesionales que resuelven problemas reales",
   Distance: "مسافة",
+  "Distance": "Distancia",
   "Distance Wise": "Por distancia",
   "Do you want to change trip duration":
     "¿Quieres cambiar la duración del viaje?",
@@ -855,7 +858,10 @@ export const spain = {
   "General Information": " معلومات عامة ",
   "General Information": " معلومات عامة ",
   "Generic Name": "Nombre genérico",
-  Get: "حصل على",
+  Get: "Obtén",
+  "OFF!": "de descuento!",
+  "OFF this order!": "de descuento en este pedido!",
+  "more to get": "más para obtener",
   "Get 10% off on all orders": "Get 10% off on all orders",
   "Get Groceries Up to {{discount}} Off?":
     "¡Compra comestibles con hasta {{discount}} de descuento!",
@@ -905,14 +911,17 @@ export const spain = {
   "Google Play": "Google Play",
   "Got It": "Entendido",
   "Got it": "Entendido",
+  "Grab best price for your order.": "Consigue el mejor precio para tu pedido.",
   "Grab The Offer Before End The Time.":
     "Aprovecha la oferta antes de que termine.",
+  "Grab These Offers": "Aprovecha estas ofertas",
   "Grand Total Amount": "Monto total general",
   "Grid view": "Vista de cuadrícula",
   Groceries: "Comestibles",
   Grocery: "Supermercado",
   Guest: "Invitado",
   Halal: "Halal",
+  "Happy Hour": "Hora feliz",
   "Has  paid by your wallet.": "Se ha pagado con tu billetera.",
   "Have a Coupon?": "هل لديك قسيمة؟",
   "Have a Coupon?": "هل لديك قسيمة؟",
@@ -949,6 +958,7 @@ export const spain = {
   "How you it works?": "¿Cómo funciona?",
   "However, the maximum cashback amount is":
     "Sin embargo, el monto máximo de reembolso es",
+  "Hurry Up! BOGO Offer Is Live": "¡Date prisa! ¡La oferta de compra y lleva está activa!",
   "I agree that placing the order places me under":
     "أوافق على أن وضع الطلب يضعني تحت",
   "I agree that placing the order places me under Terms and Conditions & Privacy Policies":
@@ -1315,6 +1325,7 @@ export const spain = {
   "No saved addresses found.": "No se encontraron direcciones guardadas.",
   "No saved addresses yet": "Aún no hay direcciones guardadas",
   "No seller info provided.": "No seller info provided.",
+  "No stores are running this offer right now.": "Ninguna tienda tiene esta oferta en este momento.",
   "No stores found": "No stores found",
   "No terms available.": "No hay términos disponibles.",
   "No title given": "لم يتم إعطاء عنوان",
@@ -1610,6 +1621,10 @@ export const spain = {
   "Please search some keywords.": "الرجاء البحث عن بعض الكلمات الرئيسية.",
   "Please select a delivery destination!":
     "¡Por favor selecciona un destino de entrega!",
+  "Could not calculate the route distance, please try again":
+    "No se pudo calcular la distancia de la ruta, inténtalo de nuevo",
+  "Parcel service is not available in your zone":
+    "El servicio de paquetería no está disponible en tu zona",
   "Please select a payment method": "Por favor selecciona un método de pago",
   "Please select a paymrnt method": "Por favor selecciona un método de pago",
   "Please select a pick up zone": "Por favor selecciona una zona de recogida",
@@ -2096,6 +2111,7 @@ export const spain = {
   "Something went wrong": "Something went wrong",
   "Something went wrong.": "هناك خطأ ما.",
   "Sorry !": "¡Lo sentimos!",
+  "Sorry, we are not available in this area yet.": "Lo sentimos, todavía no estamos disponibles en esta área.",
   "Sorry no data found related to your search":
     "عذرا ، لم يتم العثور على بيانات متعلقة ببحثك",
   "Sorry you can’t delete your account !":
@@ -2284,7 +2300,7 @@ export const spain = {
   "Top Restaurants": "Mejores restaurantes",
   "Top Store": "Mejor tienda",
   "Top offers near me": "Mejores ofertas cerca de mí",
-  Total: "المجموع",
+  Total: "Total",
   "Total Amount": "المبلغ الإجمالي",
   "Total Balance": "Saldo total",
   "Total Bill": "Factura total",
@@ -2585,6 +2601,7 @@ export const spain = {
     "Estás libre del miedo de perder recetas, encuentra tu receta digital con Lifetime Cure.",
   Your: "Tu",
   "Your Address": "عنوانك",
+  "Your Cart is Empty!": "¡Tu carrito está vacío!",
   "Your Cart is Waiting!": "¡Tu carrito está esperando!",
   "Your Email": "Tu correo",
   "Your Email Address": "عنوان بريدك  الإلكتروني",
@@ -2768,7 +2785,10 @@ export const spain = {
   map: "mapa",
   "map-image": "imagen del mapa",
   max: "máx.",
-  min: "دقيقة",
+  min: "min",
+  day: "día",
+  hr: "h",
+  sec: "seg",
   "min Order of": "pedido mín. de",
   mins: "min",
   "more for free delivery": "más para entrega gratis",
@@ -3134,7 +3154,9 @@ export const spain = {
   "Top Providers": "Top Providers",
   "Track Your Booking": "Track Your Booking",
   Upcoming: "Upcoming",
-  "Update Cart": "Update Cart",
+  "Update Cart": "Actualizar carrito",
+  "Best Value Bundle": "Paquete de mejor valor",
+  "No items to show": "No hay artículos para mostrar",
   "Update Custom Service": "Update Custom Service",
   "Update Request": "Update Request",
   "Update Variation": "Update Variation",
@@ -3184,7 +3206,11 @@ export const spain = {
   Cancelled: "Cancelled",
   "Per booking": "Per booking",
   "Total for": "Total for",
-  Validity: "Validity",
+  Validity: "Validez",
+  "BOGO Offer List": "Lista de ofertas 2x1",
+  "No BOGO offers available": "No hay ofertas 2x1 disponibles",
+  "Buy {{count}} Item": "Compra {{count}} artículo",
+  "Get {{count}} FREE": "Llévate {{count}} gratis",
   "View single booking": "View single booking",
   "View total": "View total",
   bookings: "bookings",
@@ -3244,6 +3270,16 @@ export const spain = {
 	"No category found": "No category found",
 	"No options found": "No options found",
 	"Search category...": "Search category...",
-	"Search sub category...": "Search sub category..."
-
+	"Search sub category...": "Search sub category...",
+	"Bundle": "Paquete",
+	"Bundle Discount": "Descuento del paquete",
+	"QTY": "CANT.",
+	"per bundle": "por paquete",
+	"Variation": "Variación",
+	"Addon": "Complemento",
+	"BOGO": "BOGO",
+	"Free": "Gratis",
+	"Buying Item": "Artículo a comprar",
+	"Free Item": "Artículo gratis",
+	"per bogo": "por BOGO"
 };

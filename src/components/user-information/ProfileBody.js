@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Skeleton } from "@mui/material";
 import { Stack } from "@mui/system";
+import useGetModule from "api-manage/hooks/react-query/useGetModule";
+import { setModules } from "redux/slices/configData";
 import Wallet from "../wallet";
 import Profile from "../profile";
 import OrderDetails from "../my-orders/order-details";
@@ -59,6 +61,7 @@ const ProfileBody = ({
   isLoadingDelete,
 }) => {
   const router = useRouter();
+  const dispatch = useDispatch();
   const { modules } = useSelector((state) => state.configData);
   const urlModuleId = router.query[ORDER_TAB_MODULE_KEY];
   const modulesLoaded = Array.isArray(modules) && modules.length > 0;
@@ -67,6 +70,14 @@ const ProfileBody = ({
   );
   const isServiceBooking = activeModule?.module_type === ModuleTypes.SERVICE;
   const isModuleLookupPending = !!urlModuleId && !modulesLoaded;
+
+  const { data: fetchedModules, refetch: refetchModules } = useGetModule();
+  useEffect(() => {
+    if (isModuleLookupPending) refetchModules();
+  }, [isModuleLookupPending, refetchModules]);
+  useEffect(() => {
+    if (fetchedModules?.length) dispatch(setModules(fetchedModules));
+  }, [fetchedModules, dispatch]);
 
   const renderContent = () => {
     if (page === "profile-settings") {

@@ -114,7 +114,7 @@ const AddNewAddress = (props) => {
     if (geoCodeResults?.results) {
       dispatch({
         type: ACTIONS.setCurrentLocation,
-        payload: geoCodeResults?.results[0]?.formatted_address,
+        payload: geoCodeResults?.results?.[0]?.formatted_address,
       });
     }
   }, [geoCodeResults, state.location]);
@@ -498,7 +498,7 @@ const AddNewAddress = (props) => {
                   }
                   configData={configData}
                   deliveryAddress={
-                    geoCodeResults?.results[0]?.formatted_address
+                    geoCodeResults?.results?.[0]?.formatted_address
                   }
                   personName={editAddress?.contact_person_name || personName}
                   phone={

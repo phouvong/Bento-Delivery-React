@@ -5,7 +5,7 @@ import {
   getAmountWithSign,
   getDiscountedAmount,
 } from "../../../helper-functions/CardHelpers";
-import { handleTotalAmountWithAddons } from "../../../utils/CustomFunctions";
+import { newHandleTotalAmountWithAddons } from "../../../utils/CustomFunctions";
 import { CustomTypographyGray } from "../../../styled-components/CustomStyles.style";
 // import {
 //     getAmount,
@@ -50,7 +50,7 @@ const TotalAmountVisibility = (props) => {
         >
           {modalData.length > 0 &&
             getAmountWithSign(
-              handleTotalAmountWithAddons(
+              newHandleTotalAmountWithAddons(
                 getDiscountedAmount(
                   totalPrice,
                   productDiscount,
@@ -72,7 +72,7 @@ const TotalAmountVisibility = (props) => {
         >
           (
           {getAmountWithSign(
-            handleTotalAmountWithAddons(totalPrice, selectedAddOns)
+            newHandleTotalAmountWithAddons(totalPrice, selectedAddOns)
           )}
           )
         </CustomTypographyGray>

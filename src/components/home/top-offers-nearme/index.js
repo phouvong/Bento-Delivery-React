@@ -14,6 +14,11 @@ import NewStoreCard from "components/cards/newCard/NewStoreCard";
 import useGetTopOffers from "api-manage/hooks/react-query/product-details/useGetTopOffers";
 
 const SliderWrapper = styled(CustomBoxFullWidth)(({ theme }) => ({
+  "& .slick-list": {
+    overflowX: "hidden",
+    overflowY: "visible",
+    padding: "8px 0",
+  },
   "& .slick-track": {
     marginLeft: 0,
     marginRight: "auto",
@@ -41,18 +46,78 @@ const TopOffersNearMe = ({ title }) => {
     dots: false,
     infinite: false,
     speed: 500,
-    slidesToShow: 4,
+    slidesToShow: 3.5,
     slidesToScroll: 1,
     swipeToSlide: true,
     arrows: false,
     responsive: [
-      { breakpoint: 1450, settings: { slidesToShow: 4, slidesToScroll: 1, infinite: false , swipeToSlide: true} },
-      { breakpoint: 1024, settings: { slidesToShow: 4, slidesToScroll: 1, infinite: false , swipeToSlide: true} },
-      { breakpoint: 760,  settings: { slidesToShow: 3, slidesToScroll: 2, infinite: false , swipeToSlide: true} },
-      { breakpoint: 695,  settings: { slidesToShow: 2, slidesToScroll: 2, initialSlide: 2, infinite: false , swipeToSlide: true} },
-      { breakpoint: 600,  settings: { slidesToShow: 2, slidesToScroll: 2, initialSlide: 2, infinite: false , swipeToSlide: true} },
-      { breakpoint: 480,  settings: { slidesToShow: 1.4, slidesToScroll: 1, initialSlide: 1, infinite: false , swipeToSlide: true} },
-      { breakpoint: 340,  settings: { slidesToShow: 1.2, slidesToScroll: 1, initialSlide: 1, infinite: false , swipeToSlide: true} },
+      {
+        breakpoint: 1450,
+        settings: {
+          slidesToShow: 3.5,
+          slidesToScroll: 1,
+          infinite: false,
+          swipeToSlide: true,
+        },
+      },
+      {
+        breakpoint: 1024,
+        settings: {
+          slidesToShow: 3,
+          slidesToScroll: 1,
+          infinite: false,
+          swipeToSlide: true,
+        },
+      },
+      {
+        breakpoint: 760,
+        settings: {
+          slidesToShow: 2.8,
+          slidesToScroll: 2,
+          infinite: false,
+          swipeToSlide: true,
+        },
+      },
+      {
+        breakpoint: 695,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 2,
+          swipeToSlide: true,
+          initialSlide: 2,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 600,
+        settings: {
+          slidesToShow: 2,
+          slidesToScroll: 2,
+          swipeToSlide: true,
+          initialSlide: 2,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 480,
+        settings: {
+          slidesToShow: 1.4,
+          slidesToScroll: 1,
+          swipeToSlide: true,
+          initialSlide: 1,
+          infinite: false,
+        },
+      },
+      {
+        breakpoint: 340,
+        settings: {
+          slidesToShow: 1.2,
+          slidesToScroll: 1,
+          swipeToSlide: true,
+          initialSlide: 1,
+          infinite: false,
+        },
+      },
     ],
   };
 
@@ -66,7 +131,7 @@ const TopOffersNearMe = ({ title }) => {
         sliderRef={slider}
         currentSlide={currentSlide}
         totalSlides={stores.length}
-        slidesToShow={4}
+        slidesToShow={3.5}
         sx={{ mb: "1rem" }}
         heading={
           popularIsLoading ? (

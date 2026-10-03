@@ -176,7 +176,7 @@ const ProductDetails = ({ productDetailsData, configData }) => {
 
   return (
     <CustomStackFullWidth
-      paddingTop={{ xs: 0, md: "2.5rem" }}
+      paddingTop={{ xs: 0, md: "24px" }}
       //paddingBottom="2.5rem"
       //sx={{ minHeight: "100vh" }}
     >
@@ -271,9 +271,9 @@ const ProductDetails = ({ productDetailsData, configData }) => {
       >
         <CustomPageBreadCrumb items={breadcrumbItems} />
       </CustomStackFullWidth>
-      <Grid container spacing={2}>
+      <Grid container rowSpacing={2} columnSpacing={{ xs: 2, md: 4 }}>
         <Grid item xs={12} md={8}>
-          <CustomStackFullWidth spacing={{ xs: 2, md: 5 }}>
+          <CustomStackFullWidth spacing={{ xs: 2, md: 3 }}>
             <Box>
               <ProductDetailsSection
                 productDetailsData={productDetailsData}

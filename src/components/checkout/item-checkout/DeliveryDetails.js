@@ -24,6 +24,7 @@ import { getToken } from "helper-functions/getToken";
 import LockIcon from "@mui/icons-material/Lock";
 import InstantDelivery from "./InstantDelivery";
 import DeliverySpeedOptions from "./DeliverySpeedOptions";
+import AreaZipCodeSelect from "components/checkout/AreaZipCodeSelect";
 
 const DeliveryDetails = (props) => {
   const {
@@ -52,9 +53,13 @@ const DeliveryDetails = (props) => {
     page,
     zoneData,
     deliveryFee,
+    deliveryFeeBeforeProDiscount,
+    minDeliveryCharge,
     couponDiscount,
     selectedDeliveryOption,
     setSelectedDeliveryOption,
+    deliveryOptions,
+    areaZip,
   } = props;
   const { t } = useTranslation();
   const theme = useTheme();
@@ -190,12 +195,19 @@ const DeliveryDetails = (props) => {
           setScheduleAt={setScheduleAt}
         />
       )}
+      {/* Sits with the delivery address: the zone prices by this, so it has to
+          be answered before the fee can be quoted. Renders itself away when the
+          zone prices by distance or a fixed amount. */}
+      {areaZip ? <AreaZipCodeSelect areaZip={areaZip} /> : null}
       {!!storeData?.self_delivery_system ? null : (
         <DeliverySpeedOptions
           storeData={storeData}
           zoneData={zoneData}
+          deliveryOptions={deliveryOptions}
           orderType={orderType}
           deliveryFee={deliveryFee}
+          deliveryFeeBeforeProDiscount={deliveryFeeBeforeProDiscount}
+          minDeliveryCharge={minDeliveryCharge}
           couponDiscount={couponDiscount}
           selectedDeliveryOption={selectedDeliveryOption}
           setSelectedDeliveryOption={setSelectedDeliveryOption}

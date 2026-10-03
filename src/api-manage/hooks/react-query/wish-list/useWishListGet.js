@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 import { get_wish_list_api } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
 import { getCurrentModuleId } from "helper-functions/getCurrentModuleType";
+import { getApiContent } from "../../../getApiContent";
 
 const getData = async (params = {}) => {
   const { search = "", sort_by, price_min, price_max, rating, type, quick_action } = params;
@@ -15,7 +16,7 @@ const getData = async (params = {}) => {
 
   const qs = query.toString();
   const { data } = await MainApi.get(`${get_wish_list_api}${qs ? `?${qs}` : ""}`);
-  return data;
+  return getApiContent(data);
 };
 
 /**

@@ -120,19 +120,21 @@ const DeliveryManTip = ({
 
   const pillSx = (selected) => ({
     minWidth: "auto",
-    px: { xs: 1.5, md: 2 },
-    py: { xs: 0.5, md: 0.75 },
+    height: "36px",
+    px: "16px",
+    py: 0,
     borderRadius: "8px",
     textTransform: "none",
     fontWeight: 600,
-    fontSize: { xs: "12px", md: "13px" },
+    fontSize: "14px",
+    letterSpacing: "-0.42px",
     boxShadow: "none",
     backgroundColor: selected
       ? theme.palette.primary.main
-      : alpha(neutralBase, 0.12),
+      : theme.palette.background.secondary,
     color: selected
       ? theme.palette.whiteContainer.main
-      : theme.palette.text.primary,
+      : theme.palette.neutral[1050],
     "&:hover": {
       boxShadow: "none",
       backgroundColor: selected
@@ -142,7 +144,7 @@ const DeliveryManTip = ({
   });
 
   const renderPillCell = ({ key, label, selected, onClick, isMostUsed }) => (
-    <Stack key={key} alignItems="center" spacing={0.25}>
+    <Stack key={key} alignItems="center" spacing={0.5}>
       <Button
         variant="contained"
         disableElevation
@@ -154,9 +156,10 @@ const DeliveryManTip = ({
       {isMostUsed && (
         <Typography
           sx={{
-            fontSize: "10px",
+            fontSize: "14px",
             fontWeight: 600,
-            color: theme.palette.primary.main,
+            letterSpacing: "-0.42px",
+            color: theme.palette.info?.main || "#3979e0",
           }}
         >
           {t("Most Used")}
@@ -170,26 +173,27 @@ const DeliveryManTip = ({
       sx={{
         width: "100%",
         backgroundColor: theme.palette.background.paper,
-        borderRadius: { xs: "10px", md: "14px" },
-        boxShadow: `0 1px 4px ${alpha("#000", 0.06)}`,
-        px: { xs: 2, md: 3 },
-        py: { xs: 1.5, md: 2 },
+        borderRadius: "16px",
+        boxShadow: "none",
+        padding: { xs: "16px", md: "20px" },
       }}
     >
-      <Stack spacing={0.25}>
+      <Stack spacing={0.5}>
         <Typography
           sx={{
             fontWeight: 700,
-            fontSize: { xs: "14px", md: "16px" },
-            color: theme.palette.text.primary,
+            fontSize: { xs: "16px", md: "18px" },
+            letterSpacing: "-0.54px",
+            color: "neutral.1050",
           }}
         >
-          {t("Delivery Tips")}
+          {t("Deliveryman Tips")}
         </Typography>
         <Typography
           sx={{
-            fontSize: { xs: "11px", md: "12px" },
-            color: theme.palette.text.secondary,
+            fontSize: "14px",
+            letterSpacing: "-0.42px",
+            color: theme.palette.neutral?.[500] || theme.palette.text.secondary,
           }}
         >
           {t("Your provided tips will 100% goes to deliveryman.")}
@@ -262,20 +266,21 @@ const DeliveryManTip = ({
       )}
 
       <FormControlLabel
-        sx={{ mt: { xs: 0.5, md: 1 }, ml: 0 }}
+        sx={{ mt: { xs: 1.5, md: 2 }, ml: 0 }}
         control={
           <Checkbox
-            size="small"
             checked={saveForLater}
             onChange={(e) => setSaveForLater(e.target.checked)}
-            sx={{ p: 0.5, mr: 0.5 }}
+            sx={{ p: 0, mr: 1, "& .MuiSvgIcon-root": { fontSize: 20 } }}
           />
         }
         label={
           <Typography
             sx={{
-              fontSize: { xs: "12px", md: "13px" },
-              color: theme.palette.text.primary,
+              fontWeight: 500,
+              fontSize: "16px",
+              letterSpacing: "-0.48px",
+              color: "neutral.1050",
             }}
           >
             {t("Save It For Later")}

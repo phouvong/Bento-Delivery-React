@@ -5,6 +5,7 @@ import {
   Stack,
   styled,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 import { useFormik } from "formik";
@@ -34,6 +35,7 @@ import OtpForm from "components/auth/sign-up/OtpForm";
 import { auth } from "firebase";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { useFireBaseOtpVerify } from "api-manage/hooks/react-query/forgot-password/useFIreBaseOtpVerify";
+import { getApiContent } from "api-manage/getApiContent";
 
 export const BackIconButton = styled(IconButton)(({ theme }) => ({
   padding: "10px",
@@ -113,6 +115,8 @@ const BasicInformationForm = ({
   const { f_name, l_name, phone, email, image_full_url } = data;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setConfirmShowPassword] = useState(false);
+  // "form" or "verify" — gates the Update Profile button's spinner to real submits.
+  const [submitSource, setSubmitSource] = useState(null);
   const customerImageUrl = configData?.base_urls?.customer_image_url;
   const dispatch = useDispatch();
   const profileFormik = useFormik({
@@ -127,6 +131,7 @@ const BasicInformationForm = ({
     validationSchema: ValidationSechemaProfile(),
     onSubmit: async (values, helpers) => {
       try {
+        setSubmitSource("form");
         formSubmitOnSuccess(values);
       } catch (err) {}
     },
@@ -191,10 +196,11 @@ const BasicInformationForm = ({
   const { mutate: profileUpdateByMutate, isLoading } = useUpdateProfile();
   const formSubmitOnSuccess = (values) => {
     const onSuccessHandler = (response) => {
-      if (response) {
+      const content = getApiContent(response) ?? response;
+      if (content) {
         setResData({
           ...resData,
-          ...response,
+          ...content,
           name: values?.name,
           // l_name: l_name,
           phone: values?.phone,
@@ -202,10 +208,10 @@ const BasicInformationForm = ({
           image: values?.image,
           button_type: values?.button_type,
         });
-        if (response?.otp_send) {
-          if (response?.verification_on === "phone") {
+        if (content?.otp_send) {
+          if (content?.verification_on === "phone") {
             if (configData?.firebase_otp_verification === 1) {
-              sendOTP(response, values);
+              sendOTP(content, values);
             } else {
               setOpen(true);
             }
@@ -215,7 +221,7 @@ const BasicInformationForm = ({
         } else {
           setOpenEmail(false);
           setOpen(false);
-          toast.success(t(response?.message));
+          toast.success(t(content?.message));
           refetch();
           handleClick();
         }
@@ -268,10 +274,16 @@ const BasicInformationForm = ({
     profileFormik.setFieldValue("confirm_password", "");
   };
   const handleVerified = (type) => {
+    setSubmitSource("verify");
+    const payload = {
+      ...profileFormik?.values,
+      password: "",
+      confirm_password: "",
+    };
     if (type === "email") {
-      formSubmitOnSuccess({ ...profileFormik?.values, button_type: "email" });
+      formSubmitOnSuccess({ ...payload, button_type: "email" });
     } else {
-      formSubmitOnSuccess({ ...profileFormik?.values, button_type: "phone" });
+      formSubmitOnSuccess({ ...payload, button_type: "phone" });
     }
   };
   return (
@@ -412,14 +424,16 @@ const BasicInformationForm = ({
                         <>
                           {configData?.centralize_login
                             ?.email_verification_status === 1 && (
-                            <ReportProblemIcon
-                              onClick={() => handleVerified("email")}
-                              sx={{
-                                color: (theme) => theme.palette.error.main,
-                                width: "1.2rem",
-                                cursor: "pointer",
-                              }}
-                            />
+                            <Tooltip title={t("Click to verify email")} arrow>
+                              <ReportProblemIcon
+                                onClick={() => handleVerified("email")}
+                                sx={{
+                                  color: (theme) => theme.palette.error.main,
+                                  width: "1.2rem",
+                                  cursor: "pointer",
+                                }}
+                              />
+                            </Tooltip>
                           )}
                         </>
                       )}
@@ -482,14 +496,16 @@ const BasicInformationForm = ({
                   <>
                     {configData?.centralize_login?.phone_verification_status ===
                       1 && (
-                      <ReportProblemIcon
-                        onClick={() => handleVerified("phone")}
-                        sx={{
-                          color: (theme) => theme.palette.error.main,
-                          width: "1.2rem",
-                          cursor: "pointer",
-                        }}
-                      />
+                      <Tooltip title={t("Click to verify phone")} arrow>
+                        <ReportProblemIcon
+                          onClick={() => handleVerified("phone")}
+                          sx={{
+                            color: (theme) => theme.palette.error.main,
+                            width: "1.2rem",
+                            cursor: "pointer",
+                          }}
+                        />
+                      </Tooltip>
                     )}
                   </>
                 )}
@@ -593,7 +609,7 @@ const BasicInformationForm = ({
           <Grid item md={12} xs={12} align="end">
             <FormSubmitButton
               handleReset={handleReset}
-              isLoading={isLoading}
+              isLoading={isLoading && submitSource === "form"}
               reset={t("Reset")}
               submit={t("Update Profile")}
             />

@@ -43,7 +43,7 @@ const foodCardColor = neutral[800];
 const roundStackOne = "rgba(255, 255, 255, 0.04)";
 const roundStackTwo = "rgba(255, 255, 255, 0.06)";
 const primary = {
-  main: "#A7261A",
+  main: "#039D55",
   light: "#909BEF",
   dark: "#1c6641",
   deep: "#026034",
@@ -160,6 +160,21 @@ const couponBg = {
   pro: "#1a2b3c",
   discount: "#2d2200",
   ticket: "#2d1515",
+};
+const happyHourBanner = {
+  bg: "rgba(236, 34, 31, 0.14)",
+  timerBg: "#EC221F",
+  timerColon: "#FF8A87",
+  timerColonWarm: "#E0A23D",
+};
+const progressOffer = {
+  bg: "rgba(229, 160, 0, 0.14)",
+  track: "rgba(255, 255, 255, 0.06)",
+  fill: "#e8972a",
+  chip: "#ff4444",
+};
+const bogoBanner = {
+  bg: "rgba(86, 66, 240, 0.14)",
 };
 export const darkThemeOptions = {
   components: {
@@ -291,6 +306,9 @@ export const darkThemeOptions = {
     roundStackTwo,
     toolTipColor,
     couponBg,
+    happyHourBanner,
+    progressOffer,
+    bogoBanner,
   },
   shadows: [
     "none",

@@ -53,19 +53,21 @@ const ModuleContainer = styled(Box)(({ theme, selected }) => ({
   },
 }));
 
-export const zoneWiseModule = (data) => {
-  let currentZoneIds = undefined;
-  if (typeof window !== "undefined") {
-    const rawZoneIds = localStorage.getItem("zoneid");
-    if (rawZoneIds) {
-      try {
-        const parsed = JSON.parse(rawZoneIds);
-        currentZoneIds = Array.isArray(parsed) ? parsed : undefined;
-      } catch {
-        currentZoneIds = undefined;
-      }
-    }
+// "zoneid" may be stored as a scalar or a JSON array — normalize to an array.
+export const getCurrentZoneIds = () => {
+  if (typeof window === "undefined") return undefined;
+  const rawZoneIds = localStorage.getItem("zoneid");
+  if (!rawZoneIds) return undefined;
+  try {
+    const parsed = JSON.parse(rawZoneIds);
+    return Array.isArray(parsed) ? parsed : [parsed];
+  } catch {
+    return [rawZoneIds];
   }
+};
+
+export const zoneWiseModule = (data) => {
+  const currentZoneIds = getCurrentZoneIds();
   return filterOutRiderShareModules(data)?.filter((moduleItem) => {
     const zoneIds = moduleItem?.zones?.map((zone) => zone.id);
     return currentZoneIds?.some((id) => zoneIds?.includes(id));
@@ -115,19 +117,7 @@ const ModuleSelect = ({
     );
   };
 
-  let currentZoneIds = undefined;
-  if (typeof window !== "undefined") {
-    const rawZoneIds = localStorage.getItem("zoneid");
-    if (rawZoneIds) {
-      try {
-        const parsed = JSON.parse(rawZoneIds);
-        currentZoneIds = Array.isArray(parsed) ? parsed : undefined;
-      } catch {
-        currentZoneIds = undefined;
-      }
-    }
-  }
-  console.log("vvvv", data);
+  const currentZoneIds = getCurrentZoneIds();
   const filteredModules = filterOutRiderShareModules(data);
   const modulesToShow = currentZoneIds
     ? zoneWiseModule(filteredModules)

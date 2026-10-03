@@ -35,7 +35,7 @@ const background = {
 const divider = "#E6E8F0";
 
 const primary = {
-  main: "#a7261a",
+  main: "#039D55",
   deep: "#026034",
   light: "#EBFDF2",
   dark: "#1c6641",
@@ -161,6 +161,21 @@ const couponBg = {
 	pro: "#F1F6FD",
 	discount: "#FFFBEB",
 	ticket: "#FEE9E7",
+};
+const happyHourBanner = {
+	bg: "#FEE9E7",
+	timerBg: "#EC221F",
+	timerColon: "#900B09",
+	timerColonWarm: "#BF6A02",
+};
+const progressOffer = {
+	bg: "#FFF1C2",
+	track: "#FFFBEB",
+	fill: "#BF6A02",
+	chip: "#EC221F",
+};
+const bogoBanner = {
+	bg: "#DBE9FF",
 };
 const roundStackOne = "rgba(255, 255, 255, 0.04)";
 const roundStackTwo = "rgba(255, 255, 255, 0.06)";
@@ -296,6 +311,9 @@ export const lightThemeOptions = {
     roundStackTwo,
     toolTipColor,
     couponBg,
+    happyHourBanner,
+    progressOffer,
+    bogoBanner,
   },
   shadows: [
     "none",

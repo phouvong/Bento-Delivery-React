@@ -2,10 +2,11 @@ import { useQuery } from "react-query";
 import { pro_plans } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
 import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiContent } from "../../../getApiContent";
 
 const getProPlans = async () => {
   const { data } = await MainApi.get(pro_plans);
-  return data;
+  return getApiContent(data);
 };
 
 export const useGetProPlans = ({ enabled = true } = {}) => {

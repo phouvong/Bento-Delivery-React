@@ -10,6 +10,7 @@ import deliveryImage from "../../../public/static/fee.png";
 import { Skeleton } from "@mui/material";
 import { getAmountWithSign } from "../../helper-functions/CardHelpers";
 import { handleDistance } from "../../utils/CustomFunctions";
+import { formatDistanceWithUnit } from "../../helper-functions/formatDistanceWithUnit";
 const DeliveryFree = ({
 	data,
 	parcelDeliveryFree,
@@ -44,14 +45,14 @@ const DeliveryFree = ({
 					</Typography>
 					{data ? (
 						<Typography>
-							{handleDistance(
-								data,
-								senderLocation,
-								receiverLocation
-							)?.toFixed(
-								configData?.digit_after_decimal_point
-							)}{" "}
-							km
+							{formatDistanceWithUnit(
+								handleDistance(
+									data,
+									senderLocation,
+									receiverLocation
+								),
+								configData
+							)}
 						</Typography>
 					) : (
 						<Skeleton width={50} height={20} variant="text" />

@@ -11,6 +11,7 @@ import { t } from "i18next";
 import Image from "next/image";
 import Router from "next/router";
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import * as Yup from "yup";
 import {
@@ -86,8 +87,12 @@ const WalletBoxComponent = (props) => {
     mutate(payloadData, {
       onSuccess: async (response) => {
         setLoading(false);
-        const url = response?.redirect_link;
-        Router.push(url);
+        const url = response?.content?.redirect_link ?? response?.redirect_link;
+        if (url) {
+          Router.push(url);
+        } else {
+          toast.error(t("Something went wrong, please try again"));
+        }
       },
       onError: (error) => {
         error?.response?.data?.errors?.forEach((item) => {

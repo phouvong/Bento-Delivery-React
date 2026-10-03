@@ -6,16 +6,17 @@ import {
 } from "../../../api-error-response/ErrorResponses";
 import {getCurrentModuleType} from "helper-functions/getCurrentModuleType";
 import {popular_provider, popular_store_api} from "../../../ApiRoutes";
+import { getApiCollection } from "../../../getApiContent";
 const getPopularStore = async (type) => {
   const { data } = await MainApi.get(`${popular_store_api}?type=${type}`);
-  return data;
+  return getApiCollection(data, "stores");
 };
 const getPopularStoreInfiniteScroll = async (pageParams) => {
   const { type, limit, offset, pageParam } = pageParams;
   const { data } = await MainApi.get(
     `${getCurrentModuleType() === "rental"?popular_provider:popular_store_api}?type=${type}&offset=${pageParam}&limit=${limit}`
   );
-  return data;
+  return getApiCollection(data, "stores");
 };
 
 export default function useGetPopularStore(pageParams) {

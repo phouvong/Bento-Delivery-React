@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 import { useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { setConfigData } from "redux/slices/configData";
+import { getApiContent } from "api-manage/getApiContent";
 import CustomContainer from "../../../src/components/container";
 import MainLayout from "../../../src/components/layout/MainLayout";
 import SEO from "../../../src/components/seo";
@@ -63,7 +64,7 @@ const Index = ({ configData, serviceDetailsData }) => {
         robotsMeta={serviceDetailsData?.meta_data}
       />
       <MainLayout configData={configData}>
-        <CustomContainer sx={{ mt: { xs: "0", md: "20px" } }}>
+        <CustomContainer>
           <ServiceDetails
             serviceDetailsData={mergedServiceDetailsData}
             configData={configData}
@@ -86,7 +87,7 @@ export const getServerSideProps = async (context) => {
     ? `${service_campaign_details_api}/${serviceId}`
     : `${service_details_api}/${serviceId}`;
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
   const origin = process.env.NEXT_CLIENT_HOST_URL;
 
   console.time("Fetch Config + Service Details");
@@ -122,7 +123,7 @@ export const getServerSideProps = async (context) => {
 
   let configData;
   try {
-    configData = await configRes.json();
+    configData = getApiContent(await configRes.json());
   } catch (error) {
     console.error("config parse error:", error.message);
     return { notFound: true };
@@ -141,7 +142,7 @@ export const getServerSideProps = async (context) => {
       return { notFound: true };
     }
     try {
-      serviceDetailsData = await serviceDetailsRes.json();
+      serviceDetailsData = getApiContent(await serviceDetailsRes.json());
     } catch (error) {
       console.error("service_details parse error:", error.message);
       return { notFound: true };

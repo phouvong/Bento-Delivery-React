@@ -236,6 +236,18 @@ const TrackOrderInput = ({ configData, pt = "62px" }) => {
               />
             </Grid>
             <Grid item xs={12} md={3}>
+              <Typography
+                sx={{
+                  fontWeight: 400,
+                  fontSize: "16px",
+                  lineHeight: "110%",
+                  marginBottom: "6px",
+                  visibility: "hidden",
+                  display: { xs: "none", md: "block" },
+                }}
+              >
+                {trackCopy.label}
+              </Typography>
               <PrimaryButton type="submit" disabled={isSearching}>
                 <Stack
                   direction="row"

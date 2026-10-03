@@ -37,6 +37,13 @@ const queryClient = new QueryClient({
     queries: {
       cacheTime: 1000 * 60 * 5, // 5 minutes
       staleTime: 1000 * 60 * 2, // 2 minutes
+      // react-query v3 refetches every active query whenever the tab regains
+      // focus. On the home page that is ~20 requests each time the user
+      // alt-tabs back, for catalogue data that changes far more slowly than
+      // the 2 minute staleTime above.
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: false,
+      retry: 1,
     },
   },
 });

@@ -1,13 +1,12 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Box from "@mui/material/Box";
 import CustomSearch from "../../custom-search/CustomSearch";
-import { useGetCategories } from "api-manage/hooks/react-query/all-category/all-categorys";
+import useAnimatedSearchPlaceholder from "hooks/useAnimatedSearchPlaceholder";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import SearchSuggestionsBottom from "../../search/SearchSuggestionsBottom";
 import { t } from "i18next";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { saveRecentSearch } from "utils/recentSearchStorage";
-import { ModuleTypes } from "helper-functions/moduleTypes";
 import { useTheme } from "@mui/material";
 import useGetItemOrStore from "../../../api-manage/hooks/react-query/search/useGetItemOrStore";
 import { removeSpecialCharacters } from "utils/CustomFunctions";
@@ -115,7 +114,6 @@ const ManageSearch = ({
     isRefetching: isRefetchingItemOrStoreSuggestion,
   } = useGetItemOrStore(removeSpecialCharacters(searchValue));
 
-
   let searchTimeout;
 
   const getSearchSuggestions = async () => {
@@ -180,53 +178,10 @@ const ManageSearch = ({
     };
   }, [searchRef]);
 
-  const MODULE_NOUN = {
-    [ModuleTypes.FOOD]: t("Food"),
-    [ModuleTypes.GROCERY]: t("Grocery"),
-    [ModuleTypes.PHARMACY]: t("Medicine"),
-    [ModuleTypes.ECOMMERCE]: t("Products"),
-    [ModuleTypes.PARCEL]: t("Parcel"),
-    [ModuleTypes.SERVICE]: t("Services"),
-  };
-
-  const moduleType = getCurrentModuleType();
-  const moduleNoun = MODULE_NOUN[moduleType] ?? t("Items");
-
-  // Animated placeholder — cycles through [moduleNoun, ...category names].
-  // Starts on the module noun and switches to category names once they load.
-  const { data: categoriesResponse } = useGetCategories();
-  const animatedItems = useMemo(() => {
-    const base = [moduleNoun];
-    const cats = categoriesResponse?.data ?? [];
-    cats.slice(0, 15).forEach((c) => {
-      if (c?.name) base.push(c.name);
-    });
-    return base;
-  }, [categoriesResponse, moduleNoun]);
-
-  const [phIndex, setPhIndex] = useState(0);
-  const [phVisible, setPhVisible] = useState(true);
-  // Ref so the interval always reads the latest items without restarting
-  const animatedItemsRef = useRef(animatedItems);
-  animatedItemsRef.current = animatedItems;
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      const items = animatedItemsRef.current;
-      if (!items || items.length <= 1) return;
-      setPhVisible(false);
-      setTimeout(() => {
-        setPhIndex((prev) => (prev + 1) % items.length);
-        setPhVisible(true);
-      }, 280);
-    }, 2600);
-    return () => clearInterval(id);
-  }, []);
-
-  const rawNoun = animatedItems[phIndex] ?? moduleNoun;
-  // Keep long category names from breaking the placeholder UI
-  const currentNoun =
-    rawNoun.length > 22 ? `${rawNoun.slice(0, 22).trimEnd()}…` : rawNoun;
+  // Cycling "Search for <noun>" placeholder. The hook only reaches for the
+  // category list when the persisted store has none, so this costs no request
+  // on a warm load.
+  const { currentNoun, visible: phVisible } = useAnimatedSearchPlaceholder();
 
   const richPlaceholder = (
     <span

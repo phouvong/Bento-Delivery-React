@@ -6,12 +6,13 @@ import {
   onSingleErrorResponse,
 } from "../../../api-error-response/ErrorResponses";
 import { getToken } from "helper-functions/getToken";
+import { getApiContent } from "../../../getApiContent";
 
 const getData = async () => {
   const userToken = getToken();
   if (userToken) {
     const { data } = await MainApi.get(user_info_api);
-    return data;
+    return getApiContent(data);
   }
 };
 

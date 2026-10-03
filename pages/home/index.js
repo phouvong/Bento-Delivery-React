@@ -1,6 +1,6 @@
 import CssBaseline from "@mui/material/CssBaseline";
-import Router, { useRouter } from "next/router";
-import React, { useEffect } from "react";
+import Router from "next/router";
+import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setConfigData } from "redux/slices/configData";
 import AiChatBotLauncher from "../../src/components/ai-chatbot/AiChatBotLauncher";
@@ -18,19 +18,23 @@ const Home = ({ metaData, configData }) => {
   const dispatch = useDispatch();
   //const { data: dataConfig, refetch: configRefetch } = useGetConfigData();
   const { data: dataLanding, refetch: refetchLanding } = useGetLandingPage();
-  const router = useRouter();
   const selectedModule = useSelector(
     (state) => state.utilsData?.selectedModule,
   );
-  const queryModuleType =
-    typeof router.query.module === "string" ? router.query.module : null;
-  const currentModuleType =
-    selectedModule?.module_type ??
-    getCurrentModuleType() ??
-    queryModuleType ??
-    null;
+  const [currentModuleType, setCurrentModuleType] = useState(
+    selectedModule?.module_type ?? null,
+  );
+  useEffect(() => {
+    setCurrentModuleType(selectedModule?.module_type ?? getCurrentModuleType() ?? null);
+  }, [selectedModule?.module_type]);
   const isRideModule = currentModuleType === ModuleTypes.RIDE;
   const isServiceModule = currentModuleType === ModuleTypes.SERVICE;
+
+  const [happyHourActive, setHappyHourActive] = useState(false);
+  const handleHappyHourActiveChange = useCallback(
+    (active) => setHappyHourActive(active),
+    [],
+  );
 
   const metadata = processMetadata(metaData, {
     title: `Home - ${configData?.business_name}`,
@@ -67,13 +71,19 @@ const Home = ({ metaData, configData }) => {
         />
       )}
 
-      <MainLayout configData={configData} landingPageData={dataLanding}>
+      <MainLayout
+        configData={configData}
+        landingPageData={dataLanding}
+        onHappyHourActiveChange={handleHappyHourActiveChange}
+      >
         <ModuleWiseLayout
           configData={configData}
           landingPageData={dataLanding}
         />
       </MainLayout>
-      {!isRideModule && <AiChatBotLauncher />}
+      {!isRideModule && (
+        <AiChatBotLauncher happyHourBannerActive={happyHourActive} />
+      )}
     </>
   );
 };

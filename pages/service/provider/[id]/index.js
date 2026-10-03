@@ -3,6 +3,7 @@ import CssBaseline from "@mui/material/CssBaseline";
 import { useDispatch } from "react-redux";
 import dynamic from "next/dynamic";
 import { setConfigData } from "redux/slices/configData";
+import { getApiContent } from "api-manage/getApiContent";
 import { setSelectedModule } from "redux/slices/utils";
 import { config_api } from "api-manage/ApiRoutes";
 import { provider_details_api } from "components/home/module-wise-components/service/service-api-manage/ApiRoutes";
@@ -98,7 +99,7 @@ export const getServerSideProps = async (context) => {
   const { req, res } = context;
   const language = req.cookies.languageSetting || "en";
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
   const origin = process.env.NEXT_CLIENT_HOST_URL;
 
   const headersCommon = {
@@ -108,8 +109,6 @@ export const getServerSideProps = async (context) => {
     "X-localization": language,
   };
 
-  const moduleId = req.cookies?.selectedModuleId;
-
   console.time("Fetch Config + Store Details");
   const [configSettled, providerDetailsSettled] = await Promise.allSettled([
     fetchWithTimeoutRetry(`${baseUrl}${config_api}`, {
@@ -118,7 +117,7 @@ export const getServerSideProps = async (context) => {
     }),
     fetchWithTimeoutRetry(`${baseUrl}${provider_details_api}/${storeId}`, {
       method: "GET",
-      headers: { ...headersCommon, ...(moduleId && { moduleId }) },
+      headers: headersCommon,
     }),
   ]);
   console.timeEnd("Fetch Config + Store Details");
@@ -135,7 +134,7 @@ export const getServerSideProps = async (context) => {
 
   let configData;
   try {
-    configData = await configRes.json();
+    configData = getApiContent(await configRes.json());
   } catch (error) {
     console.log("config parse error 🔥", error.message);
     return { notFound: true };
@@ -154,7 +153,7 @@ export const getServerSideProps = async (context) => {
       return { notFound: true };
     }
     try {
-      providerDetails = await providerDetailsRes.json();
+      providerDetails = getApiContent(await providerDetailsRes.json());
     } catch (error) {
       console.log("provider_details parse error 🔥", error.message);
       return { notFound: true };

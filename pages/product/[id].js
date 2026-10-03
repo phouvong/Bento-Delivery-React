@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import SEO from "../../src/components/seo";
 import CustomContainer from "../../src/components/container";
 import { setConfigData } from "redux/slices/configData";
+import { getApiContent } from "api-manage/getApiContent";
 import fetchWithTimeoutRetry from "../../src/utils/fetchWithTimeoutRetry";
 import ProductDetailsSkeleton from "../../src/components/common/skeletons/ProductDetailsSkeleton";
 const ProductDetails = dynamic(
@@ -61,7 +62,7 @@ const Index = ({ configData, productDetailsData, isCampaign }) => {
         robotsMeta={productDetailsData?.meta_data}
       />
       <MainLayout configData={configData}>
-        <CustomContainer sx={{ mt: { xs: "0", md: "20px" } }}>
+        <CustomContainer>
           {productDetails.length > 0 && (
             <ProductDetails
               productDetailsData={productDetails[0]}
@@ -83,7 +84,7 @@ export const getServerSideProps = async (context) => {
   const moduleId = query.module || query.module_id;
   const isCampaign = query?.campaign === "1";
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
   const origin = process.env.NEXT_CLIENT_HOST_URL;
 
   console.time("Fetch Config + Product Details");
@@ -124,7 +125,7 @@ export const getServerSideProps = async (context) => {
 
   let configData;
   try {
-    configData = await configRes.json();
+    configData = getApiContent(await configRes.json());
   } catch (error) {
     console.error("config parse error:", error.message);
     return { notFound: true };
@@ -143,7 +144,7 @@ export const getServerSideProps = async (context) => {
       return { notFound: true };
     }
     try {
-      productDetailsData = await productDetailsRes.json();
+      productDetailsData = getApiContent(await productDetailsRes.json());
     } catch (error) {
       console.error("product_details parse error:", error.message);
       return { notFound: true };

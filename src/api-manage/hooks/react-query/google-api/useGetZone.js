@@ -5,12 +5,17 @@ import {
   onSingleErrorResponse,
 } from "../../../api-error-response/ErrorResponses";
 import MainApi from "../../../MainApi";
+import { getApiContent } from "../../../getApiContent";
+import { store } from "redux/store";
+import { mergeZoneData } from "redux/slices/zoneData";
 const getZoneId = async (location, zoneIdEnabled) => {
   if (location?.lat && location?.lng) {
     const { data } = await MainApi.get(
       `${zoneId_api}?lat=${location?.lat}&lng=${location?.lng}`
     );
-    return data;
+    const content = getApiContent(data);
+    store.dispatch(mergeZoneData(content?.zone_data));
+    return content;
   }
 };
 

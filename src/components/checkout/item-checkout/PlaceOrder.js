@@ -11,6 +11,7 @@ const PlaceOrder = (props) => {
 		isLoading,
 		totalAmount,
 		originalAmount,
+		pricingLoading,
 	} = props;
 	const { t } = useTranslation();
 	const theme = useTheme();
@@ -83,6 +84,7 @@ const PlaceOrder = (props) => {
 
 			<LoadingButton
 				onClick={placeOrder}
+				disabled={pricingLoading}
 				loading={orderLoading}
 				loadingPosition="end"
 				loadingIndicator={

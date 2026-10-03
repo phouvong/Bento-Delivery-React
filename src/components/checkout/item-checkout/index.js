@@ -1,5 +1,5 @@
 import { useTheme } from "@emotion/react";
-import { alpha, Grid, Typography, useMediaQuery } from "@mui/material";
+import { alpha, Box, Grid, Typography, useMediaQuery } from "@mui/material";
 import { Stack } from "@mui/system";
 import { baseUrl } from "api-manage/MainApi";
 import { OrderApi } from "api-manage/another-formated-api/orderApi";
@@ -11,6 +11,8 @@ import {
 import { GoogleApi } from "api-manage/hooks/react-query/googleApi";
 import { useOfflinePayment } from "api-manage/hooks/react-query/offlinePayment/useOfflinePayment";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { isBogoCartRow } from "helper-functions/bogoCartRow";
+import { isBundleCartRow } from "helper-functions/bundleCartRow";
 import { getStoresOrRestaurants } from "helper-functions/getStoresOrRestaurants";
 import { getGuestId, getToken } from "helper-functions/getToken";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
@@ -61,6 +63,7 @@ import MultiPrescriptionRoot from "../Prescription/MultiPrescriptionRoot";
 import AddPaymentMethod from "./AddPaymentMethod";
 import CheckoutStepper from "./CheckoutStepper";
 import DeliveryDetails from "./DeliveryDetails";
+import useAreaZipSelection from "api-manage/hooks/react-query/checkout/useAreaZipSelection";
 import InstantDelivery from "./InstantDelivery";
 import HaveCoupon from "./HaveCoupon";
 import OrderCalculation from "./OrderCalculation";
@@ -119,6 +122,8 @@ const ItemCheckout = (props) => {
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
   const [check, setCheck] = React.useState(null);
   const [orderType, setOrderType] = useState("delivery");
+  const [quoteUnavailable, setQuoteUnavailable] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
   const [payableAmount, setPayableAmount] = useState(null);
   const [address, setAddress] = useState(undefined);
   const { couponInfo } = useSelector((state) => state.profileInfo);
@@ -129,12 +134,16 @@ const ItemCheckout = (props) => {
   // DeliveryDetails. Shape: { id, deliveryType, surcharge }. Null when the
   // zone doesn't expose `delivery_options` or order isn't delivery.
   const [selectedDeliveryOption, setSelectedDeliveryOption] = useState(null);
+  const [deliveryOptions, setDeliveryOptions] = useState([]);
   const [scheduleAt, setScheduleAt] = useState("now");
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [taxAmount, setTaxAmount] = useState(0);
   const [total_order_amount, setTotalOrderAmount] = useState(0);
   const [deliveryTip, setDeliveryTip] = useState(0);
   const [deliveryFee, setDeliveryFee] = useState(0);
+  const [deliveryFeeBeforeProDiscount, setDeliveryFeeBeforeProDiscount] =
+    useState(0);
+  const [minDeliveryCharge, setMinDeliveryCharge] = useState(0);
   const [isImageSelected, setIsImageSelected] = useState([]);
   const [prescriptionImages, setPrescriptionImages] = useState([]);
   const [cutlery, setCutlery] = useState(0);
@@ -185,7 +194,6 @@ const ItemCheckout = (props) => {
         .oneOf([Yup.ref("password"), null], t("Passwords must match")),
     }),
   });
-  console.log({ couponDiscount });
 
   const currentModuleType = getCurrentModuleType();
   const storeId =
@@ -199,11 +207,21 @@ const ItemCheckout = (props) => {
     const resolvedStoreId = sid || storeId;
     if (moduleId && resolvedStoreId) {
       localStorage.removeItem(
-        `monthly_subscribe_${moduleId}_${resolvedStoreId}`
+        `monthly_subscribe_${moduleId}_${resolvedStoreId}`,
       );
     }
   };
-  const { data: storeData, refetch } = useGetStoreDetails(storeId);
+  const {
+    data: storeData,
+    refetch,
+    isFetching: storeDetailsFetching,
+  } = useGetStoreDetails(storeId);
+  // Area / ZIP selection for zones priced that way. Feeds `checkout-summary`
+  // (which is what actually moves the fee) and gates Confirm Order.
+  const areaZip = useAreaZipSelection({
+    orderType,
+    selfDelivery: Number(storeData?.self_delivery_system) === 1,
+  });
   const { data: tripsData } = useGetMostTrips();
   const { mutate: offlineMutate, isLoading: offlinePaymentLoading } =
     useOfflinePayment();
@@ -238,33 +256,68 @@ const ItemCheckout = (props) => {
       return null;
     }
   }, []);
+
+  const zoneLookupLatLng =
+    currentLatLng?.lat && currentLatLng?.lng
+      ? currentLatLng
+      : address?.lat && address?.lng
+      ? { lat: address.lat, lng: address.lng }
+      : address?.latitude && address?.longitude
+      ? { lat: address.latitude, lng: address.longitude }
+      : null;
   const { data: zoneData } = useQuery(
-    ["zoneId", currentLatLng],
-    async () => GoogleApi.getZoneId(currentLatLng),
+    ["zoneId", zoneLookupLatLng],
+    // GoogleApi.getZoneId hands back the raw axios response (with the v4.2
+    // envelope already unwrapped onto `.data`) — every consumer below reads
+    // `zoneData.zone_data` directly, so unwrap that last layer here instead
+    // of leaving each call site to do it (most didn't, which is why
+    // additional_delivery_option_status/pivot lookups silently came back
+    // empty).
+    async () => (await GoogleApi.getZoneId(zoneLookupLatLng))?.data,
     {
       retry: 1,
-      enabled: Boolean(currentLatLng?.lat && currentLatLng?.lng),
-    }
+      enabled: Boolean(zoneLookupLatLng?.lat && zoneLookupLatLng?.lng),
+    },
   );
-  console.log({ zoneData, storeData });
 
+  // `stores/details` no longer returns the store's latitude/longitude, so
+  // distance-api was being called with `origin_lat=undefined` and answering
+  // 422 ("The origin lat must be a number") — and handleDistance's haversine
+  // fallback used the same undefined coords, so the delivery fee had no usable
+  // distance at all. Only call the API when we actually have both coordinate
+  // pairs; otherwise fall back to `distance_km`, which the store payload does
+  // still carry.
+  const hasStoreCoords =
+    storeData?.latitude != null && storeData?.longitude != null;
   const {
-    data: distanceData,
+    data: distanceApiData,
     refetch: refetchDistance,
     isLoading,
   } = useQuery(
     ["get-distancesss", storeData, address, orderType],
     () => GoogleApi.distanceApi(storeData, address),
     {
-      enabled: true,
+      enabled: hasStoreCoords,
       onError: onErrorResponse,
-    }
+      // Avoids flashing the delivery-fee Skeleton on every address/order-type edit.
+      keepPreviousData: true,
+    },
   );
+
+  // Present the same axios-ish shape downstream whichever source we used, so
+  // every existing `distanceData?.data...` read keeps working.
+  const distanceData = useMemo(() => {
+    if (distanceApiData?.data?.distanceMeters != null) return distanceApiData;
+    if (storeData?.distance_km != null) {
+      return { data: { distanceMeters: Number(storeData.distance_km) * 1000 } };
+    }
+    return distanceApiData;
+  }, [distanceApiData, storeData?.distance_km]);
 
   const tempDistance = handleDistance(
     distanceData?.data,
     { latitude: storeData?.latitude, longitude: storeData?.longitude },
-    address
+    address,
   );
   useEffect(() => {
     setDDistance(Number(distanceData?.data?.distanceMeters) / 1000);
@@ -286,7 +339,7 @@ const ItemCheckout = (props) => {
   //order post api
   const { mutate: orderMutation, isLoading: orderLoading } = useMutation(
     "order-place",
-    OrderApi.placeOrder
+    OrderApi.placeOrder,
   );
   const userOnSuccessHandler = (res) => {};
   const { isLoading: customerLoading, data: customerData } = useQuery(
@@ -295,10 +348,8 @@ const ItemCheckout = (props) => {
     {
       onSuccess: userOnSuccessHandler,
       onError: onSingleErrorResponse,
-    }
+    },
   );
-
-  console.log({ address });
 
   useEffect(() => {
     const currentLatLng = JSON.parse(localStorage.getItem("currentLatLng"));
@@ -318,7 +369,7 @@ const ItemCheckout = (props) => {
       cartList,
       couponDiscount,
       storeData?.tax,
-      storeData
+      storeData,
     );
     setTaxAmount(taxAmount);
   }, [cartList, couponDiscount, storeData]);
@@ -328,7 +379,7 @@ const ItemCheckout = (props) => {
       cartList,
       couponDiscount,
       taxAmount,
-      storeData
+      storeData,
     );
     setTotalOrderAmount(total_order_amount);
   }, [cartList, couponDiscount, taxAmount]);
@@ -348,14 +399,26 @@ const ItemCheckout = (props) => {
       } catch (error) {
         toast.error(
           error?.response?.data?.message ||
-            t("Failed to process offline payment")
+            t("Failed to process offline payment"),
         );
       }
     }
   };
 
   const handleProductList = (productList, totalQty) => {
-    return productList?.map((cart) => {
+    return productList.map((cart) => {
+      if (isBogoCartRow(cart)) {
+        return {
+          bogo_group_id: cart?.bogo_details?.bogo_group_id,
+          quantity: cart?.quantity,
+        };
+      }
+      if (isBundleCartRow(cart)) {
+        return {
+          bundle_group_id: cart?.bundle_details?.bundle_group_id,
+          quantity: cart?.quantity,
+        };
+      }
       return {
         add_on_ids:
           cart?.selectedAddons?.length > 0
@@ -405,7 +468,23 @@ const ItemCheckout = (props) => {
       };
     });
   };
-  console.log({});
+  // areaZip.summaryParams is keyed `areaId`/`zipCodeId` (useGetCheckoutSummary's
+  // param names) — the order-place API wants `area_id`/`zip_code_id`.
+  const AREA_ZIP_BACKEND_KEY = { areaId: "area_id", zipCodeId: "zip_code_id" };
+  const getAreaZipOrderParams = (summaryParams) =>
+    Object.fromEntries(
+      Object.entries(summaryParams || {}).map(([key, value]) => [
+        AREA_ZIP_BACKEND_KEY[key] ?? key,
+        value,
+      ]),
+    );
+
+  // profileInfo has no `.name` field — it's `f_name`/`l_name` (see
+  // delivery-address/index.js, which already builds it this way).
+  const profileFullName = [profileInfo?.f_name, profileInfo?.l_name]
+    .filter(Boolean)
+    .join(" ");
+
   const handleOrderMutationObject = (carts, productList) => {
     const guestId = getToken() ? "" : guest_id;
     const isDigital =
@@ -440,6 +519,12 @@ const ItemCheckout = (props) => {
         formData.append("delivery_type", selectedDeliveryOption.deliveryType);
       }
 
+      Object.entries(getAreaZipOrderParams(areaZip.summaryParams)).forEach(
+        ([key, value]) => {
+          formData.append(key, value);
+        },
+      );
+
       formData.append("store_id", storeData?.id);
       if (couponDiscount?.code) {
         formData.append("coupon_code", couponDiscount?.code);
@@ -451,8 +536,14 @@ const ItemCheckout = (props) => {
       formData.append("discount_amount", getProductDiscount(productList));
       formData.append(
         "distance",
-        handleDistance(distanceData?.data, originData, address)
+        handleDistance(distanceData?.data, originData, address),
       );
+      if (orderType !== "take_away") {
+        formData.append(
+          "delivery_duration",
+          parseInt(distanceData?.data?.duration, 10) || 0,
+        );
+      }
       formData.append("order_amount", totalAmount);
       formData.append("dm_tips", deliveryTip);
 
@@ -465,7 +556,7 @@ const ItemCheckout = (props) => {
       formData.append("guest_id", guestId);
       formData.append(
         "is_buy_now",
-        page === "buy_now" || page === "campaign" ? 1 : 0
+        page === "buy_now" || page === "campaign" ? 1 : 0,
       );
       formData.append("house", token ? address?.house : guestUserInfo?.house);
       formData.append("floor", token ? address?.floor : guestUserInfo?.floor);
@@ -475,8 +566,8 @@ const ItemCheckout = (props) => {
         token
           ? address?.contact_person_name
             ? address?.contact_person_name
-            : profileInfo?.name
-          : guestUserInfo?.contact_person_name
+            : profileFullName
+          : guestUserInfo?.contact_person_name,
       );
       formData.append(
         "contact_person_number",
@@ -484,15 +575,19 @@ const ItemCheckout = (props) => {
           ? address?.contact_person_number
             ? address?.contact_person_number
             : profileInfo?.phone
-          : `+${guestUserInfo?.contact_person_number}`
+          : `+${guestUserInfo?.contact_person_number}`,
       );
       formData.append(
         "contact_person_email",
-        guestUserInfo?.contact_person_email
+        token
+          ? address?.contact_person_email
+            ? address?.contact_person_email
+            : profileInfo?.email
+          : guestUserInfo?.contact_person_email,
       );
       if (prescriptionImages?.length > 0) {
         const filterBinaryImages = prescriptionImages.filter(
-          (img) => !img.name
+          (img) => !img.name,
         );
         const filterUrlImages = prescriptionImages.filter((img) => img.name);
         filterBinaryImages?.length &&
@@ -513,7 +608,7 @@ const ItemCheckout = (props) => {
       formData.append("cutlery", cartPrefs?.addCutlery ? 1 : cutlery ? 1 : 0);
       formData.append(
         "unavailable_item_note",
-        cartPrefs?.unavailableChoice ?? unavailable_item_note ?? ""
+        cartPrefs?.unavailableChoice ?? unavailable_item_note ?? "",
       );
       if (cartPrefs?.monthlySubscribe) {
         formData.append("monthly_subscribe", 1);
@@ -534,6 +629,7 @@ const ItemCheckout = (props) => {
       return {
         cart: JSON.stringify(carts),
         ...address,
+        ...getAreaZipOrderParams(areaZip.summaryParams),
         is_buy_now: page === "buy_now" || page === "campaign" ? 1 : 0,
         partial_payment: usePartialPayment,
         schedule_at: scheduleAt === "now" ? null : scheduleAt,
@@ -546,6 +642,9 @@ const ItemCheckout = (props) => {
         coupon_discount_title: couponDiscount?.title,
         discount_amount: getProductDiscount(productList),
         distance: dDistance || tempDistance,
+        ...(orderType !== "take_away" && {
+          delivery_duration: parseInt(distanceData?.data?.duration, 10) || 0,
+        }),
         order_amount: totalAmount,
         dm_tips: deliveryTip,
         cutlery: resolvedCutlery,
@@ -555,16 +654,20 @@ const ItemCheckout = (props) => {
         contact_person_name: token
           ? address?.contact_person_name
             ? address?.contact_person_name
-            : profileInfo?.name
+            : profileFullName
           : guestUserInfo?.contact_person_name,
         contact_person_number: formatPhoneNumber(
           token
             ? address?.contact_person_number
               ? address?.contact_person_number
               : profileInfo?.phone
-            : `${guestUserInfo?.contact_person_number}`
+            : `${guestUserInfo?.contact_person_number}`,
         ),
-        contact_person_email: guestUserInfo?.contact_person_email,
+        contact_person_email: token
+          ? address?.contact_person_email
+            ? address?.contact_person_email
+            : profileInfo?.email
+          : guestUserInfo?.contact_person_email,
         house: token ? address?.house : guestUserInfo?.house,
         floor: token ? address?.floor : guestUserInfo?.floor,
         road: token ? address?.road : guestUserInfo?.road,
@@ -615,6 +718,7 @@ const ItemCheckout = (props) => {
       storeData?.schedule_order && getCurrentModuleType() === ModuleTypes.FOOD
         ? isFoodAvailableBySchedule(itemsList, scheduleAt)
         : true;
+
     if (isAvailable) {
       const walletAmount = customerData?.data?.wallet_balance;
       let productList = page === "campaign" ? campaignItemList : cartList;
@@ -668,134 +772,138 @@ const ItemCheckout = (props) => {
                 error?.response?.data?.errors?.forEach((item) =>
                   toast.error(item.message, {
                     position: "bottom-right",
-                  })
+                  }),
                 );
               },
             });
           }
         }
       } else {
-        let totalQty = 0;
-        let carts = handleProductList(productList, totalQty);
-        const handleSuccess = (response) => {
-          if (response?.data) {
-            if (token) {
-              // dispatch(setOrderDetailsModal(true));
-            } else {
-              dispatch(setGuestUserOrderId(response?.data?.order_id));
-              dispatch(
-                setOrderInformation({
-                  ...response?.data,
-                  phone: formatPhoneNumber(
-                    token
-                      ? address?.contact_person_number
+        try {
+          let totalQty = 0;
+          let carts = handleProductList(productList, totalQty);
+          const handleSuccess = (response) => {
+            if (response?.data) {
+              if (token) {
+                // dispatch(setOrderDetailsModal(true));
+              } else {
+                dispatch(setGuestUserOrderId(response?.data?.order_id));
+                dispatch(
+                  setOrderInformation({
+                    ...response?.data,
+                    phone: formatPhoneNumber(
+                      token
                         ? address?.contact_person_number
-                        : profileInfo?.phone
-                      : `${guestUserInfo?.contact_person_number}`
-                  ),
-                })
-              );
-              dispatch(setOrderDetailsModalOpen(true));
-              dispatch(setGuestUserInfo(null));
-            }
-            if (
-              paymentMethod === "cash_on_delivery" ||
-              paymentMethod === "offline_payment" ||
-              paymentMethod === "wallet"
-            ) {
-              toast.success(response?.data?.message, {
-                id: paymentMethod,
-              });
-            }
-            if (
-              paymentMethod !== "cash_on_delivery" &&
-              paymentMethod !== "offline_payment"
-            ) {
-              const payment_platform = "web";
-              const page = "my-orders";
-              const callBackUrl = token
-                ? `${window.location.origin}/profile?page=${page}`
-                : `${window.location.origin}/home`;
-              const url = `${baseUrl}/payment-mobile?order_id=${
-                response?.data?.order_id
-              }&customer_id=${
-                customerData?.data?.id ?? response?.data?.user_id
-                  ? response?.data?.user_id
-                  : guest_id
-              }&payment_platform=${payment_platform}&callback=${callBackUrl}&payment_method=${paymentMethod}`;
-              localStorage.setItem("totalAmount", totalAmount);
-              dispatch(setGuestUserInfo(null));
-              dispatch(setOrderDetailsModal(true));
-              //dispatch(setClearCart());
-              Router.push(url, undefined, { shallow: true });
-            } else if (paymentMethod === "offline_payment") {
-              toast.success(t("Order is successful placed"), {
-                id: paymentMethod,
-              });
+                          ? address?.contact_person_number
+                          : profileInfo?.phone
+                        : `${guestUserInfo?.contact_person_number}`,
+                    ),
+                  }),
+                );
+                dispatch(setOrderDetailsModalOpen(true));
+                dispatch(setGuestUserInfo(null));
+              }
+              if (
+                paymentMethod === "cash_on_delivery" ||
+                paymentMethod === "offline_payment" ||
+                paymentMethod === "wallet"
+              ) {
+                toast.success(response?.data?.message, {
+                  id: paymentMethod,
+                });
+              }
+              if (
+                paymentMethod !== "cash_on_delivery" &&
+                paymentMethod !== "offline_payment"
+              ) {
+                const payment_platform = "web";
+                const page = "my-orders";
+                const callBackUrl = token
+                  ? `${window.location.origin}/profile?page=${page}`
+                  : `${window.location.origin}/home`;
+                const url = `${baseUrl}/payment-mobile?order_id=${
+                  response?.data?.order_id
+                }&customer_id=${
+                  customerData?.data?.id ?? response?.data?.user_id
+                    ? response?.data?.user_id
+                    : guest_id
+                }&payment_platform=${payment_platform}&callback=${callBackUrl}&payment_method=${paymentMethod}`;
+                localStorage.setItem("totalAmount", totalAmount);
+                dispatch(setGuestUserInfo(null));
+                dispatch(setOrderDetailsModal(true));
+                //dispatch(setClearCart());
+                Router.push(url, undefined, { shallow: true });
+              } else if (paymentMethod === "offline_payment") {
+                toast.success(t("Order is successful placed"), {
+                  id: paymentMethod,
+                });
 
-              setOrderId(response?.data?.order_id);
-              dispatch(
-                setOrderInformation({
-                  ...response?.data,
-                  phone: formatPhoneNumber(
-                    token
-                      ? address?.contact_person_number
+                setOrderId(response?.data?.order_id);
+                dispatch(
+                  setOrderInformation({
+                    ...response?.data,
+                    phone: formatPhoneNumber(
+                      token
                         ? address?.contact_person_number
-                        : profileInfo?.phone
-                      : `${guestUserInfo?.contact_person_number}`
-                  ),
-                })
-              );
-              //setOrderSuccess(true);
-              //setOfflineCheck(true);
-              dispatch(setOfflineInfoStep(2));
-              router.push(
-                {
-                  pathname: "/checkout",
-                  query: { page: page, method: "offline" },
-                },
-                undefined,
-                { shallow: true }
-              );
-            } else {
-              setOrderId(response?.data?.order_id);
-              dispatch(
-                setOrderInformation({
-                  ...response?.data,
-                  phone: formatPhoneNumber(
-                    token
-                      ? address?.contact_person_number
+                          ? address?.contact_person_number
+                          : profileInfo?.phone
+                        : `${guestUserInfo?.contact_person_number}`,
+                    ),
+                  }),
+                );
+                //setOrderSuccess(true);
+                //setOfflineCheck(true);
+                dispatch(setOfflineInfoStep(2));
+                router.push(
+                  {
+                    pathname: "/checkout",
+                    query: { page: page, method: "offline" },
+                  },
+                  undefined,
+                  { shallow: true },
+                );
+              } else {
+                setOrderId(response?.data?.order_id);
+                dispatch(
+                  setOrderInformation({
+                    ...response?.data,
+                    phone: formatPhoneNumber(
+                      token
                         ? address?.contact_person_number
-                        : profileInfo?.phone
-                      : `${guestUserInfo?.contact_person_number}`
-                  ),
-                })
-              );
-              clearMonthlySubKey(storeId);
-              setOrderSuccess(true);
-              dispatch(setOrderDetailsModal(true));
+                          ? address?.contact_person_number
+                          : profileInfo?.phone
+                        : `${guestUserInfo?.contact_person_number}`,
+                    ),
+                  }),
+                );
+                clearMonthlySubKey(storeId);
+                setOrderSuccess(true);
+                dispatch(setOrderDetailsModal(true));
+              }
             }
+          };
+          if (carts?.length > 0) {
+            let order = handleOrderMutationObject(carts, productList);
+            orderMutation(order, {
+              onSuccess: handleSuccess,
+              onError: (error) => {
+                error?.response?.data?.errors?.forEach((item) =>
+                  toast.error(item.message, {
+                    position: "bottom-right",
+                  }),
+                );
+              },
+            });
           }
-        };
-        if (carts?.length > 0) {
-          let order = handleOrderMutationObject(carts, productList);
-          orderMutation(order, {
-            onSuccess: handleSuccess,
-            onError: (error) => {
-              error?.response?.data?.errors?.forEach((item) =>
-                toast.error(item.message, {
-                  position: "bottom-right",
-                })
-              );
-            },
-          });
+        } catch (error) {
+          console.log({ error });
         }
       }
     } else {
       toast.error(
         t(
-          "One or more item is not available for the chosen preferable schedule time."
-        )
+          "One or more item is not available for the chosen preferable schedule time.",
+        ),
       );
     }
   };
@@ -807,7 +915,7 @@ const ItemCheckout = (props) => {
     toast.error(
       getCurrentModuleType() === "food"
         ? t("Restaurant is closed. Try again later.")
-        : t("Store is closed. Try again later.")
+        : t("Store is closed. Try again later."),
     );
   //totalAmount
   const handlePlaceOrderBasedOnAvailability = () => {
@@ -823,7 +931,7 @@ const ItemCheckout = (props) => {
         } else {
           toast.error(
             `${t(cod_exceeds_message)} ${getAmountWithSign(codLimit)}`,
-            { duration: 5000 }
+            { duration: 5000 },
           );
         }
       } else {
@@ -833,11 +941,19 @@ const ItemCheckout = (props) => {
   };
 
   const isSchedules = () => {
-    if (storeData?.schedules.length > 0) {
+    const schedules = storeData?.schedules;
+    // `/stores/details` does not return a `schedules` array, so `.length` threw.
+    // An absent schedule must not read as "closed" either - that path calls
+    // storeCloseToast() and rejects every order. Fall back to the store's own
+    // open flag, which the endpoint does return.
+    if (!schedules?.length) {
+      return Number(storeData?.open) === 1;
+    }
+    {
       const todayInNumber = moment().weekday();
       let isOpen = false;
-      let filteredSchedules = storeData?.schedules.filter(
-        (item) => item.day === todayInNumber
+      let filteredSchedules = schedules.filter(
+        (item) => item.day === todayInNumber,
       );
       let isAvailableNow = [];
 
@@ -857,6 +973,18 @@ const ItemCheckout = (props) => {
     }
   };
   const placeOrder = () => {
+    // The server refused to quote this delivery (e.g. an area/zip the zone no
+    // longer covers). The fee reads 0 out of the empty payload, so placing here
+    // would bill a price the server never agreed — stop instead.
+    if (quoteUnavailable) {
+      toast.error(t("Delivery charge is unavailable for this address"));
+      return;
+    }
+    // Blocked with a message rather than placing an order at an unpriced fee.
+    if (!areaZip.validate()) {
+      toast.error(t("Please select an area/zip code to continue"));
+      return;
+    }
     if (storeData?.active) {
       //checking restaurant or shop open or not
       if (isSchedules()) {
@@ -893,14 +1021,13 @@ const ItemCheckout = (props) => {
           },
         },
         undefined,
-        { shallow: false }
+        { shallow: false },
       );
     }
   };
   const handleImageUpload = (value) => {
     setIsImageSelected([value]);
   };
-  console.log({ payableAmount });
 
   const handlePartialPayment = () => {
     if (
@@ -976,7 +1103,13 @@ const ItemCheckout = (props) => {
       }
     }
   };
+  // Ignores stale onSuccess resolutions from a superseded amount.
+  const latestPayableAmountRef = useRef(payableAmount);
+  useEffect(() => {
+    latestPayableAmountRef.current = payableAmount;
+  }, [payableAmount]);
   const handleCashbackAmount = (data) => {
+    if (payableAmount !== latestPayableAmountRef.current) return;
     setCashbackAmount(data);
   };
   const { refetch: refetchCashbackAmount } = useGetCashBackAmount({
@@ -1018,15 +1151,12 @@ const ItemCheckout = (props) => {
       setSwitchToWallet(false);
     }
   }, [paymentMethod]);
-  
-  const currentZoneInfo = zoneData?.zone_data?.find(
-      (item) => item.id === storeData?.zone_id
-    );
-    console.log({currentZoneInfo,zoneData,storeData});
-    
-  const handleBadWeatherUi = (zoneWiseData) => {
-    
 
+  const currentZoneInfo = zoneData?.zone_data?.find(
+    (item) => item.id === storeData?.zone_id,
+  );
+
+  const handleBadWeatherUi = (zoneWiseData) => {
     if (currentZoneInfo) {
       if (currentZoneInfo?.increased_delivery_fee_status === 1) {
         return (
@@ -1062,8 +1192,7 @@ const ItemCheckout = (props) => {
       }
     }
   };
- 
-  
+
   const handleExtraPackaging = (e) => {
     setIsPackaging(e.target.checked);
   };
@@ -1089,7 +1218,7 @@ const ItemCheckout = (props) => {
   const isZoneDigital = useMemo(() => {
     const zoneDigitalMatch = getDigitalMethodFromZone(
       storeData?.zone_id,
-      zoneData
+      zoneData,
     );
     return {
       ...zoneDigitalMatch,
@@ -1108,7 +1237,7 @@ const ItemCheckout = (props) => {
     ) {
       setPaymentMethod(configData?.active_payment_method_list[0]?.gateway);
       setPaymentMethodImage(
-        configData?.active_payment_method_list[0]?.gateway_image_full_url
+        configData?.active_payment_method_list[0]?.gateway_image_full_url,
       );
     }
   };
@@ -1141,9 +1270,9 @@ const ItemCheckout = (props) => {
     previousCartListRef.current = cartList;
   }, [cartList]);
   return (
-    <>
+    <Box sx={{ pt: { xs: "1.5rem", md: "24px" } }}>
       {method === "offline" ? (
-        <Grid container mb="2rem" paddingTop={{ xs: "1.5rem", md: "2.5rem" }}>
+        <Grid container mb="2rem">
           <Grid item xs={12} md={12}>
             <Typography variant="h5" fontWeight="600">
               {t("Offline Payment Information")}
@@ -1172,12 +1301,7 @@ const ItemCheckout = (props) => {
           </Grid>
         </Grid>
       ) : (
-        <Grid
-          container
-          spacing={3}
-          mb="2rem"
-          paddingTop={{ xs: "1.5rem", md: "1rem" }}
-        >
+        <Grid container spacing={3} mb="2rem">
           <Grid item xs={12} md={7}>
             <Stack
               spacing={{ xs: 2, sm: 2, md: 3 }}
@@ -1210,9 +1334,13 @@ const ItemCheckout = (props) => {
                 }
                 zoneData={zoneData}
                 deliveryFee={deliveryFee}
+                deliveryFeeBeforeProDiscount={deliveryFeeBeforeProDiscount}
+                minDeliveryCharge={minDeliveryCharge}
                 couponDiscount={couponDiscount}
                 selectedDeliveryOption={selectedDeliveryOption}
                 setSelectedDeliveryOption={setSelectedDeliveryOption}
+                deliveryOptions={deliveryOptions}
+                areaZip={areaZip}
               />
 
               {Number.parseInt(configData?.dm_tips_status) === 1 &&
@@ -1279,7 +1407,7 @@ const ItemCheckout = (props) => {
             height="auto"
             sx={{
               position: { md: "sticky" },
-              top: { md: "50px" },
+              top: { md: "24px" },
               alignSelf: { md: "flex-start" },
               maxHeight: { md: "calc(100vh - 32px)" },
               // overflowY: { md: "auto" },
@@ -1304,7 +1432,7 @@ const ItemCheckout = (props) => {
               >
                 <Stack justifyContent="space-between">
                   <CouponTitle textAlign="left">{t("Billing")}</CouponTitle>
-                  {zoneData && handleBadWeatherUi(zoneData?.data?.zone_data)}
+                  {zoneData && handleBadWeatherUi(zoneData?.zone_data)}
                   <SimpleBar
                     style={{
                       maxHeight: "180px",
@@ -1341,6 +1469,10 @@ const ItemCheckout = (props) => {
                     zoneData={zoneData}
                     extraCharge={extraCharge && extraCharge}
                     setDeliveryFee={setDeliveryFee}
+                    setDeliveryFeeBeforeProDiscount={
+                      setDeliveryFeeBeforeProDiscount
+                    }
+                    setMinDeliveryCharge={setMinDeliveryCharge}
                     extraChargeLoading={extraChargeLoading}
                     walletBalance={customerData?.data?.wallet_balance}
                     setPayableAmount={setPayableAmount}
@@ -1357,6 +1489,10 @@ const ItemCheckout = (props) => {
                     initVauleEx={storeData?.extra_packaging_amount}
                     isLoading={isLoading}
                     selectedDeliveryOption={selectedDeliveryOption}
+                    areaZipParams={areaZip.summaryParams}
+                    setQuoteUnavailable={setQuoteUnavailable}
+                    setSummaryLoading={setSummaryLoading}
+                    setDeliveryOptions={setDeliveryOptions}
                     scheduleAt={scheduleAt}
                     currentZoneInfo={currentZoneInfo}
                   />
@@ -1371,6 +1507,7 @@ const ItemCheckout = (props) => {
                     page={page}
                     isLoading={isLoading}
                     totalAmount={totalAmount}
+                    pricingLoading={storeDetailsFetching || summaryLoading}
                   />
                 </Stack>
               </CustomPaperBigCard>
@@ -1404,14 +1541,14 @@ const ItemCheckout = (props) => {
                 reject={notAgreeToPartial}
                 colorTitle={t("Want to pay partially with wallet?")}
                 title={t(
-                  "You do not have sufficient balance to pay full amount via wallet."
+                  "You do not have sufficient balance to pay full amount via wallet.",
                 )}
               />
             </CustomModal>
           )}
         </Grid>
       )}
-    </>
+    </Box>
   );
 };
 

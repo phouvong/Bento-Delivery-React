@@ -2,10 +2,11 @@ import { useQuery } from "react-query";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import MainApi from "api-manage/MainApi";
 import { vehicle_list } from "api-manage/ApiRoutes";
+import { getApiList } from "../../../getApiContent";
 
 const getVehicleList = async () => {
 	const { data } = await MainApi.get(`${vehicle_list}`);
-	return data;
+	return getApiList(data);
 };
 
 export default function useGetVehicleList() {

@@ -124,19 +124,40 @@ const CommonConditions = ({ title }) => {
     swipeToSlide: true,
     arrows: false,
     responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 4, slidesToScroll: 1 , swipeToSlide: true} },
-      { breakpoint: 760, settings: { slidesToShow: 3, slidesToScroll: 2 , swipeToSlide: true} },
-      { breakpoint: 480, settings: { slidesToShow: 2.4, slidesToScroll: 1 , swipeToSlide: true} },
-      { breakpoint: 400, settings: { slidesToShow: 2.1, slidesToScroll: 1 , swipeToSlide: true} },
+      {
+        breakpoint: 1024,
+        settings: { slidesToShow: 4, slidesToScroll: 1, swipeToSlide: true },
+      },
+      {
+        breakpoint: 760,
+        settings: { slidesToShow: 3, slidesToScroll: 2, swipeToSlide: true },
+      },
+      {
+        breakpoint: 480,
+        settings: { slidesToShow: 2.4, slidesToScroll: 1, swipeToSlide: true },
+      },
+      {
+        breakpoint: 400,
+        settings: { slidesToShow: 2.1, slidesToScroll: 1, swipeToSlide: true },
+      },
       {
         breakpoint: 360,
-        settings: { slidesToShow: 1.8, slidesToScroll: 1, infinite: false , swipeToSlide: true},
+        settings: {
+          slidesToShow: 1.8,
+          slidesToScroll: 1,
+          infinite: false,
+          swipeToSlide: true,
+        },
       },
-      { breakpoint: 340, settings: { slidesToShow: 1.8, slidesToScroll: 1 , swipeToSlide: true} },
+      {
+        breakpoint: 340,
+        settings: { slidesToShow: 1.8, slidesToScroll: 1, swipeToSlide: true },
+      },
     ],
   };
 
   const products = conditionData?.products ?? [];
+  if (products?.length === 0) return null;
 
   const arrowSx = (visible) => ({
     width: 28,
@@ -203,7 +224,6 @@ const CommonConditions = ({ title }) => {
 
   return (
     <Stack gap="16px">
-
       {/* ══ MOBILE layout (xs only) ══════════════════════════════════════════ */}
 
       {/* Row 1: title + both arrows (right-aligned) */}
@@ -231,13 +251,25 @@ const CommonConditions = ({ title }) => {
           <Box onClick={() => scrollTabs(-1)} sx={arrowSx(!tabAtStart)}>
             <i
               className="fi fi-rs-angle-small-left"
-              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050], transform: theme.direction === "rtl" ? "scaleX(-1)" : "none" }}
+              style={{
+                fontSize: "16px",
+                lineHeight: 1,
+                display: "flex",
+                color: theme.palette.neutral[1050],
+                transform: theme.direction === "rtl" ? "scaleX(-1)" : "none",
+              }}
             />
           </Box>
           <Box onClick={() => scrollTabs(1)} sx={arrowSx(!tabAtEnd)}>
             <i
               className="fi fi-rs-angle-small-right"
-              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050], transform: theme.direction === "rtl" ? "scaleX(-1)" : "none" }}
+              style={{
+                fontSize: "16px",
+                lineHeight: 1,
+                display: "flex",
+                color: theme.palette.neutral[1050],
+                transform: theme.direction === "rtl" ? "scaleX(-1)" : "none",
+              }}
             />
           </Box>
         </Stack>
@@ -245,7 +277,9 @@ const CommonConditions = ({ title }) => {
 
       {/* Row 2: full-width scrollable tabs (no arrows) */}
       {conditionsLoading ? (
-        <Box sx={{ display: { xs: "block", md: "none" } }}>{loadingSkeletonJsx}</Box>
+        <Box sx={{ display: { xs: "block", md: "none" } }}>
+          {loadingSkeletonJsx}
+        </Box>
       ) : (
         <Box
           ref={mobileTabsRef}
@@ -257,7 +291,12 @@ const CommonConditions = ({ title }) => {
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          <Stack direction="row" alignItems="center" gap="20px" sx={{ width: "max-content" }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            gap="20px"
+            sx={{ width: "max-content" }}
+          >
             {tabItemsJsx}
           </Stack>
         </Box>
@@ -292,14 +331,25 @@ const CommonConditions = ({ title }) => {
           gap="8px"
           sx={{ ml: "auto", minWidth: 0, maxWidth: "65%" }}
         >
-          <Box onClick={() => scrollTabs(-1)} sx={{ ...arrowSx(!tabAtStart), mt: "-4px" }}>
+          <Box
+            onClick={() => scrollTabs(-1)}
+            sx={{ ...arrowSx(!tabAtStart), mt: "-4px" }}
+          >
             <i
               className="fi fi-rs-angle-small-left"
-              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050], transform: theme.direction === "rtl" ? "scaleX(-1)" : "none" }}
+              style={{
+                fontSize: "16px",
+                lineHeight: 1,
+                display: "flex",
+                color: theme.palette.neutral[1050],
+                transform: theme.direction === "rtl" ? "scaleX(-1)" : "none",
+              }}
             />
           </Box>
 
-          {conditionsLoading ? loadingSkeletonJsx : (
+          {conditionsLoading ? (
+            loadingSkeletonJsx
+          ) : (
             <Box
               ref={desktopTabsRef}
               onScroll={updateTabBoundary}
@@ -311,16 +361,30 @@ const CommonConditions = ({ title }) => {
                 "&::-webkit-scrollbar": { display: "none" },
               }}
             >
-              <Stack direction="row" alignItems="center" gap="20px" sx={{ width: "max-content" }}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                gap="20px"
+                sx={{ width: "max-content" }}
+              >
                 {tabItemsJsx}
               </Stack>
             </Box>
           )}
 
-          <Box onClick={() => scrollTabs(1)} sx={{ ...arrowSx(!tabAtEnd), mt: "-4px" }}>
+          <Box
+            onClick={() => scrollTabs(1)}
+            sx={{ ...arrowSx(!tabAtEnd), mt: "-4px" }}
+          >
             <i
               className="fi fi-rs-angle-small-right"
-              style={{ fontSize: "16px", lineHeight: 1, display: "flex", color: theme.palette.neutral[1050], transform: theme.direction === "rtl" ? "scaleX(-1)" : "none" }}
+              style={{
+                fontSize: "16px",
+                lineHeight: 1,
+                display: "flex",
+                color: theme.palette.neutral[1050],
+                transform: theme.direction === "rtl" ? "scaleX(-1)" : "none",
+              }}
             />
           </Box>
         </Stack>

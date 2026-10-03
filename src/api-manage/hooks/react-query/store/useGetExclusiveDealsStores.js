@@ -3,6 +3,7 @@ import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { exclusive_deals_stores_api } from "api-manage/ApiRoutes";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (params = {}) => {
   const {
@@ -38,7 +39,7 @@ const getData = async (params = {}) => {
   );
 
   const { data } = await MainApi.get(`${exclusive_deals_stores_api}?${query}`);
-  return data;
+  return getApiCollection(data, "stores");
 };
 
 const useGetExclusiveDealsStores = (params = {}, enabled = true) => {

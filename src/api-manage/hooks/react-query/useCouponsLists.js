@@ -3,6 +3,7 @@ import { onSingleErrorResponse } from "api-manage/api-error-response/ErrorRespon
 import { rental_coupon_list_api } from "api-manage/ApiRoutes";
 import MainApi from "api-manage/MainApi";
 import { useQuery } from "react-query";
+import { getApiList } from "../../getApiContent";
 
 
 // Define a standalone fetcher function
@@ -11,7 +12,7 @@ const fetchCouponLists = async (moduleId) => {
     `${rental_coupon_list_api}`,
     moduleId ? { headers: { moduleId } } : undefined,
   );
-  return data;
+  return getApiList(data);
 };
 
 // Use the fetcher function in useQuery

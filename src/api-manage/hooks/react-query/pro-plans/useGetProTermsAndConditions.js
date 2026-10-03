@@ -2,10 +2,11 @@ import { useQuery } from "react-query";
 import { pro_terms } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
 import { onErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiContent } from "../../../getApiContent";
 
 const getProTermsAndConditions = async () => {
   const { data } = await MainApi.get(pro_terms);
-  return data;
+  return getApiContent(data);
 };
 
 export const useGetProTermsAndConditions = ({ enabled = true } = {}) => {

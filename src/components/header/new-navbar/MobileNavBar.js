@@ -32,7 +32,7 @@ import { getCartListModuleWise } from "helper-functions/getCartListModuleWise";
 import { getModuleIdentifier, saveModuleParam } from "utils/moduleParamManager";
 import { setSelectedModule } from "redux/slices/utils";
 import { useScrollCollapseClass } from "hooks/useScrollDirection";
-import { useGetCategories } from "api-manage/hooks/react-query/all-category/all-categorys";
+import useAnimatedSearchPlaceholder from "hooks/useAnimatedSearchPlaceholder";
 import { getServiceSections } from "components/home/module-wise-components/service/serviceSectionsConfig";
 
 /**
@@ -53,7 +53,8 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
 
   const isSearchPage = router.pathname === "/search";
   const isHomePage = router.pathname === "/home";
-  const showModuleTabs = isHomePage || router.pathname === "/track-order";
+  const showModuleTabs =
+    router.pathname === "/home" || router.pathname.startsWith("/home/");
 
   const SECTION_TITLES = {
     offers: "Offers",
@@ -143,49 +144,10 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
     }
   }, [address]);
 
-  const MODULE_NOUN = {
-    [ModuleTypes.FOOD]: t("Food"),
-    [ModuleTypes.GROCERY]: t("Grocery"),
-    [ModuleTypes.PHARMACY]: t("Medicine"),
-    [ModuleTypes.ECOMMERCE]: t("Products"),
-    [ModuleTypes.PARCEL]: t("Parcel"),
-    [ModuleTypes.SERVICE]: t("Service"),
-  };
-  const moduleNoun = MODULE_NOUN[getCurrentModuleType()] ?? t("Items");
-
-  // Animated placeholder — cycles through [moduleNoun, ...category names].
-  const { data: categoriesResponse } = useGetCategories();
-  const animatedItems = useMemo(() => {
-    const base = [moduleNoun];
-    const cats = categoriesResponse?.data ?? [];
-    cats.slice(0, 15).forEach((c) => {
-      if (c?.name) base.push(c.name);
-    });
-    return base;
-  }, [categoriesResponse, moduleNoun]);
-
-  const [phIndex, setPhIndex] = useState(0);
-  const [phVisible, setPhVisible] = useState(true);
-  const animatedItemsRef = useRef(animatedItems);
-  animatedItemsRef.current = animatedItems;
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      const items = animatedItemsRef.current;
-      if (!items || items.length <= 1) return;
-      setPhVisible(false);
-      setTimeout(() => {
-        setPhIndex((prev) => (prev + 1) % items.length);
-        setPhVisible(true);
-      }, 280);
-    }, 2600);
-    return () => clearInterval(id);
-  }, []);
-
-  const rawNoun = animatedItems[phIndex] ?? moduleNoun;
-  // Keep long category names from breaking the placeholder UI
-  const currentNoun =
-    rawNoun.length > 22 ? `${rawNoun.slice(0, 22).trimEnd()}…` : rawNoun;
+  // Cycling "Search for <noun>" placeholder. The hook only reaches for the
+  // category list when the persisted store has none, so this costs no request
+  // on a warm load.
+  const { currentNoun, visible: phVisible } = useAnimatedSearchPlaceholder();
 
   const searchPlaceholder = (
     <span
@@ -635,8 +597,8 @@ const MobileNavBar = ({ configData, location, setOpenSignIn }) => {
                         color: isActive
                           ? theme.palette.neutral[1050]
                           : isDark
-                          ? theme.palette.text.secondary
-                          : "#757575",
+                            ? theme.palette.text.secondary
+                            : "#757575",
                         fontWeight: isActive ? 600 : 400,
                         fontSize: "14px",
                         borderRadius: "8px 8px 0 0",

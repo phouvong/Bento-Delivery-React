@@ -24,6 +24,10 @@ export const new_arrivals = "/api/v1/items/new-arrival";
 export const flash_sales = "/api/v1/flash-sales";
 export const flash_sales_items = "api/v1/flash-sales/items";
 export const parcel_category_api = "/api/v1/parcel-category";
+// Zone-scoped parcel attributes. Both take `zone_id` as a query parameter —
+// the `zoneid` header alone answers 422 "The zone id field is required."
+export const parcel_weight_api = "/api/v1/parcel-weight";
+export const parcel_dimension_api = "/api/v1/parcel-dimension";
 export const parcel_video_api = "api/v1/other-banners/video-content";
 export const parcel_whyChoose_api = "api/v1/other-banners/why-choose";
 export const distance_api = "/api/v1/config/distance-api";
@@ -92,6 +96,7 @@ export const testimonial_api = "/api/v1/testimonial";
 export const categories_details_api = "/api/v1/categories/items";
 export const categories_details_Store_api = "/api/v1/categories/stores";
 export const store_categories_items_api = "/api/v1/store-categories/items";
+export const store_popular_items_api = "/api/v1/stores/popular-items";
 export const categories_Childes_api = "/api/v1/categories/childes";
 export const basic_campaigns_api = "api/v1/campaigns/basic";
 export const basic_campaigns_details_api =
@@ -138,6 +143,11 @@ export const top_offer_near_me = "api/v1/stores/top-offer-near-me";
 export const offers_items_api = "/api/v1/offers/items";
 export const offers_stores_api = "/api/v1/offers/stores";
 export const top_offer_api = "/api/v1/module/top-offer";
+export const happy_hour_running_api = "/api/v1/happy-hour/running";
+export const happy_hour_stores_api = "/api/v1/happy-hour/stores";
+export const bogo_home_api = "/api/v1/bogo/home";
+export const bogo_offers_api = "/api/v1/bogo/offers";
+export const bogo_store_offers_api = "/api/v1/bogo/store-offers";
 export const exclusive_deals_stores_api = "/api/v1/stores/exclusive-deals";
 export const delivery_men_store = "api/v1/delivery-man/store";
 export const vehicle_list = "/api/v1/get-vehicles";
@@ -160,6 +170,13 @@ export const removeAllCartItems = "api/v1/rental/user/cart/remove-cart";
 export const recommended_provider = "api/v1/stores/recommended";
 export const quick_delivery_stores_api = "/api/v1/stores/quick-delivery";
 export const tax_api = "api/v1/customer/order/get-Tax";
+// One call for the whole checkout price breakdown — delivery, surge, Pro,
+// tax and cashback. Supersedes assembling those from separate endpoints.
+export const checkout_summary_api = "/api/v1/customer/order/checkout-summary";
+// Zone-scoped area / zip-code list for the delivery-charge rule. `type` says
+// which rule the zone prices by, so the checkout only asks for a selection
+// when it is area_wise or zip_code_wise.
+export const delivery_coverage_list_api = "/api/v1/delivery-charge/coverage-list";
 export const surge_price = "/api/v1/customer/order/get-surge-price";
 export const item_details_api = "/api/v1/items/details";
 export const confirm_return_parcel = "api/v1/customer/order/parcel-return";
@@ -188,3 +205,16 @@ export const ai_chat_conversations_api =
   "/api/v1/customer/ai-chat/conversations";
 export const ai_chat_messages_api = "/api/v1/customer/ai-chat/messages";
 export const ai_chat_send_api = "/api/v1/customer/ai-chat/send";
+
+export const bundle_home_api = "/api/v1/bundle/home";
+export const bundle_list_api = "/api/v1/bundle/list";
+export const bundle_store_bundles_api = "/api/v1/bundle/store-bundles";
+export const bundle_details_api = "/api/v1/bundle";
+export const bundle_cart_add_api = "/api/v1/customer/cart/bundle/add";
+export const bundle_cart_update_api = "/api/v1/customer/cart/bundle/update";
+export const bundle_cart_remove_api = "/api/v1/customer/cart/bundle/remove";
+export const cart_discount_eligibility_api =
+  "/api/v1/customer/cart/discount-eligibility";
+export const bogo_cart_add_api = "/api/v1/customer/cart/bogo/add";
+export const bogo_cart_update_api = "/api/v1/customer/cart/bogo/update";
+export const bogo_cart_remove_api = "/api/v1/customer/cart/bogo/remove";

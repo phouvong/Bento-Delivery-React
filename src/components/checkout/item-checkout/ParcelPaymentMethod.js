@@ -365,6 +365,7 @@ const ParcelPaymentMethod = (props) => {
                     image={item?.gateway_image_full_url}
                     paymentMethod={paymentMethod}
                     setPaymentMethod={setPaymentMethod}
+                    setPaymentMethodImage={setPaymentMethodImage}
                     setIsCheckedOffline={setIsCheckedOffline}
                     paidBy={paidBy}
                     type={item?.gateway}

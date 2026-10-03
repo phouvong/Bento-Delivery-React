@@ -234,6 +234,7 @@ const OtherModulePayment = (props) => {
     failed,
     failedOrderPlace,
     onBeforeProceed,
+    onProceed,
   } = props;
 
   const theme = useTheme();
@@ -313,6 +314,7 @@ const OtherModulePayment = (props) => {
       // onBeforeProceed is a service-module-only hook — guard with isServiceModule
       // so this has zero effect on food, grocery, pharmacy, or any other module.
       if (isServiceModule && onBeforeProceed && !onBeforeProceed()) return;
+      onProceed?.();
       setOpenModel(false);
     }
   };
@@ -320,7 +322,7 @@ const OtherModulePayment = (props) => {
   // Sync expanded with COD selection
   useEffect(() => {
     setExpanded(paymentMethod === "cash_on_delivery");
-    if (paymentMethod !== "cash_on_delivery") {
+    if (paymentMethod !== "cash_on_delivery" && setChangeAmount) {
       setChangeAmount("");
     }
   }, [paymentMethod]);

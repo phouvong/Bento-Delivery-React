@@ -19,6 +19,7 @@ import {
 } from "styled-components/CustomStyles.style";
 import CustomImageContainer from "../../CustomImageContainer";
 import FoodDetailModal from "../../food-details/foodDetail-modal/FoodDetailModal";
+import ModuleModal from "../../cards/ModuleModal";
 import NextImage from "components/NextImage";
 import {
   handleProductRedirect,
@@ -92,7 +93,7 @@ const Banners = ({ feature }) => {
       refetchBannerData();
     }
   }, [banners]);
-  console.log("banner data :", { data, bannersData, banners });
+
   useEffect(() => {
     if (data) {
       dispatch(setBanners(data));
@@ -241,7 +242,7 @@ const Banners = ({ feature }) => {
     <>
       <CustomStackFullWidth
         sx={{
-          mt: { xs: 0, sm:  bannersData?.length > 0 ? "10px" : 0   },
+          mt: { xs: 0, sm: bannersData?.length > 0 ? "10px" : 0 },
           "& .slick-track": { marginLeft: 0 },
           "& .slick-list": {
             marginRight: "-16px",
@@ -323,7 +324,6 @@ const Banners = ({ feature }) => {
                       sizes="(max-width: 600px) 100vw, 300px"
                       objectFit="fill"
                       borderRadius="16px"
-                   
                     />
                   </BannersWrapper>
                 ))}
@@ -333,15 +333,24 @@ const Banners = ({ feature }) => {
         )}
       </CustomStackFullWidth>
 
-      {openModal && foodBanner && (
-        <FoodDetailModal
-          product={foodBanner}
-          image={`${configData?.base_urls?.item_image_url}/${foodBanner?.image}`}
-          open={openModal}
-          handleModalClose={handleModalClose}
-          setOpen={setOpenModal}
-        />
-      )}
+      {openModal &&
+        foodBanner &&
+        (getCurrentModuleType() === ModuleTypes.FOOD ? (
+          <FoodDetailModal
+            product={foodBanner}
+            image={`${configData?.base_urls?.item_image_url}/${foodBanner?.image}`}
+            open={openModal}
+            handleModalClose={handleModalClose}
+            setOpen={setOpenModal}
+          />
+        ) : (
+          <ModuleModal
+            open={openModal}
+            handleModalClose={handleModalClose}
+            configData={configData}
+            productDetailsData={foodBanner}
+          />
+        ))}
     </>
   );
 };

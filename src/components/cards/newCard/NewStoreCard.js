@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { addWishListStore, removeWishListStore } from "redux/slices/wishList";
 import toast from "react-hot-toast";
+import { getAmountWithSign } from "helper-functions/CardHelpers";
 
 // ─── Shadow (Figma Drop Shadow/300) ────────────────────────────────────────
 const CARD_SHADOW =
@@ -66,18 +67,74 @@ const BadgePill = styled(Box)(({ theme, bgColor, textColor }) => ({
 // ─── Sub-components ─────────────────────────────────────────────────────────
 
 const DiscountBadges = ({ item, theme, t }) => {
-  const discounts = [];
+  const badges = [];
 
-  if (item?.discount?.discount > 0) {
-    const text =
-      item.discount.discount_type === "percent"
-        ? `-${item.discount.discount}%`
-        : `-${item.discount.discount}`;
-    discounts.push({ key: "pct", text, icon: null });
+  // Already the winning rate (happy hour beats the vendor's own standing
+  // discount server-side — see StoreDiscountResolver) and always a percent,
+  // so no discount_type branching is needed here.
+  const discountPct = Number(item?.active_discount) || 0;
+  const hasDiscount = discountPct > 0;
+  if (hasDiscount) {
+    badges.push({ key: "discount", text: `-${discountPct}%`, icon: null });
+  }
+
+  const bogoOffers = item?.bogo_offers ?? [];
+  const firstBogoOffer = bogoOffers[0];
+  if (firstBogoOffer) {
+    badges.push({
+      key: "bogo",
+      text: t("Buy {{buy}} Get {{get}} Free", {
+        buy: firstBogoOffer?.buy_qty,
+        get: firstBogoOffer?.get_qty,
+      }),
+      icon: (
+        <i
+          className="fi fi-rr-badge-percent"
+          style={{
+            fontSize: "12px",
+            lineHeight: 1,
+            display: "flex",
+            color: theme.palette.error.dangerText,
+          }}
+        />
+      ),
+    });
+  } else if (!hasDiscount && item?.coupons?.length > 0) {
+    const coupon = item.coupons[0];
+    const couponValue = Number(coupon?.discount) || 0;
+    if (couponValue > 0) {
+      badges.push({
+        key: "coupon",
+        text:
+          coupon?.discount_type === "percent"
+            ? `-${couponValue}%`
+            : `-${getAmountWithSign(couponValue)}`,
+        icon: null,
+      });
+    }
+  }
+
+  const firstBundle = item?.bundles?.[0];
+  if (firstBundle) {
+    badges.push({
+      key: "bundle",
+      text: t("Bundle Offer"),
+      icon: (
+        <i
+          className="fi fi-rr-boxes"
+          style={{
+            fontSize: "12px",
+            lineHeight: 1,
+            display: "flex",
+            color: theme.palette.error.dangerText,
+          }}
+        />
+      ),
+    });
   }
 
   if (item?.free_delivery) {
-    discounts.push({
+    badges.push({
       key: "free",
       text: t("Free"),
       icon: (
@@ -94,26 +151,8 @@ const DiscountBadges = ({ item, theme, t }) => {
     });
   }
 
-  if (item?.discount?.discount_type === "bogo") {
-    discounts.push({
-      key: "bogo",
-      text: t("Buy 1 Get 1 Free"),
-      icon: (
-        <i
-          className="fi fi-sr-badge-percent"
-          style={{
-            fontSize: "12px",
-            lineHeight: 1,
-            display: "flex",
-            color: theme.palette.error.dangerText,
-          }}
-        />
-      ),
-    });
-  }
-
-  const visible = discounts.slice(0, 3);
-  const overflow = discounts.length - visible.length;
+  const visible = badges.slice(0, 3);
+  const overflow = badges.length - visible.length;
 
   if (visible.length === 0) return null;
 
@@ -184,16 +223,6 @@ const NewStoreCard = ({
   const queryClient = useQueryClient();
 
   const { wishLists } = useSelector((s) => s.wishList);
-  const { configData } = useSelector((s) => s.configData);
-
-  // Distance comes in meters from API — convert to km
-  const formatDistance = (distanceInMeters) => {
-    if (!distanceInMeters) return null;
-    const km = distanceInMeters / 1000;
-    const decimals = configData?.digit_after_decimal_point ?? 1;
-    if (km > 1000) return t("1k+ km");
-    return `${km.toFixed(decimals)} km`;
-  };
 
   // For ads variant, wishlist targets ad.store; for normal, targets item
   const wishlistTarget = variant === "ads" ? ad?.store : item;
@@ -878,9 +907,7 @@ const NewStoreCard = ({
                 }}
               >
                 {item.delivery_time}
-                {formatDistance(item?.distance)
-                  ? ` (${formatDistance(item?.distance)})`
-                  : ""}
+                {item?.distance_label ? ` (${item.distance_label})` : ""}
               </Typography>
             </Stack>
           )}

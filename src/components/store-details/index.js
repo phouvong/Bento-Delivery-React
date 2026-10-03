@@ -25,6 +25,7 @@ import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
 import Prescription from "../Prescription";
 import CustomContainer from "../container";
 import Top from "./Top";
+import Top2 from "./Top-2";
 import MiddleSection from "./middle-section";
 import StoreCartSidebar from "./StoreCartSidebar";
 import { useRouter } from "next/router";
@@ -38,8 +39,6 @@ import useScrollToTop from "api-manage/hooks/custom-hooks/useScrollToTop";
 import LastOrdersSection from "components/home/module-wise-components/food/LastOrdersSection";
 import useGetProActiveOffer from "api-manage/hooks/react-query/pro-plans/useGetProActiveOffer";
 import useSubscribeProPlan from "api-manage/hooks/react-query/pro-plans/useSubscribeProPlan";
-import ProPlanBanner from "components/pro-plan/ProPlanBanner";
-import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
 
 const ProPlanSubscriptionModal = dynamic(() =>
   import("components/pro-plan/ProPlanSubscriptionModal"),
@@ -56,6 +55,7 @@ import { useTranslation } from "react-i18next";
 import { getSelectedVariations } from "components/header/second-navbar/SecondNavbar";
 import { setCartList, setStoreCartList } from "redux/slices/cart";
 import { saveModuleParam } from "utils/moduleParamManager";
+import CartDiscountEligibilityBanner from "components/added-cart-view/CartDiscountEligibilityBanner";
 
 const MapModal = dynamic(() => import("../Map/MapModal"));
 
@@ -95,100 +95,11 @@ const StoreDetails = ({ storeDetails, configData }) => {
 
   const proFeatureEnabled = configData?.pro_member_status === 1;
   const hasToken = !!getToken();
-  const { data: activeOfferRaw, isLoading: activeOfferLoading } =
-    useGetProActiveOffer({
-      enabled: proFeatureEnabled && hasToken,
-    });
+  const { data: activeOfferRaw } = useGetProActiveOffer({
+    enabled: proFeatureEnabled && hasToken,
+  });
   const activeOffer = activeOfferRaw?.data ?? activeOfferRaw ?? null;
-  const isProMember =
-    (activeOffer?.status === true &&
-      Number(activeOffer?.plan_details?.days_remaining) > 0) ||
-    Boolean(activeOffer?.plan_details?.plan_name);
-  const isProActive = activeOffer?.status === true;
-  const proBenefit = activeOffer?.benefit ?? null;
-  const proOfferResolved =
-    !(proFeatureEnabled && hasToken) || !activeOfferLoading;
-  const proSavingsMessage = (() => {
-    if (!proBenefit) return undefined;
-    const minOrderAmount = Number(proBenefit?.min_order_amount);
-    const hasMin =
-      proBenefit?.min_order_status === 1 &&
-      Number.isFinite(minOrderAmount) &&
-      minOrderAmount > 0;
-    const minAmount = hasMin ? getAmountWithSign(minOrderAmount) : "";
-
-    if (proBenefit?.type === "delivery_fee") {
-      const pct = Number(proBenefit?.charge_discount_percentage);
-      const isFree =
-        proBenefit?.offer_type === "free" ||
-        proBenefit?.offer_type === "full_free";
-      if (isFree) {
-        return hasMin
-          ? t("Free delivery as a Pro member on orders above {{amount}}", {
-              amount: minAmount,
-            })
-          : t("Free delivery as a Pro member");
-      }
-      if (Number.isFinite(pct) && pct > 0) {
-        return hasMin
-          ? t(
-              "{{percent}}% off on delivery fee as a Pro member on orders above {{amount}}",
-              { percent: pct, amount: minAmount },
-            )
-          : t("{{percent}}% off on delivery fee as a Pro member", {
-              percent: pct,
-            });
-      }
-      return hasMin
-        ? t("Delivery fee benefit as a Pro member on orders above {{amount}}", {
-            amount: minAmount,
-          })
-        : t("Delivery fee benefit as a Pro member");
-    }
-
-    if (proBenefit?.type === "discount") {
-      const pct = Number(proBenefit?.percentage);
-      const maxAmount = Number(proBenefit?.max_amount);
-      const hasCap = Number.isFinite(maxAmount) && maxAmount > 0;
-      const capAmount = hasCap ? getAmountWithSign(maxAmount) : "";
-
-      if (Number.isFinite(pct) && pct > 0) {
-        if (hasCap && hasMin) {
-          return t(
-            "{{percent}}% off as a Pro member (up to {{cap}}) on orders above {{amount}}",
-            { percent: pct, cap: capAmount, amount: minAmount },
-          );
-        }
-        if (hasCap) {
-          return t("{{percent}}% off as a Pro member (up to {{cap}})", {
-            percent: pct,
-            cap: capAmount,
-          });
-        }
-        if (hasMin) {
-          return t(
-            "{{percent}}% off as a Pro member on orders above {{amount}}",
-            {
-              percent: pct,
-              amount: minAmount,
-            },
-          );
-        }
-        return t("{{percent}}% off as a Pro member", { percent: pct });
-      }
-
-      return hasMin
-        ? t("Pro member discount unlocked on orders above {{amount}}", {
-            amount: minAmount,
-          })
-        : t("Pro member discount unlocked");
-    }
-
-    if (proBenefit?.type === "coupon") {
-      return t("Pro coupon benefit unlocked");
-    }
-    return undefined;
-  })();
+  const isProActive = hasToken && activeOffer?.status === true;
 
   const [proModalOpen, setProModalOpen] = useState(false);
   const [proPaymentOpen, setProPaymentOpen] = useState(false);
@@ -287,29 +198,58 @@ const StoreDetails = ({ storeDetails, configData }) => {
 
   const moduleType = getCurrentModuleType();
 
+  const mergeFoodVariationsWithSelection = (template, rowVariation) => {
+    if (!Array.isArray(template)) return [];
+    return template.map((group) => {
+      const selectedLabels =
+        rowVariation?.find((rv) => rv?.name === group?.name)?.values?.label ??
+        [];
+      return {
+        ...group,
+        values: (group?.values ?? []).map((value) => ({
+          ...value,
+          isSelected: selectedLabels.includes(value?.label),
+        })),
+      };
+    });
+  };
+
   const cartListSuccessHandler = (res) => {
     if (res) {
       console.log({ res });
 
       const thisStoreId = storeDetails?.id;
-      const tempCartLists = res?.map((item) => ({
-        ...item?.item,
-        cartItemId: item?.id,
-        // Guarantee store_id is present on every row — modal in-cart
-        // matchers rely on it to scope detection per store.
-        store_id: item?.item?.store_id ?? thisStoreId,
-        // Same for module_type so getCartListModuleWise doesn't drop rows.
-        module_type: item?.item?.module_type ?? moduleType,
-        totalPrice: item?.price,
-        selectedAddons: item?.item?.addons,
-        quantity: item?.quantity,
-        food_variations: item?.item?.food_variations,
-        itemBasePrice: item?.item?.price,
-        selectedOption:
-          moduleType !== "food"
-            ? item?.variation
-            : getSelectedVariations(item?.item?.food_variations),
-      }));
+      const tempCartLists = res?.map((item) => {
+        const mergedFoodVariations =
+          moduleType === "food"
+            ? mergeFoodVariationsWithSelection(
+                item?.item?.food_variations,
+                item?.variation,
+              )
+            : item?.item?.food_variations;
+        return {
+          ...item?.item,
+          cartItemId: item?.id,
+          // Guarantee store_id is present on every row — modal in-cart
+          // matchers rely on it to scope detection per store.
+          store_id: item?.item?.store_id ?? thisStoreId,
+          // Same for module_type so getCartListModuleWise doesn't drop rows.
+          module_type: item?.item?.module_type ?? moduleType,
+          module_id: item?.item?.module_id ?? item?.module_id,
+          bundle_details: item?.bundle_details,
+          bogo_details: item?.bogo_details,
+          price: item?.item?.price ?? item?.price,
+          totalPrice: item?.price,
+          selectedAddons: item?.item?.addons,
+          quantity: item?.quantity,
+          food_variations: mergedFoodVariations,
+          itemBasePrice: item?.item?.price,
+          selectedOption:
+            moduleType !== "food"
+              ? item?.variation
+              : getSelectedVariations(mergedFoodVariations),
+        };
+      });
       console.log({ tempCartLists });
 
       // Store-scoped slot (read by StoreCartSidebar).
@@ -451,51 +391,45 @@ const StoreDetails = ({ storeDetails, configData }) => {
   };
 
   const topSection = (
-    <Top
-      bannerCover={bannerCover}
-      storeDetails={storeDetails}
-      configData={configData}
-      logo={logo}
-      isSmall={isSmall}
-      storeShare={storeShare}
-      bannersData={bannersData}
-      isLoading={isLoading}
-      setOpenReviewModal={setOpenReviewModal}
-      onCondensedHeaderChange={setCondensedHeaderVisible}
-    />
+    <>
+      {/* <Top
+        bannerCover={bannerCover}
+        storeDetails={storeDetails}
+        configData={configData}
+        logo={logo}
+        isSmall={isSmall}
+        storeShare={storeShare}
+        bannersData={bannersData}
+        isLoading={isLoading}
+        setOpenReviewModal={setOpenReviewModal}
+        onCondensedHeaderChange={setCondensedHeaderVisible}
+      /> */}
+
+      <Top2
+        bannerCover={bannerCover}
+        storeDetails={storeDetails}
+        configData={configData}
+        logo={logo}
+        isSmall={isSmall}
+        storeShare={storeShare}
+        bannersData={bannersData}
+        isLoading={isLoading}
+        setOpenReviewModal={setOpenReviewModal}
+        onProSubscribeClick={handleProSubscribeClick}
+      />
+    </>
   );
 
   const mainContent = (
-    <CustomStackFullWidth spacing={{ xs: 0.5, md: 1 }}>
+    <CustomStackFullWidth spacing={{ xs: "16px", md: "20px" }} useFlexGap>
       {/* {storeDetails?.announcement === 1 && (
         <StoreCustomMessage
           storeAnnouncement={storeDetails?.announcement_message}
         />
       )} */}
       {topSection}
-      {proFeatureEnabled &&
-        (activeOffer?.status === true ? (
-          <Box sx={{ pt: 2 }}>
-            <ProSavingsBanner
-              amount={
-                activeOffer?.total_saved ??
-                activeOffer?.plan_details?.total_saved
-              }
-              message={proSavingsMessage}
-            />
-          </Box>
-        ) : (
-          <Box sx={{ pt: 2 }}>
-            {!isProActive && !activeOfferLoading ? (
-              <ProPlanBanner onSubscribe={handleProSubscribeClick} />
-            ) : null}
-          </Box>
-        ))}
-
       {storeDetails?.id && getToken() ? (
-        <Box sx={{ pt: 2, pb: 2 }}>
-          <LastOrdersSection store_id={storeDetails?.id} />
-        </Box>
+        <LastOrdersSection store_id={storeDetails?.id} />
       ) : null}
       {/* <PopularInTheStore id={storeDetails?.id} storeShare={storeShare} /> */}
       <MiddleSection
@@ -507,43 +441,24 @@ const StoreDetails = ({ storeDetails, configData }) => {
         condensedHeaderVisible={condensedHeaderVisible}
       />
       {configData?.prescription_order_status &&
-        storeDetails?.prescription_order &&
-        getCurrentModuleType() === "pharmacy" && (
-          <Prescription
-            expanded={expanded}
-            storeId={storeDetails?.id}
-            storeSlug={storeDetails?.slug}
-          />
-        )}
+      storeDetails?.prescription_order &&
+      getCurrentModuleType() === "pharmacy" ? (
+        <Prescription
+          expanded={expanded}
+          storeId={storeDetails?.id}
+          storeSlug={storeDetails?.slug}
+        />
+      ) : null}
     </CustomStackFullWidth>
   );
 
   const mobileContent = (
-    <CustomStackFullWidth spacing={0}>
+    <CustomStackFullWidth spacing="16px" useFlexGap>
       {topSection}
-      {proFeatureEnabled && hasToken && proOfferResolved && (
-        <Box sx={{ px: 2, pt: { xs: 1, md: 4 }, pb: { xs: 1.5, md: 4 } }}>
-          {!isProActive && !activeOfferLoading ? (
-            <ProPlanBanner onSubscribe={handleProSubscribeClick} />
-          ) : (
-            isProActive &&
-            proSavingsMessage && (
-              <ProSavingsBanner
-                amount={
-                  activeOffer?.total_saved ??
-                  activeOffer?.plan_details?.total_saved
-                }
-                message={proSavingsMessage}
-              />
-            )
-          )}
-        </Box>
-      )}
-
       {storeDetails?.id && getToken() ? (
         <LastOrdersSection store_id={storeDetails?.id} />
       ) : null}
-      <Box sx={{ mt: { xs: "0px", md: 0 } }}>
+      <Box>
         <CustomContainer>
           <CustomStackFullWidth spacing={2}>
             <MiddleSection
@@ -555,14 +470,14 @@ const StoreDetails = ({ storeDetails, configData }) => {
               condensedHeaderVisible={condensedHeaderVisible}
             />
             {configData?.prescription_order_status &&
-              storeDetails?.prescription_order &&
-              getCurrentModuleType() === "pharmacy" && (
-                <Prescription
-                  expanded={expanded}
-                  storeId={storeDetails?.id}
-                  storeSlug={storeDetails?.slug}
-                />
-              )}
+            storeDetails?.prescription_order &&
+            getCurrentModuleType() === "pharmacy" ? (
+              <Prescription
+                expanded={expanded}
+                storeId={storeDetails?.id}
+                storeSlug={storeDetails?.slug}
+              />
+            ) : null}
           </CustomStackFullWidth>
         </CustomContainer>
       </Box>
@@ -577,9 +492,9 @@ const StoreDetails = ({ storeDetails, configData }) => {
       <CustomContainer>
         <Box
           sx={{
-            mt: "45px",
+            mt: "32px",
             display: "flex",
-            gap: "34px",
+            gap: "32px",
             flexDirection: { xs: "column", md: "row" },
             alignItems: "stretch",
           }}
@@ -608,7 +523,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
     <>
       <CustomStackFullWidth
         key={rerender}
-        sx={{ minHeight: "100vh", mt: { xs: 0, md: 0, lg: "20px" } }}
+        sx={{ minHeight: "100vh" }}
         spacing={3}
       >
         {layoutHandler()}
@@ -709,97 +624,114 @@ const StoreDetails = ({ storeDetails, configData }) => {
         />
       )}
 
-      {/* Bottom cart bar — Mobile Only */}
-      {cartCount > 0 && (
+      {/* Bottom cart bar — Mobile Only. The happy-hour/discount banner is
+      independent of cart contents (matches Stackfood), so it can render
+      with an empty cart; only the "View Cart List" pill needs items. */}
+      {storeDetails?.id != null && (
         <Box
           sx={{
-            display: { xs: "block", md: "none" },
+            display: { xs: "flex", md: "none" },
+            flexDirection: "column",
+            "& > *": { margin: 0 },
             position: "fixed",
             bottom: 0,
             left: 0,
             right: 0,
             zIndex: 1000,
-            backgroundColor: (theme) => theme.palette.background.paper,
-            borderTop: (theme) => `1px solid ${theme.palette.divider}`,
-            boxShadow: "0px -2px 12px rgba(0, 0, 0, 0.06)",
-            px: 2,
-            py: 1.25,
           }}
         >
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            spacing={2}
-          >
-            <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+          {!cartDrawerOpen && (
+            <CartDiscountEligibilityBanner
+              storeId={storeDetails?.id}
+              hasCartItems={cartCount > 0}
+            />
+          )}
+          {cartCount > 0 && (
+            <Box
+              sx={{
+                backgroundColor: (theme) => theme.palette.background.paper,
+                borderTop: (theme) => `1px solid ${theme.palette.divider}`,
+                boxShadow: "0px -2px 12px rgba(0, 0, 0, 0.06)",
+                px: 2,
+                py: 1.25,
+              }}
+            >
               <Stack
                 direction="row"
                 alignItems="center"
-                spacing={0.5}
-                onClick={() => setCartDrawerOpen(true)}
-                sx={{ cursor: "pointer" }}
+                justifyContent="space-between"
+                spacing={2}
               >
-                <Typography
-                  sx={{
-                    fontSize: "13px",
-                    color: (theme) => theme.palette.text.secondary,
-                  }}
-                >
-                  {t("Subtotal")}
-                </Typography>
-                <KeyboardArrowUpIcon
-                  sx={{
-                    fontSize: 16,
-                    color: (theme) => theme.palette.text.secondary,
-                  }}
-                />
-              </Stack>
-              <Stack direction="row" alignItems="baseline" spacing={0.75}>
-                <Typography
-                  sx={{
-                    fontSize: "18px",
-                    fontWeight: 700,
-                    color: (theme) => theme.palette.text.primary,
-                  }}
-                >
-                  {getAmountWithSign(cartSubtotal)}
-                </Typography>
-                {showCartOriginalSubtotal && (
-                  <Typography
-                    sx={{
-                      fontSize: "13px",
-                      color: (theme) => theme.palette.text.disabled,
-                      textDecoration: "line-through",
-                    }}
+                <Stack spacing={0.25} sx={{ minWidth: 0 }}>
+                  <Stack
+                    direction="row"
+                    alignItems="center"
+                    spacing={0.5}
+                    onClick={() => setCartDrawerOpen(true)}
+                    sx={{ cursor: "pointer" }}
                   >
-                    {getAmountWithSign(cartOriginalSubtotal)}
-                  </Typography>
-                )}
+                    <Typography
+                      sx={{
+                        fontSize: "13px",
+                        color: (theme) => theme.palette.text.secondary,
+                      }}
+                    >
+                      {t("Subtotal")}
+                    </Typography>
+                    <KeyboardArrowUpIcon
+                      sx={{
+                        fontSize: 16,
+                        color: (theme) => theme.palette.text.secondary,
+                      }}
+                    />
+                  </Stack>
+                  <Stack direction="row" alignItems="baseline" spacing={0.75}>
+                    <Typography
+                      sx={{
+                        fontSize: "18px",
+                        fontWeight: 700,
+                        color: (theme) => theme.palette.text.primary,
+                      }}
+                    >
+                      {getAmountWithSign(cartSubtotal)}
+                    </Typography>
+                    {showCartOriginalSubtotal && (
+                      <Typography
+                        sx={{
+                          fontSize: "13px",
+                          color: (theme) => theme.palette.text.disabled,
+                          textDecoration: "line-through",
+                        }}
+                      >
+                        {getAmountWithSign(cartOriginalSubtotal)}
+                      </Typography>
+                    )}
+                  </Stack>
+                </Stack>
+                <Button
+                  onClick={() => setCartDrawerOpen(true)}
+                  variant="contained"
+                  sx={{
+                    backgroundColor: "#1E9657",
+                    color: "#fff",
+                    textTransform: "none",
+                    fontWeight: 700,
+                    fontSize: "14px",
+                    borderRadius: "8px",
+                    px: 2.5,
+                    py: 1.25,
+                    boxShadow: "none",
+                    "&:hover": {
+                      backgroundColor: "#187C49",
+                      boxShadow: "none",
+                    },
+                  }}
+                >
+                  {t("View Cart List")} ({cartCount})
+                </Button>
               </Stack>
-            </Stack>
-            <Button
-              onClick={() => setCartDrawerOpen(true)}
-              variant="contained"
-              sx={{
-                backgroundColor: "#1E9657",
-                color: "#fff",
-                textTransform: "none",
-                fontWeight: 700,
-                fontSize: "14px",
-                borderRadius: "8px",
-                px: 2.5,
-                py: 1.25,
-                boxShadow: "none",
-                "&:hover": {
-                  backgroundColor: "#187C49",
-                  boxShadow: "none",
-                },
-              }}
-            >
-              {t("View Cart List")} ({cartCount})
-            </Button>
-          </Stack>
+            </Box>
+          )}
         </Box>
       )}
 
@@ -810,6 +742,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
         onClose={() => setCartDrawerOpen(false)}
         sx={{
           display: { xs: "block", md: "none" },
+          zIndex: (theme) => theme.zIndex.appBar + 100,
           "& .MuiDrawer-paper": {
             borderRadius: "16px 16px 0 0",
             maxHeight: "90vh",
@@ -827,7 +760,7 @@ const StoreDetails = ({ storeDetails, configData }) => {
             flexDirection: "column",
           }}
         >
-          <StoreCartSidebar storeDetails={storeDetails} />
+          <StoreCartSidebar storeDetails={storeDetails} hideDiscountBanner />
         </Box>
       </Drawer>
       {proFeatureEnabled && proModalOpen && (

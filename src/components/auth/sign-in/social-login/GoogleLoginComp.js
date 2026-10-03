@@ -225,7 +225,7 @@ const GoogleLoginComp = (props) => {
 
   if (isLandingVariant) {
     return (
-      <Box sx={{ width: "100%", position: "relative" }}>
+      <Box sx={{ width: "100%", position: "relative", overflow: "hidden" }}>
         <Box
           sx={{
             display: "flex",
@@ -253,6 +253,7 @@ const GoogleLoginComp = (props) => {
             filter: "opacity(0)",
             zIndex: 9999,
             cursor: "pointer",
+            overflow: "hidden",
           }}
         >
           <div ref={buttonDiv} />

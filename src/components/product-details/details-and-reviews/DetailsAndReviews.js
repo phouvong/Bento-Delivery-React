@@ -26,16 +26,18 @@ const DetailsAndReviews = ({ description }) => {
         backgroundColor: theme.palette.background.paper,
         borderRadius: "12px",
         //border: `1px solid ${theme.palette.divider}`,
-        p: { xs: 1, md: 2 },
+        p: { xs: 1.5, md: 2.5 },
       }}
     >
       <Typography
         component="h2"
         sx={{
           fontWeight: 700,
-          fontSize: { xs: "15px", md: "17px" },
+          fontSize: { xs: "15px", md: "24px" },
+          lineHeight: 1.1,
+          letterSpacing: { md: "-1.2px" },
           color: theme.palette.text.primary,
-          mb: { xs: 1, md: 1.25 },
+          mb: { xs: 1, md: 2 },
         }}
       >
         {t("Product Details")}
@@ -43,8 +45,8 @@ const DetailsAndReviews = ({ description }) => {
 
       <Typography
         sx={{
-          fontSize: { xs: "13px", md: "14px" },
-          lineHeight: 1.55,
+          fontSize: { xs: "13px", md: "16px" },
+          lineHeight: 1.3,
           color: theme.palette.text.secondary,
           whiteSpace: "pre-wrap",
         }}
@@ -65,7 +67,7 @@ const DetailsAndReviews = ({ description }) => {
                 }
               }}
               sx={{
-                color: theme.palette.primary.main,
+                color: theme.palette.text.info,
                 fontWeight: 600,
                 cursor: "pointer",
                 ml: 0.5,

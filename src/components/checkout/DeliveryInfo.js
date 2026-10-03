@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   alpha,
   Checkbox,
@@ -18,21 +18,24 @@ import { useTranslation } from "react-i18next";
 
 import DeliveryInfoCard from "./DeliveryInfoCard";
 import CloseIcon from "@mui/icons-material/Close";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import StickyNote2OutlinedIcon from "@mui/icons-material/StickyNote2Outlined";
-import DeliveryInstruction from "./DeliveryInstruction";
-import CustomModal from "../modal";
+import SearchableSelect from "components/common/SearchableSelect";
 import { getToken } from "helper-functions/getToken";
 import { useSelector } from "react-redux";
 
 import CustomTextFieldWithFormik from "components/form-fields/CustomTextFieldWithFormik";
 import LockIcon from "@mui/icons-material/Lock";
 import EditIcon from "@mui/icons-material/Edit";
-import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DeliveryManTip from "./DeliveryManTip";
+import useGetMostTrips from "api-manage/hooks/react-query/useGetMostTrips";
 import ChangePayBy from "./ChangePayBy";
 import PaymentMethod from "./PaymentMethod";
 import Image from "next/image";
+import CustomImageContainer from "../CustomImageContainer";
+import PaymentIcon from "@mui/icons-material/Payment";
+import OfflinePaymentIcon from "./assets/OfflinePaymentIcon";
+import money from "./assets/money.png";
+import wallet from "./assets/wallet.png";
+import { getAmountWithSign } from "helper-functions/CardHelpers";
 
 const DeliveryInfo = ({
   configData,
@@ -66,38 +69,41 @@ const DeliveryInfo = ({
   setSelectedPaymentMethod,
   walletBalance,
   payableAmount,
-  // Lifted to the parent so the free-text order note reaches the order
-  // payload (`order_note`). Falls back to local state if not provided.
-  customNote: customNoteProp,
-  setCustomNote: setCustomNoteProp,
 }) => {
-  console.log({ walletBalance });
 
+  const { data: tripsData } = useGetMostTrips();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { t } = useTranslation();
-  const [openModal, setOpenModal] = useState(false);
-  const [localCustomNote, setLocalCustomNote] = useState("");
-  const customNote = setCustomNoteProp ? customNoteProp : localCustomNote;
-  const setCustomNote = setCustomNoteProp || setLocalCustomNote;
-  const [selectedInstruction, setSelectedInstruction] = useState(null);
   const [openPaymentModal, setOpenPaymentModal] = useState(false);
   const [paymentMethodImage, setPaymentMethodImage] = useState("");
+  React.useEffect(() => {
+    if (paymentMethod === "cash_on_delivery") {
+      setPaymentMethodImage(money.src);
+    } else if (paymentMethod === "wallet") {
+      setPaymentMethodImage(wallet.src);
+    } else if (paymentMethod?.match("offline_payment")) {
+      setPaymentMethodImage(OfflinePaymentIcon);
+    }
+  }, [paymentMethod]);
+  // Derived from `selectedPaymentMethod` (only updated when the picker
+  // modal's "Update" button is pressed) rather than the live `paymentMethod`/
+  // `paymentMethodImage` state the modal mutates while the user is still
+  // browsing radios — otherwise the icon in the summary row would flip
+  // before the choice is confirmed, while the text label (already driven by
+  // `selectedPaymentMethod`) stayed put.
+  const confirmedPaymentMethodImage = useMemo(() => {
+    if (selectedPaymentMethod === "cash_on_delivery") return money.src;
+    if (selectedPaymentMethod === "wallet") return wallet.src;
+    if (selectedPaymentMethod?.match("offline_payment")) return null;
+    return configData?.active_payment_method_list?.find(
+      (item) => item?.gateway === selectedPaymentMethod,
+    )?.gateway_image_full_url;
+  }, [selectedPaymentMethod, configData]);
   const [switchToWallet, setSwitchToWallet] = useState(false);
   const [changeAmount, setChangeAmount] = useState();
   const token = getToken();
   const { parcelInfo } = useSelector((state) => state.parcelInfoData);
-  const handleClick = () => {
-    setOpenModal(!openModal);
-  };
-  const handleRemoveInstruction = () => {
-    setCustomerInstruction(null);
-    setSelectedInstruction(null);
-    // setCustomNote("");
-  };
-  const handleRemoveInstructionDes = () => {
-    setCustomNote("");
-  };
   const handleCheckbox = (e) => {
     setCheck(e.target.checked);
   };
@@ -148,22 +154,25 @@ const DeliveryInfo = ({
     outline: "none",
   };
 
+  // A bare `+ ${phone}` template renders the literal string "+ undefined"
+  // before the parcel form is filled in, which is what shows on first load.
+  const withDialPrefix = (phone) => (phone ? `+ ${phone}` : "");
   return (
     <Stack sx={{ height: "100%", width: "100%" }} spacing={3}>
       <Card
         sx={{
-          padding: { xs: "16px", md: "24px" },
+          padding: { xs: "16px", md: "20px" },
           backgroundColor: theme.palette.background.paper,
           border: "none",
           borderRadius: "16px",
-          boxShadow:
-            "0px 4px 16px 0px rgba(17, 24, 39, 0.06), 0px 1px 2px 0px rgba(17, 24, 39, 0.04)",
+          boxShadow: "none",
         }}
       >
         <Typography
           fontWeight={700}
           fontSize={{ xs: "16px", md: "18px" }}
-          color="text.primary"
+          letterSpacing="-0.54px"
+          color="neutral.1050"
           mb={2}
         >
           {t("Delivery Information")}
@@ -175,7 +184,9 @@ const DeliveryInfo = ({
               title={t("Sender Information")}
               variant="sender"
               phone={
-                token ? parcelInfo?.senderPhone : `+ ${parcelInfo?.senderPhone}`
+                token
+                  ? parcelInfo?.senderPhone ?? ""
+                  : withDialPrefix(parcelInfo?.senderPhone)
               }
               name={parcelInfo?.senderName}
               address={parcelInfo?.senderAddress}
@@ -189,7 +200,7 @@ const DeliveryInfo = ({
             <DeliveryInfoCard
               title={t("Receiver Information")}
               variant="receiver"
-              phone={`+ ${parcelInfo?.receiverPhone}`}
+              phone={withDialPrefix(parcelInfo?.receiverPhone)}
               name={parcelInfo?.receiverName}
               address={parcelInfo?.receiverAddress}
               houseNumber={parcelInfo?.house}
@@ -204,11 +215,10 @@ const DeliveryInfo = ({
               <Stack
                 sx={{
                   height: "100%",
-                  backgroundColor:
-                    theme.palette.neutral?.[300] ||
-                    theme.palette.background.default,
-                  borderRadius: "12px",
-                  padding: { xs: "14px 16px", md: "14px 16px" },
+                  backgroundColor: theme.palette.background.default,
+                  borderRadius: "8px",
+                  padding: { xs: "8px 12px", md: "8px 20px 8px 12px" },
+                  justifyContent: "center",
                 }}
               >
                 <Stack
@@ -217,22 +227,22 @@ const DeliveryInfo = ({
                   justifyContent="space-between"
                   gap={2}
                 >
-                  <Stack flex={1} minWidth={0} gap={0.5}>
+                  <Stack flex={1} minWidth={0} gap={0.75}>
                     <Typography
-                      fontWeight={700}
-                      fontSize={{ xs: "15px", md: "16px" }}
-                      color="text.primary"
-                      lineHeight={1.3}
+                      fontWeight={500}
+                      fontSize="16px"
+                      color="neutral.1050"
+                      lineHeight={1.1}
                     >
                       {t("Create Account With Sender Information")}
                     </Typography>
                     <Typography
-                      fontSize={{ xs: "12px", md: "13px" }}
+                      fontSize="12px"
                       color={
                         theme.palette.neutral?.[500] ||
                         theme.palette.text.secondary
                       }
-                      lineHeight={1.45}
+                      lineHeight={1.2}
                     >
                       {t(
                         "An account is set up with sender’s name, phone & email to unlocking all the awesome features just for you!"
@@ -301,12 +311,12 @@ const DeliveryInfo = ({
             </Grid>
           )}
 
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={getToken() ? 12 : 6}>
             <Stack spacing={1} sx={{ height: "100%" }}>
-              <Typography fontSize={{ xs: "14px", md: "15px" }}>
+              <Typography fontSize="16px" letterSpacing="-0.48px">
                 <Box
                   component="span"
-                  sx={{ fontWeight: 700, color: "text.primary" }}
+                  sx={{ fontWeight: 400, color: "neutral.700" }}
                 >
                   {t("Delivery Instruction")}
                 </Box>{" "}
@@ -322,111 +332,26 @@ const DeliveryInfo = ({
                   ({t("Optional")})
                 </Box>
               </Typography>
-              <Stack
-                onClick={() => setOpenModal(true)}
-                direction="row"
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{
-                  cursor: "pointer",
-                  borderRadius: "10px",
-                  border: `1px solid ${
-                    theme.palette.neutral?.[200] || "rgba(0,0,0,0.08)"
-                  }`,
-                  backgroundColor: theme.palette.background.paper,
-                  padding: "12px 14px",
-                  minHeight: "48px",
-                  "&:hover": {
-                    borderColor: theme.palette.primary.main,
-                  },
+              <SearchableSelect
+                value={
+                  deliveryInstruction?.find(
+                    (i) => i?.instruction === customerInstruction,
+                  )?.id ?? ""
+                }
+                onChange={(id) => {
+                  const selected = deliveryInstruction?.find(
+                    (i) => i?.id === id,
+                  );
+                  setCustomerInstruction(selected?.instruction ?? "");
                 }}
-              >
-                <Typography
-                  fontSize="14px"
-                  color={
-                    customerInstruction
-                      ? theme.palette.text.primary
-                      : theme.palette.neutral?.[450] ||
-                        theme.palette.text.secondary
-                  }
-                  sx={{
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                    flex: 1,
-                    minWidth: 0,
-                  }}
-                >
-                  {customerInstruction || t("Select your instruction")}
-                </Typography>
-                <KeyboardArrowDownIcon
-                  sx={{
-                    fontSize: 20,
-                    color: theme.palette.text.primary,
-                    flexShrink: 0,
-                    ml: 1,
-                  }}
-                />
-              </Stack>
-
-              {/* Note card — shown below the picker row when a custom
-                  note has been applied. Tinted background + bold title
-                  separates it visually from the picker. */}
-              {customNote ? (
-                <Stack
-                  direction="row"
-                  alignItems="flex-start"
-                  spacing={1}
-                  sx={{
-                    mt: "4px",
-                    p: "10px 12px",
-                    borderRadius: "10px",
-                    backgroundColor: alpha(theme.palette.primary.main, 0.06),
-                    border: `1px solid ${alpha(
-                      theme.palette.primary.main,
-                      0.18
-                    )}`,
-                  }}
-                >
-                  <Stack
-                    direction="row"
-                    alignItems="center"
-                    spacing={0.5}
-                    sx={{ flexShrink: 0, mt: "1px" }}
-                  >
-                    <StickyNote2OutlinedIcon
-                      sx={{
-                        fontSize: 16,
-                        color: theme.palette.primary.main,
-                      }}
-                    />
-                    <Typography
-                      fontSize="12px"
-                      fontWeight={700}
-                      sx={{
-                        color: theme.palette.primary.main,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.4px",
-                      }}
-                    >
-                      {t("Note")}:
-                    </Typography>
-                  </Stack>
-                  <Typography
-                    fontSize="13px"
-                    sx={{
-                      color: theme.palette.text.primary,
-                      whiteSpace: "pre-wrap",
-                      wordBreak: "break-word",
-                      lineHeight: 1.45,
-                      flex: 1,
-                      minWidth: 0,
-                    }}
-                  >
-                    {customNote}
-                  </Typography>
-                </Stack>
-              ) : null}
+                options={(deliveryInstruction ?? []).map((i) => ({
+                  id: i?.id,
+                  name: i?.instruction,
+                }))}
+                placeholder={t("Select your instruction")}
+                searchPlaceholder={t("Search instructions...")}
+                emptyText={t("No instructions found")}
+              />
             </Stack>
           </Grid>
         </Grid>
@@ -437,16 +362,16 @@ const DeliveryInfo = ({
           parcel="true"
           deliveryTip={deliveryTip}
           setDeliveryTip={setDeliveryTip}
+          tripsData={tripsData}
         />
 
         <Card
           sx={{
-            padding: { xs: "16px", md: "24px" },
+            padding: { xs: "16px", md: "20px" },
             backgroundColor: theme.palette.background.paper,
             border: "none",
             borderRadius: "16px",
-            boxShadow:
-              "0px 4px 16px 0px rgba(17, 24, 39, 0.06), 0px 1px 2px 0px rgba(17, 24, 39, 0.04)",
+            boxShadow: "none",
           }}
         >
           <Stack
@@ -455,18 +380,19 @@ const DeliveryInfo = ({
             justifyContent="space-between"
             flexWrap={{ xs: "wrap", md: "nowrap" }}
             gap={2}
-            sx={{ py: { xs: 0.5, md: 1 } }}
           >
             <Stack flex={1} minWidth={0} gap={0.5}>
               <Typography
                 fontWeight={700}
-                fontSize={{ xs: "15px", md: "16px" }}
-                color="text.primary"
+                fontSize={{ xs: "16px", md: "18px" }}
+                letterSpacing="-0.54px"
+                color="neutral.1050"
               >
                 {t("Who Will Pay?")}
               </Typography>
               <Typography
-                fontSize={{ xs: "12px", md: "13px" }}
+                fontSize="14px"
+                letterSpacing="-0.42px"
                 color={
                   theme.palette.neutral?.[500] || theme.palette.text.secondary
                 }
@@ -477,9 +403,7 @@ const DeliveryInfo = ({
             <Stack
               direction="row"
               sx={{
-                backgroundColor:
-                  theme.palette.background.paper ||
-                  theme.palette.background.default,
+                backgroundColor: theme.palette.background.default,
                 border: `1px solid ${
                   theme.palette.neutral?.[200] ||
                   alpha(theme.palette.divider, 0.6)
@@ -512,8 +436,8 @@ const DeliveryInfo = ({
                       cursor: disabled ? "not-allowed" : "pointer",
                       opacity: disabled ? 0.4 : 1,
                       borderRadius: "8px",
-                      px: "28px",
-                      minHeight: "40px",
+                      px: "16px",
+                      height: "36px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -523,15 +447,14 @@ const DeliveryInfo = ({
                         : "transparent",
                       color: active
                         ? theme.palette.primary.contrastText
-                        : theme.palette.text.primary,
-                      fontWeight: active ? 700 : 500,
+                        : theme.palette.neutral[1050],
+                      fontWeight: 600,
                       fontSize: "14px",
+                      letterSpacing: "-0.42px",
                       transition: "all 0.2s ease",
                       flex: 1,
                       textAlign: "center",
-                      boxShadow: active
-                        ? "0px 2px 6px rgba(34, 197, 94, 0.25)"
-                        : "none",
+                      boxShadow: "none",
                       "&:hover": {
                         backgroundColor: active
                           ? theme.palette.primary.main
@@ -549,73 +472,89 @@ const DeliveryInfo = ({
           <Box
             sx={{
               height: "1px",
-              backgroundColor:
-                theme.palette.neutral?.[200] || "rgba(0,0,0,0.06)",
+              backgroundColor: theme.palette.background.secondary,
               my: { xs: 2, md: 2.5 },
             }}
           />
 
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-            flexWrap={{ xs: "wrap", md: "nowrap" }}
-            gap={2}
-            sx={{ py: { xs: 0.5, md: 1 } }}
-          >
-            <Stack flex={1} minWidth={0} gap={0.5}>
+          <Stack direction="row" alignItems="center" gap={0.5}>
+            <Stack flex={1} minWidth={0} gap={0.25}>
               <Typography
                 fontWeight={700}
-                fontSize={{ xs: "15px", md: "16px" }}
-                color="text.primary"
+                fontSize={{ xs: "16px", md: "18px" }}
+                letterSpacing="-0.54px"
+                color="neutral.1050"
               >
                 {t("Payment Method")}
               </Typography>
               <Typography
-                fontSize={{ xs: "12px", md: "13px" }}
+                fontSize="14px"
+                letterSpacing="-0.42px"
                 color={
                   theme.palette.neutral?.[500] || theme.palette.text.secondary
                 }
               >
-                {selectedPaymentMethod
-                  ? t(selectedPaymentMethod?.replaceAll("_", " "))
-                  : t("Add at least one option to pay your order.")}
+                {t("Add at least one option to pay your order.")}
               </Typography>
             </Stack>
-            <Box
+            <IconButton
               onClick={() => setOpenPaymentModal(true)}
               sx={{
-                cursor: "pointer",
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "8px",
-                backgroundColor: theme.palette.primary.main,
-                color: theme.palette.primary.contrastText,
-                borderRadius: "10px",
-                padding: "10px 20px",
-                fontWeight: 700,
-                fontSize: "14px",
+                width: 36,
+                height: 36,
+                borderRadius: "8px",
+                backgroundColor: theme.palette.background.secondary,
+                color: theme.palette.primary.main,
                 flexShrink: 0,
-                width: { xs: "100%", sm: "auto" },
-                justifyContent: "center",
-                "&:hover": {
-                  backgroundColor: theme.palette.primary.dark,
-                },
               }}
             >
-              {selectedPaymentMethod ? (
-                <>
-                  <EditIcon sx={{ fontSize: "16px" }} />
-                  {t("Edit")}
-                </>
-              ) : (
-                <>
-                  <AddCircleOutlineIcon sx={{ fontSize: "18px" }} />
-                  {t("Add")}
-                </>
-              )}
-            </Box>
+              <EditIcon sx={{ fontSize: "18px" }} />
+            </IconButton>
           </Stack>
+
+          {selectedPaymentMethod && (
+            <Stack
+              direction="row"
+              alignItems="center"
+              gap="12px"
+              onClick={() => setOpenPaymentModal(true)}
+              sx={{
+                mt: 2,
+                cursor: "pointer",
+                backgroundColor: theme.palette.background.default,
+                borderRadius: "8px",
+                padding: "12px",
+              }}
+            >
+              {selectedPaymentMethod?.match("offline_payment") ? (
+                <OfflinePaymentIcon />
+              ) : (
+                <CustomImageContainer
+                  src={confirmedPaymentMethodImage}
+                  width="20px"
+                  height="20px"
+                  alt="Payment Method"
+                  objectfit="contain"
+                />
+              )}
+              <Typography
+                fontWeight={500}
+                fontSize="16px"
+                letterSpacing="-0.48px"
+                color="neutral.1050"
+                sx={{ flex: 1, minWidth: 0, textTransform: "capitalize" }}
+              >
+                {t(selectedPaymentMethod?.replaceAll("_", " "))}
+              </Typography>
+              <Typography
+                fontSize="18px"
+                letterSpacing="-0.54px"
+                color="neutral.1050"
+              >
+                {getAmountWithSign(payableAmount)}
+              </Typography>
+            </Stack>
+          )}
         </Card>
       </Stack>
       {openPaymentModal &&
@@ -678,6 +617,8 @@ const DeliveryInfo = ({
                 setSelectedPaymentMethod={setSelectedPaymentMethod}
                 walletBalance={walletBalance}
                 payableAmount={payableAmount}
+                paymentMethodImage={paymentMethodImage}
+                setPaymentMethodImage={setPaymentMethodImage}
               />
             </Box>
           </Drawer>
@@ -720,26 +661,12 @@ const DeliveryInfo = ({
                 setSelectedPaymentMethod={setSelectedPaymentMethod}
                 walletBalance={walletBalance}
                 payableAmount={payableAmount}
+                paymentMethodImage={paymentMethodImage}
+                setPaymentMethodImage={setPaymentMethodImage}
               />
             </Box>
           </Modal>
         ))}
-      {openModal && (
-        <CustomModal
-          openModal={openModal}
-          handleClose={() => setOpenModal(false)}
-        >
-          <DeliveryInstruction
-            setOpenModal={setOpenModal}
-            deliveryInstruction={deliveryInstruction}
-            setCustomerInstruction={setCustomerInstruction}
-            customNote={customNote}
-            setCustomNote={setCustomNote}
-            selectedInstruction={selectedInstruction}
-            setSelectedInstruction={setSelectedInstruction}
-          />
-        </CustomModal>
-      )}
     </Stack>
   );
 };

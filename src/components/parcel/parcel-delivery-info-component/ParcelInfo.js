@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
-import EditIcon from "@mui/icons-material/Edit";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
   Card,
-  Divider,
   Drawer,
   Grid,
   IconButton,
@@ -15,37 +13,52 @@ import {
   useTheme,
 } from "@mui/material";
 import { t } from "i18next";
-import { useDispatch } from "react-redux";
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
 import { setParcelCategories } from "redux/slices/parcelCategoryData";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
-import { CustomButtonPrimary } from "styled-components/CustomButtons.style";
+import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
 import CustomImageContainer from "../../CustomImageContainer";
 import useGetParcelCategory from "../../../api-manage/hooks/react-query/percel/usePercelCategory";
 import ParcelCategoryCard from "../parcel-category/ParcelCategoryCard";
 import ParcelCategoryShimmer from "../parcel-category/ParcelCategoryShimmer";
+import { getParcelInformationSummary } from "helper-functions/parcelInformationLabel";
 
-const ParcelInfo = ({ parcelCategories }) => {
+const ParcelInfo = ({
+  parcelCategories,
+  showProSavingsBanner,
+  proSavingsAmount,
+  proSavingsMessage,
+}) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [open, setOpen] = useState(false);
-  const [tempSelected, setTempSelected] = useState(parcelCategories);
   const { data, refetch, isLoading } = useGetParcelCategory();
+  // Chosen in the parcel information modal before this screen. Summarised under
+  // the type so the customer can see what they picked without reopening it.
+  const { parcelWeight, parcelDimension } = useSelector(
+    (state) => state.parcelCategories
+  );
+  const informationSummary = getParcelInformationSummary(
+    parcelWeight,
+    parcelDimension
+  );
 
   useEffect(() => {
     if (open) {
       refetch();
-      setTempSelected(parcelCategories);
     }
   }, [open]);
 
   const handleClose = () => setOpen(false);
 
-  const handleUpdate = () => {
-    if (tempSelected) {
-      dispatch(setParcelCategories(tempSelected));
-      setOpen(false);
-    }
+  const handleSelect = (selected) => {
+    dispatch(setParcelCategories(selected));
+    toast.success(
+      `${t("Parcel type set to")} ${selected?.name ?? ""}`.trim(),
+    );
+    setOpen(false);
   };
 
   const modalStyle = {
@@ -124,8 +137,8 @@ const ParcelInfo = ({ parcelCategories }) => {
               <Grid item xs={6} sm={6} md={4} key={item.id}>
                 <ParcelCategoryCard
                   data={item}
-                  selected={tempSelected?.id === item.id}
-                  onClick={(d) => setTempSelected(d)}
+                  selected={parcelCategories?.id === item.id}
+                  onClick={handleSelect}
                 />
               </Grid>
             ))
@@ -136,52 +149,6 @@ const ParcelInfo = ({ parcelCategories }) => {
           )}
         </Grid>
       </Box>
-
-      <Divider />
-      <Stack
-        direction="row"
-        justifyContent={{ xs: "stretch", md: "flex-end" }}
-        gap={1.5}
-        sx={{
-          px: { xs: 2, md: 3 },
-          py: { xs: 1.5, md: 2 },
-          backgroundColor: theme.palette.background.paper,
-        }}
-      >
-        <CustomButtonPrimary
-          sx={{
-            flex: { xs: 1, md: "0 0 auto" },
-            maxWidth: { xs: "100%", md: "140px" },
-            minWidth: { md: "120px" },
-            height: "44px",
-            borderRadius: "10px",
-            bgcolor: theme.palette.neutral?.[200] || "rgba(0,0,0,0.06)",
-            color: theme.palette.text.primary,
-            boxShadow: "none",
-            "&:hover": {
-              bgcolor: theme.palette.neutral?.[300] || "rgba(0,0,0,0.12)",
-              boxShadow: "none",
-            },
-          }}
-          onClick={handleClose}
-        >
-          {t("Cancel")}
-        </CustomButtonPrimary>
-        <CustomButtonPrimary
-          sx={{
-            flex: { xs: 1, md: "0 0 auto" },
-            maxWidth: { xs: "100%", md: "140px" },
-            minWidth: { md: "120px" },
-            height: "44px",
-            borderRadius: "10px",
-            boxShadow: "none",
-            "&:hover": { boxShadow: "none" },
-          }}
-          onClick={handleUpdate}
-        >
-          {t("Update")}
-        </CustomButtonPrimary>
-      </Stack>
     </>
   );
 
@@ -189,12 +156,9 @@ const ParcelInfo = ({ parcelCategories }) => {
     <>
       <Card
         sx={{
-          padding: { xs: "12px 14px", md: "14px 20px" },
+          padding: { xs: "16px", md: "16px 24px" },
           backgroundColor: theme.palette.background.paper,
-          border: `1px solid ${
-            theme.palette.neutral?.[200] || "rgba(0,0,0,0.06)"
-          }`,
-          borderRadius: "12px",
+          borderRadius: "16px",
           boxShadow: "none",
         }}
       >
@@ -202,13 +166,18 @@ const ParcelInfo = ({ parcelCategories }) => {
           direction="row"
           alignItems="center"
           justifyContent="space-between"
-          gap={2}
+          gap={{ xs: 1.5, md: 2.5 }}
         >
-          <Stack direction="row" alignItems="center" gap={1.5} minWidth={0}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            gap={{ xs: 1.5, md: 2.5 }}
+            minWidth={0}
+          >
             <Box
               sx={{
-                width: { xs: 36, md: 44 },
-                height: { xs: 36, md: 44 },
+                width: 43,
+                height: 43,
                 flexShrink: 0,
               }}
             >
@@ -222,7 +191,9 @@ const ParcelInfo = ({ parcelCategories }) => {
             <Stack minWidth={0}>
               <Typography
                 fontWeight={700}
-                fontSize={{ xs: "15px", md: "16px" }}
+                fontSize={{ xs: "18px", md: "24px" }}
+                letterSpacing="-0.6px"
+                color="neutral.1050"
                 sx={{
                   whiteSpace: "nowrap",
                   overflow: "hidden",
@@ -233,15 +204,17 @@ const ParcelInfo = ({ parcelCategories }) => {
                 {parcelCategories?.name ? ` - ${parcelCategories.name}` : ""}
               </Typography>
               <Typography
-                fontSize={{ xs: "11px", md: "13px" }}
-                color={theme.palette.neutral?.[400] || "text.secondary"}
+                fontSize="14px"
+                letterSpacing="-0.42px"
+                color={theme.palette.neutral?.[500] || "text.secondary"}
                 sx={{
                   whiteSpace: "nowrap",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                 }}
               >
-                {t("Choose which type of item you want to send")}
+                {informationSummary ||
+                  t("Choose which type of item you want to send")}
               </Typography>
             </Stack>
           </Stack>
@@ -249,19 +222,36 @@ const ParcelInfo = ({ parcelCategories }) => {
           <IconButton
             onClick={() => setOpen(true)}
             sx={{
-              color: theme.palette.info?.main || theme.palette.primary.main,
-              border: `1px solid ${
-                theme.palette.neutral?.[200] || "rgba(0,0,0,0.1)"
-              }`,
-              borderRadius: "10px",
-              width: 36,
-              height: 36,
+              backgroundColor: theme.palette.background.secondary,
+              borderRadius: "12px",
+              width: 40,
+              height: 40,
               flexShrink: 0,
+              "&:hover": {
+                backgroundColor: theme.palette.background.secondary,
+              },
             }}
           >
-            <EditIcon sx={{ fontSize: "16px" }} />
+            <i
+              className="fi fi-rr-pencil"
+              style={{
+                fontSize: "16px",
+                lineHeight: 1,
+                display: "flex",
+                color: theme.palette.info?.main || theme.palette.primary.main,
+              }}
+            />
           </IconButton>
         </Stack>
+
+        {showProSavingsBanner && (
+          <Box sx={{ mt: { xs: 1.5, md: 2 } }}>
+            <ProSavingsBanner
+              amount={proSavingsAmount}
+              message={proSavingsMessage}
+            />
+          </Box>
+        )}
       </Card>
 
       {isMobile ? (

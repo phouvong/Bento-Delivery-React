@@ -30,6 +30,7 @@ export default function useDeleteCartItem() {
     onSuccess: () => {
       queryClient.invalidateQueries("cart-groups");
       queryClient.invalidateQueries("cart-itemss");
+      queryClient.invalidateQueries("cart-discount-eligibility");
     },
   });
 }

@@ -16,6 +16,8 @@ import RentalSearchLocation from "components/home/module-wise-components/rental/
 import useGetAutocompletePlace from "api-manage/hooks/react-query/google-api/usePlaceAutoComplete";
 import useGetPlaceDetails from "api-manage/hooks/react-query/google-api/useGetPlaceDetails";
 import MapModal from "components/Map/MapModal";
+import ParcelInformationModal from "components/parcel/parcel-information/ParcelInformationModal";
+import useParcelZoneId from "api-manage/hooks/react-query/percel/useParcelZoneId";
 
 const ParcelSearchPanel = () => {
   const theme = useTheme();
@@ -31,6 +33,9 @@ const ParcelSearchPanel = () => {
   const [predictions, setPredictions] = useState([]);
   const [isFocused, setIsFocused] = useState(false);
   const [openMap, setOpenMap] = useState(false);
+  const [openParcelInfo, setOpenParcelInfo] = useState(false);
+  const { zoneId: parcelZoneId, isResolving: parcelZoneResolving } =
+    useParcelZoneId();
 
   const { data: places } = useGetAutocompletePlace(searchKey, !!searchKey);
   const { data: placeDetails } = useGetPlaceDetails(placeId, !!placeId);
@@ -90,6 +95,19 @@ const ParcelSearchPanel = () => {
       toast.error(t("Please select a delivery destination!"));
       return;
     }
+    if (parcelZoneResolving) return;
+    if (parcelZoneId === undefined) {
+      toast.error(t("Parcel service is not available in your zone"));
+      return;
+    }
+    // Entering by location skips the category grid, so ask for the parcel
+    // information here too. No id is passed, so the modal falls back to the
+    // first category — the same set the grid would have offered.
+    setOpenParcelInfo(true);
+  };
+
+  const handleParcelInfoConfirm = () => {
+    setOpenParcelInfo(false);
     router.push(
       {
         pathname: "/parcel-delivery-info",
@@ -237,6 +255,12 @@ const ParcelSearchPanel = () => {
           fromReceiver="1"
         />
       )}
+
+      <ParcelInformationModal
+        open={openParcelInfo}
+        onClose={() => setOpenParcelInfo(false)}
+        onConfirm={handleParcelInfoConfirm}
+      />
     </Stack>
   );
 };

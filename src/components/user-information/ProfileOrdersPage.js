@@ -9,10 +9,10 @@ import useGetServiceBookingList from "../home/module-wise-components/service/ser
 import ModuleTabbedLayout from "./ModuleTabbedLayout";
 import MyBookings from "../home/module-wise-components/service/components/my-bookings/MyBookings";
 import { ModuleTypes } from "helper-functions/moduleTypes";
+import { getCurrentModuleId } from "helper-functions/getCurrentModuleType";
 
 // ── Tab values ────────────────────────────────────────────────────────────────
 const TAB_ALL = "all";
-
 
 export const ORDER_TAB_MODULE_KEY = "orderTabModule";
 
@@ -23,9 +23,20 @@ const ProfileOrdersPage = ({ configData }) => {
   const [activeFilterTab, setActiveFilterTab] = useState(TAB_ALL);
 
   const urlModuleId = router.query[ORDER_TAB_MODULE_KEY];
+  const siteModuleParam = router.query.module;
+  const currentModuleId = getCurrentModuleId();
   const activeModule =
     (urlModuleId != null &&
       modules?.find((m) => String(m.id) === String(urlModuleId))) ||
+    (currentModuleId != null &&
+      modules?.find((m) => String(m.id) === String(currentModuleId))) ||
+    (siteModuleParam != null &&
+      modules?.find(
+        (m) =>
+          m.slug === siteModuleParam ||
+          m.module_type === siteModuleParam ||
+          String(m.id) === String(siteModuleParam),
+      )) ||
     modules?.[0];
   const activeModuleId = activeModule?.id ?? null;
 
@@ -95,18 +106,18 @@ const ProfileOrdersPage = ({ configData }) => {
           }}
         />
       ) : isService ? (
-          <MyBookings
-            {...{
-              offset,
-              setOffset,
-              activeFilterTab,
-              onFilterTabChange,
-              isLoadingOrder: isFetchingBookings || isLoadingBookings,
-              ordersData: bookingsData,
-              moduleId: activeModule?.id,
-              configData,
-            }}
-          />
+        <MyBookings
+          {...{
+            offset,
+            setOffset,
+            activeFilterTab,
+            onFilterTabChange,
+            isLoadingOrder: isFetchingBookings || isLoadingBookings,
+            ordersData: bookingsData,
+            moduleId: activeModule?.id,
+            configData,
+          }}
+        />
       ) : isRide ? (
         <ProfileRidesList
           {...{

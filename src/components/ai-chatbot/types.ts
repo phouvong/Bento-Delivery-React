@@ -61,6 +61,41 @@ export interface ChatCartItem {
   item?: ChatProduct & Record<string, any>;
 }
 
+// Byte-identical to a GET /bogo/offers row, so the existing bogo-list card
+// (src/components/bogo-list/BogoOfferCard.jsx) renders it as-is.
+export interface ChatBogoOffer {
+  id: number;
+  slug?: string;
+  title: string;
+  description?: string;
+  image_full_url?: string | null;
+  buy_qty?: number;
+  get_qty?: number;
+}
+
+// A bundle suggestion card — same shape as the `bundles` row nested under a
+// store in GET .../get-combined-data (one summary thumbnail, not a
+// per-item image set). Carries enough of its owning store to navigate there
+// — unlike StackFood's bogo bundle (which deep-links to the offer page), a
+// 6amMart bundle belongs to one store and has no separate details page, so
+// the card opens that store instead.
+export interface ChatBundle {
+  id: number;
+  slug?: string | null;
+  name?: string;
+  image_full_url?: string | null;
+  item_count?: number;
+  base_price?: number;
+  bundle_price?: number;
+  discount_percentage?: number;
+  // Names only, no images — what the backend actually sends. Shown as a
+  // tooltip on the item count instead of per-item avatars.
+  member_items?: string[];
+  store_id?: number;
+  store_slug?: string;
+  store_name?: string;
+}
+
 export interface ChatCategory {
   id: number;
   name: string;
@@ -90,6 +125,8 @@ export interface ChatMessageMetadata {
   products?: ChatProduct[];
   stores?: ChatStore[];
   categories?: ChatCategory[];
+  bogo_offers?: ChatBogoOffer[];
+  bundles?: ChatBundle[];
   cart_items?: ChatCartItem[];
   cart?: ChatCartSummary;
   cart_updated?: boolean;

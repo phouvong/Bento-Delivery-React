@@ -195,7 +195,9 @@ const OrderActionActions = ({
                     : theme.palette.error.main
                 }
               >
-                {`Refund ${trackData?.refund?.refund_status}`}
+                {trackData?.refund?.refund_status
+                  ? `Refund ${trackData.refund.refund_status}`
+                  : t("Refund Requested")}
               </OrderStatusButton>
             </Stack>
           )}

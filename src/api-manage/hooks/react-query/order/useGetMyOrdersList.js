@@ -5,6 +5,7 @@ import {
   onErrorResponse,
   onSingleErrorResponse,
 } from "../../../api-error-response/ErrorResponses";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (pageParams) => {
   console.log({ pageParams });
@@ -15,7 +16,7 @@ const getData = async (pageParams) => {
     }`,
     moduleId ? { headers: { moduleId } } : undefined,
   );
-  return data;
+  return getApiCollection(data, "orders");
 };
 
 export default function useGetMyOrdersList(pageParams, enabled = false) {

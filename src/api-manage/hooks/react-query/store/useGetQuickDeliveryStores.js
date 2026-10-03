@@ -3,6 +3,7 @@ import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { quick_delivery_stores_api } from "api-manage/ApiRoutes";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { getApiCollection } from "../../../getApiContent";
 
 /**
  * Params (all optional — only pass what's needed per context):
@@ -51,7 +52,7 @@ const getData = async (params = {}) => {
   const { data } = await MainApi.get(
     `${quick_delivery_stores_api}?${query.toString()}`,
   );
-  return data;
+  return getApiCollection(data, "stores");
 };
 
 const useGetQuickDeliveryStores = (params = {}) => {

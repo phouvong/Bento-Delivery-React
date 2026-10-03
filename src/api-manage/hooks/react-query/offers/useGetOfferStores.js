@@ -4,6 +4,7 @@ import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { offers_stores_api } from "api-manage/ApiRoutes";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (params = {}, moduleType) => {
   const {
@@ -40,7 +41,7 @@ const getData = async (params = {}, moduleType) => {
   const { data } = await MainApi.get(
     `${offers_stores_api}?${query.toString()}`,
   );
-  return data;
+  return getApiCollection(data, ["stores"]);
 };
 
 const useGetOfferStores = (params = {}, enabled = true) => {

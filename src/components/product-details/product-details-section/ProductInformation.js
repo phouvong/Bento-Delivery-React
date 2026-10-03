@@ -56,6 +56,18 @@ import PricePreviewWithStock from "./PricePreviewWithStock";
 import { ACTION, initialState, reducer } from "./states";
 import { alpha } from "@mui/material";
 import StickyCartBar from "./StickyCartBar";
+import { getApiContent } from "api-manage/getApiContent";
+
+// Unwrap the v4.2 `{ identical_code, content, ... }` envelope, then
+// normalize to an array since the payload isn't always a bare array.
+const normalizeCartResponse = (res) => {
+  const content = getApiContent(res) ?? res;
+  if (!content) return [];
+  if (Array.isArray(content)) return content;
+  if (Array.isArray(content?.cart_items)) return content.cart_items;
+  if (Array.isArray(content?.data)) return content.data;
+  return [content];
+};
 
 export const getItemObject = (productData) => {
   return {
@@ -242,32 +254,29 @@ const ProductInformation = ({
     }
   };
   const handleSuccess = (res) => {
-    console.log({ res });
+    const items = normalizeCartResponse(res);
+    if (items.length === 0) return;
+    let product = {};
+    items.forEach((item) => {
+      product = {
+        ...item?.item,
+        cartItemId: item?.id,
+        quantity: item?.quantity,
+        totalPrice: item?.price,
+        selectedOption: item?.variation,
+      };
+    });
 
-    if (res) {
-      let product = {};
-      res?.forEach((item) => {
-        product = {
-          ...item?.item,
-          cartItemId: item?.id,
-          quantity: item?.quantity,
-          totalPrice: item?.price,
-          selectedOption: item?.variation,
-        };
-      });
-      console.log({ product });
-
-      dispatchRedux(
-        setCart({
-          ...product,
-        })
-      );
-      //alert("Item added to cart");
-      // dispatchRedux(setCartSidebarOpen(true));
-      toast.success(t("Item added to cart"));
-      handleModalClose?.();
-      setClearCartModal(false);
-    }
+    dispatchRedux(
+      setCart({
+        ...product,
+      })
+    );
+    //alert("Item added to cart");
+    // dispatchRedux(setCartSidebarOpen(true));
+    toast.success(t("Item added to cart"));
+    handleModalClose?.();
+    setClearCartModal(false);
   };
   const handleAddToCartOnDispatch = () => {
     const itemObject = getItemObject(state?.modalData[0]);
@@ -301,22 +310,18 @@ const ProductInformation = ({
   };
 
   const updateCartSuccessHandler = (res) => {
-    if (res) {
-      const pp = res?.map((item) => {
-        const newItem = {
-          ...item?.item,
-          cartItemId: item?.id,
-          quantity: item?.quantity,
-          totalPrice: item?.price,
-          selectedOption: item?.variation,
-        };
-
-        return newItem;
-      });
-      dispatchRedux(setCartList(pp));
-      toast.success(t(product_update_to_cart_message));
-      handleModalClose?.();
-    }
+    const items = normalizeCartResponse(res);
+    if (items.length === 0) return;
+    const pp = items.map((item) => ({
+      ...item?.item,
+      cartItemId: item?.id,
+      quantity: item?.quantity,
+      totalPrice: item?.price,
+      selectedOption: item?.variation,
+    }));
+    dispatchRedux(setCartList(pp));
+    toast.success(t(product_update_to_cart_message));
+    handleModalClose?.();
   };
 
   const handleUpdateToCart = (cartItem) => {
@@ -407,6 +412,7 @@ const ProductInformation = ({
         {/* Store name row — verified badge / logo + name */}
         {(state.modalData[0]?.store_name || productDetailsData?.store_name) &&
           router?.pathname !== "/store/[id]" &&
+          router?.pathname !== "/product/[id]" &&
           (() => {
             const storeData = state.modalData[0]?.store_details || {
               id: productDetailsData?.store_id,
@@ -496,7 +502,8 @@ const ProductInformation = ({
               sx={{
                 fontSize: { xs: "18px", sm: "22px", md: "24px" },
                 fontWeight: 700,
-                lineHeight: 1.25,
+                lineHeight: { xs: 1.25, md: 1.1 },
+                letterSpacing: { md: "-1.2px" },
                 color: "neutral.1050",
               }}
               component="h1"
@@ -538,7 +545,7 @@ const ProductInformation = ({
               />
               <Typography
                 sx={{
-                  fontSize: "13px",
+                  fontSize: { xs: "13px", md: "16px" },
                   fontWeight: 600,
                   color: "neutral.1050",
                   lineHeight: 1.3,
@@ -549,7 +556,7 @@ const ProductInformation = ({
               </Typography>
               <Typography
                 sx={{
-                  fontSize: "12px",
+                  fontSize: { xs: "12px", md: "16px" },
                   color: "neutral.500",
                   lineHeight: 1.2,
                   letterSpacing: "-0.36px",
@@ -567,7 +574,7 @@ const ProductInformation = ({
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 1 }}>
             <Typography
               sx={{
-                fontSize: { xs: "13px", md: "14px" },
+                fontSize: { xs: "13px", md: "16px" },
                 color: theme.palette.text.secondary,
               }}
             >
@@ -575,8 +582,8 @@ const ProductInformation = ({
             </Typography>
             <Typography
               sx={{
-                fontSize: { xs: "13px", md: "14px" },
-                fontWeight: 600,
+                fontSize: { xs: "13px", md: "16px" },
+                fontWeight: 400,
                 color: theme.palette.text.primary,
               }}
             >
@@ -585,32 +592,77 @@ const ProductInformation = ({
           </Stack>
         )}
 
+        {/* Brand tag — shown right after Unit; click navigates to the
+            brand's search results, same route the home page brand grid uses. */}
+        {(state.modalData[0]?.brand_id || state.modalData[0]?.brand?.id) &&
+          (state.modalData[0]?.brand_name ||
+            state.modalData[0]?.brand?.name) && (
+            <Stack
+              direction="row"
+              alignItems="center"
+              gap={0.75}
+              sx={{ mt: 0.5 }}
+            >
+              <Typography
+                sx={{
+                  fontSize: { xs: "13px", md: "14px" },
+                  color: theme.palette.text.secondary,
+                }}
+              >
+                {t("Brand")} :
+              </Typography>
+              <Box
+                component="span"
+                onClick={() => {
+                  const brandId =
+                    state.modalData[0]?.brand_id ||
+                    state.modalData[0]?.brand?.id;
+                  const moduleParam =
+                    typeof router.query.module === "string"
+                      ? router.query.module
+                      : undefined;
+                  router.push(
+                    `/search?brand_id=${brandId}&data_type=brand${
+                      moduleParam ? `&module=${moduleParam}` : ""
+                    }`
+                  );
+                }}
+                sx={{
+                  fontSize: { xs: "12px", md: "13px" },
+                  fontWeight: 600,
+                  px: 1,
+                  py: "2px",
+                  borderRadius: "999px",
+                  color: theme.palette.primary.main,
+                  backgroundColor: alpha(theme.palette.primary.main, 0.1),
+                  whiteSpace: "nowrap",
+                  cursor: "pointer",
+                }}
+              >
+                {state.modalData[0]?.brand_name ||
+                  state.modalData[0]?.brand?.name}
+              </Box>
+            </Stack>
+          )}
+
         <PricePreviewWithStock
           state={state}
           theme={theme}
           productDetailsData={productDetailsData}
         />
 
-        {/* Discount + free delivery + halal + veg/non-veg badges — right after price */}
+        {/* Halal + veg/non-veg + organic badges — right after price.
+            Discount + free delivery moved onto the image (see ProductImageView),
+            matching the Figma layout. */}
         {(() => {
           const item = state.modalData[0];
-          const showDiscount = productDetailsData?.discount > 0;
-          const showFreeDelivery =
-            !!productDetailsData?.store_details?.free_delivery;
           const showHalal = !!item?.halal_tag_status && !!item?.is_halal;
           const showOrganic = !!item?.organic;
           const showVeg =
             (item?.module_type === "food" ||
               item?.module?.module_type === "food") &&
             !!configData?.toggle_veg_non_veg;
-          if (
-            !showDiscount &&
-            !showFreeDelivery &&
-            !showHalal &&
-            !showOrganic &&
-            !showVeg
-          )
-            return null;
+          if (!showHalal && !showOrganic && !showVeg) return null;
           return (
             <Stack
               direction="row"
@@ -618,69 +670,6 @@ const ProductInformation = ({
               gap="4px"
               flexWrap="wrap"
             >
-              {showDiscount && (
-                <Box
-                  sx={{
-                    backgroundColor: "error.danger",
-                    borderRadius: "24px",
-                    px: "6px",
-                    py: "2px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    flexShrink: 0,
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      color: "#fff",
-                      lineHeight: 1.3,
-                      whiteSpace: "nowrap",
-                      fontVariantNumeric: "tabular-nums",
-                    }}
-                  >
-                    {productDetailsData?.discount_type === "percent"
-                      ? `-${productDetailsData?.discount}%`
-                      : `-${getAmountWithSign(productDetailsData?.discount)}`}
-                  </Typography>
-                </Box>
-              )}
-              {showFreeDelivery && (
-                <Box
-                  sx={{
-                    backgroundColor: "error.dangerLight",
-                    borderRadius: "24px",
-                    px: "6px",
-                    py: "2px",
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "4px",
-                    flexShrink: 0,
-                  }}
-                >
-                  <i
-                    className="fi fi-rs-biking-mountain"
-                    style={{
-                      fontSize: "12px",
-                      lineHeight: 1,
-                      display: "flex",
-                      color: theme.palette.error.dangerText,
-                    }}
-                  />
-                  <Typography
-                    sx={{
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      color: "error.dangerText",
-                      lineHeight: 1.3,
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    {t("Free")}
-                  </Typography>
-                </Box>
-              )}
               {showOrganic && (
                 <BadgeWithTooltip title={t("Organic")}>
                   <Box
@@ -849,42 +838,6 @@ const ProductInformation = ({
           </Typography>
         ) : null}
 
-        {/* Brand tag — shown after the description when the item has a brand */}
-        {(state.modalData[0]?.brand_name ||
-          state.modalData[0]?.brand?.name) && (
-          <Stack
-            direction="row"
-            alignItems="center"
-            gap={0.75}
-            sx={{ mt: 0.5 }}
-          >
-            <Typography
-              sx={{
-                fontSize: { xs: "13px", md: "14px" },
-                color: theme.palette.text.secondary,
-              }}
-            >
-              {t("Brand")} :
-            </Typography>
-            <Box
-              component="span"
-              sx={{
-                fontSize: { xs: "12px", md: "13px" },
-                fontWeight: 600,
-                px: 1,
-                py: "2px",
-                borderRadius: "999px",
-                color: theme.palette.primary.main,
-                backgroundColor: alpha(theme.palette.primary.main, 0.1),
-                whiteSpace: "nowrap",
-              }}
-            >
-              {state.modalData[0]?.brand_name ||
-                state.modalData[0]?.brand?.name}
-            </Box>
-          </Stack>
-        )}
-
         {state?.modalData[0]?.nutritions_name?.length > 0 && (
           <>
             <Typography fontSize="14px" fontWeight="500" mt="5px">
@@ -936,7 +889,7 @@ const ProductInformation = ({
   return (
     <>
       {state.modalData.length > 0 && (
-        <CustomStackFullWidth spacing={2}>
+        <CustomStackFullWidth spacing={2.5}>
           {topInformation()}
 
           {state.modalData[0]?.variations?.length > 0 && (
@@ -964,7 +917,7 @@ const ProductInformation = ({
                 modalData={state?.modalData[0]}
                 productUpdate={productUpdate}
               />
-              <Box sx={{ mt: 1.75 }}>
+              <Box sx={{ mt: 2 }}>
                 <ProductInformationBottomSection
                   addToCard={addToCard}
                   handleUpdateToCart={handleUpdateToCart}

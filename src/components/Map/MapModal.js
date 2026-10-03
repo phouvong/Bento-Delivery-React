@@ -135,7 +135,7 @@ const MapModal = ({
   useEffect(() => {
     if (geoCodeResults) {
       setCurrentLactionValue({
-        description: geoCodeResults?.results[0]?.formatted_address,
+        description: geoCodeResults?.results?.[0]?.formatted_address,
       });
     } else {
       setCurrentLactionValue({
@@ -160,7 +160,7 @@ const MapModal = ({
     if (typeof window !== "undefined") {
       if (zoneData) {
         setZoneId(zoneData?.zone_id);
-        if (fromReceiver !== "1") {
+        if (fromReceiver !== "1" && toparcel !== "1") {
           localStorage.setItem("zoneid", zoneData?.zone_id);
         }
       }
@@ -181,11 +181,14 @@ const MapModal = ({
   //
 
   useEffect(() => {
-    if (placeDetails) {
-      setLocation({
-        lat: placeDetails?.location?.latitude,
-        lng: placeDetails?.location?.longitude,
-      });
+    // place-api-details answers 200 with `{ error: { … } }` for a place id
+    // Google no longer recognises. That body is truthy but carries no
+    // `location`, and writing it here parks `location` as `{lat: undefined}`
+    // — which keeps the Pick/Discover button disabled with no way to recover.
+    const lat = placeDetails?.location?.latitude;
+    const lng = placeDetails?.location?.longitude;
+    if (lat !== undefined && lng !== undefined) {
+      setLocation({ lat, lng });
     }
   }, [placeDetails]);
   useEffect(() => {
@@ -236,7 +239,7 @@ const MapModal = ({
       if (fromReceiver !== "1" && toparcel !== "1") {
         localStorage.setItem(
           "location",
-          geoCodeResults?.results[0]?.formatted_address
+          geoCodeResults?.results?.[0]?.formatted_address
         );
         localStorage.setItem("currentLatLng", JSON.stringify(location));
       } else {
@@ -244,14 +247,14 @@ const MapModal = ({
       }
 
       if (toparcel === "1") {
-        handleLocation(location, geoCodeResults?.results[0]?.formatted_address);
+        handleLocation(location, geoCodeResults?.results?.[0]?.formatted_address);
         handleClose();
       } else {
         if (fromStore) {
           if (fromparcel) {
             localStorage.setItem(
               "location",
-              geoCodeResults?.results[0]?.formatted_address
+              geoCodeResults?.results?.[0]?.formatted_address
             );
             localStorage.setItem("currentLatLng", JSON.stringify(location));
             handleClose();
@@ -464,7 +467,7 @@ const MapModal = ({
                       <>
                         <RoomIcon fontSize="small" color="primary" />
                         <Typography>
-                          {geoCodeResults?.results[0]?.formatted_address}
+                          {geoCodeResults?.results?.[0]?.formatted_address}
                         </Typography>
                       </>
                     ) : (
@@ -578,20 +581,33 @@ const MapModal = ({
                     {errorLocation?.response?.data?.errors[0]?.message}
                   </Button>
                 ) : (
-                  <Button
-                    disabled={
-                      isLoading ||
-                      !geoCodeResults?.results[0]?.formatted_address
-                    }
-                    variant="contained"
-                    sx={{
-                      width: { xs: "100%", md: "auto" }, // 👈 full width only mobile
-                      minWidth: { md: "150px" },
-                    }}
-                    onClick={() => handlePickLocationOnClick()}
-                  >
-                    {t("Pick Locations")}
-                  </Button>
+                  <>
+                    {!isLoading &&
+                      geoCodeResults?.results?.[0]?.formatted_address &&
+                      !zoneId && (
+                        <Typography
+                          color="error"
+                          sx={{ fontSize: "14px", textAlign: "center" }}
+                        >
+                          {t("Sorry, we are not available in this area yet.")}
+                        </Typography>
+                      )}
+                    <Button
+                      disabled={
+                        isLoading ||
+                        !geoCodeResults?.results?.[0]?.formatted_address ||
+                        !zoneId
+                      }
+                      variant="contained"
+                      sx={{
+                        width: { xs: "100%", md: "auto" }, // 👈 full width only mobile
+                        minWidth: { md: "150px" },
+                      }}
+                      onClick={() => handlePickLocationOnClick()}
+                    >
+                      {t("Pick Locations")}
+                    </Button>
+                  </>
                 )}
               </CustomStackFullWidth>
             )}

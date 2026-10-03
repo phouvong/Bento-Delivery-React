@@ -3,6 +3,7 @@ import { useQuery } from 'react-query'
 import MainApi from "api-manage/MainApi";
 import {onSingleErrorResponse} from "api-manage/api-error-response/ErrorResponses";
 import {item_details_api} from "api-manage/ApiRoutes";
+import { getApiContent } from "api-manage/getApiContent";
 
 export const getData = async (params) => {
   const { id, campaign, page_limit, offset } = params
@@ -10,7 +11,9 @@ export const getData = async (params) => {
     ? `${item_details_api}/${id}?campaign=${campaign}`
     : `${item_details_api}/${id}`
   const { data } = await MainApi.get(`${tempUrl}`)
-  return data
+  // The modals pass this straight through as `productDetailsData`, so it must
+  // be the item itself — v4.2 nests it under `content`.
+  return getApiContent(data)
 }
 
 export const useGetItemDetails = (params, itemSuccess,productUpdate) => {

@@ -258,9 +258,11 @@ const SignIn = ({
     loginMutation(newValues, {
       onSuccess: async (response) => {
         if (response?.is_personal_info === 0) {
-          handleLoginInfo(response, {
-            phone: newValues.email_or_phone,
-          });
+          handleLoginInfo(
+            response,
+            { phone: newValues.email_or_phone },
+            newValues.login_type,
+          );
         } else {
           getLoginUserCheck(
             response,
@@ -282,10 +284,11 @@ const SignIn = ({
   const { mutate: fireBaseOtpMutation, isLoading: fireIsLoading } =
     useFireBaseOtpVerify();
 
-  const handleLoginInfo = (res, values) => {
+  const handleLoginInfo = (res, values, loginType) => {
     // Common logic to set login info based on response
     setLoginInfo({
       ...res,
+      login_type: loginType,
       phone: values.phone,
       otp: values?.reset_token,
     });
@@ -314,7 +317,7 @@ const SignIn = ({
       fireBaseOtpMutation(temValue, {
         onSuccess: (res) => {
           if (res) {
-            handleLoginInfo(res, values);
+            handleLoginInfo(res, values, "otp");
           }
         },
         onError: onErrorResponse,
@@ -329,7 +332,7 @@ const SignIn = ({
       };
       const onSuccessHandler = (res) => {
         if (res) {
-          handleLoginInfo(res, values);
+          handleLoginInfo(res, values, tempValues.login_type);
         }
       };
 
@@ -623,7 +626,7 @@ const SignIn = ({
               position: "relative",
               backgroundColor: "background.paper",
               borderRadius: "20px",
-              overflow: "hidden",
+              overflow: "visible",
               width: { xs: "100%", sm: "450px" },
               margin: "0 auto",
               display: "flex",

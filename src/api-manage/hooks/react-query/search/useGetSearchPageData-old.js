@@ -8,6 +8,7 @@ import {
   MOCK_SERVICES,
   MOCK_VERIFIED_PROVIDERS,
 } from "components/home/module-wise-components/service/components/global/serviceStoreModel";
+import { getApiCollection } from "../../../getApiContent";
 
 const getSearch = async (pageParams) => {
   const {
@@ -82,7 +83,7 @@ const getSearch = async (pageParams) => {
         (currentTab === 0 && data.products && data.products.length > 0) ||
         (currentTab === 1 && data.stores && data.stores.length > 0)
       )) {
-        return data;
+        return getApiCollection(data, ["products", "stores"]);
       }
     } catch (error) {
       console.warn("Backend search API failed or not found, using fallback:", error);
@@ -218,7 +219,7 @@ const getSearch = async (pageParams) => {
       headers: guestId ? { guestId: guestId } : {},
     },
   );
-  return data;
+  return getApiCollection(data, ["products", "stores"]);
 };
 
 export default function useGetSearchPageData(

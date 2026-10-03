@@ -4,10 +4,11 @@ import { onSingleErrorResponse } from "../../api-error-response/ErrorResponses";
 import { visit_again } from "api-manage/ApiRoutes";
 import { getToken } from "helper-functions/getToken";
 import { getModuleId } from "helper-functions/getModuleId";
+import { getApiList } from "../../getApiContent";
 
 export const getData = async () => {
   const { data } = await MainApi.get(`${visit_again}`);
-  return data;
+  return getApiList(data);
 };
 export const useGetVisitAgain = () => {
   return useQuery(["visit again", getToken(), getModuleId()], () => getData(), {

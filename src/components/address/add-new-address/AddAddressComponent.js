@@ -278,7 +278,7 @@ const AddAddressComponent = ({
           </Stack>
         </CustomStackFullWidth>
         <AddressForm
-          deliveryAddress={geoCodeResults?.results[0]?.formatted_address}
+          deliveryAddress={geoCodeResults?.results?.[0]?.formatted_address}
           atModal="false"
           addressType={addressType}
           configData={configData}

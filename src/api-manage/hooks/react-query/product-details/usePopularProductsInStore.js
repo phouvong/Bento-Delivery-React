@@ -4,6 +4,7 @@ import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
 import { getCurrentModuleType } from "../../../../helper-functions/getCurrentModuleType";
 import axios from "axios";
+import { getApiCollection } from "../../../getApiContent";
 
 // Map UI sort tokens to the backend's expected `sort_by` values. Same
 // mapping used in useGetStoreCategoriesItems — keeps call sites consistent.
@@ -26,10 +27,10 @@ const getPopularProductsInStore = async (params) => {
   const url = buildUrl(params);
   if (getCurrentModuleType()) {
     const { data } = await MainApi.get(url);
-    return data;
+    return getApiCollection(data, "items");
   } else {
     const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_BASE_URL}${url}`,
+      `${(process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "")}${url}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -38,7 +39,7 @@ const getPopularProductsInStore = async (params) => {
         },
       }
     );
-    return data;
+    return getApiCollection(data, "items");
   }
 };
 

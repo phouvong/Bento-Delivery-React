@@ -15,6 +15,8 @@ import useGetAiChatMessages from "api-manage/hooks/react-query/ai-chat/useGetAiC
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
+import ChatBogoOfferChips from "./ChatBogoOfferChips";
+import ChatBundleChips from "./ChatBundleChips";
 import ChatCartChips from "./ChatCartChips";
 import ChatCategoryChips from "./ChatCategoryChips";
 import ChatDetailShimmer from "./ChatDetailShimmer";
@@ -24,6 +26,8 @@ import { formatClockTime, formatDayLabel, isSameDay } from "./sampleData";
 import {
   mapApiMessage,
   type AiChatMessagesResponse,
+  type ChatBogoOffer,
+  type ChatBundle,
   type ChatCategory,
   type ChatMessage,
   type ChatProduct,
@@ -39,6 +43,8 @@ interface ChatDetailViewProps {
   onProductSelect?: (product: ChatProduct) => void;
   onStoreSelect?: (store: ChatStore) => void;
   onCategorySelect?: (category: ChatCategory) => void;
+  onBogoOfferSelect?: (offer: ChatBogoOffer) => void;
+  onBundleSelect?: (bundle: ChatBundle) => void;
   addingProductId?: number | null;
   isTyping?: boolean;
 }
@@ -55,6 +61,8 @@ const ChatDetailView = ({
   onProductSelect,
   onStoreSelect,
   onCategorySelect,
+  onBogoOfferSelect,
+  onBundleSelect,
   addingProductId,
   isTyping,
 }: ChatDetailViewProps) => {
@@ -128,7 +136,9 @@ const ChatDetailView = ({
       const hasMedia =
         Boolean(m.metadata?.products?.length) ||
         Boolean(m.metadata?.stores?.length) ||
-        Boolean(m.metadata?.cart_items?.length);
+        Boolean(m.metadata?.cart_items?.length) ||
+        Boolean(m.metadata?.bogo_offers?.length) ||
+        Boolean(m.metadata?.bundles?.length);
       return { isFirstInBurst, isLastInBurst, isFirstOfDay, hasMedia };
     });
   }, [messages]);
@@ -310,6 +320,8 @@ const ChatDetailView = ({
             const stores = m.metadata?.stores ?? [];
             const cartItems = m.metadata?.cart_items ?? [];
             const categories = m.metadata?.categories ?? [];
+            const bogoOffers = m.metadata?.bogo_offers ?? [];
+            const bundles = m.metadata?.bundles ?? [];
             const d = decorations[i] ?? {
               isFirstInBurst: true,
               isLastInBurst: true,
@@ -319,7 +331,6 @@ const ChatDetailView = ({
 
             const tailTop = d.isFirstInBurst ? 16 : 6;
             const tailBottom = d.isLastInBurst ? 16 : 6;
-            console.log({ cartItems });
 
             return (
               <Box key={m.id} data-msg-id={m.id}>
@@ -446,6 +457,18 @@ const ChatDetailView = ({
                           configData?.base_urls?.category_image_url
                         }
                         onSelect={onCategorySelect}
+                      />
+                    )}
+                    {bogoOffers.length > 0 && (
+                      <ChatBogoOfferChips
+                        offers={bogoOffers}
+                        onSelect={onBogoOfferSelect}
+                      />
+                    )}
+                    {bundles.length > 0 && (
+                      <ChatBundleChips
+                        bundles={bundles}
+                        onSelect={onBundleSelect}
                       />
                     )}
                     {(d.isLastInBurst || d.hasMedia) && (

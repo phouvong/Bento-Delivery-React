@@ -4,6 +4,7 @@ import { useQuery } from "react-query";
 import { coupon_list_api } from "api-manage/ApiRoutes";
 import { onSingleErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { getToken } from "helper-functions/getToken";
+import { getApiCollection } from "../../../getApiContent";
 
 const fetchStoreCouponList = async (storeId) => {
   const params = new URLSearchParams();
@@ -13,7 +14,7 @@ const fetchStoreCouponList = async (storeId) => {
     ? `${coupon_list_api}?${queryString}`
     : coupon_list_api;
   const { data } = await MainApi.get(url);
-  return data;
+  return getApiCollection(data, "coupons");
 };
 
 export const useGetStoreCouponList = (storeId, options = {}) => {

@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { useGetConfigData } from "../../../../src/api-manage/hooks/useGetConfigData";
 import { setConfigData } from "../../../../src/redux/slices/configData";
+import { getApiContent } from "api-manage/getApiContent";
 import { useEffect } from "react";
 import VehicleDetailsPage from "../../../../src/components/home/module-wise-components/rental/components/vehicle-details/VehicleDetailsPage";
 import SimpleMobileHeader from "components/common/SimpleMobileHeader";
@@ -61,7 +62,7 @@ export const getServerSideProps = async (context) => {
   const { id, module, module_id: legacyModuleId } = context.query;
   const { req } = context;
   const language = req.cookies.languageSetting || "en";
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+  const baseUrl = (process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "");
   const origin = process.env.NEXT_CLIENT_HOST_URL;
   const moduleId = module || legacyModuleId;
 
@@ -83,7 +84,7 @@ export const getServerSideProps = async (context) => {
     }
 
     const configRes = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/api/v1/config`,
+      `${(process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "")}/api/v1/config`,
       {
         method: "GET",
         headers: {
@@ -98,7 +99,7 @@ export const getServerSideProps = async (context) => {
       throw new Error(`Failed to fetch config: ${configRes.statusText}`);
     }
 
-    config = await configRes.json();
+    config = getApiContent(await configRes.json());
 
     if (id) {
       const vehicleDetailsRes = await fetch(
@@ -110,7 +111,7 @@ export const getServerSideProps = async (context) => {
       );
 
       if (vehicleDetailsRes.ok) {
-        vehicleDetailsData = await vehicleDetailsRes.json();
+        vehicleDetailsData = getApiContent(await vehicleDetailsRes.json());
       }
     }
   } catch (error) {

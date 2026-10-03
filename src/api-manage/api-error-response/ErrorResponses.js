@@ -18,16 +18,28 @@ export const handleTokenExpire = (item, status) => {
 
 export const onErrorResponse = (error) => {
   const errors = error?.response?.data?.errors;
+  const status = error?.response?.status;
   if (Array.isArray(errors)) {
     errors.forEach((item) => {
       handleTokenExpire(item);
     });
+  } else if (errors && typeof errors === "object") {
+    // A few endpoints hand back Laravel's raw validator bag — a field-keyed
+    // object of message arrays ({ rating: ["The rating must be a number."] })
+    // instead of the usual [{ code, message }]. rental/user/review/add is one,
+    // and reading `.message` off that object toasted nothing at all.
+    const messages = Object.values(errors).flat().filter(Boolean);
+    if (messages.length > 0) {
+      messages.forEach((message) => handleTokenExpire({ message }, status));
+    } else {
+      handleTokenExpire({ message: errors?.message }, status);
+    }
   } else if (errors) {
     // Some endpoints return a plain value instead of the usual array —
     // e.g. { "errors": "Unauthorized" } on auth failures.
     handleTokenExpire(
-      { message: typeof errors === "string" ? errors : errors?.message },
-      error?.response?.status
+      { message: typeof errors === "string" ? errors : undefined },
+      status
     );
   }
 };

@@ -9,6 +9,7 @@ import {
   onSingleErrorResponse,
 } from "../../../api-error-response/ErrorResponses";
 import { getModuleId } from "helper-functions/getModuleId";
+import { getApiCollection } from "../../../getApiContent";
 
 const getDiscountedItems = async (params) => {
   const { limit, offset, pageParam } = params;
@@ -22,7 +23,7 @@ const getDiscountedItems = async (params) => {
         : discounted_product_api
     }?limit=${limit}&offset=${pageParam ? pageParam : offset}`
   );
-  return data;
+  return getApiCollection(data, ["products", "stores"]);
 };
 
 export default function useGetDiscountedItems(params) {

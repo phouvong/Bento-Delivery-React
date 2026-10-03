@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 import MainApi from "../../../MainApi";
 import { categories_details_Store_api } from "../../../ApiRoutes";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiCollection } from "../../../getApiContent";
 
 type Params = {
   categoryId?: string | number | null;
@@ -23,7 +24,7 @@ const getCategoryStores = async ({
     `${categories_details_Store_api}/${categoryId}?limit=${pageLimit}&offset=${offset}&type=${type}${sortQuery}`
   );
 
-  return data;
+  return getApiCollection(data, "stores");
 };
 
 export default function useGetHomeCategoryStores({

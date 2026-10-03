@@ -16,9 +16,9 @@ import Button from "@mui/material/Button";
 import { Box } from "@mui/system";
 import { useGetOrderCancelReason } from "api-manage/hooks/react-query/order/useGetAutomatedMessage";
 import ChatWithAdmin from "components/my-orders/order-details/other-order/ChatWithAdmin";
-import ProSavingsBanner from "components/pro-plan/ProSavingsBanner";
 import { getAmountWithSign } from "helper-functions/CardHelpers";
 import { getToken } from "helper-functions/getToken";
+import { getOrderParcelInformationSummary } from "helper-functions/parcelInformationLabel";
 import { t } from "i18next";
 import { useState } from "react";
 import { CustomStackFullWidth } from "styled-components/CustomStyles.style";
@@ -36,15 +36,45 @@ import { SummeryShimmer } from "./parcel-order/Shimmers";
 export const ParcelOrderSummaryBox = styled(CustomStackFullWidth)(
   ({ theme }) => ({
     border: "1px solid",
-    borderColor: alpha(theme.palette.neutral[400], 0.2),
-    padding: "20px 14px",
-    borderRadius: "10px",
+    borderColor: alpha(theme.palette.neutral[400], 0.12),
+    padding: "24px 20px",
+    borderRadius: "16px",
+    backgroundColor: theme.palette.background.paper,
     [theme.breakpoints.down("md")]: {
-      border: "none",
-      backgroundColor: alpha(theme.palette.neutral[300], 0.5),
+      padding: "20px 16px",
     },
   })
 );
+
+// The category image can arrive without a source on some orders — this
+// wraps it in a soft rounded frame instead of a bare broken-image box, and
+// gives the weight/dimension bracket a visible pill instead of the barely-
+// there caption text it used to be.
+const ParcelCategoryImageFrame = styled(Box)(({ theme }) => ({
+  width: "104px",
+  height: "104px",
+  borderRadius: "16px",
+  backgroundColor: alpha(theme.palette.neutral[300], 0.5),
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  overflow: "hidden",
+  flexShrink: 0,
+  [theme.breakpoints.down("md")]: {
+    width: "88px",
+    height: "88px",
+  },
+}));
+
+const ParcelInfoBadge = styled(Typography)(({ theme }) => ({
+  fontSize: "13px",
+  fontWeight: 600,
+  color: theme.palette.primary.main,
+  backgroundColor: alpha(theme.palette.primary.main, 0.1),
+  borderRadius: "999px",
+  padding: "4px 12px",
+  whiteSpace: "nowrap",
+}));
 
 const ParcelOrderSummery = ({
   data,
@@ -60,6 +90,11 @@ const ParcelOrderSummery = ({
   setOpenModal,
 }) => {
   const theme = useTheme();
+  // "Small, Light (2-4Kg)" — the brackets this parcel was booked under, shown
+  // under the category the same way the checkout billing panel shows them.
+  // They ride on the track payload; `data` (order/details) carries neither.
+  const orderParcelInformation =
+    getOrderParcelInformationSummary(trackOrderData);
   const [openAdmin, setOpenAdmin] = useState(false);
   const { data: automateMessageData } = useGetOrderCancelReason();
   const isSmall = useMediaQuery(theme.breakpoints.down("md"));
@@ -84,13 +119,14 @@ const ParcelOrderSummery = ({
 
   return (
     <Grid container pr={{ xs: "0px", sm: "0px", md: "40px" }}>
-      <Grid item md={8.1} xs={12} pl={{ xs: "0px", sm: "20px", md: "25px" }}>
-        <CustomStackFullWidth
-          direction={{ xs: "column", md: "row" }}
-          justifyContent="space-between"
-          flexWrap="wrap"
-          gap="24px"
-        >
+      <Grid
+        item
+        md={8.1}
+        xs={12}
+        pl={{ xs: "0px", sm: "20px", md: "25px" }}
+        pb={{ xs: "24px", md: "0px" }}
+      >
+        <CustomStackFullWidth direction="column" gap="24px">
           <SenderOrReceiverDetails
             title="Sender Details"
             image={nodata}
@@ -100,17 +136,15 @@ const ParcelOrderSummery = ({
             house={data?.delivery_address?.house}
             floor={data?.delivery_address?.floor}
             road={data?.delivery_address?.road}
+            fullWidth
           />
-          {!isSmall && (
-            <Stack
-              sx={{
-                borderLeft: (theme) =>
-                  `3px solid ${alpha(theme.palette.neutral[400], 0.2)}`,
-
-                height: "129px",
-              }}
-            ></Stack>
-          )}
+          <Stack
+            sx={{
+              borderTop: (theme) =>
+                `3px solid ${alpha(theme.palette.neutral[400], 0.2)}`,
+              width: "100%",
+            }}
+          ></Stack>
           <SenderOrReceiverDetails
             title="Receiver Details"
             image={nodata}
@@ -120,6 +154,7 @@ const ParcelOrderSummery = ({
             house={data?.receiver_details?.house}
             floor={data?.receiver_details?.floor}
             road={data?.receiver_details?.road}
+            fullWidth
           />
         </CustomStackFullWidth>
         <CustomStackFullWidth
@@ -369,7 +404,7 @@ const ParcelOrderSummery = ({
                 fontWeight="400"
                 color={theme.palette.neutral[1000]}
               >
-                {trackOrderData?.canceled_by.replaceAll("_", " ")}
+                {trackOrderData?.parcel_cancellation?.cancel_by?.replaceAll("_", " ") ?? ""}
               </Typography>
             </Stack>
             {(() => {
@@ -451,7 +486,7 @@ const ParcelOrderSummery = ({
             )}
           </Stack>
         )}
-        {trackOrderData?.delivery_instruction && (
+        {trackOrderData?.delivery_instruction?.trim() && (
           <Stack spacing={1} pt={{ xs: "0px", md: "20px" }}>
             <Typography fontSize={{ xs: "14px", md: "16px" }} fontWeight="500">
               {t("Instructions")}
@@ -468,12 +503,13 @@ const ParcelOrderSummery = ({
                 lineHeight="25px"
                 textTransform="capitalize"
               >
-                {trackOrderData?.delivery_instruction}
+                {trackOrderData.delivery_instruction.trim()}
               </Typography>
             </Stack>
           </Stack>
         )}
-        {trackOrderData?.order_note && (
+        {!trackOrderData?.delivery_instruction?.trim() &&
+          trackOrderData?.order_note?.trim() && (
           <Stack spacing={1} pt={{ xs: "10px", md: "20px" }}>
             <Typography fontSize={{ xs: "14px", md: "16px" }} fontWeight="500">
               {t("Order Note")}
@@ -489,13 +525,19 @@ const ParcelOrderSummery = ({
                 color={theme.palette.neutral[500]}
                 lineHeight="25px"
               >
-                {trackOrderData?.order_note}
+                {trackOrderData.order_note.trim()}
               </Typography>
             </Stack>
           </Stack>
         )}
       </Grid>
-      <Grid item md={3.9} xs={12} paddingLeft={{ xs: "0px", md: "26px" }}>
+      <Grid
+        item
+        md={3.9}
+        xs={12}
+        paddingLeft={{ xs: "0px", md: "26px" }}
+        paddingBottom={{ xs: "24px", md: "0px" }}
+      >
         {data ? (
           <>
             {(trackOrderData?.order_status === "canceled" ||
@@ -533,25 +575,38 @@ const ParcelOrderSummery = ({
                   )}
                 </CustomStackFullWidth>
               )}
-            <ParcelOrderSummaryBox alignItems="center" spacing={2}>
-              <CustomImageContainer
-                width="144px"
-                height="144px"
-                src={data?.parcel_category?.image_full_url}
-                alt={data?.parcel_category?.name}
-              />
-              <Stack alignItems="center" textAlign="center">
-                <Typography fontSize="18px" fontWeight="600">
+            <ParcelOrderSummaryBox alignItems="center" spacing={2.5}>
+              <ParcelCategoryImageFrame>
+                <CustomImageContainer
+                  width="100%"
+                  height="100%"
+                  src={data?.parcel_category?.image_full_url}
+                  alt={data?.parcel_category?.name}
+                  objectfit="contain"
+                />
+              </ParcelCategoryImageFrame>
+              <Stack alignItems="center" textAlign="center" spacing={0.75}>
+                <Typography fontSize="18px" fontWeight="700">
                   {data?.parcel_category?.name}
                 </Typography>
-                <Typography color={theme.palette.neutral[400]}>
-                  {data?.parcel_category?.description}
-                </Typography>
+                {data?.parcel_category?.description && (
+                  <Typography
+                    fontSize="13px"
+                    color={theme.palette.neutral[400]}
+                  >
+                    {data?.parcel_category?.description}
+                  </Typography>
+                )}
+                {orderParcelInformation && (
+                  <ParcelInfoBadge sx={{ mt: "4px" }}>
+                    {orderParcelInformation}
+                  </ParcelInfoBadge>
+                )}
               </Stack>
-              <Stack width="100%" spacing={1}>
+              <Stack width="100%" spacing={1.25}>
                 <Typography
                   fontSize="16px"
-                  fontWeight="500"
+                  fontWeight="600"
                   textTransform="capitalize"
                   textAlign="left"
                 >
@@ -599,7 +654,7 @@ const ParcelOrderSummery = ({
                                 {getAmountWithSign(original)}
                               </Typography>
                             )}
-                            {/* <Typography
+                            <Typography
                               fontSize="14px"
                               fontWeight={hasProReduction ? 600 : 400}
                               color={
@@ -609,7 +664,7 @@ const ParcelOrderSummery = ({
                               }
                             >
                               {getAmountWithSign(data?.delivery_charge)}
-                            </Typography> */}
+                            </Typography>
                           </Stack>
                         );
                       })()
@@ -783,10 +838,10 @@ const ParcelOrderSummery = ({
                 <Stack
                   width="100%"
                   sx={{
-                    marginBottom: "10px",
-                    mt: "20px",
+                    marginBottom: "12px",
+                    mt: "16px",
                     borderBottom: (theme) =>
-                      `1px dotted ${theme.palette.neutral[400]}`,
+                      `1px solid ${alpha(theme.palette.neutral[400], 0.25)}`,
                   }}
                 ></Stack>
                 <CustomStackFullWidth
@@ -795,7 +850,7 @@ const ParcelOrderSummery = ({
                   justifyContent="space-between"
                   spacing={2}
                 >
-                  <Typography component="span" fontWeight="500">
+                  <Typography component="span" fontWeight="600" fontSize="15px">
                     {t("Total Amount")}
                     {data?.tax_status === "included" ? (
                       <Typography
@@ -811,29 +866,13 @@ const ParcelOrderSummery = ({
                     ) : null}
                   </Typography>
                   {data ? (
-                    <Typography fontWeight="600">
+                    <Typography fontWeight="700" fontSize="17px">
                       {data && getAmountWithSign(data?.order_amount)}
                     </Typography>
                   ) : (
                     <Skeleton width="100px" variant="text" />
                   )}
                 </CustomStackFullWidth>
-                {data?.benefit_type === "delivery_fee" &&
-                Number(data?.delivery_fee_reduction_amount) > 0 ? (
-                  <ProSavingsBanner
-                    amount={Number(data?.delivery_fee_reduction_amount)}
-                    message={
-                      data?.delivery_offer_type === "full_free" ||
-                      data?.delivery_offer_type === "free"
-                        ? `${t("You saved")} ${getAmountWithSign(
-                            Number(data?.delivery_fee_reduction_amount)
-                          )} ${t("on delivery fees as a Pro member.")}`
-                        : `${t("You saved")} ${getAmountWithSign(
-                            Number(data?.delivery_fee_reduction_amount)
-                          )} ${t("on delivery fees as a Pro member.")}`
-                    }
-                  />
-                ) : null}
                 {(trackOrderData?.order_status === "canceled" ||
                   trackOrderData?.order_status === "returned") &&
                 trackOrderData?.parcel_cancellation?.before_pickup === 0 &&

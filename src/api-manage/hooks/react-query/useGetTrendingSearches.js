@@ -4,10 +4,11 @@ import MainApi from "../../MainApi";
 import { trending_searches_api } from "api-manage/ApiRoutes";
 import { onSingleErrorResponse } from "../../api-error-response/ErrorResponses";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
+import { getApiContent } from "../../getApiContent";
 
 const getData = async () => {
   const { data } = await MainApi.get(trending_searches_api);
-  return data;
+  return getApiContent(data);
 };
 
 const useGetTrendingSearches = () => {

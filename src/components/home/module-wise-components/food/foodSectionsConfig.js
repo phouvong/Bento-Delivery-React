@@ -1,10 +1,13 @@
 import { Box } from "@mui/system";
+import BogoListPage from "components/bogo-list";
 import OffersSectionPage from "components/home/section-page/OffersSectionPage";
 import TabbedSectionPage from "components/home/section-page/TabbedSectionPage";
+import { navigateToBogoList } from "helper-functions/navigateToBogoList";
 
 export const SECTION_GAP = 3;
 
-export const getFoodSections = () => [
+export const getFoodSections = (isBogoLive) =>
+  [
   {
     id: "offers",
     label: "Offers",
@@ -18,6 +21,21 @@ export const getFoodSections = () => [
     ),
     content: <OffersSectionPage />,
     mobileContent: <OffersSectionPage />,
+  },
+  {
+    id: "bogo",
+    label: "BOGO",
+    icon: (
+      <Box sx={{ color: "info.main", display: "flex" }}>
+        <i
+          className="fi fi-rr-gift"
+          style={{ fontSize: "16px", lineHeight: 1, display: "flex" }}
+        />
+      </Box>
+    ),
+    content: <BogoListPage />,
+    mobileContent: <BogoListPage />,
+    onClick: navigateToBogoList,
   },
   {
     id: "free-delivery",
@@ -61,4 +79,4 @@ export const getFoodSections = () => [
     content: <TabbedSectionPage sectionType="nearby" />,
     mobileContent: <TabbedSectionPage sectionType="nearby" />,
   },
-];
+  ].filter((section) => section.id !== "bogo" || isBogoLive);

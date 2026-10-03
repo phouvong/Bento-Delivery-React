@@ -46,3 +46,8 @@ CLAUDE.md
 .CLAUDE.md
 .claude/
 CLAUDE.md
+# playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

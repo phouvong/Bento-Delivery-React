@@ -148,7 +148,7 @@ const ProductDetailsSection = ({
       >
         <Grid
           container
-          spacing={isInModal ? { xs: 0, sm: 2, md: 4 } : { xs: 2, md: 4 }}
+          spacing={isInModal ? { xs: 0, sm: 2, md: 3 } : { xs: 2, md: 3 }}
           sx={
             isInModal
               ? {

@@ -1,3 +1,18 @@
+const mergeFoodVariationsWithSelection = (template, rowVariation) => {
+  if (!Array.isArray(template)) return [];
+  return template.map((group) => {
+    const selectedLabels =
+      rowVariation?.find((rv) => rv?.name === group?.name)?.values?.label ?? [];
+    return {
+      ...group,
+      values: (group?.values ?? []).map((value) => ({
+        ...value,
+        isSelected: selectedLabels.includes(value?.label),
+      })),
+    };
+  });
+};
+
 export const normalizeCartGroups = (groups = []) => {
   if (!Array.isArray(groups)) return [];
 
@@ -35,6 +50,34 @@ export const flattenNormalizedGroups = (
 
   return normalizedGroups.flatMap(({ store, carts }) =>
     carts.map((row) => {
+      // flattened cart row (module filtering, quantity, totals).
+      if (row?.bogo_details?.bogo_group_id) {
+        const quantity = row?.quantity ?? 1;
+        return {
+          ...row,
+          cartItemId: row?.id,
+          quantity,
+          totalPrice:
+            row?.bogo_details?.final_price ?? (row?.price ?? 0) * quantity,
+          store_id: row?.store_id ?? store?.id,
+          module_id: row?.module_id,
+          module_type: row?.module_type,
+        };
+      }
+
+      if (row?.bundle_details?.bundle_id) {
+        const quantity = row?.quantity ?? 1;
+        return {
+          ...row,
+          cartItemId: row?.id,
+          quantity,
+          totalPrice: (row?.price ?? 0) * quantity,
+          store_id: row?.store_id ?? store?.id,
+          module_id: row?.module_id,
+          module_type: row?.module_type,
+        };
+      }
+
       const product = row?.item ?? {};
       const quantity = row?.quantity ?? 1;
       const isService = currentModuleType
@@ -77,6 +120,10 @@ export const flattenNormalizedGroups = (
       }
 
       const totalPrice = row?.price ?? product?.price ?? 0;
+      const mergedFoodVariations = mergeFoodVariationsWithSelection(
+        product?.food_variations,
+        row?.variation,
+      );
       return {
         ...product,
         image_full_url: product?.image_full_url ?? product?.thumbnail_full_url,
@@ -86,7 +133,7 @@ export const flattenNormalizedGroups = (
         totalPrice,
         itemBasePrice: product?.price,
         selectedAddons: product?.addons ?? [],
-        food_variations: product?.food_variations ?? [],
+        food_variations: mergedFoodVariations,
         selectedOption: row?.variation,
         store_id: row?.store_id ?? store?.id,
         module_type: row?.module_type ?? product?.module_type,

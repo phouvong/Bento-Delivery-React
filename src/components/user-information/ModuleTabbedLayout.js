@@ -1,6 +1,8 @@
 import { Box, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import useGetModule from "api-manage/hooks/react-query/useGetModule";
+import { setModules } from "redux/slices/configData";
 
 /**
  * Presentational module-tab layout shared by Orders & Coupons profile pages.
@@ -21,21 +23,29 @@ const ModuleTabbedLayout = ({
   mobileBareContent = false,
 }) => {
   const theme = useTheme();
+  const dispatch = useDispatch();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const bareContent = isMobile && mobileBareContent;
   const { modules: allModules } = useSelector((state) => state.configData);
 
+  const { data: fetchedModules, refetch: refetchModules } = useGetModule();
+  useEffect(() => {
+    if (!allModules?.length) refetchModules();
+  }, []);
+  useEffect(() => {
+    if (fetchedModules?.length) dispatch(setModules(fetchedModules));
+  }, [fetchedModules, dispatch]);
+
   // Hide the rider/rental (ride-share) module from the order/coupon tab bar —
   // it doesn't belong to the order or coupon flows.
   const modules = allModules?.filter((m) => m?.module_type !== "ride-share");
-  console.log({ allModules });
 
   const activeModule =
     modules?.find((m) => m.id === activeModuleId) ?? modules?.[0];
 
   const activeIndex =
     modules?.findIndex(
-      (m) => m.id === (activeModule?.id ?? modules?.[0]?.id)
+      (m) => m.id === (activeModule?.id ?? modules?.[0]?.id),
     ) ?? 0;
   const isFirst = activeIndex === 0;
   const isLast = activeIndex === (modules?.length ?? 1) - 1;
@@ -118,7 +128,7 @@ const ModuleTabbedLayout = ({
             display: "flex",
             alignItems: "flex-end",
             clipPath: "inset(-20px -20px 0 -20px)",
-            overflowX: "auto",
+            // overflowX: "auto",
             scrollbarWidth: "none",
             "&::-webkit-scrollbar": { display: "none" },
             backgroundColor: "background.default",

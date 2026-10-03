@@ -55,6 +55,7 @@ import useCartItemUpdate from "../../../api-manage/hooks/react-query/add-cart/us
 import { getGuestId } from "helper-functions/getToken";
 import { useGetItemDetails } from "api-manage/hooks/react-query/product-details/useGetItemDetails";
 import { handleStoreRedirect } from "helper-functions/handleStoreRedirect";
+import { getApiContent } from "api-manage/getApiContent";
 
 const FoodDetailModal = ({
   product: fromCard,
@@ -180,7 +181,7 @@ const FoodDetailModal = ({
   };
   const getNewVariationForDispatch = () => {
     const newVariations =
-      modalData?.[0]?.food_variations.length > 0
+      modalData?.[0]?.food_variations?.length > 0
         ? modalData?.[0]?.food_variations?.map((item, index) => {
             if (selectedOptions.length > 0) {
               return {
@@ -233,11 +234,47 @@ const FoodDetailModal = ({
       ),
     };
   };
+  // Unwrap the v4.2 `{ identical_code, content, ... }` envelope, then
+  // normalize to an array since the payload isn't always a bare array.
+  const normalizeCartResponse = (res) => {
+    const content = getApiContent(res) ?? res;
+    if (!content) return [];
+    if (Array.isArray(content)) return content;
+    if (Array.isArray(content?.cart_items)) return content.cart_items;
+    if (Array.isArray(content?.data)) return content.data;
+    return [content];
+  };
+
   const handleSuccess = (res) => {
-    if (res) {
-      let product = {};
-      res?.forEach((item) => {
-        product = {
+    const items = normalizeCartResponse(res);
+    if (items.length === 0) return;
+    let product = {};
+    items.forEach((item) => {
+      product = {
+        ...item?.item,
+        cartItemId: item?.id,
+        totalPrice: item?.price,
+        quantity: item?.quantity,
+        food_variations: item?.item?.food_variations,
+        selectedAddons: selectedAddons,
+        selectedOption: selectedOptions,
+        itemBasePrice: item?.item?.price,
+      };
+    });
+    dispatch(setCart(product));
+    toast.success(t("Item added to cart successfully"));
+    handleClose();
+  };
+  const updateCartSuccessHandler = (res) => {
+    const items = normalizeCartResponse(res);
+    if (items.length === 0) return;
+    const updatedProducts = items.map((item) => {
+      const indexNumber = getIndexFromArrayByComparision(
+        cartList,
+        item?.item
+      ); // use current item
+      return {
+        product: {
           ...item?.item,
           cartItemId: item?.id,
           totalPrice: item?.price,
@@ -246,47 +283,22 @@ const FoodDetailModal = ({
           selectedAddons: selectedAddons,
           selectedOption: selectedOptions,
           itemBasePrice: item?.item?.price,
-        };
-      });
-      dispatch(setCart(product));
-      toast.success(t("Item added to cart successfully"));
-      handleClose();
-    }
-  };
-  const updateCartSuccessHandler = (res) => {
-    if (res && res.length > 0) {
-      const updatedProducts = res.map((item) => {
-        const indexNumber = getIndexFromArrayByComparision(
-          cartList,
-          item?.item
-        ); // use current item
-        return {
-          product: {
-            ...item?.item,
-            cartItemId: item?.id,
-            totalPrice: item?.price,
-            quantity: item?.quantity,
-            food_variations: item?.item?.food_variations,
-            selectedAddons: selectedAddons,
-            selectedOption: selectedOptions,
-            itemBasePrice: item?.item?.price,
-          },
+        },
+        indexNumber,
+      };
+    });
+
+    updatedProducts.forEach(({ product, indexNumber }) => {
+      dispatch(
+        setUpdateVariationToCart({
+          newObj: product,
           indexNumber,
-        };
-      });
+        })
+      );
+    });
 
-      updatedProducts.forEach(({ product, indexNumber }) => {
-        dispatch(
-          setUpdateVariationToCart({
-            newObj: product,
-            indexNumber,
-          })
-        );
-      });
-
-      toast.success(t("Item updated successfully"));
-      handleModalClose?.();
-    }
+    toast.success(t("Item updated successfully"));
+    handleModalClose?.();
   };
 
   // Builds a comparable signature of selected variation labels. Cart rows
@@ -654,7 +666,15 @@ const FoodDetailModal = ({
       }
     );
   };
-  const handleClose = () => setOpen?.(false);
+  // Call sites are split: some pass `setOpen`, others only `handleModalClose`
+  // (cart content, store cart sidebar, running campaigns, wishlist). The
+  // add-to-cart success path closed via `setOpen` alone, so on those screens
+  // the modal stayed open after a successful add. Close through whichever
+  // the caller supplied — passing both is idempotent.
+  const handleClose = () => {
+    setOpen?.(false);
+    handleModalClose?.();
+  };
 
   const changeChoices = (
     e,

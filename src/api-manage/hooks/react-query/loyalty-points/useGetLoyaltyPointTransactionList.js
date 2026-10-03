@@ -1,13 +1,14 @@
 import MainApi from "../../../MainApi";
 import { data_limit, LP_transactions_list_api } from "../../../ApiRoutes";
 import { useQuery } from "react-query";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (pageParams) => {
   const { offset } = pageParams;
   const { data } = await MainApi.get(
     `${LP_transactions_list_api}?offset=${offset}&limit=${data_limit}`
   );
-  return data;
+  return getApiCollection(data);
 };
 
 export default function useGetLoyaltyPointTransactionsList(pageParams) {

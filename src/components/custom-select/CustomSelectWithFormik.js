@@ -16,7 +16,6 @@ import Tooltip from "@mui/material/Tooltip";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import CheckIcon from "@mui/icons-material/Check";
 
-
 const CustomSelectWithFormik = (props) => {
   const {
     inputLabel,
@@ -28,6 +27,7 @@ const CustomSelectWithFormik = (props) => {
     required,
     value,
     startIcon, // Adding startIcon prop
+    showStartIcon = false, 
     placeholder, // Adding placeholder prop
   } = props;
   const [age, setAge] = React.useState(value);
@@ -45,13 +45,19 @@ const CustomSelectWithFormik = (props) => {
         required={required}
         id="demo-simple-select-label"
         sx={{
-          color: theme.palette.neutral[500],
+          position: "static",
+          transform: "none",
           display: "flex",
-          alignItems: "start !important",
-          fontSize: "13px",
-          fontWeight: "500",
+          alignItems: "center",
+          marginBottom: "6px",
+          color: theme.palette.customColor.textNeutral + " !important",
+          fontSize: "16px",
+          fontWeight: 400,
+          lineHeight: "110%",
+          letterSpacing: "-0.03em",
+          textTransform: "capitalize",
           "& .MuiFormLabel-asterisk": {
-            color: "red", // 🔴 make asterisk red
+            color: theme.palette.error.danger,
           },
         }}
         shrink={true} // Keep label always visible
@@ -69,10 +75,8 @@ const CustomSelectWithFormik = (props) => {
         helperText={touched && errors}
         displayEmpty={true} // Allow empty value to show placeholder
         startAdornment={
-          startIcon ? (
-            <InputAdornment position="start">
-              {startIcon}
-            </InputAdornment>
+          showStartIcon && startIcon ? (
+            <InputAdornment position="start">{startIcon}</InputAdornment>
           ) : null
         }
         renderValue={(selected) => {
@@ -89,11 +93,29 @@ const CustomSelectWithFormik = (props) => {
         }}
         {...fieldProps}
         sx={{
-          height: "45px",
+          height: "44px",
+          borderRadius: "8px",
+          backgroundColor: theme.palette.background.paper + " !important",
           "& .MuiSelect-select": {
-            height: "45px",
+            height: "44px",
             display: "flex",
             alignItems: "center",
+            fontSize: "16px",
+            fontWeight: 400,
+          },
+          "& .MuiOutlinedInput-notchedOutline": {
+            borderRadius: "8px",
+          },
+          "&:not(.Mui-error):not(.Mui-focused) .MuiOutlinedInput-notchedOutline":
+            {
+              borderColor: theme.palette.customColor.tagBg,
+            },
+          "&:hover:not(.Mui-error):not(.Mui-focused) .MuiOutlinedInput-notchedOutline":
+            {
+              borderColor: theme.palette.customColor.tagBg,
+            },
+          "& .MuiOutlinedInput-notchedOutline legend > span": {
+            display: "none",
           },
         }}
       >
@@ -148,6 +170,7 @@ CustomSelectWithFormik.propTypes = {
   selectFieldData: PropTypes.array.isRequired,
   passSelectedValue: PropTypes.func.isRequired,
   startIcon: PropTypes.node, // Adding propType for startIcon
+  showStartIcon: PropTypes.bool,
   placeholder: PropTypes.string, // Adding propType for placeholder
   value: PropTypes.any,
   touched: PropTypes.bool,

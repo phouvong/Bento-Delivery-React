@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   Collapse,
   Dialog,
   DialogContent,
@@ -45,8 +46,10 @@ import { getCurrentModuleType } from "../../helper-functions/getCurrentModuleTyp
 import { ModuleTypes } from "../../helper-functions/moduleTypes";
 import {
   cartItemsTotalAmount,
+  getInfoFromZoneData,
   getTotalVariationsPrice,
 } from "../../utils/CustomFunctions";
+import useGetZoneId from "../../api-manage/hooks/react-query/google-api/useGetZone";
 import {
   cart_item_remove,
   out_of_limits,
@@ -77,16 +80,22 @@ import useSubscribeProPlan from "../../api-manage/hooks/react-query/pro-plans/us
 import NewProductCard from "components/cards/newCard/NewProductCard";
 import prescription from "../store-details/assets/Frame.png";
 import CartTotalPrice from "components/added-cart-view/CartTotalPrice";
+import CartBundleItemConnected from "components/added-cart-view/CartBundleItemConnected";
+import { isBundleCartRow } from "helper-functions/bundleCartRow";
+import BogoCartItemConnected from "components/added-cart-view/BogoCartItemConnected";
+import { isBogoCartRow } from "helper-functions/bogoCartRow";
+import CartDiscountEligibilityBanner from "components/added-cart-view/CartDiscountEligibilityBanner";
+import useGetCartDiscountEligibility from "api-manage/hooks/react-query/add-cart/useGetCartDiscountEligibility";
 
 const ProPlanSubscriptionModal = dynamic(() =>
-  import("../pro-plan/ProPlanSubscriptionModal")
+  import("../pro-plan/ProPlanSubscriptionModal"),
 );
 const ProPlanPaymentModal = dynamic(() =>
-  import("../pro-plan/ProPlanPaymentModal")
+  import("../pro-plan/ProPlanPaymentModal"),
 );
 
 const FoodDetailModal = dynamic(() =>
-  import("../food-details/foodDetail-modal/FoodDetailModal")
+  import("../food-details/foodDetail-modal/FoodDetailModal"),
 );
 const ModuleModal = dynamic(() => import("../cards/ModuleModal"));
 const AuthModal = dynamic(() => import("../auth/AuthModal"));
@@ -153,36 +162,19 @@ const CartItemRow = ({ cartItem }) => {
 
   const { mutate: deleteMutate, isLoading: removeIsLoading } =
     useDeleteCartItem();
-  const { mutate: updateMutate } = useCartItemUpdate();
+  const { mutate: updateMutate, isLoading: qtyIsLoading } =
+    useCartItemUpdate();
 
-  // ── Optimistic quantity (Facebook-like instant feedback) ──
-  // The stepper reflects the click immediately via `pendingQty`; the server
-  // update is fired in the background (debounced so rapid taps collapse into a
-  // single request). `pendingQty` is reconciled to the server value once Redux
-  // catches up, and reverted on error.
   const serverQuantity = Number(cartItem?.quantity) || 1;
-  const [pendingQty, setPendingQty] = useState(null);
-  const displayQuantity = pendingQty != null ? pendingQty : serverQuantity;
-  const qtyDebounceRef = useRef(null);
-  const pendingSyncRef = useRef(null);
+  const displayQuantity = serverQuantity;
 
+  const [targetQty, setTargetQty] = useState(null);
   useEffect(() => {
-    if (pendingQty != null && serverQuantity === pendingQty) {
-      setPendingQty(null);
+    if (targetQty != null && serverQuantity === targetQty) {
+      setTargetQty(null);
     }
-  }, [serverQuantity, pendingQty]);
-
-  // On unmount, FLUSH (not cancel) any pending quantity sync so closing the
-  // cart within the debounce window doesn't silently drop the change.
-  useEffect(
-    () => () => {
-      if (qtyDebounceRef.current) {
-        clearTimeout(qtyDebounceRef.current);
-        pendingSyncRef.current?.();
-      }
-    },
-    []
-  );
+  }, [serverQuantity, targetQty]);
+  const isSyncingQty = qtyIsLoading || targetQty != null;
 
   const onQuantitySuccess = (res) => {
     if (res) {
@@ -204,42 +196,34 @@ const CartItemRow = ({ cartItem }) => {
     }
   };
 
-  // Builds the payload for a target quantity and fires the (debounced) update.
-  const syncQuantityToServer = (targetQty) => {
+  const syncQuantityToServer = (nextQty) => {
     const price =
       cartItem?.price + getTotalVariationsPrice(cartItem?.food_variations);
-    const productPrice = price * targetQty;
+    const productPrice = price * nextQty;
     const mainPrice =
       getCurrentModuleType() === "food"
         ? productPrice
         : (cartItem?.selectedOption?.length > 0
             ? cartItem?.selectedOption?.[0]?.price
-            : cartItem?.price) * targetQty;
+            : cartItem?.price) * nextQty;
     const itemObject = getItemDataForAddToCart(
       cartItem,
-      targetQty,
+      nextQty,
       mainPrice,
-      guestId
+      guestId,
     );
-    const fire = () => {
-      qtyDebounceRef.current = null;
-      pendingSyncRef.current = null;
-      updateMutate(itemObject, {
-        onSuccess: onQuantitySuccess,
-        onError: (err) => {
-          setPendingQty(null); // revert optimistic value on failure
-          onErrorResponse(err);
-        },
-      });
-    };
-    pendingSyncRef.current = fire;
-    clearTimeout(qtyDebounceRef.current);
-    qtyDebounceRef.current = setTimeout(fire, 350);
+    setTargetQty(nextQty);
+    updateMutate(itemObject, {
+      onSuccess: onQuantitySuccess,
+      onError: (err) => {
+        setTargetQty(null);
+        onErrorResponse(err);
+      },
+    });
   };
 
   const handleIncrement = () => {
-    // Validate against the displayed (optimistic) quantity so rapid taps use
-    // the up-to-date value rather than the lagging server value.
+    if (isSyncingQty || removeIsLoading) return;
     if (getCurrentModuleType() !== "food") {
       if (cartItem?.stock <= displayQuantity) {
         toast.error(t(out_of_stock));
@@ -260,16 +244,14 @@ const CartItemRow = ({ cartItem }) => {
       return;
     }
 
-    const targetQty = displayQuantity + 1;
-    setPendingQty(targetQty); // instant UI
-    syncQuantityToServer(targetQty);
+    syncQuantityToServer(displayQuantity + 1);
   };
 
   const handleDecrement = () => {
-    const targetQty = displayQuantity - 1;
-    if (targetQty < 1) return; // qty 1 uses the trash button (handleRemove)
-    setPendingQty(targetQty); // instant UI
-    syncQuantityToServer(targetQty);
+    if (isSyncingQty || removeIsLoading) return;
+    const nextQty = displayQuantity - 1;
+    if (nextQty < 1) return; // qty 1 uses the trash button (handleRemove)
+    syncQuantityToServer(nextQty);
   };
 
   const handleRemove = () => {
@@ -286,30 +268,30 @@ const CartItemRow = ({ cartItem }) => {
       onError: onErrorResponse,
     });
   };
-  console.log({ cartItem });
 
-  // Optimistic quantity drives the stepper AND the line-item totals so both
-  // update instantly on tap.
   const quantity = displayQuantity;
   const isFood = cartItem?.module_type === ModuleTypes.FOOD;
 
   const optionsTotal = (cartItem?.selectedOption ?? []).reduce(
     (sum, o) =>
       o?.isSelected === false ? sum : sum + (Number(o?.optionPrice) || 0),
-    0
+    0,
   );
 
   const addonsTotal = (cartItem?.selectedAddons ?? []).reduce(
     (sum, a) => sum + (Number(a?.price) || 0) * (Number(a?.quantity) || 0),
-    0
+    0,
   );
 
-  let unitPrice;
+  // Addons are never discounted (the discounted/discount-free item price is
+  // what the % or fixed discount applies to; the addon total is added back
+  // afterward on both the discounted and strike-through figures).
+  let basePrice;
   if (isFood) {
-    unitPrice = (Number(cartItem?.price) || 0) + optionsTotal;
+    basePrice = (Number(cartItem?.price) || 0) + optionsTotal;
   } else {
     const variationPrice = Number(cartItem?.selectedOption?.[0]?.price);
-    unitPrice =
+    basePrice =
       Number.isFinite(variationPrice) && variationPrice > 0
         ? variationPrice
         : Number(cartItem?.price) || 0;
@@ -317,14 +299,14 @@ const CartItemRow = ({ cartItem }) => {
   const discountValue = Number(cartItem?.discount) || 0;
   const discountPerUnit =
     cartItem?.discount_type === "percent" || cartItem?.discount_type === "fixed"
-      ? (discountValue / 100) * unitPrice
+      ? (discountValue / 100) * basePrice
       : discountValue;
-  const discountedUnitPrice = Math.max(unitPrice - discountPerUnit, 0);
+  const discountedBasePrice = Math.max(basePrice - discountPerUnit, 0);
 
-  const itemTotal = discountedUnitPrice * quantity + addonsTotal;
+  const unitPrice = basePrice + addonsTotal;
+  const discountedUnitPrice = discountedBasePrice + addonsTotal;
 
-  const originalPrice = unitPrice * quantity + addonsTotal;
-  const showStrike = originalPrice > itemTotal;
+  const showStrike = unitPrice > discountedUnitPrice;
 
   return (
     <>
@@ -378,7 +360,7 @@ const CartItemRow = ({ cartItem }) => {
                   color: theme.palette.text.primary,
                 }}
               >
-                {getAmountWithSign(itemTotal)}
+                {getAmountWithSign(discountedUnitPrice)}
               </Typography>
               {showStrike && (
                 <Typography
@@ -388,7 +370,7 @@ const CartItemRow = ({ cartItem }) => {
                     textDecoration: "line-through",
                   }}
                 >
-                  {getAmountWithSign(originalPrice)}
+                  {getAmountWithSign(unitPrice)}
                 </Typography>
               )}
             </Stack>
@@ -409,7 +391,7 @@ const CartItemRow = ({ cartItem }) => {
             {quantity === 1 ? (
               <QtyButton
                 onClick={handleRemove}
-                disabled={removeIsLoading}
+                disabled={removeIsLoading || isSyncingQty}
                 sx={{ color: theme.palette.error.main }}
               >
                 <i
@@ -422,7 +404,10 @@ const CartItemRow = ({ cartItem }) => {
                 />
               </QtyButton>
             ) : (
-              <QtyButton onClick={handleDecrement}>
+              <QtyButton
+                onClick={handleDecrement}
+                disabled={isSyncingQty || removeIsLoading}
+              >
                 <RemoveIcon sx={{ fontSize: 20 }} />
               </QtyButton>
             )}
@@ -436,11 +421,19 @@ const CartItemRow = ({ cartItem }) => {
                 alignItems: "center",
                 justifyContent: "center",
                 flexShrink: 0,
+                fontVariantNumeric: "tabular-nums",
               }}
             >
-              {quantity}
+              {isSyncingQty ? (
+                <CircularProgress size={14} thickness={6} />
+              ) : (
+                quantity
+              )}
             </Typography>
-            <QtyButton onClick={handleIncrement}>
+            <QtyButton
+              onClick={handleIncrement}
+              disabled={isSyncingQty || removeIsLoading}
+            >
               <AddIcon sx={{ fontSize: 20 }} />
             </QtyButton>
           </Stack>
@@ -481,20 +474,23 @@ const CartItemRow = ({ cartItem }) => {
 };
 
 // Min-order / free-delivery hint — shown in the empty state AND below the
-// item list. Renders nothing unless the config threshold is set (> 0).
-const FreeDeliveryHint = ({ configData, sx }) => {
+// item list. Free delivery is set up per (zone, module) now, not a single
+// admin-wide setting — read it off the current module's entry in the zone
+// lookup response (zoneData.zone_data), via the same getInfoFromZoneData()
+// lookup used elsewhere for delivery pivots (matches by module_type AND
+// module id across every zone the location falls into).
+const FreeDeliveryHint = ({ zoneData, sx }) => {
   const theme = useTheme();
   const { t } = useTranslation();
 
-  // Config shape: admin_free_delivery: { status, type, free_delivery_over }.
-  // Only show for an active order-amount-based free delivery offer.
-  const adminFreeDelivery = configData?.admin_free_delivery;
-  const freeDeliveryThreshold =
-    Number(adminFreeDelivery?.free_delivery_over) || 0;
+  const freeDelivery = getInfoFromZoneData(zoneData)?.free_delivery;
+  const freeDeliveryThreshold = Number(freeDelivery?.minimum_order_amount) || 0;
+  const isAllStoreFree =
+    freeDelivery?.status === true && freeDelivery?.type === "all_store";
   const isOfferActive =
-    adminFreeDelivery?.status === true &&
-    adminFreeDelivery?.type === "free_delivery_by_order_amount" &&
-    freeDeliveryThreshold > 0;
+    freeDelivery?.status === true &&
+    (isAllStoreFree ||
+      (freeDelivery?.type === "specific_criteria" && freeDeliveryThreshold > 0));
 
   if (!isOfferActive) return null;
 
@@ -529,14 +525,20 @@ const FreeDeliveryHint = ({ configData, sx }) => {
           lineHeight: 1.3,
         }}
       >
-        {t("Order min")}{" "}
-        <Box
-          component="span"
-          sx={{ fontWeight: 700, color: theme.palette.warning.dark }}
-        >
-          {getAmountWithSign(freeDeliveryThreshold)}
-        </Box>{" "}
-        {t("to get free delivery")}
+        {isAllStoreFree ? (
+          t("Free delivery on this order")
+        ) : (
+          <>
+            {t("Order min")}{" "}
+            <Box
+              component="span"
+              sx={{ fontWeight: 700, color: theme.palette.warning.dark }}
+            >
+              {getAmountWithSign(freeDeliveryThreshold)}
+            </Box>{" "}
+            {t("to get free delivery")}
+          </>
+        )}
       </Typography>
     </Stack>
   );
@@ -558,7 +560,7 @@ const MonthlyOrderInfo = () => {
 
   const policyItems = [
     t(
-      "Your selected items will be automatically added to your cart every month."
+      "Your selected items will be automatically added to your cart every month.",
     ),
     t("Prices and availability may change based on current store updates"),
     t("If any item is unavailable, it may be removed"),
@@ -712,7 +714,11 @@ const MonthlyOrderInfo = () => {
   );
 };
 
-const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
+const StoreCartSidebar = ({
+  storeDetails,
+  isCartLoading = false,
+  hideDiscountBanner = false,
+}) => {
   const theme = useTheme();
   const { t } = useTranslation();
   const router = useRouter();
@@ -731,7 +737,7 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
           },
         },
         undefined,
-        { shallow: true }
+        { shallow: true },
       );
     } else {
       toast.error(t(not_logged_in_message));
@@ -748,13 +754,31 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
       ? storeCartList
       : currentStoreId != null
       ? (Array.isArray(cartList) ? cartList : [])?.filter(
-          (i) => String(i?.store_id) === String(currentStoreId)
+          (i) => String(i?.store_id) === String(currentStoreId),
         )
       : Array.isArray(cartList)
       ? cartList
       : [];
   const { configData } = useSelector((state) => state.configData);
   console.log({ cartList, storeCartList, storeScopedCart });
+
+  // Free delivery is set up per (zone, module) now, not a single admin-wide
+  // setting — same lookup the header already fires (same react-query key,
+  // so this piggybacks its cache instead of a second network call).
+  const currentLatLng =
+    typeof window !== "undefined"
+      ? (() => {
+          try {
+            return JSON.parse(localStorage.getItem("currentLatLng") || "null");
+          } catch {
+            return null;
+          }
+        })()
+      : null;
+  const { data: zoneData } = useGetZoneId(
+    currentLatLng,
+    !!currentLatLng?.lat && !!currentLatLng?.lng,
+  );
 
   // Packaging fee comes from the parent's `storeDetails` (the store-details
   // page already has it from SSR — no need for a second fetch).
@@ -782,7 +806,7 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     setMonthlyOrder(
-      monthlySubKey ? localStorage.getItem(monthlySubKey) === "1" : false
+      monthlySubKey ? localStorage.getItem(monthlySubKey) === "1" : false,
     );
   }, [monthlySubKey]);
   // Default `extraPackaging` to false to match ItemCheckout's `isPackaging`
@@ -805,7 +829,7 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
         addCutlery,
         unavailableChoice,
         monthlySubscribe: monthlyOrder,
-      })
+      }),
     );
   }, [extraPackaging, addCutlery, unavailableChoice, monthlyOrder, dispatch]);
 
@@ -876,7 +900,7 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
     // later in the function body, so we recompute here to keep this IIFE
     // self-contained without reordering the rest of the file).
     const cartSubtotal = cartItemsTotalAmount(
-      getCartListModuleWise(storeScopedCart)
+      getCartListModuleWise(storeScopedCart),
     );
 
     const qualifiesForOffer =
@@ -888,7 +912,7 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
       // "Add ৳X more to save" message regardless of benefit type.
       const amountToReachText = getAmountWithSign(amountToReachMin);
       return `${t("Add")} ${amountToReachText} ${t(
-        "more to save with Pro Plan"
+        "more to save with Pro Plan",
       )}`;
     }
     if (benefitType === "discount") {
@@ -947,10 +971,10 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
           },
           onError: (err) => {
             toast.error(
-              err?.response?.data?.message || t("Subscription failed")
+              err?.response?.data?.message || t("Subscription failed"),
             );
           },
-        }
+        },
       );
       return;
     }
@@ -965,41 +989,50 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
 
   const hasFlashSaleItem = useMemo(
     () => moduleCartList?.some((item) => Number(item?.flash_sale) === 1),
-    [moduleCartList]
+    [moduleCartList],
   );
 
   const subtotal =
     moduleCartList?.reduce((sum, item) => {
       const itemQty = Number(item?.quantity) || 1;
       const isFood = item?.module_type === ModuleTypes.FOOD;
+      const bundleDetails = item?.bundle_details;
 
-      let unitPrice;
-      if (isFood) {
-        const optionsTotal = (item?.selectedOption ?? []).reduce(
-          (s, o) =>
-            o?.isSelected === false ? s : s + (Number(o?.optionPrice) || 0),
-          0
-        );
-        unitPrice = (Number(item?.price) || 0) + optionsTotal;
+      let discountedUnitPrice;
+      if (bundleDetails?.bundle_id) {
+        // Bundle's own discount is already reflected in `price`/`final_price`;
+        // the item-level discount fields don't apply to bundle rows.
+        discountedUnitPrice =
+          Number(bundleDetails?.final_price ?? item?.price) || 0;
       } else {
-        const variationPrice = Number(item?.selectedOption?.[0]?.price);
-        unitPrice =
-          Number.isFinite(variationPrice) && variationPrice > 0
-            ? variationPrice
-            : Number(item?.price) || 0;
-      }
+        let unitPrice;
+        if (isFood) {
+          const optionsTotal = (item?.selectedOption ?? []).reduce(
+            (s, o) =>
+              o?.isSelected === false ? s : s + (Number(o?.optionPrice) || 0),
+            0,
+          );
+          unitPrice = (Number(item?.price) || 0) + optionsTotal;
+        } else {
+          const variationPrice = Number(item?.selectedOption?.[0]?.price);
+          unitPrice =
+            Number.isFinite(variationPrice) && variationPrice > 0
+              ? variationPrice
+              : Number(item?.price) || 0;
+        }
 
-      const discountValue = Number(item?.discount) || 0;
-      const discountPerUnit =
-        item?.discount_type === "percent" || item?.discount_type === "fixed"
-          ? (discountValue / 100) * unitPrice
-          : discountValue;
-      const discountedUnitPrice = Math.max(unitPrice - discountPerUnit, 0);
+        const discountValue = Number(item?.discount) || 0;
+        const discountPerUnit =
+          item?.discount_type === "percent" || item?.discount_type === "fixed"
+            ? (discountValue / 100) * unitPrice
+            : discountValue;
+        discountedUnitPrice = Math.max(unitPrice - discountPerUnit, 0);
+      }
 
       const addons = item?.selectedAddons ?? [];
       const addonsTotal = addons.reduce(
         (t, a) => t + (Number(a?.price) || 0) * (Number(a?.quantity) || 0),
-        0
+        0,
       );
 
       return sum + discountedUnitPrice * itemQty + addonsTotal;
@@ -1008,8 +1041,14 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
   const originalSubtotal = moduleCartList?.reduce((sum, item) => {
     const itemQty = item?.quantity || 1;
     const isFood = item?.module_type === ModuleTypes.FOOD;
+    const bundleDetails = item?.bundle_details;
     let unitPrice;
-    if (isFood) {
+    if (bundleDetails?.bundle_id) {
+      // A bundle row's `price` is already the discounted bundle price — the
+      // "before discount" reference is `bundle_details.base_price`, or this
+      // row's own discount never shows up in Items Total.
+      unitPrice = Number(bundleDetails?.base_price) || 0;
+    } else if (isFood) {
       // Food: variation values are additive on top of the base price.
       unitPrice =
         (item?.price || 0) + getTotalVariationsPrice(item?.food_variations);
@@ -1027,13 +1066,25 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
     const addons = item?.selectedAddons ?? item?.addons ?? [];
     const addonTotal = addons.reduce(
       (t, a) => t + (Number(a?.price) || 0) * (Number(a?.quantity) || 0),
-      0
+      0,
     );
     return sum + unitPrice * itemQty + addonTotal;
   }, 0);
 
   const showOriginalSubtotal =
     originalSubtotal && Number(originalSubtotal) > Number(subtotal);
+
+  const { data: cartDiscountEligibility } = useGetCartDiscountEligibility(
+    storeDetails?.id,
+    !!storeDetails?.id && moduleCartList?.length > 0,
+  );
+  const eligibilityDiscountAmount = cartDiscountEligibility?.is_qualified
+    ? Number(cartDiscountEligibility?.discount_amount) || 0
+    : 0;
+  const eligibilityDiscountLabel =
+    cartDiscountEligibility?.source === "happy_hour"
+      ? t("Happy Hour Discount")
+      : t("Store Discount");
 
   const handleClearCart = () => {
     const targetStoreId =
@@ -1053,7 +1104,7 @@ const StoreCartSidebar = ({ storeDetails, isCartLoading = false }) => {
       onError: onErrorResponse,
     });
   };
-console.log("ddd",configData);
+  console.log("ddd", configData);
 
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
@@ -1109,6 +1160,13 @@ console.log("ddd",configData);
   return (
     <>
       <SidebarSurface>
+        {!hideDiscountBanner && (
+          <CartDiscountEligibilityBanner
+            storeId={storeDetails?.id}
+            hasCartItems={moduleCartList?.length > 0}
+            rounded
+          />
+        )}
         {configData?.prescription_order_status &&
         storeDetails?.prescription_order &&
         getCurrentModuleType() === "pharmacy" ? (
@@ -1329,7 +1387,7 @@ console.log("ddd",configData);
                     textAlign: "center",
                   }}
                 >
-                  {t("Your Cart is Waiting!")}
+                  {t("Your Cart is Empty!")}
                 </Typography>
                 <Typography
                   sx={{
@@ -1344,7 +1402,7 @@ console.log("ddd",configData);
               </Stack>
 
               {/* Free-delivery banner */}
-              <FreeDeliveryHint configData={configData} sx={{ mt: 1 }} />
+              <FreeDeliveryHint zoneData={zoneData} sx={{ mt: 1 }} />
             </Stack>
           ) : (
             <SimpleBar
@@ -1373,20 +1431,32 @@ console.log("ddd",configData);
                     {t("Items")}
                   </Typography>
                   <Stack>
-                    {moduleCartList.map((item) => (
-                      <CartItemRow
-                        key={item?.cartItemId || item?.id}
-                        cartItem={item}
-                      />
-                    ))}
+                    {moduleCartList.map((item) =>
+                      isBogoCartRow(item) ? (
+                        <BogoCartItemConnected
+                          key={item?.bogo_details?.bogo_group_id}
+                          row={item}
+                        />
+                      ) : isBundleCartRow(item) ? (
+                        <CartBundleItemConnected
+                          key={item?.bundle_details?.bundle_group_id}
+                          row={item}
+                        />
+                      ) : (
+                        <CartItemRow
+                          key={item?.cartItemId || item?.id}
+                          cartItem={item}
+                        />
+                      ),
+                    )}
                   </Stack>
                 </Stack>
 
-                <FreeDeliveryHint configData={configData} sx={{ mt: 1 }} />
+                <FreeDeliveryHint zoneData={zoneData} sx={{ mt: 1 }} />
 
                 {/* Add To Monthly Order — grocery & pharmacy only, hidden when any cart item is a flash sale */}
                 {[ModuleTypes.GROCERY, ModuleTypes.PHARMACY].includes(
-                  getCurrentModuleType()
+                  getCurrentModuleType(),
                 ) &&
                 configData?.monthly_order_reminder &&
                 !hasFlashSaleItem ? (
@@ -1401,7 +1471,7 @@ console.log("ddd",configData);
                       borderRadius: 1,
                       backgroundColor: alpha(
                         theme.palette.warning?.main || "#F59E0B",
-                        0.12
+                        0.12,
                       ),
                     }}
                   >
@@ -1482,7 +1552,7 @@ console.log("ddd",configData);
                           }}
                         >
                           {`${t("An additional")} ${getAmountWithSign(
-                            extraPackagingAmount
+                            extraPackagingAmount,
                           )} ${t("will be applied.")}`}
                         </Typography>
                       </Stack>
@@ -1523,7 +1593,7 @@ console.log("ddd",configData);
                           }}
                         >
                           {t(
-                            "If available, your order will come with cutlery."
+                            "If available, your order will come with cutlery.",
                           )}
                         </Typography>
                       </Stack>
@@ -1583,7 +1653,7 @@ console.log("ddd",configData);
                           borderRadius: 2,
                           backgroundColor: alpha(
                             theme.palette.text.primary,
-                            0.03
+                            0.03,
                           ),
                         }}
                       >
@@ -1679,14 +1749,14 @@ console.log("ddd",configData);
                       <Slider {...sliderSettings}>
                         {broughtItems.map((rel) => {
                           const relPrice = Number(
-                            rel?.discounted_price ?? rel?.price ?? 0
+                            rel?.discounted_price ?? rel?.price ?? 0,
                           );
                           const relOriginal = Number(rel?.price ?? 0);
                           const hasOff =
                             relOriginal > 0 && relOriginal > relPrice;
                           const discountPct = hasOff
                             ? Math.round(
-                                ((relOriginal - relPrice) / relOriginal) * 100
+                                ((relOriginal - relPrice) / relOriginal) * 100,
                               )
                             : 0;
                           const showHalal =
@@ -1715,15 +1785,16 @@ console.log("ddd",configData);
           {/* Footer with subtotal and checkout */}
           {moduleCartList?.length > 0 &&
             (() => {
-              console.log({ subtotal });
-
               const extraPackagingFee = extraPackaging
                 ? extraPackagingAmount
                 : 0;
               const itemDiscount = showOriginalSubtotal
                 ? Number(originalSubtotal) - Number(subtotal)
                 : 0;
-              const grandTotal = Number(subtotal) + extraPackagingFee;
+              const grandTotal =
+                Number(subtotal) +
+                extraPackagingFee -
+                eligibilityDiscountAmount;
               return (
                 <CustomStackFullWidth
                   sx={{
@@ -1755,6 +1826,7 @@ console.log("ddd",configData);
                             activeOffer?.plan_details?.total_saved
                           }
                           message={proSavingsMessage}
+                          compact
                         />
                       </Box>
                     )}
@@ -1816,6 +1888,31 @@ console.log("ddd",configData);
                           </Typography>
                         </Stack>
                       )}
+                      {eligibilityDiscountAmount > 0 && (
+                        <Stack
+                          direction="row"
+                          alignItems="center"
+                          justifyContent="space-between"
+                        >
+                          <Typography
+                            sx={{
+                              fontSize: "13px",
+                              color: theme.palette.text.secondary,
+                            }}
+                          >
+                            {eligibilityDiscountLabel}
+                          </Typography>
+                          <Typography
+                            sx={{
+                              fontSize: "13px",
+                              fontWeight: 600,
+                              color: theme.palette.success?.main || "#16A34A",
+                            }}
+                          >
+                            -{getAmountWithSign(eligibilityDiscountAmount)}
+                          </Typography>
+                        </Stack>
+                      )}
                       {extraPackaging && (
                         <Stack
                           direction="row"
@@ -1847,65 +1944,76 @@ console.log("ddd",configData);
                     direction="row"
                     alignItems="center"
                     justifyContent="space-between"
+                    gap={1}
                   >
                     <Stack
-                      direction="row"
-                      alignItems="center"
-                      spacing={0.5}
-                      sx={{ cursor: "pointer" }}
-                      onClick={() => setSubtotalCollapsed((v) => !v)}
+                      direction="column"
+                      alignItems="start"
+                      justifyContent="space-between"
                     >
-                      <Typography
-                        sx={{
-                          fontSize: "14px",
-                          fontWeight: 600,
-                          color: theme.palette.text.primary,
-                        }}
+                      <Stack
+                        direction="row"
+                        alignItems="center"
+                        spacing={0.5}
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => setSubtotalCollapsed((v) => !v)}
                       >
-                        {t("Subtotal")}
-                      </Typography>
-                      <KeyboardArrowDownIcon
-                        sx={{
-                          fontSize: 18,
-                          transform: subtotalCollapsed
-                            ? "rotate(0deg)"
-                            : "rotate(180deg)",
-                          transition: "transform 250ms ease",
-                        }}
-                      />
-                    </Stack>
-                    <Stack direction="row" alignItems="baseline" spacing={0.75}>
-                      <Typography
-                        sx={{
-                          fontSize: "16px",
-                          fontWeight: 700,
-                          color: theme.palette.text.primary,
-                        }}
-                      >
-                        {getAmountWithSign(grandTotal)}
-                      </Typography>
-                      {showOriginalSubtotal && (
                         <Typography
                           sx={{
-                            fontSize: "12px",
-                            color: theme.palette.text.disabled,
-                            textDecoration: "line-through",
+                            fontSize: "14px",
+                            fontWeight: 600,
+                            color: theme.palette.text.primary,
                           }}
                         >
-                          {getAmountWithSign(originalSubtotal)}
+                          {t("Subtotal")}
                         </Typography>
-                      )}
+                        <KeyboardArrowDownIcon
+                          sx={{
+                            fontSize: 18,
+                            transform: subtotalCollapsed
+                              ? "rotate(0deg)"
+                              : "rotate(180deg)",
+                            transition: "transform 250ms ease",
+                          }}
+                        />
+                      </Stack>
+                      <Stack
+                        direction="row"
+                        alignItems="baseline"
+                        spacing={0.75}
+                      >
+                        <Typography
+                          sx={{
+                            fontSize: "16px",
+                            fontWeight: 700,
+                            color: theme.palette.text.primary,
+                          }}
+                        >
+                          {getAmountWithSign(grandTotal)}
+                        </Typography>
+                        {showOriginalSubtotal && (
+                          <Typography
+                            sx={{
+                              fontSize: "12px",
+                              color: theme.palette.text.disabled,
+                              textDecoration: "line-through",
+                            }}
+                          >
+                            {getAmountWithSign(originalSubtotal)}
+                          </Typography>
+                        )}
+                      </Stack>
                     </Stack>
+
+                    <PrimaryButton
+                      onClick={handleCheckout}
+                      variant="contained"
+                      width="auto"
+                      borderRadius="10px"
+                    >
+                      {t("Checkout")}
+                    </PrimaryButton>
                   </Stack>
-                  <PrimaryButton
-                    onClick={handleCheckout}
-                    variant="contained"
-                    size="large"
-                    fullWidth
-                    borderRadius="10px"
-                  >
-                    {t("Checkout")}
-                  </PrimaryButton>
                 </CustomStackFullWidth>
               );
             })()}

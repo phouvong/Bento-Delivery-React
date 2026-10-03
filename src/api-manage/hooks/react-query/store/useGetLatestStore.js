@@ -3,10 +3,11 @@ import { latest_store_api } from "../../../ApiRoutes";
 import { useInfiniteQuery, useQuery } from "react-query";
 import MainApi from "../../../MainApi";
 import {getCurrentModuleType} from "helper-functions/getCurrentModuleType";
+import { getApiCollection } from "../../../getApiContent";
 
 const getLatestStore = async () => {
   const { data } = await MainApi.get(latest_store_api);
-  return data;
+  return getApiCollection(data, "stores");
 };
 
 const getLatestStoreWithParams = async (pageParams) => {
@@ -14,7 +15,7 @@ const getLatestStoreWithParams = async (pageParams) => {
   const { data } = await MainApi.get(
     `${getCurrentModuleType() === "rental"?latest_provider:latest_store_api}?limit=${limit}&offset=${pageParam}&type=${type}`
   );
-  return data;
+  return getApiCollection(data, "stores");
 };
 
 export default function useGetLatestStore() {

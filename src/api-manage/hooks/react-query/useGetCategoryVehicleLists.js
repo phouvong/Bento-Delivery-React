@@ -5,12 +5,13 @@ import { useDispatch } from "react-redux";
 import { setRentalCategoriesList } from "redux/slices/rentalCategories";
 import { onSingleErrorResponse } from "api-manage/api-error-response/ErrorResponses";
 import { vehicle_category_list } from "api-manage/ApiRoutes";
+import { getApiCollection } from "../../getApiContent";
 
 
 // Define a standalone fetcher function
 const fetchCategoryVehicleLists = async () => {
   const { data } = await MainApi.get(`${vehicle_category_list}`);
-  return data;
+  return getApiCollection(data, "vehicles");
 };
 
 // Use the fetcher function in useQuery

@@ -1,14 +1,15 @@
+import { t } from "i18next";
+import toast from "react-hot-toast";
 import { useMutation, useQueryClient } from "react-query";
-import MainApi from "../../../MainApi";
-import {
-  reorder_api,
-  rental_reorder_api,
-  service_rebook_api,
-} from "../../../ApiRoutes";
 import { getCurrentModuleType } from "../../../../helper-functions/getCurrentModuleType";
 import { getGuestId, getToken } from "../../../../helper-functions/getToken";
-import toast from "react-hot-toast";
-import { t } from "i18next";
+import {
+  rental_reorder_api,
+  reorder_api,
+  service_rebook_api,
+} from "../../../ApiRoutes";
+import { getApiContent } from "../../../getApiContent";
+import MainApi from "../../../MainApi";
 
 const RENTAL_GET_CART_API = "/api/v1/rental/user/cart/get-cart";
 
@@ -17,7 +18,11 @@ const fetchRentalCart = async () => {
   const guestId = getGuestId();
   const params = !token && guestId ? `?guest_id=${guestId}` : "";
   const { data } = await MainApi.get(`${RENTAL_GET_CART_API}${params}`);
-  return data;
+  // Primed into the "booking-items" cache below, which useGetBookingList owns
+  // and fills with the unwrapped `{ carts, user_data }`. Seeding the raw v4.2
+  // envelope there left the rental cart and checkout reading `.carts` off the
+  // envelope, so both rendered empty after a rebook.
+  return getApiContent(data);
 };
 
 const postData = async (formData) => {
@@ -38,7 +43,12 @@ const postData = async (formData) => {
     ? { booking_id: formData?.booking_id ?? formData?.order_id }
     : formData;
   const { data } = await MainApi.post(url, payload);
-  return data;
+  // All three reorder endpoints answer with the v4.2 envelope wrapping
+  // `{ cart_count, added_count, skipped_count, unavailable_items, skipped_items }`.
+  // reOrderToastMessageHandler reads those off the result, so unwrap here —
+  // otherwise `added_count` is undefined and every successful reorder toasts
+  // "is unavailable".
+  return getApiContent(data);
 };
 
 export default function usePostReorder() {
@@ -62,6 +72,7 @@ export default function usePostReorder() {
       } else {
         queryClient.invalidateQueries("cart-itemss");
         queryClient.invalidateQueries("cart-groups");
+        queryClient.invalidateQueries("cart-discount-eligibility");
       }
     },
   });
@@ -96,7 +107,7 @@ export const reOrderToastMessageHandler = (apiResponse, isSuccess = true) => {
 
     showUnavailableItemToasts(unavailableItems);
   } else {
-    const error = apiResponse?.response?.data;
+    const error = apiResponse?.response?.data.content;
     const unavailableItems = error?.unavailable_items || [];
     if (!unavailableItems?.length) {
       return onErrorResponse(apiResponse);

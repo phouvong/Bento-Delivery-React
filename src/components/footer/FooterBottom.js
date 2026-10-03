@@ -3,7 +3,13 @@ import { Box, Stack } from "@mui/system";
 import { t } from "i18next";
 import { useRouter } from "next/router";
 import CustomImageContainer from "../CustomImageContainer";
-import { Facebook, Instragram, LinkedIn, Pinterest, Twitter } from "./footer-middle/Icon";
+import {
+  Facebook,
+  Instragram,
+  LinkedIn,
+  Pinterest,
+  Twitter,
+} from "./footer-middle/Icon";
 
 const FooterBottom = ({ configData }) => {
   const theme = useTheme();
@@ -15,17 +21,28 @@ const FooterBottom = ({ configData }) => {
 
   const iconHandler = (name) => {
     switch (name) {
-      case "facebook":  return <Facebook />;
-      case "instagram": return <Instragram />;
-      case "twitter":   return <Twitter />;
-      case "linkedin":  return <LinkedIn />;
-      case "pinterest": return <Pinterest />;
-      default:          return <Twitter />;
+      case "facebook":
+        return <Facebook />;
+      case "instagram":
+        return <Instragram />;
+      case "twitter":
+        return <Twitter />;
+      case "linkedin":
+        return <LinkedIn />;
+      case "pinterest":
+        return <Pinterest />;
+      default:
+        return <Twitter />;
     }
   };
 
   const socialIcons = (
-    <Stack direction="row" alignItems="center" gap="16px" sx={{ flexShrink: 0 }}>
+    <Stack
+      direction="row"
+      alignItems="center"
+      gap="16px"
+      sx={{ flexShrink: 0 }}
+    >
       {configData?.social_media?.map((item, index) => (
         <IconButton
           key={index}
@@ -60,10 +77,27 @@ const FooterBottom = ({ configData }) => {
       }}
     >
       {[
+        {
+          label: "Terms & Conditions",
+          href: "/terms-and-conditions",
+          show: true,
+        },
         { label: "Privacy Policy", href: "/privacy-policy", show: true },
-        { label: "Refund Policy", href: "/refund-policy", show: configData?.refund_policy !== 0 },
-        { label: "Cancellation Policy", href: "/cancellation-policy", show: configData?.cancelation_policy !== 0 },
-        { label: "Shipping Policy", href: "/shipping-policy", show: configData?.shipping_policy !== 0 },
+        {
+          label: "Refund Policy",
+          href: "/refund-policy",
+          show: configData?.refund_policy !== 0,
+        },
+        {
+          label: "Cancellation Policy",
+          href: "/cancellation-policy",
+          show: configData?.cancelation_policy !== 0,
+        },
+        {
+          label: "Shipping Policy",
+          href: "/shipping-policy",
+          show: configData?.shipping_policy !== 0,
+        },
       ].map(
         ({ label, href, show }) =>
           show && (
@@ -91,7 +125,6 @@ const FooterBottom = ({ configData }) => {
   return (
     <NoSsr>
       <Box sx={{ backgroundColor: "background.secondary", width: "100%" }}>
-
         {/* ── MOBILE ── */}
         <Stack
           gap="20px"
@@ -157,7 +190,6 @@ const FooterBottom = ({ configData }) => {
 
           {policyLinks()}
         </Box>
-
       </Box>
     </NoSsr>
   );

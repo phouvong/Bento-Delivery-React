@@ -7,6 +7,7 @@ import {
 } from "../../../api-error-response/ErrorResponses";
 import { getCurrentModuleType } from "../../../../helper-functions/getCurrentModuleType";
 import axios from "axios";
+import { getApiCollection } from "../../../getApiContent";
 
 const getData = async (pageParams) => {
   const { storeId, searchKey, offset, limit, type, moduleId, storeZoneId } =
@@ -15,10 +16,10 @@ const getData = async (pageParams) => {
     const { data } = await MainApi.get(
       `${store_item_search_api}?store_id=${storeId}&name=${searchKey}&offset=${offset}&limit=${limit}&type=${type}`
     );
-    return data;
+    return getApiCollection(data, ["products", "items"]);
   } else {
     const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_BASE_URL}${store_item_search_api}?store_id=${storeId}&name=${searchKey}&offset=${offset}&limit=${limit}&type=${type}`,
+      `${(process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "")}${store_item_search_api}?store_id=${storeId}&name=${searchKey}&offset=${offset}&limit=${limit}&type=${type}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -27,7 +28,7 @@ const getData = async (pageParams) => {
         },
       }
     );
-    return data;
+    return getApiCollection(data, ["products", "items"]);
   }
 };
 

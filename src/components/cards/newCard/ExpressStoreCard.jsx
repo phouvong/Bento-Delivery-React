@@ -176,12 +176,6 @@ const ExpressStoreCard = ({
 
   const handleClick = () => handleStoreRedirect(store, router);
 
-  const formatDistance = (meters) => {
-    if (!meters && meters !== 0) return null;
-    const km = meters / 1000;
-    return `${km.toFixed(1)} km`;
-  };
-
   return (
     <CardRoot
       onClick={handleClick}
@@ -261,7 +255,7 @@ const ExpressStoreCard = ({
               fontSize="14px"
             />
           </Stack>
-          {(store?.delivery_time || store?.distance != null) && (
+          {(store?.delivery_time || store?.distance_label) && (
             <Stack direction="row" alignItems="center" gap="4px">
               <i
                 className="fi fi-rr-clock"
@@ -288,7 +282,7 @@ const ExpressStoreCard = ({
                   {store.delivery_time}
                 </Typography>
               )}
-              {formatDistance(store?.distance) && (
+              {store?.distance_label && (
                 <Typography
                   dir="ltr"
                   sx={{
@@ -301,7 +295,7 @@ const ExpressStoreCard = ({
                     unicodeBidi: "isolate",
                   }}
                 >
-                  ({formatDistance(store.distance)})
+                  ({store.distance_label})
                 </Typography>
               )}
             </Stack>

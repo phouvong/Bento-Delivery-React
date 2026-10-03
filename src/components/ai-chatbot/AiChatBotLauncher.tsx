@@ -10,9 +10,20 @@ import ChatBotPopover from "./ChatBotPopover";
 
 interface AiChatBotLauncherProps {
   unreadCount?: number;
+  happyHourBannerActive?: boolean;
 }
 
-const AiChatBotLauncher = ({ unreadCount = 0 }: AiChatBotLauncherProps) => {
+const DEFAULT_MOBILE_BOTTOM = 80;
+const HAPPY_HOUR_BANNER_BOTTOM = 65;
+const HAPPY_HOUR_BANNER_HEIGHT = 60;
+const FLOATING_STACK_GAP = 12;
+const ACTIVE_MOBILE_BOTTOM =
+  HAPPY_HOUR_BANNER_BOTTOM + HAPPY_HOUR_BANNER_HEIGHT + FLOATING_STACK_GAP;
+
+const AiChatBotLauncher = ({
+  unreadCount = 0,
+  happyHourBannerActive = false,
+}: AiChatBotLauncherProps) => {
   const { t } = useTranslation();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
@@ -38,7 +49,13 @@ const AiChatBotLauncher = ({ unreadCount = 0 }: AiChatBotLauncherProps) => {
           sx={{
             position: "fixed",
             right: { xs: 16, sm: 24 },
-            bottom: { xs: 80, sm: "10%" },
+            bottom: {
+              xs: happyHourBannerActive
+                ? ACTIVE_MOBILE_BOTTOM
+                : DEFAULT_MOBILE_BOTTOM,
+              sm: "10%",
+            },
+            transition: "bottom 0.2s ease",
             zIndex: (th) => th.zIndex.appBar - 10,
           }}
         >

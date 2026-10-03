@@ -5,10 +5,11 @@ import {
   onErrorResponse,
   onSingleErrorResponse,
 } from "../../../api-error-response/ErrorResponses";
+import { getApiContent } from "../../../getApiContent";
 
 const getUserProfile = async () => {
   const { data } = await MainApi.get(profile_info);
-  return data;
+  return getApiContent(data);
 };
 
 export default function useGetProfile(userOnSuccessHandler) {

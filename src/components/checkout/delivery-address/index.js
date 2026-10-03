@@ -173,7 +173,14 @@ const DeliveryAddress = ({
   };
 
   const isCardWrapped = renderOnNavbar !== "true";
-  const showHeader = isCardWrapped && orderType !== "take_away";
+  const isTakeAway = orderType === "take_away";
+  const isGuest = !token;
+  // Take Away needs no delivery address, but a guest must still provide contact
+  // info (name + phone) for the pickup — logged-in users supply it from their
+  // profile. So the contact section is shown for guests on Take Away too.
+  const showGuestTakeAwayContact = isTakeAway && isGuest;
+  const showHeader =
+    isCardWrapped && (!isTakeAway || showGuestTakeAwayContact);
 
   const instructionValue =
     deliveryInstruction !== undefined ? deliveryInstruction : localInstruction;
@@ -486,7 +493,7 @@ const DeliveryAddress = ({
             mb: { xs: 1, md: 1.25 },
           }}
         >
-          {t("Delivery Address")}
+          {isTakeAway ? t("Contact Info") : t("Delivery Address")}
         </Typography>
       )}
 
@@ -519,18 +526,18 @@ const DeliveryAddress = ({
         />
       ) : (
         <>
-          {orderType !== "take_away" && (
+          {(!isTakeAway || showGuestTakeAwayContact) && (
             <Stack
               direction={{ xs: "column", md: "row" }}
               alignItems="stretch"
               gap={{ xs: 1, md: 1.5 }}
             >
-              {AddressPill}
+              {!isTakeAway && AddressPill}
               {hasContactInfo ? ContactInfoPill : AddContactInfoButton}
             </Stack>
           )}
 
-          {orderType !== "take_away" && InstructionField}
+          {!isTakeAway && InstructionField}
         </>
       )}
       {!getToken() &&
@@ -664,7 +671,9 @@ const DeliveryAddress = ({
   }
 
   // take_away = customer picks up from store, no delivery address needed.
-  if (orderType === "take_away") {
+  // Guests still need to enter contact info for the pickup, so keep the card
+  // for them; logged-in users use their profile, so nothing is rendered.
+  if (isTakeAway && !showGuestTakeAwayContact) {
     return null;
   }
 

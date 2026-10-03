@@ -2,6 +2,7 @@ import { useQuery } from "react-query";
 import { common_condition_product_in_store } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiCollection } from "../../../getApiContent";
 import { getCurrentModuleType } from "../../../../helper-functions/getCurrentModuleType";
 import axios, { Axios } from "axios";
 
@@ -9,10 +10,10 @@ const getCommonConditionStoreProduct = async (params) => {
   const { id, moduleId, storeZoneId, offset, limit } = params;
   if (getCurrentModuleType()) {
     const { data } = await MainApi.get(`${common_condition_product_in_store}?store_id=${id}&offset=${offset}&limit=${limit}`);
-    return data;
+    return getApiCollection(data, "products");
   } else {
     const { data } = await axios.get(
-      `${process.env.NEXT_PUBLIC_BASE_URL}${common_condition_product_in_store}/${id}`,
+      `${(process.env.NEXT_PUBLIC_BASE_URL || "").replace(/\/+$/, "")}${common_condition_product_in_store}/${id}`,
       {
         headers: {
           "Content-Type": "application/json",
@@ -21,7 +22,7 @@ const getCommonConditionStoreProduct = async (params) => {
         },
       }
     );
-    return data;
+    return getApiCollection(data, "products");
   }
 };
 

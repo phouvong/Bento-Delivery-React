@@ -62,7 +62,7 @@ const GoogleMapComponent = ({
       lat: parseFloat(location?.lat),
       lng: parseFloat(location?.lng),
     }),
-    [location?.lng, location?.lng]
+    [location?.lng, location?.lng],
   );
 
   const options = useMemo(
@@ -74,7 +74,7 @@ const GoogleMapComponent = ({
       disableDefaultUI: true,
       styles: theme.palette.mode === "dark" ? darkStyles : grayMapStyle,
     }),
-    [theme.palette.mode]
+    [theme.palette.mode],
   );
 
   const { isLoaded } = useJsApiLoader({
@@ -165,8 +165,15 @@ const GoogleMapComponent = ({
         bounds.extend(new window.google.maps.LatLng(path.lat, path.lng));
       });
 
-      // Fit the map to the new polygon bounds
-      if (!fromVendor) {
+      // Fit the map to the new polygon bounds. In the vendor flow, skip the fit
+
+      const lat = parseFloat(location?.lat);
+      const lng = parseFloat(location?.lng);
+      const markerInsideNewZone =
+        !isNaN(lat) &&
+        !isNaN(lng) &&
+        bounds.contains(new window.google.maps.LatLng(lat, lng));
+      if (!fromVendor || !markerInsideNewZone) {
         map.fitBounds(bounds);
       }
     }

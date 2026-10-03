@@ -40,7 +40,7 @@ import {
   getConvertDiscount,
   getImageUrl,
   getTotalVariationsPrice,
-  handleTotalAmountWithAddons,
+  newHandleTotalAmountWithAddons,
 } from "utils/CustomFunctions";
 import Body2 from "components/typographies/Body2";
 
@@ -264,7 +264,7 @@ const CartContent = (props) => {
           </Typography>
           <Typography fontWeight="500" fontSize={{ xs: "13px", md: "16px" }}>
             {getAmountWithSign(
-              handleTotalAmountWithAddons(
+              newHandleTotalAmountWithAddons(
                 getDiscountedAmount(
                   cartItem?.totalPrice,
                   cartItem?.discount,

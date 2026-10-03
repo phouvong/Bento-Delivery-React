@@ -49,7 +49,6 @@ import AllCartDrawer from "./AllCartDrawer";
 import { getCurrentModuleType } from "helper-functions/getCurrentModuleType";
 import { ModuleTypes } from "helper-functions/moduleTypes";
 import { getModuleIdentifier, saveModuleParam } from "utils/moduleParamManager";
-import { useQueryClient } from "react-query";
 
 const AuthModal = dynamic(() => import("components/auth/AuthModal"));
 
@@ -241,7 +240,6 @@ const NewNavBar = ({ configData }) => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const router = useRouter();
-  const queryClient = useQueryClient();
   const isSmall = useMediaQuery("(max-width:1180px)");
   const _scrollTrigger = useScrollTrigger({
     disableHysteresis: true,
@@ -258,7 +256,9 @@ const NewNavBar = ({ configData }) => {
   // On the home & search pages the navbar search must stay hidden while the
   // ModuleSearchBanner is still visible; elsewhere it follows scroll only.
   const isSearchAwarePage =
-    router.pathname === "/home" || router.pathname === "/search";
+    router.pathname === "/home" ||
+    router.pathname.startsWith("/home/") ||
+    router.pathname === "/search";
   const isProfilePage = router.pathname === "/profile";
 
   // ── Redux ──
@@ -275,10 +275,10 @@ const NewNavBar = ({ configData }) => {
   // ModuleSearchBanner has scrolled out of view. Also hidden for modules that
   // don't have item-level search (rental, ride-share, parcel, ride).
   const showNavSearch =
-    scrollTrigger &&
     !isSearchlessModule &&
     !isProfilePage &&
-    (!isSearchAwarePage || !searchBannerInView);
+    !isLandingPage &&
+    (isSearchAwarePage ? scrollTrigger && !searchBannerInView : true);
 
   // ── Local state ──
   const [moduleType, setModuleType] = useState("");
@@ -309,7 +309,7 @@ const NewNavBar = ({ configData }) => {
     const matched = modules.find(
       (m) =>
         String(m?.slug) === String(urlModuleParam) ||
-        String(m?.id) === String(urlModuleParam)
+        String(m?.id) === String(urlModuleParam),
     );
     if (!matched) return;
     const current = selectedModule?.slug || selectedModule?.id;
@@ -667,20 +667,37 @@ const NewNavBar = ({ configData }) => {
     dispatch(setSelectedModule(mod));
     const moduleIdentifier = getModuleIdentifier(mod);
     saveModuleParam(mod?.id, mod?.slug);
-    // Two modules can share a module_type (e.g. two "food" modules) — queries
-    // keyed only by type would keep serving the previous module's cache.
-    // Keys now include getModuleId(), and this invalidation refreshes any
-    // remaining cache so every section refetches under the new module.
-    queryClient.invalidateQueries();
+    // Section query keys already carry getModuleId(), so each module owns a
+    // separate cache entry and switching cannot serve the previous module's
+    // data. A blanket invalidateQueries() here additionally threw away every
+    // unrelated entry too — config, modules, zone, landing page — so every
+    // switch refetched the whole app and switching back was never cached.
+    //
+    // /home's getServerSideProps only loads config and page metadata, neither
+    // of which depends on the module, so stay shallow when already on /home
+    // and skip the server round trip.
+    if (isOnHome) {
+      router.push(
+        {
+          pathname: "/home",
+          query: { ...router.query, module: moduleIdentifier },
+        },
+        undefined,
+        { shallow: true },
+      );
+      return;
+    }
     router.push({ pathname: "/home", query: { module: moduleIdentifier } });
   };
 
   // ── Module bar ──
   const renderModuleBar = () => {
     if (!modules?.length) return null;
-    if (router.pathname === "/profile") return null;
-    if (router.pathname === "/") return null;
-    if (router.pathname === "/checkout") return null;
+    const isHomeOrNested =
+      router.pathname === "/home" ||
+      router.pathname.startsWith("/home/") ||
+      router.pathname.startsWith("/search");
+    if (!isHomeOrNested) return null;
     return (
       <ModuleBarWrapper hidden={scrollTrigger}>
         <CustomContainer>

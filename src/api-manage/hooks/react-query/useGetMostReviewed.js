@@ -6,11 +6,12 @@ import {
   getCurrentModuleId,
   getCurrentModuleType,
 } from "helper-functions/getCurrentModuleType";
+import { getApiCollection } from "../../getApiContent";
 
 const getData = async (pageParams) => {
   const { offset, type } = pageParams;
   const { data } = await MainApi.get(`${most_reviewed_items_api}?type=${type}`);
-  return data;
+  return getApiCollection(data, ["products", "stores"]);
 };
 
 export default function useGetMostReviewed(pageParams) {

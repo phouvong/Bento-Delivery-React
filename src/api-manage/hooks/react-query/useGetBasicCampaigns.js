@@ -3,10 +3,11 @@ import { useQuery } from "react-query";
 import { onSingleErrorResponse } from "../../api-error-response/ErrorResponses";
 import { basic_campaigns_api } from "../../ApiRoutes";
 import { getModuleId } from "helper-functions/getModuleId";
+import { getApiList } from "../../getApiContent";
 
 const getData = async () => {
   const { data } = await MainApi.get(basic_campaigns_api);
-  return data;
+  return getApiList(data);
 };
 
 export default function useGetBasicCampaigns() {

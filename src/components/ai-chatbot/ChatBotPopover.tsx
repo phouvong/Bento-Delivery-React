@@ -47,6 +47,8 @@ import {
   normalizeMetadata,
   type AiChatConversationApi,
   type AiChatConversationsResponse,
+  type ChatBogoOffer,
+  type ChatBundle,
   type ChatCategory,
   type ChatConversation,
   type ChatMessage,
@@ -511,6 +513,89 @@ const ChatBotPopover = ({ open, onClose }: ChatBotPopoverProps) => {
     [router, onClose, activeChat, resolveModuleItem]
   );
 
+  // BOGO offers only exist for item modules — mirrors
+  // pages/bogo-list/[id]/index.js's own BOGO_ALLOWED_MODULES guard, which
+  // would otherwise bounce a rental/service module straight back to /home.
+  const handleBogoOfferSelect = useCallback(
+    (offer: ChatBogoOffer) => {
+      if (!offer?.id) return;
+      const moduleItem = resolveModuleItem(activeChat?.moduleId);
+      const itemModuleType = moduleItem?.module_type;
+      const activeModuleType = getCurrentModuleType();
+      const isCrossModule =
+        !!itemModuleType && itemModuleType !== activeModuleType;
+
+      const openOffer = () => {
+        const moduleValue = isCrossModule
+          ? getModuleIdentifier(moduleItem)
+          : router?.query?.module ||
+            router?.query?.module_id ||
+            getCurrentModuleId();
+        router.push({
+          pathname: `/bogo-list/${offer.id}`,
+          query: moduleValue ? { module: String(moduleValue) } : undefined,
+        });
+        onClose();
+      };
+
+      if (isCrossModule) {
+        setPendingModuleSwitch({
+          moduleItem,
+          onConfirm: openOffer,
+          entity: "item",
+        });
+        return;
+      }
+      openOffer();
+    },
+    [router, onClose, activeChat, resolveModuleItem]
+  );
+
+  // Unlike StackFood's bogo bundle (which deep-links to the offer page), a
+  // 6amMart bundle belongs to a single store and has no standalone details
+  // page — so the card opens that store instead, same as a plain store
+  // suggestion.
+  const handleBundleSelect = useCallback(
+    (bundle: ChatBundle) => {
+      const storeId = bundle?.store_id;
+      const storeSlug = bundle?.store_slug;
+      if (!storeId && !storeSlug) return;
+      const moduleItem = resolveModuleItem(activeChat?.moduleId);
+      const itemModuleType = moduleItem?.module_type;
+      const activeModuleType = getCurrentModuleType();
+      const isCrossModule =
+        !!itemModuleType && itemModuleType !== activeModuleType;
+      const store = { id: storeId, slug: storeSlug, name: bundle?.store_name };
+
+      const openStore = () => {
+        if (isCrossModule) {
+          const moduleParam = getModuleIdentifier(moduleItem);
+          const basePath =
+            itemModuleType === ModuleTypes.RENTAL
+              ? `/rental/provider/${store.id}`
+              : itemModuleType === ModuleTypes.SERVICE
+              ? `/service/provider/${store.id}`
+              : `/store/${store.id}`;
+          router.push({ pathname: basePath, query: { module: moduleParam } });
+        } else {
+          handleStoreRedirect(store, router);
+        }
+        onClose();
+      };
+
+      if (isCrossModule) {
+        setPendingModuleSwitch({
+          moduleItem,
+          onConfirm: openStore,
+          entity: "store",
+        });
+        return;
+      }
+      openStore();
+    },
+    [router, onClose, activeChat, resolveModuleItem]
+  );
+
   const handleCloseProductModal = useCallback(() => setProductModal(null), []);
 
   const isProductWishlisted = useMemo(() => {
@@ -700,6 +785,8 @@ const ChatBotPopover = ({ open, onClose }: ChatBotPopoverProps) => {
                     onProductSelect={handleProductSelect}
                     onStoreSelect={handleStoreSelect}
                     onCategorySelect={handleCategorySelect}
+                    onBogoOfferSelect={handleBogoOfferSelect}
+                    onBundleSelect={handleBundleSelect}
                     addingProductId={addingProductId}
                     isTyping={isTyping}
                   />

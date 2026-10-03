@@ -22,7 +22,7 @@ const VariationsManager = ({ productDetailsData, handleChoices }) => {
     productDetailsData?.choice_options?.map((i) => ({
       type: i?.title,
       value:
-        i?.options[
+        i?.options?.[
           getSelectedIndex(i?.options, productDetailsData?.selectedOption?.[0])
         ],
     }))
@@ -45,7 +45,7 @@ const VariationsManager = ({ productDetailsData, handleChoices }) => {
     value.forEach((item) => (finalVariation += item.value));
     let option = productDetailsData?.variations?.filter(
       (item) =>
-        item.type.replaceAll("-", "").replaceAll(" ", "") ===
+        (item?.type ?? "").replaceAll("-", "").replaceAll(" ", "") ===
         finalVariation.replaceAll("-", "").replaceAll(" ", "")
     );
 
@@ -56,7 +56,7 @@ const VariationsManager = ({ productDetailsData, handleChoices }) => {
 
   return (
     <CustomStackFullWidth
-      spacing={2}
+      spacing={2.5}
       sx={{
         p: { xs: 2, md: 2.5 },
         borderRadius: "12px",

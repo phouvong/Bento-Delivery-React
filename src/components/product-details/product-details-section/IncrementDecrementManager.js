@@ -64,9 +64,6 @@ const IncrementDecrementManager = (props) => {
         alignItems="center"
         justifyContent="space-between"
         sx={{
-          px: { xs: 1.5, md: 1.5 },
-          py: { xs: 1, md: 1.25 },
-          
           borderRadius: "10px",
           backgroundColor: theme.palette.background.paper,
         }}
@@ -74,7 +71,7 @@ const IncrementDecrementManager = (props) => {
         <Stack direction="row" spacing={1} alignItems="baseline">
           <Typography
             sx={{
-              fontSize: { xs: "13px", md: "14px" },
+              fontSize: { xs: "13px", md: "16px" },
               fontWeight: 500,
               color: theme.palette.text.secondary,
             }}
@@ -84,7 +81,7 @@ const IncrementDecrementManager = (props) => {
           <Typography
             sx={{
               fontWeight: 700,
-              fontSize: { xs: "16px", md: "18px" },
+              fontSize: { xs: "16px", md: "20px" },
               color: theme.palette.text.primary,
             }}
           >

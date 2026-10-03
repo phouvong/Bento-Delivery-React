@@ -3,10 +3,10 @@ import {
   Grid,
   InputAdornment,
   Stack,
-  TextField,
   Tooltip,
   Typography,
 } from "@mui/material";
+import { CustomTextFieldStyle } from "../form-fields/CustomTextField.style";
 import Image from "next/image";
 import { t } from "i18next";
 import {
@@ -24,7 +24,6 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { PickersDay } from "@mui/x-date-pickers/PickersDay";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CustomModal from "components/modal";
-import AccountCircle from '@mui/icons-material/AccountCircle';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import EditIcon from '@mui/icons-material/Edit';
 import DescriptionIcon from '@mui/icons-material/Description';
@@ -161,30 +160,15 @@ const BusinessTin = ({
             <Grid item xs={12} lg={6}>
               <Grid container spacing={4}>
                 <Grid item xs={12}>
-                  <TextField
-                    fontSize="12px"
+                  <CustomTextFieldStyle
                     label={t("Taxpayer Identification Number (TIN)")}
                     placeholder={t("Type your tin number")}
                     type="text"
-                    //inputMode="numeric"
                     fullWidth
                     name="tin"
                     value={RestaurantJoinFormik.values.tin}
                     onChange={RestaurantJoinFormik.handleChange}
                     onBlur={RestaurantJoinFormik.handleBlur}
-
-                    InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <AccountCircle
-                            sx={{
-                              color: alpha(theme.palette.neutral[400], 0.7),
-                              fontSize: "18px",
-                            }}
-                          />
-                        </InputAdornment>
-                      ),
-                    }}
                     error={
                       RestaurantJoinFormik.touched.tin &&
                       Boolean(RestaurantJoinFormik.errors.tin)
@@ -193,25 +177,18 @@ const BusinessTin = ({
                       RestaurantJoinFormik.touched.tin &&
                       RestaurantJoinFormik.errors.tin
                     }
-                    sx={{
-                      "& .MuiInputBase-root": {
-                        height: "45px",
-                      },
-                      "& .MuiInputBase-input": {
-                        fontSize: "12px",
-                        padding: "0 14px", // Adjust padding to center the text vertically
-                      },
+                    InputLabelProps={{
+                      shrink: true,
                     }}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField
-                    size="medium"
-                    label="Expire Date"
+                  <CustomTextFieldStyle
+                    label={t("Expire Date")}
+                    placeholder={t("Select expire date")}
                     fullWidth
                     value={selectedDates ? selectedDates[0] : ""}
                     onClick={handleOpen}
-                    readOnly
                     error={
                       RestaurantJoinFormik.touched.tin_expire_date &&
                       Boolean(RestaurantJoinFormik.errors.tin_expire_date)
@@ -221,32 +198,10 @@ const BusinessTin = ({
                       RestaurantJoinFormik.errors.tin_expire_date
                     }
                     InputLabelProps={{
-                      shrink: true, // ✅ this fixes the label overlapping
-                    }}
-                    sx={{
-                      cursor: "pointer",
-                      "& .MuiInputBase-root": {
-                        height: "45px",
-                      },
-                      "& .MuiInputBase-input": {
-                        fontSize: "12px",
-                        padding: "0 14px", // Adjust padding to center the text vertically
-                      },
-                      "& .MuiInputLabel-root": {
-                        //  fontSize: '12px',
-                      },
+                      shrink: true,
                     }}
                     InputProps={{
-                      startAdornment: (
-                        <InputAdornment position="start">
-                          <CalendarMonthIcon
-                            sx={{
-                              color: alpha(theme.palette.neutral[400], 0.7),
-                              fontSize: "18px",
-                            }}
-                          />
-                        </InputAdornment>
-                      ),
+                      readOnly: true,
                       endAdornment: (
                         <InputAdornment position="end">
                           <CalendarMonthIcon
@@ -258,6 +213,7 @@ const BusinessTin = ({
                         </InputAdornment>
                       ),
                     }}
+                    sx={{ cursor: "pointer" }}
                   />
                   {open && (
                     <CustomModal

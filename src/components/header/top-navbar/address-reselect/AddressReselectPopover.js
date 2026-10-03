@@ -60,7 +60,7 @@ const AddressReselectPopover = (props) => {
   }, [currentLocation, location,address?.address]);
   useEffect(() => {
     if (geoCodeResults?.results && showCurrentLocation) {
-      setCurrentLocation(geoCodeResults?.results[0]?.formatted_address);
+      setCurrentLocation(geoCodeResults?.results?.[0]?.formatted_address);
     }
   }, [geoCodeResults, location]);
 

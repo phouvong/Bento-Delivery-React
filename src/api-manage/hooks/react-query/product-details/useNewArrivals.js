@@ -2,10 +2,11 @@ import { useInfiniteQuery, useQuery } from "react-query";
 import { new_arrivals } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiCollection } from "../../../getApiContent";
 
 const getNewArrivals = async () => {
   const { data } = await MainApi.get(new_arrivals);
-  return data;
+  return getApiCollection(data, "products");
 };
 
 export default function useNewArrivals() {
@@ -20,7 +21,7 @@ const getData = async (pageParams) => {
   const { data } = await MainApi.get(
     `${new_arrivals}?limit=${limit}&offset=${pageParam}`
   );
-  return data;
+  return getApiCollection(data, "products");
 };
 export function useNewArrivalsInfiniteScroll(pageParams) {
   return useInfiniteQuery(

@@ -3,12 +3,13 @@ import { useQuery } from "react-query";
 import { last_item_review } from "../../../ApiRoutes";
 import MainApi from "../../../MainApi";
 import { onSingleErrorResponse } from "../../../api-error-response/ErrorResponses";
+import { getApiContent } from "../../../getApiContent";
 
 const getData = async (id) => {
 	const userToken = getToken();
 	if (userToken) {
 		const { data } = await MainApi.get(`${last_item_review}`);
-		return data;
+		return getApiContent(data);
 	}
 };
 

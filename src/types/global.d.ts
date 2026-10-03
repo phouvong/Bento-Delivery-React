@@ -87,4 +87,8 @@ declare module '@mui/material/styles' {
             [key: number]: string;
         };
     }
+
+    interface TypeBackground {
+        secondary: string;
+    }
 }
