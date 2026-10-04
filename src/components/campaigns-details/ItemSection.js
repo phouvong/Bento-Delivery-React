@@ -1,0 +1,51 @@
+import React, { useState } from "react";
+import { Grid, Typography, useMediaQuery } from "@mui/material";
+import { useSelector } from "react-redux";
+import CustomEmptyResult from "../custom-empty-result";
+import noData from "../../../public/static/newnoitem.png";
+import StoreShimmer from "../Shimmer/StoreShimmer";
+import StoreCard from "../cards/StoreCard";
+import NewStoreCard from "components/cards/newCard/NewStoreCard";
+
+const ItemSection = ({ campaignsDetails, isLoading, isRefetching }) => {
+  const [page_limit, setPageLimit] = useState(10);
+  const [offset, setOffset] = useState(1);
+  const { configData } = useSelector((state) => state.configData);
+  const matches = useMediaQuery("(max-width:1475px)");
+  const matchesXs = useMediaQuery("(max-width:480px)");
+  return (
+    <>
+      <Grid container spacing={{ xs: 0.5, md: 1 }} paddingTop="1.5rem">
+        {campaignsDetails?.stores?.length > 0 &&
+          campaignsDetails?.stores?.map((store) => {
+            return (
+              <Grid
+                key={store?.id}
+                item
+                md={matches ? 3 : 3}
+                sm={4}
+                xs={matchesXs ? 12 : 3}
+              >
+                <NewStoreCard
+                  variant="normal"
+                  item={store}
+                  imageUrl={store?.cover_photo_full_url}
+                />
+              </Grid>
+            );
+          })}
+        {isLoading && <StoreShimmer />}
+      </Grid>
+      {campaignsDetails?.stores?.length === 0 && (
+        <CustomEmptyResult
+          label="No store found"
+          image={noData}
+          height="200px"
+          width="200px"
+        />
+      )}
+    </>
+  );
+};
+
+export default ItemSection;

@@ -8,12 +8,12 @@ import {
 import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD0Z911mOoWCVkeGdjhIKwWFPRgvd6ZyAw",
-  authDomain: "stackmart-500c7.firebaseapp.com",
-  projectId: "stackmart-500c7",
-  storageBucket: "stackmart-500c7.appspot.com",
-  messagingSenderId: "491987943015",
-  appId: "1:491987943015:web:d8bc7ab8dbc9991c8f1ec2",
+  apiKey: "",
+  authDomain: "",
+  projectId: "",
+  storageBucket: "",
+  messagingSenderId: "",
+  appId: "",
 };
 
 const firebaseApp = !getApps().length
@@ -44,7 +44,7 @@ export const fetchToken = async (setTokenFound, setFcmToken) => {
 
     const currentToken = await getToken(messaging, {
       vapidKey:
-        "BIYqKZ2ZlXRJYZX_iU7oYymqHZ1B0d8MVsYMoEPX_eFtezlxZ_V4JooCxS8ks857ylCVLewTtgHFxc6I8iBi7h4",
+        "",
     });
 
     if (currentToken) {

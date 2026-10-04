@@ -1,0 +1,4 @@
+// Placeholder — real component shipped with the Rental addon.
+export default function RentalCheckoutPage() {
+  return null;
+}
